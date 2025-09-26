@@ -33,6 +33,12 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
+	//Servlet
+	implementation 'javax.servlet:jstl'
+
+	//Tomcat
+	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
