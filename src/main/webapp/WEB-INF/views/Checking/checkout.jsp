@@ -1,0 +1,27 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Check Out</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h2 { color: #2c3e50; }
+        form { max-width: 400px; }
+        label { display: block; margin-top: 10px; }
+        input { width: 100%; padding: 8px; margin-top: 5px; }
+        button {
+            margin-top: 15px; padding: 10px 20px;
+            background-color: #e74c3c; color: white; border: none; cursor: pointer;
+        }
+        button:hover { background-color: #c0392b; }
+    </style>
+</head>
+<body>
+<h2>Check Out</h2>
+<form action="/checkout" method="post">
+    <label>Booking ID:</label>
+    <input type="text" name="bookingId" required>
+
+    <button type="submit">Confirm Check Out</button>
+</form>
+</body>
+</html>
