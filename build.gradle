@@ -34,7 +34,7 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	//Servlet
-	implementation 'javax.servlet:jstl'
+	implementation 'javax.servlet:jstl:1.2'
 
 	//Tomcat
 	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
