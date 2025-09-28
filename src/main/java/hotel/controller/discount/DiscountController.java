@@ -12,7 +12,7 @@ public class DiscountController {
     public DiscountController(DiscountService discountService) {
         this.discountService = discountService;
     }
-
+    //test
     @PostMapping("/apply")
     public String applyVoucher(@RequestBody DiscountRequestDto request) {
         Discount discount = discountService.applyVoucher(request.getCode());
