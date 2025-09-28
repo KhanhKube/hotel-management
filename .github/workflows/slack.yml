@@ -1,0 +1,20 @@
+name: Slack commit notification (all branches)
+
+on:
+  push:               # chạy khi có push
+    branches:
+      - '**'          # 👈 mọi nhánh
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send commit notification to Slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          payload: |
+            {
+              "text": "📢 Commit pushed to *${{ github.ref_name }}* by *${{ github.actor }}*\n📝 Message: ${{ github.event.head_commit.message }}\n🔗 <${{ github.event.head_commit.url }}|View Commit>"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
