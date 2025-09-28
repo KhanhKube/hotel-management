@@ -1,2 +1,2 @@
 # hotel-management
-this is web hotel. Welcome
+this is web hotel. Welcome my repo
