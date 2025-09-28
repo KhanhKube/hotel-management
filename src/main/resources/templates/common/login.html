@@ -14,28 +14,109 @@
     <link rel="stylesheet" href="/vendors/owl-carousel/owl.carousel.min.css">
     <link rel="stylesheet" href="/vendors/nice-select/nice-select.css">
     <link rel="stylesheet" href="/css/style.css">
+
+    <!--===============================================================================================-->
+    <link rel="icon" type="image/png" href="/images/icons/favicon.ico"/>
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="/vendors/bootstrap/css/bootstrap.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="/vendors/animate/animate.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="/vendors/css-hamburgers/hamburgers.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="/vendors/select2/select2.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="/css/util.css">
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <!--===============================================================================================-->
 </head>
 <body>
 <!-- import header -->
 <div th:replace="common/header :: header"></div>
 
-<h2>Login</h2>
-<form th:action="@{/hotel/login}" method="post" th:object="${userLogin}">
-    <div>
-        <label>Username:</label>
-        <input type="text" th:field="*{username}" required/>
+<div class="limiter">
+    <div class="container-login100">
+        <div class="wrap-login100">
+            <div class="login100-pic js-tilt" data-tilt>
+                <img src="/images/img-01.png" alt="IMG">
+            </div>
+
+            <form class="login100-form validate-form"
+                  th:action="@{/hotel/login}"
+                  method="post"
+                  th:object="${userLogin}">
+
+    <span class="login100-form-title">
+        Member Login
+    </span>
+
+                <!-- Username (email field đổi sang username) -->
+                <div class="wrap-input100 validate-input" data-validate="Username is required">
+                    <input class="input100" type="text" th:field="*{username}" placeholder="Tài khoản" required/>
+                    <span class="focus-input100"></span>
+                    <span class="symbol-input100">
+            <i class="fa fa-user" aria-hidden="true"></i>
+        </span>
+                </div>
+
+                <!-- Password -->
+                <div class="wrap-input100 validate-input" data-validate="Password is required">
+                    <input class="input100" type="password" th:field="*{password}" placeholder="Mật khẩu" required/>
+                    <span class="focus-input100"></span>
+                    <span class="symbol-input100">
+            <i class="fa fa-lock" aria-hidden="true"></i>
+        </span>
+                </div>
+
+                <!-- Submit button -->
+                <div class="container-login100-form-btn">
+                    <button type="submit" class="login100-form-btn">
+                        Login
+                    </button>
+                </div>
+
+                <!-- Forgot password -->
+                <div class="text-center p-t-12">
+                    <span class="txt1">Quên</span>
+                    <a class="txt2" href="#"> Tài khoản / Mật khẩu? </a>
+                </div>
+
+                <!-- Register link -->
+                <div class="text-center p-t-136">
+                    <a class="txt2" href="#">
+                        Tạo tài khoản
+                        <i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
-    <div>
-        <label>Password:</label>
-        <input type="password" th:field="*{password}" required/>
-    </div>
-    <button type="submit">Login</button>
-</form>
+</div>
 
 <p th:if="${error}" th:text="${error}" style="color:red;"></p>
 
 <!-- import footer -->
 <div th:replace="common/footer :: footer"></div>
+
+<!--===============================================================================================-->
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+<script src="/vendors/bootstrap/js/popper.js"></script>
+<script src="/vendors/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+<script src="/vendors/select2/select2.min.js"></script>
+<!--===============================================================================================-->
+<script src="/vendors/tilt/tilt.jquery.min.js"></script>
+<script>
+    $('.js-tilt').tilt({
+        scale: 1.1
+    })
+</script>
+<!--===============================================================================================-->
+<script src="/js/main.js"></script>
+
 <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
 <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
 <script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
