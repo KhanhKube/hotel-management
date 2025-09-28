@@ -1,2 +1,2 @@
 # hotel-management
-this is web hotel
+this is web hotel. Welcome
