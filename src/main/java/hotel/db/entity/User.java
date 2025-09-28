@@ -1,45 +1,89 @@
 package hotel.db.entity;
 
-import hotel.db.enums.CollectionConst;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.FieldDefaults;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
+import lombok.*;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
+import java.time.LocalDateTime;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = CollectionConst.USER)
-public class User extends AbstractVersion implements UserDetails {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "users")
+public class User {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	@Column(name = "user_id")
+	private Integer userId;
 
-	String username;
-	String password;
-	String role;
-	String firstName;
-	String lastName;
-	String email;
-	Long phone;
-	String address;
-	LocalDate dob;
-	String gender;
-	String otp;
-	Boolean otpVerified;
+	@Column(name = "username", nullable = false, unique = true, length = 50)
+	private String username;
 
+	@Column(name = "role", length = 50)
+	private String role;
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of(new SimpleGrantedAuthority(role));
+	@Column(name = "email", nullable = false, unique = true, length = 100)
+	private String email;
+
+	@Column(name = "password", nullable = false, length = 255)
+	private String password;
+
+	@Column(name = "phone", unique = true, length = 20)
+	private String phone;
+
+	@Column(name = "first_name", length = 50)
+	private String firstName;
+
+	@Column(name = "last_name", length = 50)
+	private String lastName;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "gender", columnDefinition = "ENUM('MALE', 'FEMALE', 'OTHER') default 'OTHER'")
+	private Gender gender = Gender.OTHER;
+
+	@Column(name = "dob")
+	private LocalDate dob;
+
+	@Column(name = "address", length = 255)
+	private String address;
+
+	@Column(name = "avatar_url", length = 255)
+	private String avatarUrl;
+
+	@Column(name = "last_login")
+	private LocalDateTime lastLogin;
+
+	@Column(name = "last_logout")
+	private LocalDateTime lastLogout;
+
+	@Column(name = "otp", length = 50)
+	private String otp;
+
+	@Column(name = "otp_verified")
+	private Boolean otpVerified = false;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status", columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED') default 'ACTIVE'")
+	private Status status = Status.ACTIVE;
+
+	@Column(name = "created_at", updatable = false, insertable = false)
+	private LocalDateTime createdAt;
+
+	@Column(name = "updated_at", insertable = false)
+	private LocalDateTime updatedAt;
+
+	@Column(name = "is_deleted", nullable = false)
+	private Boolean isDeleted = false;
+
+	// --- Enums ---
+	public enum Gender {
+		MALE, FEMALE, OTHER
+	}
+
+	public enum Status {
+		ACTIVE, INACTIVE, SUSPENDED
 	}
 }
