@@ -1,4 +1,4 @@
-package hotel.dto.response;
+package hotel.util;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

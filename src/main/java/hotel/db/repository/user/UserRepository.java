@@ -1,4 +1,4 @@
-package hotel.repository;
+package hotel.db.repository.user;
 
 import hotel.db.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

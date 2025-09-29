@@ -1,9 +1,5 @@
-package hotel.dto.request;
+package hotel.db.dto.user;
 
-import hotel.db.entity.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.*;
 
 import java.time.LocalDate;
