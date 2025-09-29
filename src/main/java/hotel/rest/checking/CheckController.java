@@ -1,4 +1,4 @@
-package hotel.controller.checking;
+package hotel.rest.checking;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

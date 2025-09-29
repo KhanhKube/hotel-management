@@ -1,4 +1,4 @@
-package hotel.dto.request;
+package hotel.db.dto.user;
 
 import lombok.*;
 
