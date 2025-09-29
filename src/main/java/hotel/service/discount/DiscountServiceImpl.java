@@ -1,17 +1,19 @@
-package hotel.service.common;
+package hotel.service.discount;
 import hotel.db.entity.Discount;
-import hotel.repository.DiscountRepository;
+
+import hotel.db.repository.discount.DiscountRepository;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-public class DiscountService {
+public class DiscountServiceImpl implements DiscountService {
     private final DiscountRepository discountRepository;
 
-    public DiscountService(DiscountRepository discountRepository) {
+    public DiscountServiceImpl(DiscountRepository discountRepository) {
         this.discountRepository = discountRepository;
     }
 
+    @Override
     public Discount applyVoucher(String code) {
         Discount discount = discountRepository.findByCodeAndIsDeletedFalse(code)
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));

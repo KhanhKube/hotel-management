@@ -1,6 +1,8 @@
 package hotel.service.common;
 
 import hotel.db.entity.User;
+import hotel.db.repository.user.UserRepository;
+import lombok.RequiredArgsConstructor;
 import hotel.dto.request.UserRegisterDto;
 import hotel.dto.response.MessageResponse;
 import hotel.repository.UserRepository;
@@ -11,16 +13,28 @@ import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static ch.qos.logback.core.util.StringUtil.isNullOrEmpty;
-import static hotel.config.Constants.*;
+import java.util.Optional;
+
 
 @Service
+@RequiredArgsConstructor
 public class CommonServiceImpl implements CommonService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+
+    private final   PasswordEncoder passwordEncoder;
+    public Optional<User> login(String username, String password) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (user.getPassword().equals(password)) {
+                // 🔑 In production: use BCryptPasswordEncoder, not plain equals
+                return Optional.of(user);
+            }
+        }
+        return Optional.empty();
+    }
 
 //    @Override
 //    public Optional<User> login(String username, String password) {
