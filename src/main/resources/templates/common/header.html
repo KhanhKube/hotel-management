@@ -23,7 +23,7 @@
         <div class="container">
             <div class="d-flex align-items-center">
                 <div id="logo">
-                    <a href="index.html"><img src="/img/Logo.png" alt="" title=""/></a>
+                    <a th:href="@{/hotel}"><img src="/img/Logo.png" alt="" title=""/></a>
                 </div>
                 <div class="ml-auto d-none d-md-block d-md-flex">
 <!--                    <div class="media header-top-info">-->
@@ -61,20 +61,20 @@
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
                     <ul class="nav navbar-nav menu_nav">
-                        <li class="nav-item active"><a class="nav-link" href="index.html">TRANG CHỦ</a></li>
-                        <li class="nav-item"><a class="nav-link" href="about.html">PHÒNG</a></li>
-                        <li class="nav-item"><a class="nav-link" href="properties.html">TIN TỨC</a></li>
-                        <li class="nav-item"><a class="nav-link" href="gallery.html">SALE</a></li>
+                        <li class="nav-item active"><a class="nav-link" th:href="@{/hotel}">TRANG CHỦ</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">PHÒNG</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">TIN TỨC</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">SALE</a></li>
                         <li class="nav-item submenu dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button"
                                aria-haspopup="true"
                                aria-expanded="false">AI</a>
                             <ul class="dropdown-menu">
-                                <li class="nav-item"><a class="nav-link" href="blog.html">AI CHATBOT</a></li>
-                                <li class="nav-item"><a class="nav-link" href="blog-single.html">BÁO CÁO</a></li>
+                                <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">AI CHATBOT</a></li>
+                                <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">BÁO CÁO</a></li>
                             </ul>
                         </li>
-                        <li class="nav-item"><a class="nav-link" href="contact.html">LIÊN HỆ</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">LIÊN HỆ</a></li>
                     </ul>
                 </div>
 
@@ -83,7 +83,7 @@
                     <li><a href="#"><i class="fas fa-shopping-cart"></i></a></li>
 
                     <!-- User -->
-                    <li><a href="/hotel/profile"><i class="fas fa-user"></i></a></li>
+                    <li><a th:href="@{/hotel/profile}"><i class="fas fa-user"></i></a></li>
                 </ul>
             </div>
         </nav>
@@ -98,7 +98,13 @@
           </div>
         </div> -->
     </div>
+    <div id="toast-container" class="toast-container">
+        <div th:if="${message}" class="toast toast-success" th:text="${message}"></div>
+        <div th:if="${error}" class="toast toast-error" th:text="${error}"></div>
+    </div>
 </header>
+<!-- Toast container -->
+
 <!-- ================ header section end ================= -->
 
 <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
