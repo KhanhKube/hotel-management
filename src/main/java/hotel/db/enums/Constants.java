@@ -1,4 +1,4 @@
-package hotel.config;
+package hotel.db.enums;
 
 public class Constants {
     public static final String MALE = "MALE";
