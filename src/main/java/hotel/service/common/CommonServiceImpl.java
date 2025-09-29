@@ -1,19 +1,15 @@
 package hotel.service.common;
 
+import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.entity.User;
 import hotel.db.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import hotel.dto.request.UserRegisterDto;
-import hotel.dto.response.MessageResponse;
-import hotel.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-
+import hotel.util.MessageResponse;
 import java.util.Optional;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
+import static ch.qos.logback.core.util.StringUtil.isNullOrEmpty;
+import static hotel.config.Constants.*;
 
 
 @Service
@@ -21,34 +17,7 @@ import java.util.Optional;
 public class CommonServiceImpl implements CommonService {
 
     private final UserRepository userRepository;
-
-    private final   PasswordEncoder passwordEncoder;
-    public Optional<User> login(String username, String password) {
-        Optional<User> userOpt = userRepository.findByUsername(username);
-
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            if (user.getPassword().equals(password)) {
-                // 🔑 In production: use BCryptPasswordEncoder, not plain equals
-                return Optional.of(user);
-            }
-        }
-        return Optional.empty();
-    }
-
-//    @Override
-//    public Optional<User> login(String username, String password) {
-//        Optional<User> userOpt = userRepository.findByUsername(username);
-//
-//        if (userOpt.isPresent()) {
-//            User user = userOpt.get();
-//            if (user.getPassword().equals(password)) {
-//                // 🔑 In production: use BCryptPasswordEncoder, not plain equals
-//                return Optional.of(user);
-//            }
-//        }
-//        return Optional.empty();
-//    }
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Optional<User> login(String username, String rawPassword) {

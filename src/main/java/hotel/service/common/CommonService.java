@@ -1,8 +1,9 @@
 package hotel.service.common;
 
+import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.entity.User;
-import hotel.dto.request.UserRegisterDto;
-import hotel.dto.response.MessageResponse;
+
+import hotel.util.MessageResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
