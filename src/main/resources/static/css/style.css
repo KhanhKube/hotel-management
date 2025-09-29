@@ -1889,3 +1889,35 @@ button {
     color: #777; }
 
 /*============ End Blog Single Styles  =============*/
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1050;
+}
+
+.toast {
+  min-width: 250px;
+  margin-bottom: 10px;
+  padding: 15px 20px;
+  border-radius: 5px;
+  color: #fff;
+  opacity: 0.95;
+  animation: fadeInOut 3s forwards;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+.toast-success {
+  background-color: #28a745;
+}
+
+.toast-error {
+  background-color: #dc3545;
+}
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; transform: translateY(-20px); }
+  10%  { opacity: 1; transform: translateY(0); }
+  90%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
