@@ -75,11 +75,6 @@ public class User {
 
 	@Column(name = "is_deleted", nullable = false)
 	private Boolean isDeleted = false;
-    private boolean active;
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
 
     // --- Enums ---
 	public enum Gender {

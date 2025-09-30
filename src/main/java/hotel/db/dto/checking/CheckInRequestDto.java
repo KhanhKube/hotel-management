@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class CheckInRequestDto {
-    @NotNull private Long roomId;
+    @NotNull private Integer roomId;
     @NotBlank private String customerName;
 
     private String customerPhone;

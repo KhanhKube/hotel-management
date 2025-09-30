@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>View List</title>
+</head>
+<body>
+<h1>Danh sách View</h1>
+
+<a th:href="@{/hotel-management/view/new}">+ Thêm View</a>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Loại View</th>
+        <th>Hành động</th>
+    </tr>
+    <tr th:each="v : ${views}">
+        <td th:text="${v.viewId}"></td>
+        <td th:text="${v.viewType}"></td>
+        <td>
+            <a th:href="@{'/views/edit/' + ${v.viewId}}">Sửa</a> |
+            <a th:href="@{'/views/delete/' + ${v.viewId}}"
+               onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

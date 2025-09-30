@@ -19,8 +19,6 @@ public interface CommonService {
 
     MessageResponse registerUser(UserRegisterDto userRegisterDto);
 
-    MessageResponse registerUser(UserRegisterDto userRegisterDto);
-
     MessageResponse editUserProfile(UserProfileDto dto);
 
     UserProfileDto userToUserProfile(User user);

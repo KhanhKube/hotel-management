@@ -1,11 +1,14 @@
 package hotel.db.repository.room;
 
 import hotel.db.entity.Room;
-import hotel.enums.RoomStatus;
+import hotel.db.enums.RoomStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-public interface RoomRepository extends JpaRepository<Room, Long> {
-    List<Room> findByStatus(RoomStatus status);
-    boolean existsByRoomNumber(String roomNumber);
+@Repository
+public interface RoomRepository extends JpaRepository<Room, Integer> {
+    // có thể thêm custom query nếu cần, ví dụ:
+     List<Room> findByStatus(RoomStatus status);
 }

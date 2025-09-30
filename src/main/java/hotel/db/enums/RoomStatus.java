@@ -1,4 +1,4 @@
-package hotel.enums;
+package hotel.db.enums;
 
 public enum RoomStatus {
     AVAILABLE,   // phòng trống
