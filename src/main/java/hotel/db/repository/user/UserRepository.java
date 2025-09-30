@@ -1,4 +1,4 @@
-package hotel.db.repository.user;
+package hotel.repository;
 
 import hotel.db.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,5 +17,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Boolean existsByUsername(String username);
 
     List<User> findByRole(String role);
+    Boolean existsByEmail(String email);
+    Boolean existsByUsername(String username);
+    Boolean existsByPhoneAndUsernameNot(String phone, String username);
+    Boolean existsByEmailAndUsernameNot(String email, String username);
 
 }
