@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hotel-Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/vendors/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="/vendors/linericon/style.css">
+    <link rel="stylesheet" href="/vendors/magnefic-popup/magnific-popup.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.theme.default.min.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.carousel.min.css">
+    <link rel="stylesheet" href="/vendors/nice-select/nice-select.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+<!-- import header -->
+<div th:include="common/header :: header"></div>
+
+<!-- main here -->
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Sửa Thông Tin Cá Nhân</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Form binding với userProfileDto -->
+                    <form th:action="@{/hotel/edit-profile}" th:object="${userProfileDto}" method="post">
+                        <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" th:field="*{username}" class="form-control" id="username" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">Họ</label>
+                            <input type="text" th:field="*{firstName}" class="form-control" id="firstName" placeholder="Nhập họ">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Tên</label>
+                            <input type="text" th:field="*{lastName}" class="form-control" id="lastName" placeholder="Nhập tên">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" th:field="*{email}" class="form-control" id="email" placeholder="Nhập email">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Số Điện Thoại</label>
+                            <input type="text" th:field="*{phone}" class="form-control" id="phone" placeholder="Nhập số điện thoại">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="gender" class="form-label">Giới Tính</label>
+                            <select th:field="*{gender}" class="form-select" id="gender">
+                                <option th:value="true">Male</option>
+                                <option th:value="false">Female</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="dob" class="form-label">Ngày Sinh</label>
+                            <input type="date" th:field="*{dob}" class="form-control" id="dob">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Địa Chỉ</label>
+                            <input type="text" th:field="*{address}" class="form-control" id="address" placeholder="Nhập địa chỉ">
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-success">Lưu</button>
+                            <a th:href="@{/hotel/profile}" class="btn btn-secondary">Quay Lại</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- import footer -->
+<div th:replace="common/footer :: footer"></div>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
+<script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
+<script src="/vendors/easing.min.js"></script>
+<script src="/vendors/superfish.min.js"></script>
+<script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
+<script src="/vendors/jquery.ajaxchimp.min.js"></script>
+<script src="/vendors/mail-script.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>
