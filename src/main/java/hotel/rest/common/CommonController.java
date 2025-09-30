@@ -1,6 +1,7 @@
 package hotel.rest.common;
 
 import hotel.db.dto.user.UserLoginDto;
+import hotel.db.dto.user.UserProfileDto;
 import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.entity.User;
 import hotel.service.common.CommonService;
@@ -87,6 +88,8 @@ public class CommonController {
             return "common/register";
         }
     }
+
+    // Show profile
     @GetMapping("/profile")
     public String profile(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
@@ -95,5 +98,40 @@ public class CommonController {
         }
         model.addAttribute("user", user);
         return "redirect:/hotel/home";
+        UserProfileDto userProfileDto = commonService.userToUserProfile(user);
+        model.addAttribute("user", userProfileDto);
+        return "common/profile";
+    }
+
+    // Show form edit user profile
+    @GetMapping("/edit-profile")
+    public String editProfile(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel/login";
+        }
+        UserProfileDto dto = commonService.userToUserProfile(user);
+        model.addAttribute("userProfileDto", dto);
+        return "common/edit-profile";
+    }
+
+    // Submit form user profile
+    @PostMapping("/edit-profile")
+    public String updateProfile(@ModelAttribute("user") UserProfileDto dto,
+                                HttpSession session,
+                                Model model,
+                                RedirectAttributes redirectAttrs) {
+        MessageResponse response = commonService.editUserProfile(dto);
+        if (response.isSuccess()) {
+            User user = commonService.getUserByUsername(dto.getUsername());
+            session.setAttribute("user", user);
+            model.addAttribute("message", response.getMessage());
+            redirectAttrs.addFlashAttribute("message", response.getMessage());
+            return "redirect:/hotel/profile";
+        } else {
+            model.addAttribute("error", response.getMessage());
+            redirectAttrs.addFlashAttribute("error", response.getMessage());
+            return "redirect:/hotel/edit-profile";
+        }
     }
 }
