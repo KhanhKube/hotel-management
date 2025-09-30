@@ -76,7 +76,7 @@ public class User {
 	@Column(name = "is_deleted", nullable = false)
 	private Boolean isDeleted = false;
 
-	// --- Enums ---
+    // --- Enums ---
 	public enum Gender {
 		MALE, FEMALE, OTHER
 	}

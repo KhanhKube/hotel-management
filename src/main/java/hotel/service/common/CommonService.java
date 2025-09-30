@@ -1,5 +1,6 @@
 package hotel.service.common;
 
+import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.dto.user.UserProfileDto;
 import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.entity.User;
