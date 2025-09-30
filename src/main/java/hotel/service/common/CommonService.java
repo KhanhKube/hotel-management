@@ -1,5 +1,6 @@
 package hotel.service.common;
 
+import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.dto.user.UserProfileDto;
 import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.entity.User;
@@ -15,6 +16,8 @@ public interface CommonService {
     User getUserByUsername(String username);
 
     Optional<User> login(String username, String password);
+
+    MessageResponse registerUser(UserRegisterDto userRegisterDto);
 
     MessageResponse registerUser(UserRegisterDto userRegisterDto);
 

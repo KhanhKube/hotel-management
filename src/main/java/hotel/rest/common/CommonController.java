@@ -96,6 +96,8 @@ public class CommonController {
         if (user == null) {
             return "redirect:/hotel/login";
         }
+        model.addAttribute("user", user);
+        return "redirect:/hotel/home";
         UserProfileDto userProfileDto = commonService.userToUserProfile(user);
         model.addAttribute("user", userProfileDto);
         return "common/profile";
