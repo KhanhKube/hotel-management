@@ -12,22 +12,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "sizes")
 
-public class Size {
+public class Size extends AbstractVersion{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "size_id")
-    private Long sizeId;
+    private Integer sizeId;
 
-    @Column(name = "size", nullable = false, precision = 5, scale = 2)
+    @Column(name = "size", precision = 5, scale = 2)
     private BigDecimal size;
-
-    @Column(name = "created_at", insertable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", insertable = false, updatable = false)
-    private LocalDateTime updatedAt;
-
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }
