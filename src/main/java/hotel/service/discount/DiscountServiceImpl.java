@@ -24,7 +24,7 @@ public class DiscountServiceImpl implements DiscountService {
         }
 
         // kiểm tra trạng thái
-        if (!"ACTIVE".equals(discount.getStatus())) {
+        if (discount.getStatus() != Discount.Status.ACTIVE) {
             throw new RuntimeException("Voucher không khả dụng");
         }
 
