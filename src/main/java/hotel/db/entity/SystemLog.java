@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "system_logs")
-public class SystemLog {
+public class SystemLog extends AbstractVersion{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,13 +18,4 @@ public class SystemLog {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
-
-    @Column(name = "created_at", updatable = false, insertable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", insertable = false)
-    private LocalDateTime updatedAt;
-
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted = false;
 }

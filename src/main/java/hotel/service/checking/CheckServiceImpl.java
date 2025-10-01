@@ -1,13 +1,11 @@
 package hotel.service.checking;
 
-import hotel.db.entity.Booking;
 import hotel.db.entity.Room;
 import hotel.db.enums.RoomStatus;   // ✅ sửa lại đường dẫn import đúng
 import hotel.db.dto.checking.CheckInRequestDto;
 import hotel.db.dto.checking.CheckOutStaffConfirmDto;
 import hotel.db.dto.checking.CheckOutFinalizeRequestDto;
 import hotel.db.repository.room.RoomRepository;
-import hotel.db.repository.booking.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

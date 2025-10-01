@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
-public class User {
+public class User extends AbstractVersion{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,15 +66,6 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED') default 'ACTIVE'")
 	private Status status = Status.ACTIVE;
-
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
-
-	@Column(name = "is_deleted")
-	private Boolean isDeleted = false;
 
     // --- Enums ---
 	public enum Gender {
