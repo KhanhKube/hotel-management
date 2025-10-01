@@ -1,28 +1,48 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
-    <title>View List</title>
+    <meta charset="UTF-8">
+    <title>View Types</title>
+    <style>
+        body{font-family:Inter,system-ui,Arial;padding:24px}
+        table{border-collapse:collapse;width:100%}
+        th,td{border:1px solid #ddd;padding:8px}
+        th{background:#f4f4f4;text-align:left}
+        .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .msg{background:#e8fff1;border:1px solid #b7f0cd;padding:8px 12px;border-radius:6px;margin-bottom:12px}
+        form.inline{display:inline}
+    </style>
 </head>
 <body>
-<h1>Danh sách View</h1>
+<div class="topbar">
+    <h2>View types</h2>
+    <a th:href="@{/hotel-management/view/new}">+ Thêm view</a>
+</div>
 
-<a th:href="@{/hotel-management/view/new}">+ Thêm View</a>
+<div th:if="${message}" class="msg" th:text="${message}"></div>
 
-<table border="1">
+<table>
+    <thead>
     <tr>
         <th>ID</th>
-        <th>Loại View</th>
-        <th>Hành động</th>
+        <th>View type</th>
+        <th>Created</th>
+        <th>Updated</th>
+        <th>Action</th>
     </tr>
+    </thead>
+    <tbody>
     <tr th:each="v : ${views}">
-        <td th:text="${v.viewId}"></td>
-        <td th:text="${v.viewType}"></td>
+        <td th:text="${v.viewId}">1</td>
+        <td th:text="${v.viewType}">Sea view</td>
+        <td th:text="${#temporals.format(v.createdAt, 'yyyy-MM-dd HH:mm')}">-</td>
+        <td th:text="${#temporals.format(v.updatedAt, 'yyyy-MM-dd HH:mm')}">-</td>
         <td>
-            <a th:href="@{'/views/edit/' + ${v.viewId}}">Sửa</a> |
-            <a th:href="@{'/views/delete/' + ${v.viewId}}"
-               onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
+            <a th:href="@{'/hotel-management/view/edit/' + ${v.viewId}}">Sửa</a>
+            <a th:href="@{'/hotel-management/view/delete/' + ${v.viewId}}" onclick="return confirm('Xóa mục này?')">Xóa</a>
         </td>
     </tr>
+    </tbody>
 </table>
 </body>
 </html>

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "rooms")
-public class Room {
+public class Room extends AbstractVersion{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,15 +27,11 @@ public class Room {
     @Column(name = "bed_type", length = 100)
     private String bedType;
 
-    // Quan hệ với Floor
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "floor_id")
-    private Floor floor;
+    private Integer floorId;
 
-    // Quan hệ với Size
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "size_id")
-    private Size size;
+    private Integer sizeId;
 
     @Column(name = "room_description", columnDefinition = "TEXT")
     private String roomDescription;
@@ -51,14 +47,5 @@ public class Room {
 
     @Column(name = "view")
     private Integer view = 0;
-
-    @Column(name = "created_at", insertable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", insertable = false, updatable = false)
-    private LocalDateTime updatedAt;
-
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted = false;
 }
 
