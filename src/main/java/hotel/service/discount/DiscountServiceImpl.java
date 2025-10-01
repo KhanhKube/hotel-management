@@ -1,9 +1,13 @@
 package hotel.service.discount;
 import hotel.db.entity.Discount;
+import hotel.db.dto.discount.DiscountResponseDto;
 
 import hotel.db.repository.discount.DiscountRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class DiscountServiceImpl implements DiscountService {
@@ -34,5 +38,31 @@ public class DiscountServiceImpl implements DiscountService {
         }
 
         return discount;
+    }
+
+    private DiscountResponseDto toDto(Discount d) {
+        return new DiscountResponseDto(
+                d.getDiscountId(),
+                d.getCode(),
+                d.getDiscountType(),
+                d.getValue(),
+                d.getRoomType(),
+                d.getStartDate(),
+                d.getEndDate(),
+                d.getStatus()
+        );
+    }
+
+    @Override
+    public List<DiscountResponseDto> getAll() {
+        return discountRepository.findAll().stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    @Override
+    public Page<DiscountResponseDto> getAll(Pageable pageable) {
+        return discountRepository.findAll(pageable)
+                .map(this::toDto);
     }
 }
