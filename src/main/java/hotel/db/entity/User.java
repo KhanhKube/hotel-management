@@ -17,19 +17,19 @@ public class User {
 	@Column(name = "user_id")
 	private Integer userId;
 
-	@Column(name = "username", nullable = false, unique = true, length = 50)
+	@Column(name = "username", unique = true, length = 50)
 	private String username;
 
 	@Column(name = "role", length = 50)
 	private String role;
 
-	@Column(name = "email", nullable = false, unique = true, length = 100)
+	@Column(name = "email", unique = true, length = 100)
 	private String email;
 
-	@Column(name = "password", nullable = false, length = 255)
+	@Column(name = "password", length = 255)
 	private String password;
 
-	@Column(name = "phone", unique = true, length = 20)
+	@Column(name = "phone", length = 20)
 	private String phone;
 
 	@Column(name = "first_name", length = 50)
@@ -67,13 +67,13 @@ public class User {
 	@Column(name = "status", columnDefinition = "ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED') default 'ACTIVE'")
 	private Status status = Status.ACTIVE;
 
-	@Column(name = "created_at", updatable = false, insertable = false)
+	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 
-	@Column(name = "updated_at", insertable = false)
+	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
 
-	@Column(name = "is_deleted", nullable = false)
+	@Column(name = "is_deleted")
 	private Boolean isDeleted = false;
 
     // --- Enums ---

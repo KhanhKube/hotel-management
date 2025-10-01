@@ -9,16 +9,28 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "views")
-public class View {
+@Table(name = "orders")
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "view_id")
-    private Integer viewId;
+    @Column(name = "order_id")
+    private Integer orderId;
 
-    @Column(name = "view_type", length = 100)
-    private String viewType;
+    @Column(name = "user_id")
+    private Integer userId;
+
+    @Column(name = "floor_id")
+    private Integer floorId;
+
+    @Column(name = "check_in")
+    private LocalDateTime checkIn;
+
+    @Column(name = "check_out")
+    private LocalDateTime checkOut;
+
+    @Column(name = "status")
+    private String status = "PENDING";
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -29,3 +41,4 @@ public class View {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 }
+

@@ -2,23 +2,22 @@ package hotel.db.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "views")
-public class View {
+@Table(name = "news_groups")
+public class NewsGroup {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "view_id")
-    private Integer viewId;
+    @Column(name = "news_group_id")
+    private Integer newsGroupId;
 
-    @Column(name = "view_type", length = 100)
-    private String viewType;
+    @Column(name = "name", length = 150)
+    private String name;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

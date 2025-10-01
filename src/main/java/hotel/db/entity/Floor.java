@@ -17,15 +17,15 @@ public class Floor {
     @Column(name = "floor_id")
     private Integer floorId;
 
-    @Column(name = "floor_number", nullable = false)
+    @Column(name = "floor_number")
     private Integer floorNumber;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", insertable = false, updatable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 }

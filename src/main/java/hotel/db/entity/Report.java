@@ -2,23 +2,28 @@ package hotel.db.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "views")
-public class View {
+@Table(name = "reports")
+public class Report {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "view_id")
-    private Integer viewId;
+    @Column(name = "report_id")
+    private Integer reportId;
 
-    @Column(name = "view_type", length = 100)
-    private String viewType;
+    @Column(name = "user_id")
+    private Integer userId;
+
+    @Column(name = "order_id")
+    private Integer orderId;
+
+    @Column(name = "content", columnDefinition = "TEXT")
+    private String content;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -29,3 +34,4 @@ public class View {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 }
+

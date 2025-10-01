@@ -16,18 +16,18 @@ public class Size {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "size_id")
-    private Long sizeId;
+    private Integer sizeId;
 
-    @Column(name = "size", nullable = false, precision = 5, scale = 2)
+    @Column(name = "size", precision = 5, scale = 2)
     private BigDecimal size;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", insertable = false, updatable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
 }

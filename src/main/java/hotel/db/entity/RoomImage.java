@@ -1,24 +1,28 @@
 package hotel.db.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "views")
-public class View {
+@Table(name = "room_images")
+public class RoomImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "view_id")
-    private Integer viewId;
+    @Column(name = "room_image_id")
+    private Integer roomImageId;
 
-    @Column(name = "view_type", length = 100)
-    private String viewType;
+    @Column(name = "room_id")
+    private Integer roomId;
+
+    @Column(name = "room_image_url", length = 255)
+    private String roomImageUrl;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

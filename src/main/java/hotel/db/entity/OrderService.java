@@ -9,16 +9,19 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "views")
-public class View {
+@Table(name = "order_services")
+public class OrderService {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "view_id")
-    private Integer viewId;
+    @Column(name = "order_service_id")
+    private Integer orderServiceId;
 
-    @Column(name = "view_type", length = 100)
-    private String viewType;
+    @Column(name = "order_id")
+    private Integer orderId;
+
+    @Column(name = "service_id")
+    private Integer serviceId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
