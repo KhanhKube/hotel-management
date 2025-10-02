@@ -8,43 +8,19 @@ import java.util.List;
 
 public interface SizeService {
 
-    /**
-     * Lấy tất cả size đang hoạt động
-     */
-    List<SizeResponseDto> getAllActiveSizes();
+	List<SizeResponseDto> getAllActiveSizes();
 
-    /**
-     * Lấy size theo ID
-     */
-    SizeResponseDto getSizeById(Long sizeId);
+	SizeResponseDto getSizeById(Integer sizeId);
 
-    /**
-     * Tạo size mới
-     */
-    SizeResponseDto createSize(SizeRequestDto sizeRequestDto);
+	SizeResponseDto createSize(SizeRequestDto sizeRequestDto);
 
-    /**
-     * Cập nhật size
-     */
-    SizeResponseDto updateSize(Long sizeId, SizeRequestDto sizeRequestDto);
+	SizeResponseDto updateSize(Integer sizeId, SizeRequestDto sizeRequestDto);
 
-    /**
-     * Xóa mềm size
-     */
-    void deleteSize(Long sizeId);
+	void deleteSize(Integer sizeId);
 
-    /**
-     * Kiểm tra size có tồn tại không
-     */
-    boolean existsById(Long sizeId);
+	boolean existsById(Integer sizeId);
 
-    /**
-     * Kiểm tra giá trị size đã tồn tại chưa
-     */
-    boolean existsBySize(BigDecimal size);
+	boolean existsBySize(BigDecimal size);
 
-    /**
-     * Tìm size trong khoảng giá trị
-     */
-    List<SizeResponseDto> getSizesByRange(BigDecimal minSize, BigDecimal maxSize);
+	List<SizeResponseDto> getSizesByRange(BigDecimal minSize, BigDecimal maxSize);
 }
