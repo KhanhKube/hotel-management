@@ -18,100 +18,115 @@ import java.util.stream.Collectors;
 @Transactional
 public class FloorServiceImpl implements FloorService {
 
-    private final FloorRepository floorRepository;
+	private final FloorRepository floorRepository;
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<FloorResponseDto> getAllActiveFloors() {
-        log.info("Getting all active floors");
-        List<Floor> floors = floorRepository.findAllActive();
-        return floors.stream()
-                .map(this::convertToResponseDto)
-                .collect(Collectors.toList());
-    }
+	@Override
+	@Transactional(readOnly = true)
+	public List<FloorResponseDto> getAllActiveFloors() {
+		log.info("Getting all active floors");
+		List<Floor> floors = floorRepository.findAllByIsDeletedIsFalse();
+		return floors.stream()
+				.map(this::convertToResponseDto)
+				.collect(Collectors.toList());
+	}
 
-    @Override
-    @Transactional(readOnly = true)
-    public FloorResponseDto getFloorById(Long floorId) {
-        log.info("Getting floor by ID: {}", floorId);
-        Floor floor = floorRepository.findByIdActive(floorId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng với ID: " + floorId));
-        return convertToResponseDto(floor);
-    }
+	@Override
+	@Transactional(readOnly = true)
+	public FloorResponseDto getFloorById(Integer floorId) {
+		log.info("Getting floor by ID: {}", floorId);
+		Floor floor = floorRepository.findByFloorIdAndIsDeletedIsFalse(floorId);
+		if (floor == null) {
+			throw new RuntimeException("Floor with ID: " + floorId + " not found");
+		}
+		return convertToResponseDto(floor);
+	}
 
-    @Override
-    public FloorResponseDto createFloor(FloorRequestDto floorRequestDto) {
-        log.info("Creating new floor with number: {}", floorRequestDto.getFloorNumber());
+	@Override
+	public FloorResponseDto createFloor(FloorRequestDto floorRequestDto) {
+		log.info("Creating new floor with number: {}", floorRequestDto.getFloorNumber());
+		Boolean floorExits = floorRepository.existsByFloorNumberAndIsDeletedIsFalse(floorRequestDto.getFloorNumber());
+		// Kiểm tra số tầng đã tồn tại chưa
+		if (Boolean.TRUE.equals(floorExits)) {
+			throw new RuntimeException("Số tầng " + floorRequestDto.getFloorNumber() + " đã tồn tại");
+		}
 
-        // Kiểm tra số tầng đã tồn tại chưa
-        if (floorRepository.existsByFloorNumber(floorRequestDto.getFloorNumber())) {
-            throw new RuntimeException("Số tầng " + floorRequestDto.getFloorNumber() + " đã tồn tại");
-        }
+		Floor floor = buildFloor(floorRequestDto);
 
-        Floor floor = Floor.builder()
-                .floorNumber(floorRequestDto.getFloorNumber())
-                .isDeleted(false)   // ✅ sửa thành isDeleted
-                .build();
+		Floor savedFloor = floorRepository.save(floor);
+		log.info("Created floor with ID: {}", savedFloor.getFloorId());
 
-        Floor savedFloor = floorRepository.save(floor);
-        log.info("Created floor with ID: {}", savedFloor.getFloorId());
+		return convertToResponseDto(savedFloor);
+	}
 
-        return convertToResponseDto(savedFloor);
-    }
+	private Floor buildFloor(FloorRequestDto floorRequestDto) {
+		Floor floor = new Floor();
+		floor.setFloorNumber(floorRequestDto.getFloorNumber());
+		floor.setIsDeleted(false);
+		return floor;
+	}
 
-    @Override
-    public FloorResponseDto updateFloor(Long floorId, FloorRequestDto floorRequestDto) {
-        log.info("Updating floor with ID: {}", floorId);
+	@Override
+	public FloorResponseDto updateFloor(Integer floorId, FloorRequestDto floorRequestDto) {
+		log.info("Updating floor with ID: {}", floorId);
 
-        Floor existingFloor = floorRepository.findByIdActive(floorId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng với ID: " + floorId));
+		Floor existingFloor = floorRepository.findByFloorIdAndIsDeletedIsFalse(floorId);
 
-        // Kiểm tra số tầng đã tồn tại chưa (loại trừ floor hiện tại)
-        if (floorRepository.existsByFloorNumberAndIdNot(floorRequestDto.getFloorNumber(), floorId)) {
-            throw new RuntimeException("Số tầng " + floorRequestDto.getFloorNumber() + " đã tồn tại");
-        }
+		if (existingFloor == null) {
+			throw new RuntimeException("Floor with ID: " + floorId + " not found");
+		}
 
-        existingFloor.setFloorNumber(floorRequestDto.getFloorNumber());
-        Floor updatedFloor = floorRepository.save(existingFloor);
+		existingFloor.setFloorNumber(floorRequestDto.getFloorNumber());
+		Floor updatedFloor = floorRepository.save(existingFloor);
 
-        log.info("Updated floor with ID: {}", updatedFloor.getFloorId());
-        return convertToResponseDto(updatedFloor);
-    }
+		log.info("Updated floor with ID: {}", updatedFloor.getFloorId());
+		return convertToResponseDto(updatedFloor);
+	}
 
-    @Override
-    public void deleteFloor(Long floorId) {
-        log.info("Deleting floor with ID: {}", floorId);
+	@Override
+	public void deleteFloor(Integer floorId) {
+		log.info("Deleting floor with ID: {}", floorId);
 
-        Floor floor = floorRepository.findByIdActive(floorId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng với ID: " + floorId));
+		Floor floor = floorRepository.findByFloorIdAndIsDeletedIsFalse(floorId);
+		if (floor == null) {
+			throw new RuntimeException("Floor with ID: " + floorId + " not found");
+		}
 
-        floor.setDeleted(true);   // ✅ sửa thành setDeleted
-        floorRepository.save(floor);
+		floor.setIsDeleted(true);
+		floorRepository.save(floor);
 
-        log.info("Deleted floor with ID: {}", floorId);
-    }
+		log.info("Deleted floor with ID: {}", floorId);
+	}
 
-    @Override
-    @Transactional(readOnly = true)
-    public boolean existsById(Long floorId) {
-        return floorRepository.findByIdActive(floorId).isPresent();
-    }
+	@Override
+	@Transactional(readOnly = true)
+	public boolean existsById(Integer floorId) {
+		Floor floor = floorRepository.findByFloorIdAndIsDeletedIsFalse(floorId);
+		if (floor != null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-    @Override
-    @Transactional(readOnly = true)
-    public boolean existsByFloorNumber(Integer floorNumber) {
-        return floorRepository.existsByFloorNumber(floorNumber);
-    }
+	@Override
+	@Transactional(readOnly = true)
+	public boolean existsByFloorNumber(Integer floorNumber) {
+		Floor floor = floorRepository.findByFloorIdAndIsDeletedIsFalse(floorNumber);
+		if (floor != null) {
+			return true;
+		}
+		return false;
+	}
 
-    /**
-     * Chuyển đổi Floor entity sang FloorResponseDto
-     */
-    private FloorResponseDto convertToResponseDto(Floor floor) {
-        return FloorResponseDto.builder()
-                .floorId(floor.getFloorId())
-                .floorNumber(floor.getFloorNumber())
-                .createdAt(floor.getCreatedAt())
-                .updatedAt(floor.getUpdatedAt())
-                .build();
-    }
+	/**
+	 * Chuyển đổi Floor entity sang FloorResponseDto
+	 */
+	private FloorResponseDto convertToResponseDto(Floor floor) {
+		return FloorResponseDto.builder()
+				.floorId(floor.getFloorId())
+				.floorNumber(floor.getFloorNumber())
+				.createdAt(floor.getCreatedAt())
+				.updatedAt(floor.getUpdatedAt())
+				.build();
+	}
 }
