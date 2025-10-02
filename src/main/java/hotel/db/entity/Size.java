@@ -2,23 +2,27 @@ package hotel.db.entity;
 
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "sizes")
 
-public class Size extends AbstractVersion{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "size_id")
-    private Integer sizeId;
+public class Size extends AbstractVersion {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "size_id")
+	private Integer sizeId;
 
-    @Column(name = "size", precision = 5, scale = 2)
-    private BigDecimal size;
+	@Column(name = "size", precision = 5, scale = 2)
+	private BigDecimal size;
 
 }
