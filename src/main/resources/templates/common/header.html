@@ -18,7 +18,7 @@
 </head>
 <body>
 <!-- ================ header section start ================= -->
-<header class="header_area">
+<header class="header_area" th:fragment="header">
     <div class="header-top">
         <div class="container">
             <div class="d-flex align-items-center">
@@ -61,20 +61,19 @@
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
                     <ul class="nav navbar-nav menu_nav">
-                        <li class="nav-item active"><a class="nav-link" th:href="@{/hotel}">TRANG CHỦ</a></li>
-                        <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">PHÒNG</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">TRANG CHỦ</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/rooms}">PHÒNG</a></li>
                         <li class="nav-item"><a class="nav-link" th:href="@{/news}">TIN TỨC</a></li>
-                        <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">SALE</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/sale}">SALE</a></li>
                         <li class="nav-item submenu dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button"
-                               aria-haspopup="true"
-                               aria-expanded="false">AI</a>
+                               aria-haspopup="true" aria-expanded="false">AI</a>
                             <ul class="dropdown-menu">
-                                <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">AI CHATBOT</a></li>
-                                <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">BÁO CÁO</a></li>
+                                <li class="nav-item"><a class="nav-link" th:href="@{/ai/chatbot}">AI CHATBOT</a></li>
+                                <li class="nav-item"><a class="nav-link" th:href="@{/ai/report}">BÁO CÁO</a></li>
                             </ul>
                         </li>
-                        <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">LIÊN HỆ</a></li>
+                        <li class="nav-item"><a class="nav-link" th:href="@{/contact}">LIÊN HỆ</a></li>
                     </ul>
                 </div>
 
