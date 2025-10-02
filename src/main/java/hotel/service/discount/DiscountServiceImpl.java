@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -55,9 +56,12 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public List<DiscountResponseDto> getAll() {
-        return discountRepository.findAll().stream()
-                .map(this::toDto)
-                .toList();
+        List<Discount> entities = discountRepository.findAll();
+        List<DiscountResponseDto> result = new ArrayList<>();
+        for (Discount d : entities) {
+            result.add(toDto(d)); // toDto nhận Discount, trả DiscountResponseDto
+        }
+        return result;
     }
 
     @Override

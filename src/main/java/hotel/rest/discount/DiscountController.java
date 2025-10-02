@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/discounts")
@@ -32,7 +34,7 @@ public class DiscountController {
 	}
 
 	@GetMapping
-	public ResponseEntity<java.util.List<DiscountResponseDto>> list() {
+	public ResponseEntity<List<DiscountResponseDto>> list() {
 		return ResponseEntity.ok(discountService.getAll());
 	}
 
