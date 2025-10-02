@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${view != null && view.viewId != null} ? 'Sửa View' : 'Thêm View'">View Form</title>
+    <style>
+        body{font-family:Inter,system-ui,Arial;padding:24px}
+        .field{margin-bottom:12px}
+        label{display:block;margin-bottom:6px}
+        input[type=text]{padding:8px;width:320px}
+        .actions{margin-top:16px;display:flex;gap:8px}
+    </style>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    }</head>
+<body>
+<h2 th:text="${view != null && view.viewId != null} ? 'Sửa View' : 'Thêm View'"></h2>
+
+<form th:action="@{/hotel-management/view/new}" th:object="${view}" method="post">
+    <input type="hidden" th:field="*{viewId}">
+
+    <div class="field">
+        <label for="viewType">Loại view</label>
+        <input id="viewType" type="text" th:field="*{viewType}" placeholder="Ví dụ: Sea View" maxlength="100" required>
+    </div>
+
+    <div class="actions">
+        <button type="submit">Lưu</button>
+        <a th:href="@{/hotel-management/view}">Hủy</a>
+    </div>
+</form>
+
+</body>
+</html>
+
+
