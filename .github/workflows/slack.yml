@@ -1,20 +1,32 @@
 name: Slack commit notification (all branches)
 
 on:
-  push:               # chạy khi có push
+  push:
     branches:
-      - '**'          # 👈 mọi nhánh
+      - '**'
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Format commit messages
+        id: commits
+        run: |
+          COMMITS=""
+          for commit in $(jq -r '.commits[].id' <<< '${{ toJson(github.event.commits) }}'); do
+            MESSAGE=$(jq -r --arg id "$commit" '.commits[] | select(.id==$id) | .message' <<< '${{ toJson(github.event.commits) }}')
+            URL=$(jq -r --arg id "$commit" '.commits[] | select(.id==$id) | .url' <<< '${{ toJson(github.event.commits) }}')
+            AUTHOR=$(jq -r --arg id "$commit" '.commits[] | select(.id==$id) | .author.name' <<< '${{ toJson(github.event.commits) }}')
+            COMMITS="${COMMITS}\\n• *${AUTHOR}*: ${MESSAGE} (<${URL}|View>)"
+          done
+          echo "commits=${COMMITS}" >> $GITHUB_OUTPUT
+
       - name: Send commit notification to Slack
         uses: slackapi/slack-github-action@v1.25.0
         with:
           payload: |
             {
-              "text": "📢 Commit pushed to *${{ github.ref_name }}* by *${{ github.actor }}*\n📝 Message: ${{ github.event.head_commit.message }}\n🔗 <${{ github.event.head_commit.url }}|View Commit>"
+              "text": "📢 Push to *${{ github.ref_name }}* by *${{ github.actor }}*\\n${{ steps.commits.outputs.commits }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
