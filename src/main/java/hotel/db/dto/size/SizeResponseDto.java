@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @Builder
 public class SizeResponseDto {
 
-    private Long sizeId;
-    private BigDecimal size;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+	private Integer sizeId;
+	private BigDecimal size;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 }

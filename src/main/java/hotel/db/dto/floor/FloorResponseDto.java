@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class FloorResponseDto {
-    
-    private Long floorId;
-    private Integer floorNumber;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
+	private Integer floorId;
+	private Integer floorNumber;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 }
