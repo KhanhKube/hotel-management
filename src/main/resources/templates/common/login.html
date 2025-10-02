@@ -73,6 +73,7 @@
 
                 <!-- Submit button -->
                 <div class="container-login100-form-btn">
+                    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
                     <button type="submit" class="login100-form-btn">
                         Login
                     </button>

@@ -7,6 +7,7 @@ public class Constants {
 
 
     //Validate
+    public static final String LOGININVALID = "Invalid username or password";
     public static final String FILLALLFEILD = "Please fill all the required fields!";
     public static final String PASSWORDNOTMATCH = "Passwords do not match!";
     public static final String USERNAMEDUPLICATE = "Username already taken!";
@@ -19,4 +20,7 @@ public class Constants {
     public static final String EMAILINVALID = "Email không hợp lệ!";
     public static final String EMAILEXIST = "Email đã tồn tại!";
     public static final String USERNOTEXIST = "User không tồn tại!";
+    public static final String LOGINFIRST = "Bạn cần đăng nhập trước!";
+    public static final String CHOOSEPICTURE = "Vui lòng chọn ảnh!";
+    public static final String FILEINVALID = "Invalid file type. Please upload an image.";
 }
