@@ -35,7 +35,7 @@ public class ViewController {
     @PostMapping("/view/new")
     public String saveView(@ModelAttribute("view") View view) {
         viewService.saveView(view);
-        return "redirect:/views";
+        return "redirect:/hotel-management/view";
     }
 
     // Form sửa
