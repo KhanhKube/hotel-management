@@ -8,11 +8,19 @@ import hotel.util.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Optional;
+import java.util.UUID;
 
 import static ch.qos.logback.core.util.StringUtil.isNullOrEmpty;
 import static hotel.db.enums.Constants.*;
@@ -167,6 +175,50 @@ public class CommonServiceImpl implements CommonService {
         dto.setAddress(user.getAddress());
         dto.setCreatedAt(user.getCreatedAt());
         return dto;
+    }
+
+    @Override
+    public MessageResponse updateAvatar(String userName, MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            return new MessageResponse(false, CHOOSEPICTURE);
+        }
+
+        // Validate file type
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            return new MessageResponse(false, FILEINVALID);
+        }
+
+        // Upload directory outside resources
+        String uploadDir = "src/main/resources/static/images/avatar";
+        File dir = new File(uploadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        // Clean file name: remove spaces and special chars
+        String originalFileName = file.getOriginalFilename();
+        if (originalFileName == null) {
+            return new MessageResponse(false, FILEINVALID);
+        }
+
+        // Replace spaces with underscore, remove anything that's not letter/number/dot/underscore/dash
+        String safeFileName = originalFileName.replaceAll("\\s+", "_")
+                .replaceAll("[^a-zA-Z0-9._-]", "");
+
+        String fileName = UUID.randomUUID() + "_" + safeFileName;
+        Path filePath = Paths.get(uploadDir, fileName);
+
+        // Save file
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // Update user profile
+        User user = userRepository.findByUsername(userName)
+                .orElseThrow(() -> new RuntimeException(USERNOTEXIST));
+        user.setAvatarUrl("/images/avatar/" + fileName);
+        userRepository.save(user);
+
+        return new MessageResponse(true, UPDATESUCCESS);
     }
 
 }

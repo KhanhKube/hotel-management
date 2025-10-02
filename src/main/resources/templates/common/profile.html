@@ -28,10 +28,18 @@
     <!-- Left profile card -->
     <div class="col-md-4">
       <div class="profile-card text-center">
-        <img th:src="${user.avatarUrl}" alt="Avatar" class="avatar mb-3">
+        <img th:src="${user.avatarUrl != null ? user.avatarUrl : '/images/avatar/default-avatar.png'}"
+             alt="Avatar"
+             class="card-img-top rounded-circle mx-auto mt-3"
+             style="width: 150px; height: 150px; object-fit: cover;">
         <h4 th:text="${user.firstName + ' ' + user.lastName}">John Doe</h4>
         <p class="text-muted" th:text="${user.username}">Full Stack Developer</p>
         <p class="text-muted" th:text="${user.address}">Bay Area, San Francisco</p>
+        <!-- Edit picture -->
+        <form th:action="@{/hotel/update-avatar}" method="post" enctype="multipart/form-data">
+          <input type="file" name="avatar" accept="image/*" class="form-control mb-2" required>
+          <button type="submit" class="btn btn-sm btn-primary">Sửa ảnh</button>
+        </form>
         <div class="d-flex justify-content-center gap-2 mt-3">
           <button class="btn btn-primary btn-sm">Theo dõi</button>
           <button class="btn btn-outline-secondary btn-sm">Liên hệ</button>
