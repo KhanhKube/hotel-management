@@ -10,11 +10,11 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import static hotel.db.enums.Constants.*;
 
 @Controller
 @RequestMapping("/hotel")
@@ -34,7 +34,7 @@ public class CommonController {
         return "common/footer";
     }
 
-    @GetMapping({"/","", "/home"})
+    @GetMapping({"/", "", "/home"})
     public String home(Model model) {
         return "common/home";
     }
@@ -64,8 +64,8 @@ public class CommonController {
                     return "redirect:/hotel";
                 })
                 .orElseGet(() -> {
-                    model.addAttribute("error", "Invalid username or password");
-                    return "common/login";
+                    redirectAttrs.addFlashAttribute("error", LOGININVALID);
+                    return "redirect:/hotel/login";
                 });
     }
 
@@ -132,4 +132,45 @@ public class CommonController {
             return "redirect:/hotel/edit-profile";
         }
     }
+
+    @PostMapping("/update-avatar")
+    public String updateAvatar(@RequestParam("avatar") MultipartFile file,
+                               HttpSession session,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                redirectAttributes.addFlashAttribute("error", LOGINFIRST);
+                return "redirect:/login";
+            }
+
+            if (file.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", CHOOSEPICTURE);
+                return "redirect:/hotel/profile";
+            }
+
+            // Call service to update avatar
+            MessageResponse response = commonService.updateAvatar(user.getUsername(), file);
+
+            if (response.isSuccess()) {
+                // Refresh user from DB to update avatarUrl
+                User updatedUser = commonService.getUserByUsername(user.getUsername());
+                if(user == null){
+                    return "redirect:/login";
+                }
+                // Update session
+                session.setAttribute("user", updatedUser);
+
+                redirectAttributes.addFlashAttribute("success", response.getMessage());
+            } else {
+                redirectAttributes.addFlashAttribute("error", response.getMessage());
+            }
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/hotel/profile";
+    }
+
 }
