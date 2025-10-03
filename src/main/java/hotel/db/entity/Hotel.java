@@ -20,5 +20,6 @@ public class Hotel {
     private String services;    // Danh sách dịch vụ (có thể là JSON hoặc 1 bảng riêng)
 
     public String getId() {
+        return "redirect:/hotel/";
     }
 }
