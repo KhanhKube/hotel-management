@@ -2,7 +2,11 @@ package hotel.db.entity;
 
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@Data
 @Entity
 @Table(name = "hotels")
 public class Hotel {
@@ -18,7 +22,4 @@ public class Hotel {
     private Integer stars;      // Số sao (3,4,5 sao)
 
     private String services;    // Danh sách dịch vụ (có thể là JSON hoặc 1 bảng riêng)
-
-    public String getId() {
-    }
 }

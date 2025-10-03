@@ -2,6 +2,7 @@ package hotel.rest.view;
 
 import hotel.db.entity.View;
 import hotel.service.view.ViewService;
+import hotel.util.BaseController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,7 +13,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/hotel-management")
 @RequiredArgsConstructor
-public class ViewController {
+public class ViewController extends BaseController {
 
     private final ViewService viewService;
 
@@ -20,15 +21,17 @@ public class ViewController {
     @GetMapping("/view")
     public String listViews(Model model) {
         List<View> views = viewService.getAllViews();
-        model.addAttribute("views", views);
-        return "management/view/view-list";
+//        model.addAttribute("views", views);
+//        return "management/view/view-list";
+            return renderBuilder("management/view/view-list").with("views",views).build(model);
     }
 
     // Form thêm mới
     @GetMapping("/view/new")
     public String createViewForm(Model model) {
-        model.addAttribute("view", new View());
-        return "management/view/form";
+        return renderBuilder("management/view/form")
+                .with("view", new View())
+                .build(model);
     }
 
     // Lưu view (tạo mới hoặc cập nhật)

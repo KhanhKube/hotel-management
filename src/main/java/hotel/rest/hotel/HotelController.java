@@ -2,19 +2,18 @@ package hotel.rest.hotel;
 
 import hotel.db.entity.Hotel;
 import hotel.service.hotel.HotelService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/hotel")
 public class HotelController {
 
     private final HotelService hotelService;
 
-    public HotelController(HotelService hotelService) {
-        this.hotelService = hotelService;
-    }
 
     // Xem chi tiết khách sạn
     @GetMapping("/{id}")

@@ -1,9 +1,10 @@
 package hotel.service.hotel;
 
+import hotel.db.entity.Hotel;
 import org.springframework.stereotype.Service;
 
 @Service
-public abstract class HotelServiceImpl implements HotelService {
+public class HotelServiceImpl implements HotelService {
 
     @Override
     public boolean checkAvailableRoom(Long roomId) {
@@ -11,4 +12,14 @@ public abstract class HotelServiceImpl implements HotelService {
         // ví dụ tạm: nếu id chẵn thì còn phòng, lẻ thì hết phòng
         return roomId % 2 == 0;
     }
+
+	@Override
+	public Hotel findById(Long id) {
+		return null;
+	}
+
+	@Override
+	public void save(Hotel hotel) {
+
+	}
 }
