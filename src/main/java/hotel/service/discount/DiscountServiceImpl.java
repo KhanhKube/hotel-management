@@ -1,8 +1,10 @@
 package hotel.service.discount;
 import hotel.db.entity.Discount;
+import hotel.db.enums.DiscountStatus;
 import hotel.db.dto.discount.DiscountResponseDto;
 
 import hotel.db.repository.discount.DiscountRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -11,12 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DiscountServiceImpl implements DiscountService {
     private final DiscountRepository discountRepository;
-
-    public DiscountServiceImpl(DiscountRepository discountRepository) {
-        this.discountRepository = discountRepository;
-    }
 
     @Override
     public Discount applyVoucher(String code) {
@@ -29,7 +28,7 @@ public class DiscountServiceImpl implements DiscountService {
         }
 
         // kiểm tra trạng thái
-        if (discount.getStatus() != Discount.Status.ACTIVE) {
+        if (!DiscountStatus.ACTIVE.name().equalsIgnoreCase(discount.getStatus())) {
             throw new RuntimeException("Voucher không khả dụng");
         }
 
