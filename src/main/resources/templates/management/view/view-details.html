@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết View Cao Cấp - Hệ Thống Khách Sạn 5 Sao</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/luxury-view.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Chi tiết view cao cấp cho quản lý khách sạn đẳng cấp thế giới">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--luxury-gradient-hero);
+            min-height: 100vh;
+        }
+        .luxury-title { font-family: 'Playfair Display', serif; }
+        .details-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .view-icon-large {
+            font-size: 6rem;
+            margin-bottom: 2rem;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        .info-card {
+            background: var(--luxury-white);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--luxury-shadow-md);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            transition: var(--luxury-transition);
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--luxury-shadow-lg);
+        }
+        .info-label {
+            font-size: 0.9rem;
+            color: var(--luxury-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        .info-value {
+            font-size: 1.2rem;
+            color: var(--luxury-navy);
+            font-weight: 600;
+        }
+        .description-card {
+            background: var(--luxury-gradient-card);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: var(--luxury-shadow-lg);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        .hero-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: var(--luxury-shadow-lg);
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="details-container">
+            <!-- Header Cao Cấp -->
+            <div class="luxury-header mb-5">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h1 class="luxury-title">
+                                <i class="fas fa-crown me-3"></i>Chi Tiết View Cao Cấp
+                            </h1>
+                            <p class="luxury-subtitle mb-0">
+                                Thông tin chi tiết và quản lý view cao cấp toàn diện
+                            </p>
+                        </div>
+                        <div class="col-lg-4 text-lg-end">
+                            <div class="d-flex align-items-center justify-content-lg-end">
+                                <div class="me-3">
+                                    <i class="fas fa-star text-warning fs-4"></i>
+                                    <i class="fas fa-star text-warning fs-4"></i>
+                                    <i class="fas fa-star text-warning fs-4"></i>
+                                    <i class="fas fa-star text-warning fs-4"></i>
+                                    <i class="fas fa-star text-warning fs-4"></i>
+                                </div>
+                                <div>
+                                    <span class="fs-5 fw-bold">Chi Tiết Cao Cấp</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Chi Tiết Chính -->
+            <div class="luxury-card fade-in-up mb-5">
+                <div class="luxury-card-header text-center">
+                    <!-- Ảnh Hero -->
+                    <img th:if="${view.viewType == 'SEA_VIEW'}" 
+                         src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=400&fit=crop"
+                         th:alt="${view.viewType}"
+                         class="hero-image">
+                    <img th:if="${view.viewType == 'MOUNTAIN_VIEW'}" 
+                         src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop"
+                         th:alt="${view.viewType}"
+                         class="hero-image">
+                    <img th:if="${view.viewType == 'CITY_VIEW'}" 
+                         src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&h=400&fit=crop"
+                         th:alt="${view.viewType}"
+                         class="hero-image">
+                    <img th:if="${view.viewType == 'GARDEN_VIEW'}" 
+                         src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=400&fit=crop"
+                         th:alt="${view.viewType}"
+                         class="hero-image">
+                    <img th:if="${view.viewType != 'SEA_VIEW' and view.viewType != 'MOUNTAIN_VIEW' and view.viewType != 'CITY_VIEW' and view.viewType != 'GARDEN_VIEW'}" 
+                         src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&h=400&fit=crop"
+                         th:alt="${view.viewType}"
+                         class="hero-image">
+                    
+                    <div th:switch="${view.viewType}">
+                        <div th:case="'SEA_VIEW'" class="view-icon-large text-info">
+                            <i class="fas fa-water"></i>
+                        </div>
+                        <div th:case="'MOUNTAIN_VIEW'" class="view-icon-large text-success">
+                            <i class="fas fa-mountain"></i>
+                        </div>
+                        <div th:case="'CITY_VIEW'" class="view-icon-large text-primary">
+                            <i class="fas fa-city"></i>
+                        </div>
+                        <div th:case="'GARDEN_VIEW'" class="view-icon-large text-success">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                        <div th:case="'POOL_VIEW'" class="view-icon-large text-info">
+                            <i class="fas fa-swimming-pool"></i>
+                        </div>
+                        <div th:case="*" class="view-icon-large text-luxury-gold">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                    </div>
+                    <h2 class="luxury-title mb-4" th:text="${view.viewType}">Loại View</h2>
+                    <span th:class="${view.isDeleted ? 'status-deleted' : 'status-active'}"
+                          th:text="${view.isDeleted ? 'Đã Xóa' : 'Hoạt Động'}">Trạng Thái</span>
+                </div>
+
+                <div class="luxury-card-body">
+                    <!-- Lưới Thông Tin -->
+                    <div class="info-grid mb-5">
+                        <div class="info-card fade-in-up" style="animation-delay: 0.1s;">
+                            <div class="info-label">ID View</div>
+                            <div class="info-value" th:text="${view.viewId}">1</div>
+                        </div>
+                        
+                        <div class="info-card fade-in-up" style="animation-delay: 0.2s;">
+                            <div class="info-label">Loại View</div>
+                            <div class="info-value">
+                                <span class="view-type-badge" th:text="${view.viewType}">Loại View</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card fade-in-up" style="animation-delay: 0.3s;">
+                            <div class="info-label">Trạng Thái</div>
+                            <div class="info-value">
+                                <span th:class="${view.isDeleted ? 'status-deleted' : 'status-active'}"
+                                      th:text="${view.isDeleted ? 'Đã Xóa' : 'Hoạt Động'}">Trạng Thái</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card fade-in-up" style="animation-delay: 0.4s;">
+                            <div class="info-label">Ngày Tạo</div>
+                            <div class="info-value" th:text="${#temporals.format(view.createdAt, 'dd/MM/yyyy HH:mm:ss')}">01/01/2024 10:00:00</div>
+                        </div>
+                        
+                        <div class="info-card fade-in-up" style="animation-delay: 0.5s;">
+                            <div class="info-label">Cập Nhật Cuối</div>
+                            <div class="info-value" th:text="${view.updatedAt != null ? #temporals.format(view.updatedAt, 'dd/MM/yyyy HH:mm:ss') : 'Chưa cập nhật'}">01/01/2024 10:00:00</div>
+                        </div>
+                        
+                        <div class="info-card fade-in-up" style="animation-delay: 0.6s;">
+                            <div class="info-label">Trạng Thái Hệ Thống</div>
+                            <div class="info-value">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span class="text-success fw-bold">Hoạt Động</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mô Tả View Cao Cấp -->
+                    <div class="description-card mb-5">
+                        <h5 class="mb-4 fw-bold text-luxury-navy">
+                            <i class="fas fa-info-circle me-2 text-luxury-gold"></i>Mô Tả View Cao Cấp
+                        </h5>
+                        <div th:switch="${view.viewType}">
+                            <div th:case="'SEA_VIEW'" class="text-center">
+                                <i class="fas fa-water fa-4x text-info mb-4"></i>
+                                <h4 class="fw-bold text-luxury-navy mb-4">Trải Nghiệm View Biển</h4>
+                                <p class="text-muted mb-0 fs-5">
+                                    Tầm nhìn ra đại dương tuyệt đẹp với tiện nghi cao cấp. Trải nghiệm sự sang trọng ven biển 
+                                    với tầm nhìn toàn cảnh ra vùng nước trong xanh, bãi biển nguyên sơ và hoàng hôn tuyệt đẹp. 
+                                    Hoàn hảo cho những kỳ nghỉ lãng mạn và thư giãn cao cấp trong các phòng nghỉ đẳng cấp thế giới.
+                                </p>
+                            </div>
+                            <div th:case="'MOUNTAIN_VIEW'" class="text-center">
+                                <i class="fas fa-mountain fa-4x text-success mb-4"></i>
+                                <h4 class="fw-bold text-luxury-navy mb-4">Trải Nghiệm View Núi</h4>
+                                <p class="text-muted mb-0 fs-5">
+                                    Những đỉnh núi hùng vĩ và vẻ đẹp thiên nhiên bao quanh chỗ nghỉ cao cấp của bạn. Đắm mình 
+                                    trong sự yên bình của cảnh quan núi non với không khí trong lành, tầm nhìn cảnh quan và khung cảnh 
+                                    hoàn hảo cho một kỳ nghỉ yên tĩnh trong các suite view núi cao cấp của chúng tôi.
+                                </p>
+                            </div>
+                            <div th:case="'CITY_VIEW'" class="text-center">
+                                <i class="fas fa-city fa-4x text-primary mb-4"></i>
+                                <h4 class="fw-bold text-luxury-navy mb-4">Trải Nghiệm View Thành Phố</h4>
+                                <p class="text-muted mb-0 fs-5">
+                                    Skyline đô thị và ánh sáng thành phố sôi động tạo ra bầu không khí sôi động. Tận hưởng năng lượng 
+                                    của thành phố bên dưới trong khi duy trì sự sang trọng và thoải mái của chỗ nghỉ cao cấp của bạn. 
+                                    Hoàn hảo cho khách du lịch công vụ và những người yêu thích đô thị tìm kiếm sự tinh tế.
+                                </p>
+                            </div>
+                            <div th:case="'GARDEN_VIEW'" class="text-center">
+                                <i class="fas fa-seedling fa-4x text-success mb-4"></i>
+                                <h4 class="fw-bold text-luxury-navy mb-4">Trải Nghiệm View Vườn</h4>
+                                <p class="text-muted mb-0 fs-5">
+                                    Vườn cây xanh mướt và môi trường thiên nhiên yên bình cung cấp nơi ẩn náu hoàn hảo. Được bao quanh bởi 
+                                    cảnh quan được duy trì cẩn thận, cây cối kỳ lạ và các tính năng nước yên tĩnh cho sự thư giãn tối đa 
+                                    và vẻ đẹp thiên nhiên trong các chỗ nghỉ view vườn cao cấp của chúng tôi.
+                                </p>
+                            </div>
+                            <div th:case="'POOL_VIEW'" class="text-center">
+                                <i class="fas fa-swimming-pool fa-4x text-info mb-4"></i>
+                                <h4 class="fw-bold text-luxury-navy mb-4">Trải Nghiệm View Hồ Bơi</h4>
+                                <p class="text-muted mb-0 fs-5">
+                                    Hồ bơi vô cực và tiện nghi nước cao cấp tạo ra bầu không khí như resort. Tận hưởng quyền truy cập trực tiếp 
+                                    đến các tiện nghi hồ bơi cao cấp với các tính năng nước tuyệt đẹp, hoàn hảo cho thư giãn và giải trí 
+                                    trong môi trường tinh tế với các suite view hồ bơi cao cấp của chúng tôi.
+                                </p>
+                            </div>
+                            <div th:case="*" class="text-center">
+                                <i class="fas fa-eye fa-4x text-luxury-gold mb-4"></i>
+                                <h4 class="fw-bold text-luxury-navy mb-4">Trải Nghiệm View Cao Cấp</h4>
+                                <p class="text-muted mb-0 fs-5">
+                                    Cấu hình view đặc biệt được thiết kế cho trải nghiệm sang trọng tối đa. Chỗ nghỉ cao cấp này 
+                                    cung cấp sự thoải mái và tinh tế vô song cho những vị khách khó tính tìm kiếm sự xuất sắc 
+                                    trong dịch vụ khách sạn.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nút Hành Động -->
+                    <div class="text-center pt-5 border-top">
+                        <div class="d-flex justify-content-center flex-wrap gap-3">
+                            <a th:href="@{/hotel-management/views/edit/{id}(id=${view.viewId})}" 
+                               class="luxury-btn luxury-btn-warning">
+                                <i class="fas fa-edit me-2"></i>Chỉnh Sửa View
+                            </a>
+                            <a th:href="@{/hotel-management/views/toggle-status/{id}(id=${view.viewId})}" 
+                               th:class="${view.isDeleted ? 'luxury-btn luxury-btn-success' : 'luxury-btn luxury-btn-danger'}"
+                               th:text="${view.isDeleted ? 'Khôi Phục View' : 'Xóa View'}">
+                                <i th:class="${view.isDeleted ? 'fas fa-undo me-2' : 'fas fa-trash me-2'}"></i>
+                            </a>
+                            <a href="/hotel-management/views" class="luxury-btn luxury-btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay Lại View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông Tin Bổ Sung Cao Cấp -->
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="luxury-card fade-in-up" style="animation-delay: 0.7s;">
+                        <div class="luxury-card-header">
+                            <h6 class="mb-0 fw-bold text-luxury-navy">
+                                <i class="fas fa-chart-line me-2 text-success"></i>Chỉ Số Hiệu Suất
+                            </h6>
+                        </div>
+                        <div class="luxury-card-body">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="stats-number text-success">98%</div>
+                                    <div class="stats-label">Thời Gian Hoạt Động</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stats-number text-info">4.9</div>
+                                    <div class="stats-label">Đánh Giá</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stats-number text-luxury-gold">24/7</div>
+                                    <div class="stats-label">Hỗ Trợ</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="luxury-card fade-in-up" style="animation-delay: 0.8s;">
+                        <div class="luxury-card-header">
+                            <h6 class="mb-0 fw-bold text-luxury-navy">
+                                <i class="fas fa-cogs me-2 text-primary"></i>Thông Tin Hệ Thống
+                            </h6>
+                        </div>
+                        <div class="luxury-card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted fw-semibold">Trạng Thái Database:</span>
+                                <span class="badge bg-success fs-6">Đã Kết Nối</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted fw-semibold">Đồng Bộ Cuối:</span>
+                                <span class="fw-bold text-luxury-navy" th:text="${#temporals.format(view.updatedAt != null ? view.updatedAt : view.createdAt, 'HH:mm:ss')}">10:00:00</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted fw-semibold">Phiên Bản:</span>
+                                <span class="fw-bold text-luxury-navy">v2.1.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Thêm animations mượt mà
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.luxury-card, .info-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                observer.observe(card);
+            });
+
+            // Thêm loading states cho nút hành động
+            document.querySelectorAll('.luxury-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!this.classList.contains('disabled')) {
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<span class="loading-spinner me-2"></span>Đang xử lý...';
+                        this.classList.add('disabled');
+                        
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                            this.classList.remove('disabled');
+                        }, 2000);
+                    }
+                });
+            });
+
+            // Thêm pulse animation cho status badges
+            document.querySelectorAll('.status-active, .status-deleted').forEach(badge => {
+                badge.classList.add('pulse');
+            });
+
+            // Thêm hover effects cho cards
+            document.querySelectorAll('.luxury-card, .info-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px)';
+                    this.style.boxShadow = 'var(--luxury-shadow-xl)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'var(--luxury-shadow-lg)';
+                });
+            });
+
+            // Thêm smooth scroll cho anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
