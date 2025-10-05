@@ -34,6 +34,24 @@ public class CommonController {
         return "common/footer";
     }
 
+    @GetMapping("/sidebar")
+    public String sidebar(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        model.addAttribute("user", user);
+        if (user != null) {
+            return "common/sidebar";
+        }
+        return "common/login";
+    }
+    @GetMapping("/dashboard")
+    public String dashboard(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        model.addAttribute("user", user);
+        if (user != null) {
+            return "common/dashboard";
+        }
+        return "common/login";
+    }
     @GetMapping({"/", "", "/home"})
     public String home(Model model) {
         return "common/home";
@@ -155,7 +173,7 @@ public class CommonController {
             if (response.isSuccess()) {
                 // Refresh user from DB to update avatarUrl
                 User updatedUser = commonService.getUserByUsername(user.getUsername());
-                if(user == null){
+                if (user == null) {
                     return "redirect:/login";
                 }
                 // Update session
