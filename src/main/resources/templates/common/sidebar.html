@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sidebar</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<nav class="sidebar sidebar-offcanvas" th:fragment="sidebar">
+    <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+        <a class="sidebar-brand brand-logo" th:href="@{/hotel}"><img src="/assets/images/logo.svg" alt="logo" /></a>
+        <a class="sidebar-brand brand-logo-mini" th:href="@{/hotel-management/dashboard}"><img src="/assets/images/logo-mini.svg" alt="logo" /></a>
+    </div>
+    <ul class="nav">
+        <li class="nav-item profile">
+            <div class="profile-desc">
+                <div class="profile-pic">
+                    <div class="count-indicator">
+                        <img class="img-xs rounded-circle "
+                             th:src="${user.avatarUrl != null ? user.avatarUrl : '/images/avatar/default-avatar.png'}"
+                             alt="Avatar">
+                        <span class="count bg-success"></span>
+                    </div>
+                    <div class="profile-name">
+                        <h5 class="mb-0 font-weight-normal" th:text="${user.firstName + ' ' + user.lastName}">Henry Klein</h5>
+                        <span th:text="${user.username}">Gold Member</span>
+                    </div>
+                </div>
+                <a id="profile-dropdown" data-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></a>
+                <div class="dropdown-menu dropdown-menu-right sidebar-dropdown preview-list" aria-labelledby="profile-dropdown">
+                    <a href="#" class="dropdown-item preview-item">
+                        <div class="preview-thumbnail">
+                            <div class="preview-icon bg-dark rounded-circle">
+                                <i class="mdi mdi-settings text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="preview-item-content">
+                            <p class="preview-subject ellipsis mb-1 text-small">Account settings</p>
+                        </div>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item preview-item">
+                        <div class="preview-thumbnail">
+                            <div class="preview-icon bg-dark rounded-circle">
+                                <i class="mdi mdi-onepassword  text-info"></i>
+                            </div>
+                        </div>
+                        <div class="preview-item-content">
+                            <p class="preview-subject ellipsis mb-1 text-small">Change Password</p>
+                        </div>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item preview-item">
+                        <div class="preview-thumbnail">
+                            <div class="preview-icon bg-dark rounded-circle">
+                                <i class="mdi mdi-calendar-today text-success"></i>
+                            </div>
+                        </div>
+                        <div class="preview-item-content">
+                            <p class="preview-subject ellipsis mb-1 text-small">To-do list</p>
+                        </div>
+                    </a>
+                    <a class="dropdown-item preview-item">
+                        <div class="preview-thumbnail">
+                            <div class="preview-icon bg-dark rounded-circle">
+                                <i class="mdi mdi-logout text-danger"></i>
+                            </div>
+                        </div>
+                        <div class="preview-item-content">
+                            <p class="preview-subject mb-1">Log out</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </li>
+
+        <!-- NAVIGATION -->
+        <li class="nav-item nav-category">
+            <span class="nav-link">Navigation</span>
+        </li>
+        <li class="nav-item menu-items"
+            th:if="${user.getRole() == 'ADMIN'}">
+            <a class="nav-link" th:href="@{/hotel-management/dashboard}">
+        <span class="menu-icon">
+            <i class="mdi mdi-speedometer"></i>
+        </span>
+                <span class="menu-title">Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item menu-items">
+            <a class="nav-link" th:href="@{/hotel-management/hotel}">
+              <span class="menu-icon">
+                <i class="mdi mdi-playlist-play"></i>
+              </span>
+                <span class="menu-title">Khách sạn</span>
+            </a>
+        </li>
+        <li class="nav-item menu-items">
+            <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+              <span class="menu-icon">
+                <i class="mdi mdi-laptop"></i>
+              </span>
+                <span class="menu-title">Quản lí khách sạn</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="ui-basic">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/room}">Phòng</a></li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/furnishing}">Dụng Cụ</a></li>
+                    <li class="nav-item"
+                        th:if="${user.getRole() == 'MANAGER'}"> <a class="nav-link" th:href="@{/hotel-management/receptionist}">Lễ Tân</a></li>
+                    <li class="nav-item"
+                        th:if="${user.getRole() == 'MANAGER'}"> <a class="nav-link" th:href="@{/hotel-management/staff}">Nhân Viên</a></li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/discount}">Mã giảm giá</a></li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/news}">Báo</a></li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/dashboard}">...</a></li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item menu-items">
+            <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
+              <span class="menu-icon">
+                <i class="mdi mdi-security"></i>
+              </span>
+                <span class="menu-title">Quản lí người dùng</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="auth">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link" href="../../pages/samples/blank-page.html">Khách hàng</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-404.html">Lịch đặt phòng</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-404.html">Checkin</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-404.html">Dọn phòng</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-500.html">...</a></li>
+                </ul>
+            </div>
+        </li>
+
+        <li class="nav-item menu-items">
+            <a class="nav-link" href="/pages/tables/basic-table.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-table-large"></i>
+              </span>
+                <span class="menu-title">Tables</span>
+            </a>
+        </li>
+        <li class="nav-item menu-items">
+            <a class="nav-link" href="/pages/charts/chartjs.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-chart-bar"></i>
+              </span>
+                <span class="menu-title">Charts</span>
+            </a>
+        </li>
+        <li class="nav-item menu-items">
+            <a class="nav-link" href="../../pages/icons/mdi.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-contacts"></i>
+              </span>
+                <span class="menu-title">Icons</span>
+            </a>
+        </li>
+
+        <li class="nav-item menu-items">
+            <a class="nav-link" href="http://www.bootstrapdash.com/demo/corona-free/jquery/documentation/documentation.html">
+              <span class="menu-icon">
+                <i class="mdi mdi-file-document-box"></i>
+              </span>
+                <span class="menu-title">Thông tin</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+<script src="/assets/vendors/chart.js/Chart.min.js"></script>
+<script src="/assets/js/off-canvas.js"></script>
+<script src="/assets/js/hoverable-collapse.js"></script>
+<script src="/assets/js/misc.js"></script>
+<script src="/assets/js/settings.js"></script>
+<script src="/assets/js/todolist.js"></script>
+<script src="/assets/js/chart.js"></script>
+</body>
+</html>
