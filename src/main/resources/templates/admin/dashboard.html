@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Hệ Thống Khách Sạn</title>
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --secondary-gold: #F4E4BC;
+            --dark-navy: #1B2951;
+            --accent-blue: #2C5F7C;
+            --cream: #F8F6F0;
+            --text-dark: #2C3E50;
+            --text-light: #7F8C8D;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFFFF 100%);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+        }
+
+        .dashboard-container {
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--secondary-gold));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-icon.rooms { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-icon.bookings { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-icon.users { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-icon.available { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .quick-actions-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--secondary-gold) 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .action-btn i {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+            
+            .dashboard-title {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">
+                <i class="fas fa-tachometer-alt"></i>
+                Admin Dashboard
+            </h1>
+            <p class="dashboard-subtitle">
+                Tổng quan hệ thống quản lý khách sạn
+            </p>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon rooms">
+                    <i class="fas fa-bed"></i>
+                </div>
+                <div class="stat-number" th:text="${totalRooms}">0</div>
+                <div class="stat-label">Tổng số phòng</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon available">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-number" th:text="${availableRooms}">0</div>
+                <div class="stat-label">Phòng trống</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon bookings">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-number" th:text="${activeBookings}">0</div>
+                <div class="stat-label">Đặt phòng đang hoạt động</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon users">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number" th:text="${totalUsers}">0</div>
+                <div class="stat-label">Tổng số người dùng</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2 class="quick-actions-title">Thao tác nhanh</h2>
+            <div class="actions-grid">
+                <a href="/admin/rooms" class="action-btn">
+                    <i class="fas fa-bed"></i>
+                    Quản lý phòng
+                </a>
+                <a href="/admin/bookings" class="action-btn">
+                    <i class="fas fa-calendar-alt"></i>
+                    Quản lý đặt phòng
+                </a>
+                <a href="/admin/users" class="action-btn">
+                    <i class="fas fa-user-cog"></i>
+                    Quản lý người dùng
+                </a>
+                <a href="/hotel-management/view" class="action-btn">
+                    <i class="fas fa-eye"></i>
+                    Quản lý view
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="/vendors/bootstrap/bootstrap.min.js"></script>
+</body>
+</html>
