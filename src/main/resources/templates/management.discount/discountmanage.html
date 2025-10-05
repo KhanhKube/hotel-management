@@ -61,45 +61,7 @@
                 </ul>
                 <ul class="navbar-nav navbar-nav-right">
                     <li class="nav-item dropdown d-none d-lg-block">
-                        <a class="nav-link btn btn-success create-new-button" id="createbuttonDropdown" data-toggle="dropdown" aria-expanded="false" href="#">+ Create New Project</a>
-                        <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="createbuttonDropdown">
-                            <h6 class="p-3 mb-0">Projects</h6>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item preview-item">
-                                <div class="preview-thumbnail">
-                                    <div class="preview-icon bg-dark rounded-circle">
-                                        <i class="mdi mdi-file-outline text-primary"></i>
-                                    </div>
-                                </div>
-                                <div class="preview-item-content">
-                                    <p class="preview-subject ellipsis mb-1">Software Development</p>
-                                </div>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item preview-item">
-                                <div class="preview-thumbnail">
-                                    <div class="preview-icon bg-dark rounded-circle">
-                                        <i class="mdi mdi-web text-info"></i>
-                                    </div>
-                                </div>
-                                <div class="preview-item-content">
-                                    <p class="preview-subject ellipsis mb-1">UI Development</p>
-                                </div>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item preview-item">
-                                <div class="preview-thumbnail">
-                                    <div class="preview-icon bg-dark rounded-circle">
-                                        <i class="mdi mdi-layers text-danger"></i>
-                                    </div>
-                                </div>
-                                <div class="preview-item-content">
-                                    <p class="preview-subject ellipsis mb-1">Software Testing</p>
-                                </div>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <p class="p-3 mb-0 text-center">See all projects</p>
-                        </div>
+                        <a class="nav-link btn btn-success create-new-button" th:href="@{/management/discount/create}">+ Create New Discount</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link" id="profileDropdown" href="#" data-toggle="dropdown">
@@ -154,7 +116,12 @@
                     <div class="col-12 grid-margin">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title">Discount Voucher Status</h4>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Discount Voucher Status</h4>
+                                    <a th:href="@{/management/discount/create}" class="btn btn-primary">
+                                        <i class="mdi mdi-plus"></i> Create New Discount
+                                    </a>
+                                </div>
                                 <div class="table-responsive">
                                     <table class="table">
                                         <thead>
@@ -172,13 +139,13 @@
                                         <tbody>
                                         <tr th:each="d, stat : ${listDiscount}">
                                             <td th:text="${d.discountId}"></td>
-                                            <td th:text="${d.code}"></td>
-                                            <td th:text="${d.value} + (d.discountType == 'PERCENT' ? ' %' : ' VND')"></td>
-                                            <td th:text="${d.roomType}"></td>
-                                            <td th:text="${#temporals.format(d.startDate, 'dd/MM/yyyy')}"></td>
-                                            <td th:text="${#temporals.format(d.endDate, 'dd/MM/yyyy')}"></td>
+                                            <td th:text="${d.code != null ? d.code : 'N/A'}"></td>
+                                            <td th:text="${d.value != null ? (d.value + (d.discountType == 'PERCENT' ? ' %' : ' VND')) : 'N/A'}"></td>
+                                            <td th:text="${d.roomType != null ? d.roomType : 'N/A'}"></td>
+                                            <td th:text="${d.startDate != null ? #temporals.format(d.startDate, 'dd/MM/yyyy') : 'N/A'}"></td>
+                                            <td th:text="${d.endDate != null ? #temporals.format(d.endDate, 'dd/MM/yyyy') : 'N/A'}"></td>
                                             <td>
-                                                <div class="badge badge-outline-success" th:text="${d.status}">ACTIVE</div>
+                                                <div class="badge badge-outline-success" th:text="${d.status != null ? d.status : 'INACTIVE'}">ACTIVE</div>
                                             </td>
                                             <td><a th:href="@{'/management/discount/' + ${d.discountId} + '/edit'}">Edit</a></td>
                                         </tr>

@@ -16,9 +16,13 @@ public class DiscountPageController {
 
     @GetMapping
     public String view(Model model) {
-        model.addAttribute("listDiscount",discountService.getAll());
-
+        // Tạm thời trả về list rỗng để tránh lỗi
+        model.addAttribute("listDiscount", discountService.getAll());
         return "management.discount/discountmanage";
+    }
+    @GetMapping("/create")
+    public String createDiscountForm() {
+        return "management.discount/discount-create-form";
     }
 }
 
