@@ -83,7 +83,7 @@
         </li>
         <li class="nav-item menu-items"
             th:if="${user.getRole() == 'ADMIN'}">
-            <a class="nav-link" th:href="@{/hotel-management/dashboard}">
+            <a class="nav-link" th:href="@{/hotel/dashboard}">
         <span class="menu-icon">
             <i class="mdi mdi-speedometer"></i>
         </span>
@@ -130,17 +130,17 @@
             </a>
             <div class="collapse" id="auth">
                 <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"> <a class="nav-link" href="../../pages/samples/blank-page.html">Khách hàng</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-404.html">Lịch đặt phòng</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-404.html">Checkin</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-404.html">Dọn phòng</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="../../pages/samples/error-500.html">...</a></li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/customer}">Khách hàng</a></li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/order}">Lịch đặt phòng</a></li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/checin}">Checkin</a></li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/clean}">Dọn phòng</a></li>
+                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/...}">...</a></li>
                 </ul>
             </div>
         </li>
 
         <li class="nav-item menu-items">
-            <a class="nav-link" href="/pages/tables/basic-table.html">
+            <a class="nav-link" th:href="@{/hotel/dashboard}">
               <span class="menu-icon">
                 <i class="mdi mdi-table-large"></i>
               </span>
@@ -148,7 +148,7 @@
             </a>
         </li>
         <li class="nav-item menu-items">
-            <a class="nav-link" href="/pages/charts/chartjs.html">
+            <a class="nav-link" th:href="@{/hotel/dashboard}">
               <span class="menu-icon">
                 <i class="mdi mdi-chart-bar"></i>
               </span>
@@ -156,7 +156,7 @@
             </a>
         </li>
         <li class="nav-item menu-items">
-            <a class="nav-link" href="../../pages/icons/mdi.html">
+            <a class="nav-link" th:href="@{/hotel/dashboard}">
               <span class="menu-icon">
                 <i class="mdi mdi-contacts"></i>
               </span>
