@@ -17,7 +17,7 @@ public class DiscountPageController {
     @GetMapping
     public String view(Model model) {
         // Tạm thời trả về list rỗng để tránh lỗi
-        model.addAttribute("listDiscount", new java.util.ArrayList<>());
+        model.addAttribute("listDiscount", discountService.getAll());
         return "management.discount/discountmanage";
     }
     @GetMapping("/create")
