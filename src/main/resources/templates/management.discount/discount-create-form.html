@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Discount Management - Create/Edit</title>
+    <base th:href="@{/}">
+    <!-- Corona Admin assets -->
+    <!-- plugins:css -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <!-- End plugins:css -->
+    <!-- Plugin css for this page -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/jvectormap/jquery-jvectormap.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/flag-icon-css/css/flag-icon.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.theme.default.min.css}">
+    <!-- End plugin css for this page -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <!-- End layout styles -->
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/discount-create-form.css}">
+</head>
+
+<body>
+    <div class="container-scroller">
+        <!-- Include sidebar -->
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+        <!-- partial -->
+        <div class="container-fluid page-body-wrapper">
+            <!-- partial:partials/_navbar.html -->
+            <nav class="navbar p-0 fixed-top d-flex flex-row">
+                <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                    <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                            alt="logo" /></a>
+                </div>
+                <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+                </div>
+            </nav>
+            <!-- partial -->
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="row">
+                        <div class="col-12 grid-margin">
+                            <div class="card">
+                                <div class="card-body">
+                                    <!-- Header with Status Toggle -->
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h2 class="card-title mb-0">Discount management</h2>
+                                        <div class="status-container">
+                                            <span class="status-label">Status</span>
+                                            <label class="switch">
+                                                <input type="checkbox" id="statusToggle" />
+                                                <span class="slider"></span>
+                                                <img class="off"
+                                                    src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAQABADASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAIG/8QAIxAAAgIABQQDAAAAAAAAAAAAAQMCBAAREiExBUFRcROBsf/EABQBAQAAAAAAAAAAAAAAAAAAAAX/xAAWEQADAAAAAAAAAAAAAAAAAAAAEiL/2gAMAwEAAhEDEQA/AMBTp03dNglMVuttjqnKQ2UPOfntkOThbqVVUJ12BKnogZQZpy+Ucc8knwePWJrWqyqEHVmrTahEBqpbBoAH1n635wt3a9mjN1p8X2pw0qVEbKB/CO/c4OphSVP/2Q==" />
+                                                <img class="on"
+                                                    src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAQABADASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAQIEBf/EACMQAAEDAwQDAQEAAAAAAAAAAAQBAgUDESEAEjFBBlFhMkL/xAAUAQEAAAAAAAAAAAAAAAAAAAAF/8QAGBEAAwEBAAAAAAAAAAAAAAAAABIiMUH/2gAMAwEAAhEDEQA/AMuBg4mS8coRccMOdNG01qVyH/kRvHPKKmMdr8uujPwUTG+NkRpw1AKWCbvHKa2zTGphc9u9p0q+rLqeMl4kSCGkYgtoE0HTahIz3bWGNanPrdyqWzn7p5ibh5CArnyZNMyVLpK0QSkt2BNXtVX+7ol1wuLJiyaHt+6Kyp//2Q==" />
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Create/Edit Form -->
+                                    <div class="discount-form-container">
+                                        <h5 class="form-title">Create/Edit</h5>
+
+                                        <form>
+                                            <!-- First Row: Voucher Code and Total Usage Limit -->
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="voucherCode">Voucher Code:</label>
+                                                    <input type="text" class="form-control input-medium"
+                                                        id="voucherCode" placeholder="Mã voucher (Ex: HPHGA2025)">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="totalUsageLimit">Total Usage Limit:</label>
+                                                    <input type="number" class="form-control input-small"
+                                                        id="totalUsageLimit" placeholder="20">
+                                                </div>
+                                            </div>
+
+                                            <!-- Second Row: Title -->
+                                            <div class="form-row">
+                                                <div class="form-group" style="flex: 2;">
+                                                    <label for="title">Title:</label>
+                                                    <input type="text" class="form-control" id="title"
+                                                        placeholder="Lễ hội hè 2025">
+                                                </div>
+                                            </div>
+
+                                            <!-- Third Row: Date Range -->
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="startDate">Start Date:</label>
+                                                    <input type="date" class="form-control input-medium" id="startDate">
+                                                </div>
+                                                <div class="date-arrow">
+                                                    <i class="mdi mdi-arrow-right"></i>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="endDate">END DATE:</label>
+                                                    <input type="date" class="form-control input-medium" id="endDate">
+                                                </div>
+                                            </div>
+
+                                            <!-- Discount Type Section -->
+                                            <div class="form-row">
+                                                <div class="form-group" style="flex: 1;">
+                                                    <label>Discount:</label>
+                                                    <div class="discount-type-container">
+                                                        <!-- Percentage Option -->
+                                                        <div class="discount-option selected" id="percentOption">
+                                                            <label>
+                                                                <input type="radio" name="discountType" value="percent"
+                                                                    checked>
+                                                                Percent
+                                                            </label>
+                                                            <div class="input-group">
+                                                                <label for="percent">Percent:</label>
+                                                                <input type="text" class="form-control" id="percent"
+                                                                    placeholder="% Giảm giá">
+                                                            </div>
+                                                            <div class="input-group" style="margin-top: 10px;">
+                                                                <label for="percentLimit">Limit:</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="percentLimit" placeholder="Tối đa số tiền được giảm">
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Price Option -->
+                                                        <div class="discount-option" id="priceOption">
+                                                            <label>
+                                                                <input type="radio" name="discountType" value="price">
+                                                                Price
+                                                            </label>
+                                                            <div class="input-group">
+                                                                <label for="price">Price:</label>
+                                                                <input type="text" class="form-control" id="price"
+                                                                    placeholder="VNĐ Giảm trực tiếp">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Room Types -->
+                                            <div class="form-row">
+                                                <div class="form-group" style="flex: 1;">
+                                                    <label>Type Of Room:</label>
+                                                    <div class="room-types-container">
+                                                        <div class="room-type-item">
+                                                            <input type="checkbox" id="presidential" name="roomTypes"
+                                                                value="Presidential">
+                                                            <label for="presidential">Presidential</label>
+                                                        </div>
+                                                        <div class="room-type-item">
+                                                            <input type="checkbox" id="ultimate" name="roomTypes"
+                                                                value="Ultimate">
+                                                            <label for="ultimate">Ultimate</label>
+                                                        </div>
+                                                        <div class="room-type-item">
+                                                            <input type="checkbox" id="executive" name="roomTypes"
+                                                                value="Executive">
+                                                            <label for="executive">Executive</label>
+                                                        </div>
+                                                        <div class="room-type-item">
+                                                            <input type="checkbox" id="standard" name="roomTypes"
+                                                                value="Standard">
+                                                            <label for="standard">Standard</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Minimum Guests -->
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="minimumGuests">Minimum Guests:</label>
+                                                    <input type="number" class="form-control input-small"
+                                                        id="minimumGuests" placeholder="Số lượng" min="1">
+                                                </div>
+                                            </div>
+
+                                            <!-- Save Button -->
+                                            <button type="submit" class="save-button">Save</button>
+                                            <div style="clear: both;"></div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- content-wrapper ends -->
+                <!-- partial:partials/_footer.html -->
+                <footer class="footer">
+                    <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                        <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright ©
+                            bootstrapdash.com 2020</span>
+                    </div>
+                </footer>
+                <!-- partial -->
+            </div>
+            <!-- main-panel ends -->
+        </div>
+        <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+
+    <!-- plugins:js -->
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <!-- End plugins:js -->
+    <!-- Plugin js for this page -->
+    <script th:src="@{/assets/vendors/chart.js/Chart.min.js}"></script>
+    <script th:src="@{/assets/vendors/progressbar.js/progressbar.min.js}"></script>
+    <script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap.min.js}"></script>
+    <script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js}"></script>
+    <script th:src="@{/assets/vendors/owl-carousel-2/owl.carousel.min.js}"></script>
+    <!-- End plugin js for this page -->
+    <!-- inject:js -->
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/assets/js/misc.js}"></script>
+    <script th:src="@{/assets/js/settings.js}"></script>
+    <script th:src="@{/assets/js/todolist.js}"></script>
+    <!-- endinject -->
+    <!-- Custom JS -->
+    <script th:src="@{/js/discount-create-form.js}"></script>
+
+</body>
+
+</html>
