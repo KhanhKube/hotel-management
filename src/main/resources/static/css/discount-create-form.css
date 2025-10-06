@@ -1,0 +1,223 @@
+.discount-form-container {
+    background: #f8f9fa;
+    border: 2px solid #191c24;
+    border-radius: 10px;
+    padding: 30px;
+    margin: 20px 0;
+}
+
+.form-title {
+    color: #495057;
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #191c24;
+    padding-bottom: 10px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: end;
+}
+
+.form-group {
+    flex: 1;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-control {
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 14px;
+    width: 100%;
+    background-color: #f8f9fa;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    background-color: #f8f9fa;
+}
+
+.discount-type-container {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.discount-option {
+    flex: 1;
+    border: 2px solid #191c24;
+    border-radius: 6px;
+    padding: 20px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.discount-option:hover {
+    border-color: #007bff;
+}
+
+.discount-option.selected {
+    border-color: #007bff;
+    background: #f0f8ff;
+}
+
+.discount-option input[type="radio"] {
+    margin-right: 8px;
+}
+
+.discount-option label {
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.room-types-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.room-type-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.room-type-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.status-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.status-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Minecraft switch made by: csozi | Website: english.csozi.hu */
+/* The switch - the box around the slider */
+.switch {
+    font-size: 30px;
+    position: relative;
+    display: inline-block;
+    width: 4em;
+    height: 0.3em;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #900c3f;
+    transition: 0.4s;
+}
+
+.off {
+    position: absolute;
+    content: "";
+    height: 2em;
+    width: 2em;
+    background-color: white;
+    transition: 0.4s;
+    image-rendering: pixelated;
+    opacity: 1;
+    left: 0;
+    bottom: -0.8em;
+}
+
+.on {
+    position: absolute;
+    content: "";
+    height: 2em;
+    width: 2em;
+    background-color: white;
+    transition: 0.4s;
+    image-rendering: pixelated;
+    opacity: 0;
+    left: 0;
+    bottom: -0.8em;
+}
+
+.switch input:checked + .slider {
+    background-color: #c70039;
+}
+
+.switch input:focus + .slider {
+    box-shadow: 0 0 1px #c70039;
+}
+
+.switch input:checked ~ .off {
+    transform: translateX(2em);
+}
+
+.switch input:checked ~ .on {
+    transform: translateX(2em);
+    opacity: 1;
+}
+
+.date-arrow {
+    font-size: 24px;
+    color: #6c757d;
+    margin: 0 10px;
+    align-self: center;
+}
+
+.save-button {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    float: right;
+    margin-top: 20px;
+}
+
+.save-button:hover {
+    background: #218838;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-small {
+    width: 120px;
+}
+
+.input-medium {
+    width: 200px;
+}
