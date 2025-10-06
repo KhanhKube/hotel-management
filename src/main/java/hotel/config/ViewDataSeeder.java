@@ -36,7 +36,6 @@ public class ViewDataSeeder implements CommandLineRunner {
         for (String viewType : viewTypes) {
             View view = new View();
             view.setViewType(viewType);
-            view.setIsDeleted(false);
             viewRepository.save(view);
         }
 
