@@ -9,70 +9,82 @@
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-<nav class="sidebar sidebar-offcanvas" th:fragment="sidebar">
+<nav class="sidebar sidebar-offcanvas" th:fragment="sidebar"
+     xmlns:th="http://www.thymeleaf.org"
+     th:with="user=${session.user}">
+
+    <!-- Brand -->
     <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-        <a class="sidebar-brand brand-logo" th:href="@{/hotel}"><img src="/assets/images/logo.svg" alt="logo" /></a>
-        <a class="sidebar-brand brand-logo-mini" th:href="@{/hotel-management/dashboard}"><img src="/assets/images/logo-mini.svg" alt="logo" /></a>
+        <a class="sidebar-brand brand-logo" th:href="@{/hotel}">
+            <img src="/assets/images/logo.svg" alt="logo" />
+        </a>
+        <a class="sidebar-brand brand-logo-mini" th:href="@{/hotel-management/dashboard}">
+            <img src="/assets/images/logo-mini.svg" alt="logo" />
+        </a>
     </div>
+
     <ul class="nav">
-        <li class="nav-item profile">
+        <!-- Profile Section -->
+        <li class="nav-item profile" th:if="${user != null}">
             <div class="profile-desc">
                 <div class="profile-pic">
                     <div class="count-indicator">
-                        <img class="img-xs rounded-circle "
+                        <img class="img-xs rounded-circle"
                              th:src="${user.avatarUrl != null ? user.avatarUrl : '/images/avatar/default-avatar.png'}"
                              alt="Avatar">
                         <span class="count bg-success"></span>
                     </div>
                     <div class="profile-name">
-                        <h5 class="mb-0 font-weight-normal" th:text="${user.firstName + ' ' + user.lastName}">Henry Klein</h5>
-                        <span th:text="${user.username}">Gold Member</span>
+                        <h5 class="mb-0 font-weight-normal"
+                            th:text="${user.firstName + ' ' + user.lastName}">User Name</h5>
+                        <span th:text="${user.role}">Role</span>
                     </div>
                 </div>
+
+                <!-- Dropdown inside profile -->
                 <a id="profile-dropdown" data-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></a>
-                <div class="dropdown-menu dropdown-menu-right sidebar-dropdown preview-list" aria-labelledby="profile-dropdown">
-                    <a href="#" class="dropdown-item preview-item">
+                <div class="dropdown-menu dropdown-menu-right sidebar-dropdown preview-list"
+                     aria-labelledby="profile-dropdown">
+
+                    <a th:href="@{/hotel/profile}" class="dropdown-item preview-item">
                         <div class="preview-thumbnail">
                             <div class="preview-icon bg-dark rounded-circle">
-                                <i class="mdi mdi-settings text-primary"></i>
+                                <i class="mdi mdi-account text-primary"></i>
                             </div>
                         </div>
                         <div class="preview-item-content">
-                            <p class="preview-subject ellipsis mb-1 text-small">Account settings</p>
+                            <p class="preview-subject ellipsis mb-1 text-small">Hồ sơ</p>
                         </div>
                     </a>
+
                     <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item preview-item">
+
+                    <a th:href="@{/hotel/change-password}" class="dropdown-item preview-item">
                         <div class="preview-thumbnail">
                             <div class="preview-icon bg-dark rounded-circle">
-                                <i class="mdi mdi-onepassword  text-info"></i>
+                                <i class="mdi mdi-lock text-info"></i>
                             </div>
                         </div>
                         <div class="preview-item-content">
-                            <p class="preview-subject ellipsis mb-1 text-small">Change Password</p>
+                            <p class="preview-subject ellipsis mb-1 text-small">Đổi mật khẩu</p>
                         </div>
                     </a>
+
                     <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item preview-item">
-                        <div class="preview-thumbnail">
-                            <div class="preview-icon bg-dark rounded-circle">
-                                <i class="mdi mdi-calendar-today text-success"></i>
+
+                    <!-- Logout form -->
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="dropdown-item preview-item border-0 bg-transparent w-100 text-left">
+                            <div class="preview-thumbnail">
+                                <div class="preview-icon bg-dark rounded-circle">
+                                    <i class="mdi mdi-logout text-danger"></i>
+                                </div>
                             </div>
-                        </div>
-                        <div class="preview-item-content">
-                            <p class="preview-subject ellipsis mb-1 text-small">To-do list</p>
-                        </div>
-                    </a>
-                    <a class="dropdown-item preview-item">
-                        <div class="preview-thumbnail">
-                            <div class="preview-icon bg-dark rounded-circle">
-                                <i class="mdi mdi-logout text-danger"></i>
+                            <div class="preview-item-content">
+                                <p class="preview-subject mb-1">Đăng xuất</p>
                             </div>
-                        </div>
-                        <div class="preview-item-content">
-                            <p class="preview-subject mb-1">Log out</p>
-                        </div>
-                    </a>
+                        </button>
+                    </form>
                 </div>
             </div>
         </li>
@@ -81,99 +93,113 @@
         <li class="nav-item nav-category">
             <span class="nav-link">Navigation</span>
         </li>
-        <li class="nav-item menu-items"
-            th:if="${user.getRole() == 'ADMIN'}">
+
+        <!-- Dashboard - only ADMIN -->
+        <li class="nav-item menu-items" th:if="${user != null and user.role == 'ADMIN'}">
             <a class="nav-link" th:href="@{/hotel/dashboard}">
-        <span class="menu-icon">
-            <i class="mdi mdi-speedometer"></i>
-        </span>
+                <span class="menu-icon"><i class="mdi mdi-speedometer"></i></span>
                 <span class="menu-title">Dashboard</span>
             </a>
         </li>
+
+        <!-- Hotel list -->
         <li class="nav-item menu-items">
             <a class="nav-link" th:href="@{/hotel-management/hotel}">
-              <span class="menu-icon">
-                <i class="mdi mdi-playlist-play"></i>
-              </span>
+                <span class="menu-icon"><i class="mdi mdi-playlist-play"></i></span>
                 <span class="menu-title">Khách sạn</span>
             </a>
         </li>
+
+        <!-- Quản lí khách sạn -->
         <li class="nav-item menu-items">
-            <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-              <span class="menu-icon">
-                <i class="mdi mdi-laptop"></i>
-              </span>
+            <a class="nav-link" data-toggle="collapse" href="#ui-basic"
+               aria-expanded="false" aria-controls="ui-basic">
+                <span class="menu-icon"><i class="mdi mdi-laptop"></i></span>
                 <span class="menu-title">Quản lí khách sạn</span>
                 <i class="menu-arrow"></i>
             </a>
             <div class="collapse" id="ui-basic">
                 <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/room}">Phòng</a></li>
-                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/furnishing}">Dụng Cụ</a></li>
-                    <li class="nav-item"
-                        th:if="${user.getRole() == 'MANAGER'}"> <a class="nav-link" th:href="@{/hotel-management/receptionist}">Lễ Tân</a></li>
-                    <li class="nav-item"
-                        th:if="${user.getRole() == 'MANAGER'}"> <a class="nav-link" th:href="@{/hotel-management/staff}">Nhân Viên</a></li>
-                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/discount}">Mã giảm giá</a></li>
-                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/news}">Báo</a></li>
-                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/dashboard}">...</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/room}">Phòng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/furnishing}">Dụng cụ</a>
+                    </li>
+
+                    <!-- Only MANAGER can see -->
+                    <li class="nav-item" th:if="${user != null and user.role == 'MANAGER'}">
+                        <a class="nav-link" th:href="@{/hotel-management/receptionist}">Lễ tân</a>
+                    </li>
+                    <li class="nav-item" th:if="${user != null and user.role == 'MANAGER'}">
+                        <a class="nav-link" th:href="@{/hotel-management/staff}">Nhân viên</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/discount}">Mã giảm giá</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/news}">Tin tức</a>
+                    </li>
                 </ul>
             </div>
         </li>
+
+        <!-- Quản lí người dùng -->
         <li class="nav-item menu-items">
-            <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
-              <span class="menu-icon">
-                <i class="mdi mdi-security"></i>
-              </span>
+            <a class="nav-link" data-toggle="collapse" href="#auth"
+               aria-expanded="false" aria-controls="auth">
+                <span class="menu-icon"><i class="mdi mdi-security"></i></span>
                 <span class="menu-title">Quản lí người dùng</span>
                 <i class="menu-arrow"></i>
             </a>
             <div class="collapse" id="auth">
                 <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/customer}">Khách hàng</a></li>
-                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/order}">Lịch đặt phòng</a></li>
-                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/checin}">Checkin</a></li>
-                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/clean}">Dọn phòng</a></li>
-                    <li class="nav-item"> <a class="nav-link" th:href="@{/hotel-management/...}">...</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/customer}">Khách hàng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/order}">Lịch đặt phòng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/checkin}">Check-in</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/clean}">Dọn phòng</a>
+                    </li>
                 </ul>
             </div>
         </li>
 
+        <!-- Other pages -->
         <li class="nav-item menu-items">
             <a class="nav-link" th:href="@{/hotel/dashboard}">
-              <span class="menu-icon">
-                <i class="mdi mdi-table-large"></i>
-              </span>
+                <span class="menu-icon"><i class="mdi mdi-table-large"></i></span>
                 <span class="menu-title">Tables</span>
             </a>
         </li>
         <li class="nav-item menu-items">
             <a class="nav-link" th:href="@{/hotel/dashboard}">
-              <span class="menu-icon">
-                <i class="mdi mdi-chart-bar"></i>
-              </span>
+                <span class="menu-icon"><i class="mdi mdi-chart-bar"></i></span>
                 <span class="menu-title">Charts</span>
             </a>
         </li>
         <li class="nav-item menu-items">
             <a class="nav-link" th:href="@{/hotel/dashboard}">
-              <span class="menu-icon">
-                <i class="mdi mdi-contacts"></i>
-              </span>
+                <span class="menu-icon"><i class="mdi mdi-contacts"></i></span>
                 <span class="menu-title">Icons</span>
             </a>
         </li>
 
         <li class="nav-item menu-items">
             <a class="nav-link" href="http://www.bootstrapdash.com/demo/corona-free/jquery/documentation/documentation.html">
-              <span class="menu-icon">
-                <i class="mdi mdi-file-document-box"></i>
-              </span>
+                <span class="menu-icon"><i class="mdi mdi-file-document-box"></i></span>
                 <span class="menu-title">Thông tin</span>
             </a>
         </li>
     </ul>
 </nav>
+
 <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
 <script src="/assets/vendors/chart.js/Chart.min.js"></script>
 <script src="/assets/js/off-canvas.js"></script>
