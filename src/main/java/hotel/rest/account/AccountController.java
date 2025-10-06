@@ -1,31 +1,187 @@
 package hotel.rest.account;
 
-import hotel.db.entity.User;
-import hotel.db.repository.user.UserRepository;
+import hotel.db.dto.user.AccountRequestDto;
+import hotel.db.dto.user.AccountResponseDto;
+import hotel.service.account.AccountService;
+import hotel.util.BaseController;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/accounts")
+@Controller
+@RequestMapping("/hotel-management/accounts")
 @RequiredArgsConstructor
-public class AccountController {
-//
-//    private final UserRepository userRepo;
-//
-//    // Lấy tất cả user hoặc lọc theo role
-//    @GetMapping
-//    public List<User> getAll(@RequestParam(required = false) String role) {
-//        return role == null ? userRepo.findAll() : userRepo.findByRole(role);
-//    }
-//
-//    // Đổi trạng thái active/inactive
-//    @PatchMapping("/{id}/status")
-//    public User changeStatus(@PathVariable Integer id, @RequestParam boolean active) {
-//        User u = userRepo.findById(id).orElseThrow();
-//        u.setActive(active);   // ✅ thiếu setActive
-//        return userRepo.save(u);
-//    }
+@Slf4j
+public class AccountController extends BaseController {
+
+    private final AccountService accountService;
+
+    /**
+     * Hiển thị danh sách tất cả accounts
+     */
+    @GetMapping
+    public String listAccounts(HttpSession session, Model model) {
+        List<AccountResponseDto> accounts = accountService.getAllAccounts();
+        model.addAttribute("accounts", accounts);
+        return "management/account/account-list";
+    }
+
+    /**
+     * Hiển thị danh sách accounts theo role
+     */
+    @GetMapping("/role/{role}")
+    public String listAccountsByRole(@PathVariable String role, HttpSession session, Model model) {
+        List<AccountResponseDto> accounts = accountService.getAccountsByRole(role);
+        model.addAttribute("accounts", accounts);
+        model.addAttribute("role", role);
+        return "management/account/account-list";
+    }
+
+    /**
+     * Hiển thị chi tiết account
+     */
+    @GetMapping("/{id}")
+    public String viewAccount(@PathVariable Integer id, Model model) {
+        AccountResponseDto account = accountService.getAccountById(id);
+        model.addAttribute("account", account);
+        return "management/account/account-details";
+    }
+
+    /**
+     * Form tạo account mới
+     */
+    @GetMapping("/new")
+    public String createAccountForm(Model model) {
+        model.addAttribute("account", new AccountRequestDto());
+        return "management/account/account-form";
+    }
+
+    /**
+     * Lưu account mới
+     */
+    @PostMapping("/save")
+    public String saveAccount(@Valid @ModelAttribute("account") AccountRequestDto accountRequestDto,
+                              BindingResult bindingResult,
+                              RedirectAttributes redirectAttributes) {
+        
+        if (bindingResult.hasErrors()) {
+            return "management/account/account-form";
+        }
+
+        try {
+            accountService.createAccount(accountRequestDto);
+            redirectAttributes.addFlashAttribute("successMessage", "Tạo account thành công!");
+            return "redirect:/hotel-management/accounts?success=add";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi tạo account: " + e.getMessage());
+            return "redirect:/hotel-management/accounts/new";
+        }
+    }
+
+    /**
+     * Form chỉnh sửa account
+     */
+    @GetMapping("/edit/{id}")
+    public String editAccountForm(@PathVariable Integer id, Model model) {
+        AccountResponseDto account = accountService.getAccountById(id);
+        
+        // Convert ResponseDto to RequestDto for form
+        AccountRequestDto accountRequestDto = new AccountRequestDto();
+        accountRequestDto.setUsername(account.getUsername());
+        accountRequestDto.setEmail(account.getEmail());
+        accountRequestDto.setPhone(account.getPhone());
+        accountRequestDto.setFirstName(account.getFirstName());
+        accountRequestDto.setLastName(account.getLastName());
+        accountRequestDto.setGender(account.getGender());
+        accountRequestDto.setDob(account.getDob());
+        accountRequestDto.setAddress(account.getAddress());
+        accountRequestDto.setRole(account.getRole());
+        accountRequestDto.setStatus(account.getStatus());
+        accountRequestDto.setAvatarUrl(account.getAvatarUrl());
+        
+        model.addAttribute("account", accountRequestDto);
+        model.addAttribute("accountId", id);
+        return "management/account/account-form";
+    }
+
+    /**
+     * Cập nhật account
+     */
+    @PostMapping("/update/{id}")
+    public String updateAccount(@PathVariable Integer id,
+                               @Valid @ModelAttribute("account") AccountRequestDto accountRequestDto,
+                               BindingResult bindingResult,
+                               RedirectAttributes redirectAttributes) {
+        
+        if (bindingResult.hasErrors()) {
+            return "management/account/account-form";
+        }
+
+        try {
+            accountService.updateAccount(id, accountRequestDto);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật account thành công!");
+            return "redirect:/hotel-management/accounts?success=edit";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật account: " + e.getMessage());
+            return "redirect:/hotel-management/accounts/edit/" + id;
+        }
+    }
+
+    /**
+     * Thay đổi trạng thái active của account
+     */
+    @PostMapping("/toggle-status/{id}")
+    public String toggleAccountStatus(@PathVariable Integer id,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            accountService.toggleAccountStatus(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Thay đổi trạng thái account thành công!");
+            return "redirect:/hotel-management/accounts?success=toggle";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi thay đổi trạng thái: " + e.getMessage());
+            return "redirect:/hotel-management/accounts";
+        }
+    }
+
+    /**
+     * Xóa account
+     */
+    @PostMapping("/delete/{id}")
+    public String deleteAccount(@PathVariable Integer id,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            accountService.deleteAccount(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa account thành công!");
+            return "redirect:/hotel-management/accounts?success=delete";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa account: " + e.getMessage());
+            return "redirect:/hotel-management/accounts";
+        }
+    }
+
+    /**
+     * Kiểm tra username đã tồn tại chưa (AJAX)
+     */
+    @GetMapping("/check-username/{username}")
+    @ResponseBody
+    public boolean checkUsernameExists(@PathVariable String username) {
+        return accountService.existsByUsername(username);
+    }
+
+    /**
+     * Kiểm tra email đã tồn tại chưa (AJAX)
+     */
+    @GetMapping("/check-email/{email}")
+    @ResponseBody
+    public boolean checkEmailExists(@PathVariable String email) {
+        return accountService.existsByEmail(email);
+    }
 }
-
-
