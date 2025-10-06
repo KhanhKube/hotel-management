@@ -28,13 +28,13 @@
     <!-- Left profile card -->
     <div class="col-md-4">
       <div class="profile-card text-center">
-        <img th:src="${user.avatarUrl != null ? user.avatarUrl : '/images/avatar/default-avatar.png'}"
+        <img th:src="${userProfile.avatarUrl != null ? userProfile.avatarUrl : '/images/avatar/default-avatar.png'}"
              alt="Avatar"
              class="card-img-top rounded-circle mx-auto mt-3"
              style="width: 150px; height: 150px; object-fit: cover;">
-        <h4 th:text="${user.firstName + ' ' + user.lastName}">John Doe</h4>
-        <p class="text-muted" th:text="${user.username}">Full Stack Developer</p>
-        <p class="text-muted" th:text="${user.address}">Bay Area, San Francisco</p>
+        <h4 th:text="${userProfile.firstName + ' ' + userProfile.lastName}">John Doe</h4>
+        <p class="text-muted" th:text="${userProfile.username}">Full Stack Developer</p>
+        <p class="text-muted" th:text="${userProfile.address}">Bay Area, San Francisco</p>
         <!-- Edit picture -->
         <form th:action="@{/hotel/update-avatar}" method="post" enctype="multipart/form-data">
           <input type="file" name="avatar" accept="image/*" class="form-control mb-2" required>
@@ -62,31 +62,31 @@
           <tbody>
           <tr>
             <th scope="row">Họ & Tên</th>
-            <td th:text="${user.firstName + ' ' + user.lastName}">Kenneth Valdez</td>
+            <td th:text="${userProfile.firstName + ' ' + userProfile.lastName}">Kenneth Valdez</td>
           </tr>
           <tr>
             <th scope="row">Email</th>
-            <td th:text="${user.email}">fip@jukmuh.al</td>
+            <td th:text="${userProfile.email}">fip@jukmuh.al</td>
           </tr>
           <tr>
             <th scope="row">SĐT</th>
-            <td th:text="${user.phone}">(239) 816-9029</td>
+            <td th:text="${userProfile.phone}">(239) 816-9029</td>
           </tr>
           <tr>
             <th scope="row">Giới Tính</th>
-            <td th:text="${user.gender ? 'Male' : 'Female'}">Male</td>
+            <td th:text="${userProfile.gender ? 'Male' : 'Female'}">Male</td>
           </tr>
           <tr>
             <th scope="row">Sinh Nhật</th>
-            <td th:text="${#temporals.format(user.dob, 'dd/MM/yyyy')}">01/01/1990</td>
+            <td th:text="${#temporals.format(userProfile.dob, 'dd/MM/yyyy')}">01/01/1990</td>
           </tr>
           <tr>
             <th scope="row">Địa Chỉ</th>
-            <td th:text="${user.address}">Bay Area, San Francisco, CA</td>
+            <td th:text="${userProfile.address}">Bay Area, San Francisco, CA</td>
           </tr>
           <tr>
             <th scope="row">Tham gia</th>
-            <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}">20/07/2023</td>
+            <td th:text="${#temporals.format(userProfile.createdAt, 'dd/MM/yyyy HH:mm')}">20/07/2023</td>
           </tr>
           </tbody>
         </table>
