@@ -1,0 +1,71 @@
+/* View Images CSS */
+.view-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    overflow: hidden;
+}
+
+.view-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1));
+    animation: luxuryFloat 20s ease-in-out infinite;
+}
+
+/* Background images for different view types */
+.view-image[data-view="View Biển"] {
+    background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+}
+
+.view-image[data-view="View Núi"] {
+    background-image: url('https://images.unsplash.com/photo-1464822759844-d150ba3253d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+}
+
+.view-image[data-view="View Thành Phố"] {
+    background-image: url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+}
+
+.view-image[data-view="View Vườn"] {
+    background-image: url('https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+}
+
+.view-image[data-view="View Hồ Bơi"] {
+    background-image: url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+}
+
+.view-image[data-view="View Bãi Biển"] {
+    background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+}
+
+.view-image[data-view="View Cảng"] {
+    background-image: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+}
+
+.view-image[data-view="View Rừng"] {
+    background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+}
+
+.view-image[data-view="View Sông"] {
+    background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+}
+
+.view-image[data-view="View Thung Lũng"] {
+    background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+}
+
+/* Default background for unknown views */
+.view-image:not([data-view]) {
+    background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+}
+
+@keyframes luxuryFloat {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(-10px, -10px) rotate(180deg); }
+}

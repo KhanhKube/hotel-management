@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${view.viewId != null ? 'Chỉnh Sửa View Cao Cấp' : 'Tạo View Cao Cấp Mới'}">Form View Cao Cấp - Hệ Thống Khách Sạn 5 Sao</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/luxury-view.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Cấu hình view cao cấp cho khách sạn đẳng cấp thế giới">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--luxury-gradient-hero);
+            min-height: 100vh;
+        }
+        .luxury-title { font-family: 'Playfair Display', serif; }
+        .form-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .view-option-card {
+            cursor: pointer;
+            transition: var(--luxury-transition);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        .view-option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--luxury-shadow-lg);
+        }
+        .view-option-card.selected {
+            border-color: var(--luxury-gold);
+            background: var(--luxury-light-gold);
+        }
+        .view-option-card input[type="radio"]:checked + label {
+            color: var(--luxury-navy);
+        }
+        .view-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+        .view-preview-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="form-container">
+            <!-- Form Cao Cấp -->
+            <div class="luxury-form fade-in-up">
+                <!-- Header Form -->
+                <div class="luxury-form-header">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h2 class="luxury-title mb-3">
+                                <i class="fas fa-crown me-3"></i>
+                                <span th:text="${view.viewId != null ? 'Chỉnh Sửa View Cao Cấp' : 'Tạo View Cao Cấp Mới'}">Form View Cao Cấp</span>
+                            </h2>
+                            <p class="luxury-subtitle mb-0">
+                                <span th:text="${view.viewId != null ? 'Chỉnh sửa cài đặt view cao cấp hiện có' : 'Cấu hình view cao cấp mới cho phòng đẳng cấp thế giới'}">Mô tả Form</span>
+                            </p>
+                        </div>
+                        <div class="col-lg-4 text-lg-end">
+                            <div class="d-flex align-items-center justify-content-lg-end">
+                                <div class="me-3">
+                                    <i class="fas fa-star text-warning fs-5"></i>
+                                    <i class="fas fa-star text-warning fs-5"></i>
+                                    <i class="fas fa-star text-warning fs-5"></i>
+                                    <i class="fas fa-star text-warning fs-5"></i>
+                                    <i class="fas fa-star text-warning fs-5"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold">Chất Lượng Cao Cấp</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body Form -->
+                <div class="luxury-form-body">
+                    <form th:action="${view.viewId != null ? '/hotel-management/views/update/' + view.viewId : '/hotel-management/views/save'}" 
+                          th:object="${view}" method="post" id="luxuryViewForm">
+                        
+                        <!-- Lựa chọn loại View -->
+                        <div class="mb-5">
+                            <label class="form-label fw-bold text-luxury-navy mb-4">
+                                <i class="fas fa-layer-group me-2 text-luxury-gold"></i>Chọn Loại View <span class="text-danger">*</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 mb-4">
+                                    <div class="view-option-card luxury-card p-4" data-view-type="SEA_VIEW">
+                                        <input class="form-check-input" type="radio" name="viewType" id="seaView" value="SEA_VIEW" 
+                                               th:field="*{viewType}" th:checked="${view.viewType == 'SEA_VIEW'}">
+                                        <label class="form-check-label w-100" for="seaView">
+                                            <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=250&fit=crop" 
+                                                 alt="View Biển" class="view-image">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-water fa-2x text-info me-3"></i>
+                                                <div>
+                                                    <h5 class="mb-2 fw-bold">View Biển</h5>
+                                                    <small class="text-muted">Tầm nhìn ra đại dương với tiện nghi cao cấp và hoàng hôn tuyệt đẹp</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 mb-4">
+                                    <div class="view-option-card luxury-card p-4" data-view-type="MOUNTAIN_VIEW">
+                                        <input class="form-check-input" type="radio" name="viewType" id="mountainView" value="MOUNTAIN_VIEW" 
+                                               th:field="*{viewType}" th:checked="${view.viewType == 'MOUNTAIN_VIEW'}">
+                                        <label class="form-check-label w-100" for="mountainView">
+                                            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=250&fit=crop" 
+                                                 alt="View Núi" class="view-image">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-mountain fa-2x text-success me-3"></i>
+                                                <div>
+                                                    <h5 class="mb-2 fw-bold">View Núi</h5>
+                                                    <small class="text-muted">Những đỉnh núi hùng vĩ và vẻ đẹp thiên nhiên với không khí trong lành</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 mb-4">
+                                    <div class="view-option-card luxury-card p-4" data-view-type="CITY_VIEW">
+                                        <input class="form-check-input" type="radio" name="viewType" id="cityView" value="CITY_VIEW" 
+                                               th:field="*{viewType}" th:checked="${view.viewType == 'CITY_VIEW'}">
+                                        <label class="form-check-label w-100" for="cityView">
+                                            <img src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=250&fit=crop" 
+                                                 alt="View Thành Phố" class="view-image">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-city fa-2x text-primary me-3"></i>
+                                                <div>
+                                                    <h5 class="mb-2 fw-bold">View Thành Phố</h5>
+                                                    <small class="text-muted">Skyline đô thị và ánh sáng thành phố sôi động với năng lượng hiện đại</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 mb-4">
+                                    <div class="view-option-card luxury-card p-4" data-view-type="GARDEN_VIEW">
+                                        <input class="form-check-input" type="radio" name="viewType" id="gardenView" value="GARDEN_VIEW" 
+                                               th:field="*{viewType}" th:checked="${view.viewType == 'GARDEN_VIEW'}">
+                                        <label class="form-check-label w-100" for="gardenView">
+                                            <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=250&fit=crop" 
+                                                 alt="View Vườn" class="view-image">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-seedling fa-2x text-success me-3"></i>
+                                                <div>
+                                                    <h5 class="mb-2 fw-bold">View Vườn</h5>
+                                                    <small class="text-muted">Vườn cây xanh mướt và môi trường thiên nhiên yên bình với sự thanh thản</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 mb-4">
+                                    <div class="view-option-card luxury-card p-4" data-view-type="POOL_VIEW">
+                                        <input class="form-check-input" type="radio" name="viewType" id="poolView" value="POOL_VIEW" 
+                                               th:field="*{viewType}" th:checked="${view.viewType == 'POOL_VIEW'}">
+                                        <label class="form-check-label w-100" for="poolView">
+                                            <img src="https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=400&h=250&fit=crop" 
+                                                 alt="View Hồ Bơi" class="view-image">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-swimming-pool fa-2x text-info me-3"></i>
+                                                <div>
+                                                    <h5 class="mb-2 fw-bold">View Hồ Bơi</h5>
+                                                    <small class="text-muted">Hồ bơi vô cực và tiện nghi nước cao cấp với không khí resort sang trọng</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:if="${#fields.hasErrors('viewType')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-triangle me-2 text-danger"></i>
+                                <span th:errors="*{viewType}" class="text-danger">Thông báo lỗi</span>
+                            </div>
+                        </div>
+
+                        <!-- Phần Preview Cao Cấp -->
+                        <div class="mb-5" id="previewSection" style="display: none;">
+                            <label class="form-label fw-bold text-luxury-navy mb-4">
+                                <i class="fas fa-eye me-2 text-luxury-gold"></i>Xem Trước Cao Cấp
+                            </label>
+                            <div class="luxury-card">
+                                <div class="luxury-card-body text-center">
+                                    <img id="previewImage" src="" alt="Preview" class="view-preview-image">
+                                    <h4 id="previewTitle" class="fw-bold text-luxury-navy mb-3"></h4>
+                                    <p id="previewDescription" class="text-muted mb-0 fs-5"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nút Hành Động -->
+                        <div class="d-flex justify-content-between align-items-center pt-5 border-top">
+                            <a href="/hotel-management/views" class="luxury-btn luxury-btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay Lại View
+                            </a>
+                            <div>
+                                <button type="submit" class="luxury-btn luxury-btn-primary me-3" id="submitBtn">
+                                    <i class="fas fa-save me-2"></i>
+                                    <span th:text="${view.viewId != null ? 'Cập Nhật View' : 'Tạo View'}">Lưu</span>
+                                </button>
+                                <a href="/hotel-management/views" class="luxury-btn luxury-btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewTypeInputs = document.querySelectorAll('input[name="viewType"]');
+            const previewSection = document.getElementById('previewSection');
+            const previewImage = document.getElementById('previewImage');
+            const previewTitle = document.getElementById('previewTitle');
+            const previewDescription = document.getElementById('previewDescription');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Cấu hình loại view cao cấp
+            const viewConfigs = {
+                'SEA_VIEW': {
+                    image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&h=400&fit=crop',
+                    title: 'Trải Nghiệm View Biển',
+                    description: 'Tầm nhìn ra đại dương tuyệt đẹp với tiện nghi cao cấp và hoàng hôn lãng mạn'
+                },
+                'MOUNTAIN_VIEW': {
+                    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop',
+                    title: 'Trải Nghiệm View Núi',
+                    description: 'Những đỉnh núi hùng vĩ và vẻ đẹp thiên nhiên với không khí trong lành'
+                },
+                'CITY_VIEW': {
+                    image: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&h=400&fit=crop',
+                    title: 'Trải Nghiệm View Thành Phố',
+                    description: 'Skyline đô thị và ánh sáng thành phố sôi động với năng lượng hiện đại'
+                },
+                'GARDEN_VIEW': {
+                    image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=400&fit=crop',
+                    title: 'Trải Nghiệm View Vườn',
+                    description: 'Vườn cây xanh mướt và môi trường thiên nhiên yên bình với sự thanh thản'
+                },
+                'POOL_VIEW': {
+                    image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=600&h=400&fit=crop',
+                    title: 'Trải Nghiệm View Hồ Bơi',
+                    description: 'Hồ bơi vô cực và tiện nghi nước cao cấp với không khí resort sang trọng'
+                }
+            };
+
+            // Cập nhật preview khi thay đổi loại view
+            viewTypeInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    if (this.checked) {
+                        const config = viewConfigs[this.value];
+                        previewImage.src = config.image;
+                        previewImage.alt = config.title;
+                        previewTitle.textContent = config.title;
+                        previewDescription.textContent = config.description;
+                        previewSection.style.display = 'block';
+                        
+                        // Thêm animation mượt mà
+                        previewSection.style.opacity = '0';
+                        previewSection.style.transform = 'translateY(30px)';
+                        setTimeout(() => {
+                            previewSection.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                            previewSection.style.opacity = '1';
+                            previewSection.style.transform = 'translateY(0)';
+                        }, 100);
+                    }
+                });
+            });
+
+            // Thêm click handlers cho card containers
+            document.querySelectorAll('.view-option-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const input = this.querySelector('input[type="radio"]');
+                    if (input) {
+                        input.checked = true;
+                        input.dispatchEvent(new Event('change'));
+                        
+                        // Cập nhật trạng thái lựa chọn card
+                        document.querySelectorAll('.view-option-card').forEach(c => c.classList.remove('selected'));
+                        this.classList.add('selected');
+                    }
+                });
+            });
+
+            // Form submission với loading state cao cấp
+            document.getElementById('luxuryViewForm').addEventListener('submit', function(e) {
+                const submitBtn = document.getElementById('submitBtn');
+                const originalText = submitBtn.innerHTML;
+                
+                submitBtn.innerHTML = '<span class="loading-spinner me-2"></span>Đang xử lý...';
+                submitBtn.classList.add('disabled');
+                
+                // Kích hoạt lại sau 3 giây (trong trường hợp có lỗi)
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.classList.remove('disabled');
+                }, 3000);
+            });
+
+            // Khởi tạo preview nếu đã có loại view được chọn
+            const selectedInput = document.querySelector('input[name="viewType"]:checked');
+            if (selectedInput) {
+                selectedInput.dispatchEvent(new Event('change'));
+                const selectedCard = document.querySelector(`[data-view-type="${selectedInput.value}"]`);
+                if (selectedCard) {
+                    selectedCard.classList.add('selected');
+                }
+            }
+
+            // Thêm animations mượt mà
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.luxury-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                observer.observe(card);
+            });
+
+            // Thêm hover effects cho view option cards
+            document.querySelectorAll('.view-option-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.transform = 'translateY(-5px)';
+                        this.style.boxShadow = 'var(--luxury-shadow-lg)';
+                    }
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = 'var(--luxury-shadow)';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

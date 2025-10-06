@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${room.roomId == null ? 'Thêm Phòng Mới' : 'Chỉnh Sửa Phòng'}">Thêm Phòng Mới - Hệ Thống Khách Sạn</title>
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --secondary-gold: #F4E4BC;
+            --dark-navy: #1B2951;
+            --light-navy: #2C3E50;
+            --cream: #F8F6F0;
+            --charcoal: #2C2C2C;
+            --soft-gray: #E8E8E8;
+            --accent-blue: #4A90E2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFFFF 100%);
+            min-height: 100vh;
+            color: var(--charcoal);
+            line-height: 1.6;
+        }
+
+        .luxury-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .luxury-header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .luxury-header::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--secondary-gold));
+            border-radius: 2px;
+        }
+
+        .luxury-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .luxury-subtitle {
+            font-size: 1.1rem;
+            color: var(--light-navy);
+            font-weight: 300;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 24px;
+            padding: 50px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--dark-navy);
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--soft-gray);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            background: white;
+        }
+
+        .form-control::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--soft-gray);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            background: white;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn-luxury {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, #B8860B 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(212, 175, 55, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-cancel {
+            background: var(--soft-gray);
+            color: var(--dark-navy);
+            border: 2px solid transparent;
+        }
+
+        .btn-cancel:hover {
+            background: var(--light-navy);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(44, 62, 80, 0.3);
+            text-decoration: none;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .alert-luxury {
+            padding: 20px 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        .price-input {
+            position: relative;
+        }
+
+        .price-input::before {
+            content: '₫';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-gold);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .price-input .form-control {
+            padding-left: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .luxury-container {
+                padding: 20px 15px;
+            }
+
+            .luxury-title {
+                font-size: 2.5rem;
+            }
+
+            .form-container {
+                padding: 30px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="luxury-container">
+        <!-- Luxury Header -->
+        <div class="luxury-header">
+            <h1 class="luxury-title" th:text="${room.roomId == null ? 'Thêm Phòng Mới' : 'Chỉnh Sửa Phòng'}">Thêm Phòng Mới</h1>
+            <p class="luxury-subtitle">Tạo hoặc chỉnh sửa thông tin phòng trong hệ thống khách sạn</p>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${error}" class="alert-luxury alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Form Container -->
+        <div class="form-container">
+            <form th:action="@{/hotel-management/rooms/save}" th:object="${room}" method="post">
+                <input type="hidden" th:field="*{roomId}" />
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="roomNumber" class="form-label">
+                            Số phòng <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               id="roomNumber" 
+                               th:field="*{roomNumber}" 
+                               class="form-control" 
+                               placeholder="Nhập số phòng (VD: 101, A201)"
+                               required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="roomType" class="form-label">
+                            Loại phòng <span class="required">*</span>
+                        </label>
+                        <select id="roomType" th:field="*{roomType}" class="form-select" required>
+                            <option value="">Chọn loại phòng</option>
+                            <option value="STANDARD">Phòng tiêu chuẩn</option>
+                            <option value="DELUXE">Phòng cao cấp</option>
+                            <option value="SUITE">Phòng suite</option>
+                            <option value="PRESIDENTIAL">Phòng tổng thống</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bedType" class="form-label">
+                            Loại giường <span class="required">*</span>
+                        </label>
+                        <select id="bedType" th:field="*{bedType}" class="form-select" required>
+                            <option value="">Chọn loại giường</option>
+                            <option value="SINGLE">Giường đơn</option>
+                            <option value="DOUBLE">Giường đôi</option>
+                            <option value="QUEEN">Giường Queen</option>
+                            <option value="KING">Giường King</option>
+                            <option value="TWIN">Giường đôi Twin</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="floorId" class="form-label">
+                            Tầng <span class="required">*</span>
+                        </label>
+                        <input type="number" 
+                               id="floorId" 
+                               th:field="*{floorId}" 
+                               class="form-control" 
+                               placeholder="Nhập số tầng"
+                               min="1"
+                               max="50"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sizeId" class="form-label">
+                            Kích thước phòng
+                        </label>
+                        <input type="number" 
+                               id="sizeId" 
+                               th:field="*{sizeId}" 
+                               class="form-control" 
+                               placeholder="ID kích thước phòng"
+                               min="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="price" class="form-label">
+                            Giá phòng <span class="required">*</span>
+                        </label>
+                        <div class="price-input">
+                            <input type="number" 
+                                   id="price" 
+                                   th:field="*{price}" 
+                                   class="form-control" 
+                                   placeholder="Nhập giá phòng"
+                                   min="0"
+                                   step="1000"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="status" class="form-label">
+                            Trạng thái <span class="required">*</span>
+                        </label>
+                        <select id="status" th:field="*{status}" class="form-select" required>
+                            <option value="">Chọn trạng thái</option>
+                            <option th:each="status : ${roomStatuses}" 
+                                    th:value="${status}" 
+                                    th:text="${status}">AVAILABLE</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="view" class="form-label">
+                            View phòng
+                        </label>
+                        <input type="number" 
+                               id="view" 
+                               th:field="*{view}" 
+                               class="form-control" 
+                               placeholder="ID view phòng"
+                               min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="roomDescription" class="form-label">Mô tả phòng</label>
+                    <textarea id="roomDescription" 
+                              th:field="*{roomDescription}" 
+                              class="form-control" 
+                              rows="4"
+                              placeholder="Nhập mô tả chi tiết về phòng"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-luxury btn-save">
+                        <i class="fas fa-save"></i>
+                        <span th:text="${room.roomId == null ? 'Tạo Phòng' : 'Cập Nhật'}">Lưu</span>
+                    </button>
+                    <a th:href="@{/hotel-management/rooms}" class="btn-luxury btn-cancel">
+                        <i class="fas fa-times"></i>
+                        Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+    <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            const form = document.querySelector('form');
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.value.trim() === '') {
+                        this.style.borderColor = '#e74c3c';
+                    } else {
+                        this.style.borderColor = 'var(--soft-gray)';
+                    }
+                });
+            });
+
+            // Room number validation
+            const roomNumberInput = document.getElementById('roomNumber');
+            roomNumberInput.addEventListener('input', function() {
+                const roomRegex = /^[A-Z]?\d{3}$/;
+                if (this.value && !roomRegex.test(this.value)) {
+                    this.style.borderColor = '#e74c3c';
+                } else {
+                    this.style.borderColor = 'var(--soft-gray)';
+                }
+            });
+
+            // Price formatting
+            const priceInput = document.getElementById('price');
+            priceInput.addEventListener('input', function() {
+                if (this.value < 0) {
+                    this.value = 0;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

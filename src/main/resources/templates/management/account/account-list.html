@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Tài Khoản - Hệ Thống Khách Sạn</title>
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --secondary-gold: #F4E4BC;
+            --dark-navy: #1B2951;
+            --light-navy: #2C3E50;
+            --cream: #F8F6F0;
+            --charcoal: #2C2C2C;
+            --soft-gray: #E8E8E8;
+            --accent-blue: #4A90E2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFFFF 100%);
+            min-height: 100vh;
+            color: var(--charcoal);
+            line-height: 1.6;
+        }
+
+        .luxury-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            background: linear-gradient(135deg, var(--dark-navy) 0%, var(--light-navy) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            transform: translateX(-5px);
+        }
+
+        .nav-title h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .nav-title p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .control-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+            padding: 25px 35px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--dark-navy);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-luxury {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-filter {
+            background: var(--soft-gray);
+            color: var(--dark-navy);
+            border: 2px solid transparent;
+        }
+
+        .btn-filter:hover {
+            background: var(--primary-gold);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-filter.active {
+            background: var(--primary-gold);
+            color: white;
+            border-color: var(--primary-gold);
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, #B8860B 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-add:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(212, 175, 55, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .accounts-table {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, var(--dark-navy) 0%, var(--light-navy) 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .table tbody td {
+            padding: 20px;
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .status-inactive {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .status-suspended {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .role-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--secondary-gold);
+            color: var(--primary-gold);
+        }
+
+        .btn-action {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin: 2px;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-toggle {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(240, 147, 251, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 107, 107, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .alert-luxury {
+            padding: 20px 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+        }
+
+        .empty-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--secondary-gold) 0%, var(--primary-gold) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 3rem;
+            color: white;
+            box-shadow: 0 15px 50px rgba(212, 175, 55, 0.3);
+        }
+
+        .empty-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-bottom: 15px;
+        }
+
+        .empty-subtitle {
+            font-size: 1.1rem;
+            color: var(--light-navy);
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .luxury-container {
+                padding: 20px 15px;
+            }
+
+            .nav-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .nav-title h1 {
+                font-size: 2rem;
+            }
+
+            .control-bar {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .filter-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="luxury-container">
+        <!-- Navigation Header -->
+        <div class="nav-header">
+            <div class="nav-content">
+                <a href="/hotel" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Về Trang Chủ
+                </a>
+                <div class="nav-title">
+                    <h1>Quản Lý Tài Khoản</h1>
+                    <p>Quản lý tài khoản của khách hàng, quản trị viên, lễ tân, quản lý kho và nhân viên dọn phòng</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${message}" class="alert-luxury alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${message}"></span>
+        </div>
+
+        <div th:if="${error}" class="alert-luxury alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Control Bar -->
+        <div class="control-bar">
+            <div class="filter-controls">
+                <span class="filter-label">Lọc theo vai trò:</span>
+                <a th:href="@{/hotel-management/accounts}" 
+                   th:class="${selectedRole == null} ? 'btn-luxury btn-filter active' : 'btn-luxury btn-filter'"
+                   class="btn-luxury btn-filter">
+                    <i class="fas fa-users"></i>
+                    Tất cả
+                </a>
+                <a th:href="@{/hotel-management/accounts(role='ADMIN')}" 
+                   th:class="${selectedRole == 'ADMIN'} ? 'btn-luxury btn-filter active' : 'btn-luxury btn-filter'"
+                   class="btn-luxury btn-filter">
+                    <i class="fas fa-crown"></i>
+                    Admin
+                </a>
+                <a th:href="@{/hotel-management/accounts(role='RECEPTIONIST')}" 
+                   th:class="${selectedRole == 'RECEPTIONIST'} ? 'btn-luxury btn-filter active' : 'btn-luxury btn-filter'"
+                   class="btn-luxury btn-filter">
+                    <i class="fas fa-user-tie"></i>
+                    Lễ tân
+                </a>
+                <a th:href="@{/hotel-management/accounts(role='HOUSEKEEPING')}" 
+                   th:class="${selectedRole == 'HOUSEKEEPING'} ? 'btn-luxury btn-filter active' : 'btn-luxury btn-filter'"
+                   class="btn-luxury btn-filter">
+                    <i class="fas fa-broom"></i>
+                    Dọn phòng
+                </a>
+                <a th:href="@{/hotel-management/accounts(role='CUSTOMER')}" 
+                   th:class="${selectedRole == 'CUSTOMER'} ? 'btn-luxury btn-filter active' : 'btn-luxury btn-filter'"
+                   class="btn-luxury btn-filter">
+                    <i class="fas fa-user"></i>
+                    Khách hàng
+                </a>
+            </div>
+            
+            <a th:href="@{/hotel-management/accounts/new}" class="btn-luxury btn-add">
+                <i class="fas fa-plus"></i>
+                Thêm Tài Khoản Mới
+            </a>
+        </div>
+
+        <!-- Accounts Table -->
+        <div th:if="${#lists.isEmpty(users)}" class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-user-slash"></i>
+            </div>
+            <h2 class="empty-title">Chưa có tài khoản nào</h2>
+            <p class="empty-subtitle">Hãy bắt đầu bằng cách thêm tài khoản đầu tiên</p>
+            <a th:href="@{/hotel-management/accounts/new}" class="btn-luxury btn-add">
+                <i class="fas fa-plus"></i>
+                Thêm Tài Khoản Đầu Tiên
+            </a>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(users)}" class="accounts-table">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th>Số điện thoại</th>
+                            <th>Vai trò</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${users}">
+                            <td th:text="${user.userId}">1</td>
+                            <td th:text="${user.username}">admin</td>
+                            <td th:text="${user.firstName + ' ' + user.lastName}">Admin User</td>
+                            <td th:text="${user.email}">admin@hotel.com</td>
+                            <td th:text="${user.phone}">0123456789</td>
+                            <td>
+                                <span class="role-badge" th:text="${user.role}">ADMIN</span>
+                            </td>
+                            <td>
+                                <span th:class="'status-badge status-' + ${#strings.toLowerCase(user.status)}" 
+                                      th:text="${user.status}">ACTIVE</span>
+                            </td>
+                            <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}">01/01/2024</td>
+                            <td>
+                                <a th:href="@{'/hotel-management/accounts/edit/' + ${user.userId}}" 
+                                   class="btn-action btn-edit">
+                                    <i class="fas fa-edit"></i>
+                                    Sửa
+                                </a>
+                                <a th:href="@{'/hotel-management/accounts/' + ${user.userId} + '/toggle-status'}" 
+                                   class="btn-action btn-toggle"
+                                   th:text="${user.status == T(hotel.db.entity.User$Status).ACTIVE ? 'Vô hiệu' : 'Kích hoạt'}">
+                                    <i class="fas fa-power-off"></i>
+                                    Toggle
+                                </a>
+                                <a th:href="@{'/hotel-management/accounts/' + ${user.userId} + '/delete'}" 
+                                   onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản này?')" 
+                                   class="btn-action btn-delete">
+                                    <i class="fas fa-trash"></i>
+                                    Xóa
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+    <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+</body>
+</html>

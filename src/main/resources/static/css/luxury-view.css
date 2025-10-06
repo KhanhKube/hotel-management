@@ -1,0 +1,703 @@
+/* ========================================
+   LUXURY 5-STAR HOTEL MANAGEMENT SYSTEM
+   Inspired by Burj Al Arab, Four Seasons, Ritz Carlton
+   ======================================== */
+
+:root {
+    /* Luxury Color Palette */
+    --luxury-gold: #D4AF37;
+    --luxury-dark-gold: #B8860B;
+    --luxury-light-gold: #F4E4BC;
+    --luxury-navy: #1B2951;
+    --luxury-dark-navy: #0F1B2E;
+    --luxury-light-navy: #2C3E50;
+    --luxury-cream: #F8F6F0;
+    --luxury-white: #FFFFFF;
+    --luxury-ivory: #FFFEF7;
+    --luxury-gray: #6C757D;
+    --luxury-light-gray: #E9ECEF;
+    --luxury-dark-gray: #495057;
+    
+    /* Gradients */
+    --luxury-gradient-gold: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    --luxury-gradient-navy: linear-gradient(135deg, #1B2951 0%, #2C3E50 100%);
+    --luxury-gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --luxury-gradient-card: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    
+    /* Shadows */
+    --luxury-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --luxury-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --luxury-shadow-md: 0 6px 12px rgba(0, 0, 0, 0.15);
+    --luxury-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+    --luxury-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+    --luxury-shadow-gold: 0 4px 15px rgba(212, 175, 55, 0.3);
+    
+    /* Transitions */
+    --luxury-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --luxury-transition-slow: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    --luxury-transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--luxury-cream);
+    color: var(--luxury-dark-navy);
+    line-height: 1.6;
+    font-size: 16px;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   TYPOGRAPHY
+   ======================================== */
+
+.luxury-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.luxury-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    opacity: 0.8;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    color: var(--luxury-dark-navy);
+}
+
+/* ========================================
+   LUXURY HEADER
+   ======================================== */
+
+.luxury-header {
+    background: var(--luxury-gradient-navy);
+    color: var(--luxury-white);
+    padding: 3rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.luxury-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="luxury-pattern" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="%23D4AF37" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23luxury-pattern)"/></svg>');
+    opacity: 0.3;
+}
+
+.luxury-header .container {
+    position: relative;
+    z-index: 2;
+}
+
+.luxury-title {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.luxury-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 0;
+}
+
+/* ========================================
+   LUXURY CARDS
+   ======================================== */
+
+.luxury-card {
+    background: var(--luxury-white);
+    border-radius: 24px;
+    box-shadow: var(--luxury-shadow-lg);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    transition: var(--luxury-transition);
+    overflow: hidden;
+    position: relative;
+}
+
+.luxury-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--luxury-gradient-gold);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.luxury-card:hover::before {
+    transform: scaleX(1);
+}
+
+.luxury-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--luxury-shadow-xl);
+}
+
+.luxury-card-header {
+    padding: 2.5rem 2.5rem 1.5rem;
+    border-bottom: 1px solid var(--luxury-light-gray);
+    background: var(--luxury-gradient-card);
+}
+
+.luxury-card-body {
+    padding: 2rem 2.5rem 2.5rem;
+}
+
+/* ========================================
+   STATISTICS CARDS
+   ======================================== */
+
+.stats-card {
+    background: var(--luxury-white);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: var(--luxury-shadow-md);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    transition: var(--luxury-transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--luxury-gradient-gold);
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--luxury-shadow-lg);
+}
+
+.stats-number {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--luxury-gold);
+    margin-bottom: 0.5rem;
+    font-family: 'Playfair Display', serif;
+}
+
+.stats-label {
+    color: var(--luxury-gray);
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ========================================
+   VIEW TYPE BADGES
+   ======================================== */
+
+.view-type-badge {
+    background: var(--luxury-gradient-gold);
+    color: var(--luxury-white);
+    padding: 0.75rem 1.5rem;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: var(--luxury-shadow-gold);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.view-type-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.view-type-badge:hover::before {
+    left: 100%;
+}
+
+/* ========================================
+   STATUS BADGES
+   ======================================== */
+
+.status-active {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+}
+
+.status-deleted {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
+}
+
+/* ========================================
+   LUXURY BUTTONS
+   ======================================== */
+
+.luxury-btn {
+    padding: 1rem 2.5rem;
+    border-radius: 30px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--luxury-transition);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.luxury-btn-primary {
+    background: var(--luxury-gradient-gold);
+    color: var(--luxury-white);
+    box-shadow: var(--luxury-shadow-gold);
+}
+
+.luxury-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+    color: var(--luxury-white);
+}
+
+.luxury-btn-secondary {
+    background: var(--luxury-white);
+    color: var(--luxury-navy);
+    border: 2px solid var(--luxury-gold);
+    box-shadow: var(--luxury-shadow);
+}
+
+.luxury-btn-secondary:hover {
+    background: var(--luxury-gold);
+    color: var(--luxury-white);
+    transform: translateY(-2px);
+}
+
+.luxury-btn-danger {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: white;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.luxury-btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+    color: white;
+}
+
+.luxury-btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.luxury-btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    color: white;
+}
+
+.luxury-btn-warning {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.luxury-btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+    color: white;
+}
+
+/* ========================================
+   ACTION BUTTONS
+   ======================================== */
+
+.action-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 4px;
+    transition: var(--luxury-transition);
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    transform: scale(1.1);
+}
+
+.action-btn-info {
+    background: linear-gradient(135deg, #17a2b8, #20c997);
+    color: white;
+    box-shadow: 0 3px 10px rgba(23, 162, 184, 0.3);
+}
+
+.action-btn-warning {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    color: white;
+    box-shadow: 0 3px 10px rgba(255, 193, 7, 0.3);
+}
+
+.action-btn-danger {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: white;
+    box-shadow: 0 3px 10px rgba(220, 53, 69, 0.3);
+}
+
+.action-btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+}
+
+/* ========================================
+   FILTER BUTTONS
+   ======================================== */
+
+.filter-btn {
+    padding: 0.875rem 2rem;
+    border-radius: 30px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--luxury-transition);
+    border: 2px solid transparent;
+    background: var(--luxury-white);
+    color: var(--luxury-navy);
+    box-shadow: var(--luxury-shadow);
+    margin: 0 8px 12px 0;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 0.85rem;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: var(--luxury-gradient-gold);
+    color: var(--luxury-white);
+    border-color: var(--luxury-gold);
+    transform: translateY(-2px);
+    box-shadow: var(--luxury-shadow-gold);
+}
+
+/* ========================================
+   FORM STYLES
+   ======================================== */
+
+.luxury-form {
+    background: var(--luxury-white);
+    border-radius: 24px;
+    box-shadow: var(--luxury-shadow-xl);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    overflow: hidden;
+}
+
+.luxury-form-header {
+    background: var(--luxury-gradient-navy);
+    color: var(--luxury-white);
+    padding: 3rem;
+    text-align: center;
+}
+
+.luxury-form-body {
+    padding: 3rem;
+}
+
+.form-floating > .form-control {
+    border: 2px solid var(--luxury-light-gray);
+    border-radius: 16px;
+    padding: 1.25rem 1.25rem 0.75rem;
+    font-size: 1rem;
+    transition: var(--luxury-transition);
+    background: var(--luxury-ivory);
+}
+
+.form-floating > .form-control:focus {
+    border-color: var(--luxury-gold);
+    box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25);
+    background: var(--luxury-white);
+}
+
+.form-floating > label {
+    color: var(--luxury-gray);
+    font-weight: 500;
+    padding-left: 1.25rem;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+
+.empty-state {
+    text-align: center;
+    padding: 5rem 3rem;
+    background: var(--luxury-white);
+    border-radius: 24px;
+    box-shadow: var(--luxury-shadow-lg);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.empty-state-icon {
+    font-size: 5rem;
+    color: var(--luxury-gold);
+    margin-bottom: 2rem;
+    opacity: 0.7;
+}
+
+.empty-state-title {
+    font-size: 2rem;
+    color: var(--luxury-navy);
+    margin-bottom: 1rem;
+    font-weight: 600;
+    font-family: 'Playfair Display', serif;
+}
+
+.empty-state-text {
+    color: var(--luxury-gray);
+    margin-bottom: 2.5rem;
+    font-size: 1.1rem;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* ========================================
+   LOADING SPINNER
+   ======================================== */
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(212, 175, 55, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--luxury-gold);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1200px) {
+    .luxury-title {
+        font-size: 2.5rem;
+    }
+    
+    .stats-number {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .luxury-title {
+        font-size: 2rem;
+    }
+    
+    .luxury-subtitle {
+        font-size: 1rem;
+    }
+    
+    .luxury-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .luxury-card-header,
+    .luxury-card-body {
+        padding: 1.5rem;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+    }
+    
+    .filter-btn {
+        margin-bottom: 12px;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .luxury-btn {
+        padding: 0.875rem 2rem;
+        font-size: 0.85rem;
+    }
+    
+    .luxury-form-header,
+    .luxury-form-body {
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .luxury-header {
+        padding: 2rem 0;
+    }
+    
+    .luxury-title {
+        font-size: 1.75rem;
+    }
+    
+    .stats-card {
+        padding: 2rem;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+    }
+    
+    .action-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+.text-luxury-gold {
+    color: var(--luxury-gold) !important;
+}
+
+.text-luxury-navy {
+    color: var(--luxury-navy) !important;
+}
+
+.bg-luxury-gradient {
+    background: var(--luxury-gradient-gold) !important;
+}
+
+.shadow-luxury {
+    box-shadow: var(--luxury-shadow-lg) !important;
+}
+
+.border-luxury {
+    border-color: var(--luxury-gold) !important;
+}
+
+/* ========================================
+   SCROLLBAR STYLING
+   ======================================== */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--luxury-light-gray);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--luxury-gold);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--luxury-dark-gold);
+}

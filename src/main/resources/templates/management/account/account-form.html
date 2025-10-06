@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${user.userId == null ? 'Thêm Tài Khoản Mới' : 'Chỉnh Sửa Tài Khoản'}">Thêm Tài Khoản Mới - Hệ Thống Khách Sạn</title>
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --secondary-gold: #F4E4BC;
+            --dark-navy: #1B2951;
+            --light-navy: #2C3E50;
+            --cream: #F8F6F0;
+            --charcoal: #2C2C2C;
+            --soft-gray: #E8E8E8;
+            --accent-blue: #4A90E2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFFFF 100%);
+            min-height: 100vh;
+            color: var(--charcoal);
+            line-height: 1.6;
+        }
+
+        .luxury-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .luxury-header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .luxury-header::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--secondary-gold));
+            border-radius: 2px;
+        }
+
+        .luxury-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .luxury-subtitle {
+            font-size: 1.1rem;
+            color: var(--light-navy);
+            font-weight: 300;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 24px;
+            padding: 50px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--dark-navy);
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--soft-gray);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            background: white;
+        }
+
+        .form-control::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--soft-gray);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            background: white;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn-luxury {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, #B8860B 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(212, 175, 55, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-cancel {
+            background: var(--soft-gray);
+            color: var(--dark-navy);
+            border: 2px solid transparent;
+        }
+
+        .btn-cancel:hover {
+            background: var(--light-navy);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(44, 62, 80, 0.3);
+            text-decoration: none;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .alert-luxury {
+            padding: 20px 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .luxury-container {
+                padding: 20px 15px;
+            }
+
+            .luxury-title {
+                font-size: 2.5rem;
+            }
+
+            .form-container {
+                padding: 30px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="luxury-container">
+        <!-- Luxury Header -->
+        <div class="luxury-header">
+            <h1 class="luxury-title" th:text="${user.userId == null ? 'Thêm Tài Khoản Mới' : 'Chỉnh Sửa Tài Khoản'}">Thêm Tài Khoản Mới</h1>
+            <p class="luxury-subtitle">Tạo hoặc chỉnh sửa thông tin tài khoản người dùng trong hệ thống</p>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${error}" class="alert-luxury alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Form Container -->
+        <div class="form-container">
+            <form th:action="@{/hotel-management/accounts/save}" th:object="${user}" method="post">
+                <input type="hidden" th:field="*{userId}" />
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="username" class="form-label">
+                            Tên đăng nhập <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               id="username" 
+                               th:field="*{username}" 
+                               class="form-control" 
+                               placeholder="Nhập tên đăng nhập"
+                               required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            Email <span class="required">*</span>
+                        </label>
+                        <input type="email" 
+                               id="email" 
+                               th:field="*{email}" 
+                               class="form-control" 
+                               placeholder="Nhập địa chỉ email"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName" class="form-label">
+                            Họ <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               id="firstName" 
+                               th:field="*{firstName}" 
+                               class="form-control" 
+                               placeholder="Nhập họ"
+                               required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lastName" class="form-label">
+                            Tên <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               id="lastName" 
+                               th:field="*{lastName}" 
+                               class="form-control" 
+                               placeholder="Nhập tên"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone" class="form-label">
+                            Số điện thoại <span class="required">*</span>
+                        </label>
+                        <input type="tel" 
+                               id="phone" 
+                               th:field="*{phone}" 
+                               class="form-control" 
+                               placeholder="Nhập số điện thoại"
+                               required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="role" class="form-label">
+                            Vai trò <span class="required">*</span>
+                        </label>
+                        <select id="role" th:field="*{role}" class="form-select" required>
+                            <option value="">Chọn vai trò</option>
+                            <option value="ADMIN">Quản trị viên</option>
+                            <option value="RECEPTIONIST">Lễ tân</option>
+                            <option value="HOUSEKEEPING">Nhân viên dọn phòng</option>
+                            <option value="WAREHOUSE_MANAGER">Quản lý kho</option>
+                            <option value="CUSTOMER">Khách hàng</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gender" class="form-label">Giới tính</label>
+                        <select id="gender" th:field="*{gender}" class="form-select">
+                            <option value="OTHER">Khác</option>
+                            <option value="MALE">Nam</option>
+                            <option value="FEMALE">Nữ</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status" class="form-label">Trạng thái</label>
+                        <select id="status" th:field="*{status}" class="form-select">
+                            <option value="ACTIVE">Hoạt động</option>
+                            <option value="INACTIVE">Không hoạt động</option>
+                            <option value="SUSPENDED">Tạm khóa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dob" class="form-label">Ngày sinh</label>
+                    <input type="date" 
+                           id="dob" 
+                           th:field="*{dob}" 
+                           class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="address" class="form-label">Địa chỉ</label>
+                    <textarea id="address" 
+                              th:field="*{address}" 
+                              class="form-control" 
+                              rows="3"
+                              placeholder="Nhập địa chỉ"></textarea>
+                </div>
+
+                <div class="form-group" th:if="${user.userId == null}">
+                    <label for="password" class="form-label">
+                        Mật khẩu <span class="required">*</span>
+                    </label>
+                    <input type="password" 
+                           id="password" 
+                           th:field="*{password}" 
+                           class="form-control" 
+                           placeholder="Nhập mật khẩu"
+                           th:required="${user.userId == null}">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-luxury btn-save">
+                        <i class="fas fa-save"></i>
+                        <span th:text="${user.userId == null ? 'Tạo Tài Khoản' : 'Cập Nhật'}">Lưu</span>
+                    </button>
+                    <a th:href="@{/hotel-management/accounts}" class="btn-luxury btn-cancel">
+                        <i class="fas fa-times"></i>
+                        Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+    <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            const form = document.querySelector('form');
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.value.trim() === '') {
+                        this.style.borderColor = '#e74c3c';
+                    } else {
+                        this.style.borderColor = 'var(--soft-gray)';
+                    }
+                });
+            });
+
+            // Phone number validation
+            const phoneInput = document.getElementById('phone');
+            phoneInput.addEventListener('input', function() {
+                const phoneRegex = /^0\d{9}$/;
+                if (this.value && !phoneRegex.test(this.value)) {
+                    this.style.borderColor = '#e74c3c';
+                } else {
+                    this.style.borderColor = 'var(--soft-gray)';
+                }
+            });
+
+            // Email validation
+            const emailInput = document.getElementById('email');
+            emailInput.addEventListener('input', function() {
+                const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$/;
+                if (this.value && !emailRegex.test(this.value)) {
+                    this.style.borderColor = '#e74c3c';
+                } else {
+                    this.style.borderColor = 'var(--soft-gray)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
