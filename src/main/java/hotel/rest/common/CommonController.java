@@ -43,17 +43,21 @@ public class CommonController {
         }
         return "common/login";
     }
+
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
-        model.addAttribute("user", user);
+//        model.addAttribute("user", user);
         if (user != null) {
             return "common/dashboard";
         }
         return "common/login";
     }
+
     @GetMapping({"/", "", "/home"})
-    public String home(Model model) {
+    public String home(HttpSession session, Model model) {
+//        User user = new User();
+//        session.setAttribute("user", user);
         return "common/home";
     }
 
@@ -65,6 +69,12 @@ public class CommonController {
             return "common/home";
         }
         return "common/login";
+    }
+
+    @PostMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/hotel/login";
     }
 
     @PostMapping("/login")
@@ -115,7 +125,7 @@ public class CommonController {
             return "redirect:/hotel/login";
         }
         UserProfileDto userProfileDto = commonService.userToUserProfile(user);
-        model.addAttribute("user", userProfileDto);
+        model.addAttribute("userProfile", userProfileDto);
         return "common/profile";
     }
 
