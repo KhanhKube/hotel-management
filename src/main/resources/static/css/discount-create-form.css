@@ -40,6 +40,7 @@
     font-size: 14px;
     width: 100%;
     background-color: #f8f9fa;
+    color: #495057;
 }
 
 .form-control:focus {
@@ -47,6 +48,7 @@
     outline: none;
     box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
     background-color: #f8f9fa;
+    color: #495057;
 }
 
 .discount-type-container {
@@ -214,10 +216,14 @@
     flex-direction: column;
 }
 
+.input-group .form-control {
+    width: 100%;
+}
+
 .input-small {
     width: 120px;
 }
 
 .input-medium {
-    width: 200px;
+    width: 250px;
 }
