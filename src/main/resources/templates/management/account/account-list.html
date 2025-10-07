@@ -1,515 +1,582 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Tài Khoản - Hệ Thống Khách Sạn</title>
-    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Account Management</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <style>
-        :root {
-            --primary-gold: #D4AF37;
-            --secondary-gold: #F4E4BC;
-            --dark-navy: #1B2951;
-            --light-navy: #2C3E50;
-            --cream: #F8F6F0;
-            --charcoal: #2C2C2C;
-            --soft-gray: #E8E8E8;
-            --accent-blue: #4A90E2;
+        .btn-group .btn {
+            margin-right: 5px;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .btn-group .btn:last-child {
+            margin-right: 0;
         }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--cream) 0%, #FFFFFF 100%);
-            min-height: 100vh;
-            color: var(--charcoal);
-            line-height: 1.6;
-        }
-
-        .luxury-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        /* Navigation Header */
-        .nav-header {
-            background: linear-gradient(135deg, var(--dark-navy) 0%, var(--light-navy) 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
-            margin-bottom: 40px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-content {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-        }
-
-        .back-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .card-title {
+            color: #2c3e50;
             font-weight: 600;
         }
-
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            color: white;
-            text-decoration: none;
-            transform: translateX(-5px);
-        }
-
-        .nav-title h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            letter-spacing: -1px;
-        }
-
-        .nav-title p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            font-weight: 300;
-        }
-
-        .control-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 50px;
-            padding: 25px 35px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(212, 175, 55, 0.1);
-        }
-
-        .filter-controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .filter-label {
+        .table th {
+            background-color: #f8f9fa;
             font-weight: 600;
-            color: var(--dark-navy);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: #495057;
+        }
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-outline-success:hover {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn-outline-warning:hover {
+            background-color: #ffc107;
+            border-color: #ffc107;
         }
 
-        .btn-luxury {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-filter {
-            background: var(--soft-gray);
-            color: var(--dark-navy);
-            border: 2px solid transparent;
-        }
-
-        .btn-filter:hover {
-            background: var(--primary-gold);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
-        }
-
-        .btn-filter.active {
-            background: var(--primary-gold);
-            color: white;
-            border-color: var(--primary-gold);
-        }
-
-        .btn-add {
-            background: linear-gradient(135deg, var(--primary-gold) 0%, #B8860B 100%);
-            color: white;
-            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
-        }
-
-        .btn-add:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(212, 175, 55, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-        .accounts-table {
-            background: white;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(212, 175, 55, 0.1);
-        }
-
-        .table {
-            margin-bottom: 0;
-        }
-
-        .table thead th {
-            background: linear-gradient(135deg, var(--dark-navy) 0%, var(--light-navy) 100%);
-            color: white;
-            border: none;
-            padding: 20px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 0.9rem;
-        }
-
-        .table tbody td {
-            padding: 20px;
-            border-top: 1px solid rgba(212, 175, 55, 0.1);
-            vertical-align: middle;
-        }
-
-        .table tbody tr:hover {
-            background: rgba(212, 175, 55, 0.05);
-        }
-
+        /* Status badges */
         .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .status-active {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
-        }
-
-        .status-inactive {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            color: white;
-        }
-
-        .status-suspended {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .role-badge {
-            padding: 6px 12px;
-            border-radius: 15px;
+            padding: 4px 8px;
+            border-radius: 12px;
             font-size: 0.75rem;
             font-weight: 600;
-            background: var(--secondary-gold);
-            color: var(--primary-gold);
+            text-transform: uppercase;
+        }
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .status-suspended {
+            background-color: #fff3cd;
+            color: #856404;
         }
 
-        .btn-action {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
+        /* Role badges */
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
             font-weight: 600;
-            font-size: 0.8rem;
-            text-decoration: none;
-            text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin: 2px;
+            text-transform: uppercase;
+        }
+        .role-admin {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        .role-manager {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .role-receptionist {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .role-housekeeping {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .role-customer {
+            background-color: #fff3cd;
+            color: #856404;
         }
 
-        .btn-edit {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
         }
 
-        .btn-edit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-toggle {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .btn-toggle:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(240, 147, 251, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-delete {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            color: white;
-        }
-
-        .btn-delete:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(255, 107, 107, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-        .alert-luxury {
-            padding: 20px 25px;
-            border-radius: 16px;
-            margin-bottom: 30px;
+        .toast {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            min-width: 300px;
+            max-width: 400px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            animation: slideInRight 0.3s ease-out;
+            border-left: 4px solid;
         }
 
-        .alert-success {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
+        .toast.success {
+            border-left-color: #28a745;
         }
 
-        .alert-error {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            color: white;
+        .toast.error {
+            border-left-color: #dc3545;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+        .toast-icon {
+            font-size: 20px;
+            margin-right: 12px;
         }
 
-        .empty-icon {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, var(--secondary-gold) 0%, var(--primary-gold) 100%);
-            border-radius: 50%;
+        .toast.success .toast-icon {
+            color: #28a745;
+        }
+
+        .toast.error .toast-icon {
+            color: #dc3545;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            color: #333;
+        }
+
+        .toast-message {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            margin-left: 10px;
+            padding: 0;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 30px;
-            font-size: 3rem;
-            color: white;
-            box-shadow: 0 15px 50px rgba(212, 175, 55, 0.3);
         }
 
-        .empty-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--dark-navy);
-            margin-bottom: 15px;
+        .toast-close:hover {
+            color: #333;
         }
 
-        .empty-subtitle {
-            font-size: 1.1rem;
-            color: var(--light-navy);
-            margin-bottom: 30px;
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
-        @media (max-width: 768px) {
-            .luxury-container {
-                padding: 20px 15px;
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
             }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
 
-            .nav-content {
-                flex-direction: column;
-                text-align: center;
-                gap: 20px;
-            }
+        .toast.fade-out {
+            animation: slideOutRight 0.3s ease-in forwards;
+        }
 
-            .nav-title h1 {
-                font-size: 2rem;
-            }
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
 
-            .control-bar {
-                flex-direction: column;
-                gap: 20px;
-                padding: 20px;
-            }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
-            .filter-controls {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .table-responsive {
-                font-size: 0.9rem;
-            }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="luxury-container">
-        <!-- Navigation Header -->
-        <div class="nav-header">
-            <div class="nav-content">
-                <a href="/hotel" class="back-btn">
-                    <i class="fas fa-arrow-left"></i>
-                    Về Trang Chủ
-                </a>
-                <div class="nav-title">
-                    <h1>Quản Lý Tài Khoản</h1>
-                    <p>Quản lý tài khoản của khách hàng, quản trị viên, lễ tân, quản lý kho và nhân viên dọn phòng</p>
+
+<!-- Toast Notification Container -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+</div>
+
+<div class="container-scroller">
+
+    <!-- import sidebar -->
+    <div th:replace="common/sidebar"></div>
+
+    <div class="main-panel">
+
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h4 class="card-title mb-0">Quản lý Tài khoản</h4>
+                            <p class="card-description mb-0">
+                                Danh sách tất cả tài khoản trong hệ thống
+                            </p>
+                        </div>
+                        <a href="/hotel-management/accounts/new" class="btn btn-primary">
+                            <i class="mdi mdi-plus"></i> Thêm Tài khoản Mới
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th> # </th>
+                                <th> Username </th>
+                                <th> Họ tên </th>
+                                <th> Email </th>
+                                <th> Số điện thoại </th>
+                                <th> Vai trò </th>
+                                <th> Trạng thái </th>
+                                <th> Thao tác </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="account, iterStat : ${accounts}">
+                                <td th:text="${iterStat.index + 1}">1</td>
+                                <td th:text="${account.username}">admin</td>
+                                <td th:text="${account.firstName + ' ' + account.lastName}">Nguyễn Văn A</td>
+                                <td th:text="${account.email}">admin@hotel.com</td>
+                                <td th:text="${account.phone}">0123456789</td>
+                                <td>
+                                    <span th:class="'role-badge role-' + ${#strings.toLowerCase(account.role)}" 
+                                          th:text="${account.role}">ADMIN</span>
+                                </td>
+                                <td>
+                                    <span th:class="'status-badge status-' + ${#strings.toLowerCase(account.status)}" 
+                                          th:text="${account.status}">ACTIVE</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a th:href="@{/hotel-management/accounts/{id}(id=${account.userId})}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Xem chi tiết">
+                                            <i class="mdi mdi-eye"></i>
+                                        </a>
+                                        <a th:href="@{/hotel-management/accounts/edit/{id}(id=${account.userId})}" 
+                                           class="btn btn-sm btn-outline-success" 
+                                           title="Sửa">
+                                            <i class="mdi mdi-pencil"></i>
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-outline-warning" 
+                                                th:onclick="'toggleStatus(' + ${account.userId} + ')'"
+                                                title="Thay đổi trạng thái">
+                                            <i class="mdi mdi-toggle-switch"></i>
+                                        </button>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-outline-danger" 
+                                                th:onclick="'confirmDelete(' + ${account.userId} + ')'"
+                                                title="Xóa">
+                                            <i class="mdi mdi-delete"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Alert Messages -->
-        <div th:if="${message}" class="alert-luxury alert-success">
-            <i class="fas fa-check-circle"></i>
-            <span th:text="${message}"></span>
-        </div>
-
-        <div th:if="${error}" class="alert-luxury alert-error">
-            <i class="fas fa-exclamation-circle"></i>
-            <span th:text="${error}"></span>
-        </div>
-
-        <!-- Control Bar -->
-        <div class="control-bar">
-            <div class="filter-controls">
-                <span class="filter-label">Lọc theo vai trò:</span>
-                <a th:href="@{/hotel-management/accounts}" 
-                   th:class="${selectedRole == null} ? 'btn-luxury btn-filter active' : 'btn-luxury btn-filter'"
-                   class="btn-luxury btn-filter">
-                    <i class="fas fa-users"></i>
-                    Tất cả
-                </a>
-                <a th:href="@{/hotel-management/accounts(role='ADMIN')}" 
-                   th:class="${selectedRole == 'ADMIN'} ? 'btn-luxury btn-filter active' : 'btn-luxury btn-filter'"
-                   class="btn-luxury btn-filter">
-                    <i class="fas fa-crown"></i>
-                    Admin
-                </a>
-                <a th:href="@{/hotel-management/accounts(role='RECEPTIONIST')}" 
-                   th:class="${selectedRole == 'RECEPTIONIST'} ? 'btn-luxury btn-filter active' : 'btn-luxury btn-filter'"
-                   class="btn-luxury btn-filter">
-                    <i class="fas fa-user-tie"></i>
-                    Lễ tân
-                </a>
-                <a th:href="@{/hotel-management/accounts(role='HOUSEKEEPING')}" 
-                   th:class="${selectedRole == 'HOUSEKEEPING'} ? 'btn-luxury btn-filter active' : 'btn-luxury btn-filter'"
-                   class="btn-luxury btn-filter">
-                    <i class="fas fa-broom"></i>
-                    Dọn phòng
-                </a>
-                <a th:href="@{/hotel-management/accounts(role='CUSTOMER')}" 
-                   th:class="${selectedRole == 'CUSTOMER'} ? 'btn-luxury btn-filter active' : 'btn-luxury btn-filter'"
-                   class="btn-luxury btn-filter">
-                    <i class="fas fa-user"></i>
-                    Khách hàng
-                </a>
-            </div>
-            
-            <a th:href="@{/hotel-management/accounts/new}" class="btn-luxury btn-add">
-                <i class="fas fa-plus"></i>
-                Thêm Tài Khoản Mới
-            </a>
-        </div>
-
-        <!-- Accounts Table -->
-        <div th:if="${#lists.isEmpty(users)}" class="empty-state">
-            <div class="empty-icon">
-                <i class="fas fa-user-slash"></i>
-            </div>
-            <h2 class="empty-title">Chưa có tài khoản nào</h2>
-            <p class="empty-subtitle">Hãy bắt đầu bằng cách thêm tài khoản đầu tiên</p>
-            <a th:href="@{/hotel-management/accounts/new}" class="btn-luxury btn-add">
-                <i class="fas fa-plus"></i>
-                Thêm Tài Khoản Đầu Tiên
-            </a>
-        </div>
-
-        <div th:unless="${#lists.isEmpty(users)}" class="accounts-table">
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Tên đăng nhập</th>
-                            <th>Họ tên</th>
-                            <th>Email</th>
-                            <th>Số điện thoại</th>
-                            <th>Vai trò</th>
-                            <th>Trạng thái</th>
-                            <th>Ngày tạo</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="user : ${users}">
-                            <td th:text="${user.userId}">1</td>
-                            <td th:text="${user.username}">admin</td>
-                            <td th:text="${user.firstName + ' ' + user.lastName}">Admin User</td>
-                            <td th:text="${user.email}">admin@hotel.com</td>
-                            <td th:text="${user.phone}">0123456789</td>
-                            <td>
-                                <span class="role-badge" th:text="${user.role}">ADMIN</span>
-                            </td>
-                            <td>
-                                <span th:class="'status-badge status-' + ${#strings.toLowerCase(user.status)}" 
-                                      th:text="${user.status}">ACTIVE</span>
-                            </td>
-                            <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}">01/01/2024</td>
-                            <td>
-                                <a th:href="@{'/hotel-management/accounts/edit/' + ${user.userId}}" 
-                                   class="btn-action btn-edit">
-                                    <i class="fas fa-edit"></i>
-                                    Sửa
-                                </a>
-                                <a th:href="@{'/hotel-management/accounts/' + ${user.userId} + '/toggle-status'}" 
-                                   class="btn-action btn-toggle"
-                                   th:text="${user.status == T(hotel.db.entity.User$Status).ACTIVE ? 'Vô hiệu' : 'Kích hoạt'}">
-                                    <i class="fas fa-power-off"></i>
-                                    Toggle
-                                </a>
-                                <a th:href="@{'/hotel-management/accounts/' + ${user.userId} + '/delete'}" 
-                                   onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản này?')" 
-                                   class="btn-action btn-delete">
-                                    <i class="fas fa-trash"></i>
-                                    Xóa
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
+<!-- main-panel ends -->
+</div>
+<!-- page-body-wrapper ends -->
+<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+<script src="/assets/vendors/chart.js/Chart.min.js"></script>
+<script src="/assets/js/off-canvas.js"></script>
+<script src="/assets/js/hoverable-collapse.js"></script>
+<script src="/assets/js/misc.js"></script>
+<script src="/assets/js/settings.js"></script>
+<script src="/assets/js/todolist.js"></script>
+<script src="/assets/js/chart.js"></script>
 
-    <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
-    <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+<script>
+// Toast Notification Functions
+function showToast(type, title, message, duration = 20000) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle';
+    
+    toast.innerHTML = `
+        <i class="mdi ${icon} toast-icon"></i>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close" onclick="removeToast(this.parentElement)">×</button>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Auto remove after duration
+    setTimeout(() => {
+        if (toast.parentElement) {
+            removeToast(toast);
+        }
+    }, duration);
+}
+
+function removeToast(toast) {
+    toast.classList.add('fade-out');
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.parentElement.removeChild(toast);
+        }
+    }, 300);
+}
+
+// Loading Functions
+function showLoading() {
+    document.getElementById('loading-overlay').style.display = 'flex';
+}
+
+function hideLoading() {
+    document.getElementById('loading-overlay').style.display = 'none';
+}
+
+// Enhanced Delete Function with Animation
+function confirmDelete(userId) {
+    // Create custom confirmation modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10001;
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        ">
+            <i class="mdi mdi-alert-circle" style="font-size: 48px; color: #dc3545; margin-bottom: 20px;"></i>
+            <h4 style="margin-bottom: 15px; color: #333;">Xác nhận xóa</h4>
+            <p style="margin-bottom: 25px; color: #666;">Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản này không? Hành động này không thể hoàn tác và tài khoản sẽ bị mất hoàn toàn.</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="this.closest('div').parentElement.remove()" 
+                        style="padding: 10px 20px; border: 1px solid #ccc; background: white; border-radius: 5px; cursor: pointer;">
+                    Hủy
+                </button>
+                <button onclick="deleteAccount(${userId}, this.closest('div').parentElement)" 
+                        style="padding: 10px 20px; border: none; background: #dc3545; color: white; border-radius: 5px; cursor: pointer;">
+                    Xóa
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Delete Account Function
+function deleteAccount(userId, modal) {
+    showLoading();
+    
+    fetch(`/hotel-management/accounts/delete/${userId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        hideLoading();
+        modal.remove();
+        
+        if (response.ok) {
+            showToast('success', 'Xóa thành công!', 'Tài khoản đã được xóa vĩnh viễn khỏi hệ thống.');
+            
+            // Remove row from table with animation
+            const row = document.querySelector(`button[onclick*="${userId}"]`).closest('tr');
+            row.style.transition = 'all 0.3s ease';
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(-100%)';
+            
+            setTimeout(() => {
+                row.remove();
+                // Reload page to update numbering
+                setTimeout(() => {
+                    window.location.reload();
+                }, 300);
+            }, 300);
+        } else {
+            showToast('error', 'Lỗi!', 'Không thể xóa tài khoản. Vui lòng thử lại.');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        modal.remove();
+        showToast('error', 'Lỗi!', 'Có lỗi xảy ra khi xóa tài khoản.');
+        console.error('Error:', error);
+    });
+}
+
+// Toggle Status Function
+function toggleStatus(userId) {
+    showLoading();
+    
+    fetch(`/hotel-management/accounts/toggle-status/${userId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        hideLoading();
+        
+        if (response.ok) {
+            showToast('success', 'Thay đổi trạng thái thành công!', 'Trạng thái tài khoản đã được cập nhật.');
+            
+            // Reload page to show updated status
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showToast('error', 'Lỗi!', 'Không thể thay đổi trạng thái. Vui lòng thử lại.');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showToast('error', 'Lỗi!', 'Có lỗi xảy ra khi thay đổi trạng thái.');
+        console.error('Error:', error);
+    });
+}
+
+// Check for URL parameters to show success messages
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.get('success') === 'add') {
+        showToast('success', 'Thêm thành công!', 'Tài khoản mới đã được thêm vào hệ thống.');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    if (urlParams.get('success') === 'edit') {
+        showToast('success', 'Cập nhật thành công!', 'Thông tin tài khoản đã được cập nhật.');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    if (urlParams.get('success') === 'toggle') {
+        showToast('success', 'Thay đổi trạng thái thành công!', 'Trạng thái tài khoản đã được cập nhật.');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    if (urlParams.get('success') === 'delete') {
+        showToast('success', 'Xóa thành công!', 'Tài khoản đã được xóa vĩnh viễn khỏi hệ thống.');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    if (urlParams.get('error') === 'delete') {
+        showToast('error', 'Lỗi xóa!', 'Không thể xóa tài khoản. Vui lòng thử lại.');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
+
+// Add click animation to buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // Add ripple animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
 </body>
 </html>

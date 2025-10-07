@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Tài khoản</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .container-scroller {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .main-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .details-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 50px;
+            width: 100%;
+            max-width: 800px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .details-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        
+        .details-title {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .details-subtitle {
+            color: #6c757d;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+        
+        .avatar-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 3rem;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .detail-group {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .detail-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .detail-value {
+            color: #2c3e50;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-suspended {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .role-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        
+        .role-admin {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .role-manager {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .role-receptionist {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .role-housekeeping {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .role-customer {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #f8f9fa;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, rgba(75, 76, 162, 0.65) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 16px 30px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #ffffff;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+            padding: 16px 30px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            border-color: #dee2e6;
+            transform: translateY(-1px);
+        }
+        
+        .details-icon {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-scroller">
+        <!-- Import sidebar -->
+        <div th:replace="common/sidebar"></div>
+        
+        <div class="main-panel">
+            <div class="details-card">
+                <div class="details-header">
+                    <div class="details-icon">
+                        <i class="mdi mdi-account-details"></i>
+                    </div>
+                    <h1 class="details-title">Chi tiết Tài khoản</h1>
+                    <p class="details-subtitle">Thông tin chi tiết về tài khoản</p>
+                </div>
+                
+                <div class="avatar-section">
+                    <div class="avatar" th:if="${account.avatarUrl == null or account.avatarUrl == ''}">
+                        <i class="mdi mdi-account"></i>
+                    </div>
+                    <div class="avatar" th:if="${account.avatarUrl != null and account.avatarUrl != ''}">
+                        <img th:src="${account.avatarUrl}" alt="Avatar" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=&quot;mdi mdi-account&quot;></i>'">
+                    </div>
+                    <h3 th:text="${account.firstName + ' ' + account.lastName}">Nguyễn Văn A</h3>
+                    <p th:text="${account.username}" class="text-muted">@username</p>
+                </div>
+                
+                <div class="details-grid">
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="mdi mdi-account me-2"></i>Tên đăng nhập
+                        </div>
+                        <div class="detail-value" th:text="${account.username}">admin</div>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="mdi mdi-email me-2"></i>Email
+                        </div>
+                        <div class="detail-value" th:text="${account.email}">admin@hotel.com</div>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="mdi mdi-phone me-2"></i>Số điện thoại
+                        </div>
+                        <div class="detail-value" th:text="${account.phone}">0123456789</div>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="mdi mdi-gender-male-female me-2"></i>Giới tính
+                        </div>
+                        <div class="detail-value" th:text="${account.gender == 'MALE' ? 'Nam' : (account.gender == 'FEMALE' ? 'Nữ' : 'Khác')}">Nam</div>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="mdi mdi-calendar me-2"></i>Ngày sinh
+                        </div>
+                        <div class="detail-value" th:text="${#temporals.format(account.dob, 'dd/MM/yyyy')}">01/01/1990</div>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="mdi mdi-map-marker me-2"></i>Địa chỉ
+                        </div>
+                        <div class="detail-value" th:text="${account.address != null ? account.address : 'Chưa cập nhật'}">123 Đường ABC, Quận XYZ</div>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="mdi mdi-account-group me-2"></i>Vai trò
+                        </div>
+                        <div class="detail-value">
+                            <span th:class="'role-badge role-' + ${#strings.toLowerCase(account.role)}" 
+                                  th:text="${account.role == 'ADMIN' ? 'Quản trị viên' : (account.role == 'MANAGER' ? 'Quản lý' : (account.role == 'RECEPTIONIST' ? 'Lễ tân' : (account.role == 'HOUSEKEEPING' ? 'Nhân viên dọn phòng' : 'Khách hàng')))}">ADMIN</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="mdi mdi-toggle-switch me-2"></i>Trạng thái
+                        </div>
+                        <div class="detail-value">
+                            <span th:class="'status-badge status-' + ${#strings.toLowerCase(account.status)}" 
+                                  th:text="${account.status == 'ACTIVE' ? 'Hoạt động' : (account.status == 'INACTIVE' ? 'Không hoạt động' : 'Bị cấm')}">ACTIVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-group" th:if="${account.lastLogin != null}">
+                        <div class="detail-label">
+                            <i class="mdi mdi-login me-2"></i>Lần đăng nhập cuối
+                        </div>
+                        <div class="detail-value" th:text="${#temporals.format(account.lastLogin, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:30</div>
+                    </div>
+                    
+                    <div class="detail-group" th:if="${account.lastLogout != null}">
+                        <div class="detail-label">
+                            <i class="mdi mdi-logout me-2"></i>Lần đăng xuất cuối
+                        </div>
+                        <div class="detail-value" th:text="${#temporals.format(account.lastLogout, 'dd/MM/yyyy HH:mm')}">01/01/2024 18:00</div>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="mdi mdi-calendar-plus me-2"></i>Ngày tạo
+                        </div>
+                        <div class="detail-value" th:text="${#temporals.format(account.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 08:00</div>
+                    </div>
+                    
+                    <div class="detail-group">
+                        <div class="detail-label">
+                            <i class="mdi mdi-calendar-edit me-2"></i>Lần cập nhật cuối
+                        </div>
+                        <div class="detail-value" th:text="${#temporals.format(account.updatedAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 15:30</div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <a th:href="@{/hotel-management/accounts}" class="btn-secondary">
+                        <i class="mdi mdi-arrow-left me-2"></i>Quay Lại
+                    </a>
+                    <a th:href="@{/hotel-management/accounts/edit/{id}(id=${account.userId})}" class="btn-primary">
+                        <i class="mdi mdi-pencil me-2"></i>Chỉnh Sửa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="/assets/vendors/chart.js/Chart.min.js"></script>
+    <script src="/assets/js/off-canvas.js"></script>
+    <script src="/assets/js/hoverable-collapse.js"></script>
+    <script src="/assets/js/misc.js"></script>
+    <script src="/assets/js/settings.js"></script>
+    <script src="/assets/js/todolist.js"></script>
+    <script src="/assets/js/chart.js"></script>
+</body>
+</html>

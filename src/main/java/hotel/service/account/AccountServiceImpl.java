@@ -1,0 +1,176 @@
+package hotel.service.account;
+
+import hotel.db.dto.user.AccountRequestDto;
+import hotel.db.dto.user.AccountResponseDto;
+import hotel.db.entity.User;
+import hotel.db.repository.user.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+@Transactional
+public class AccountServiceImpl implements AccountService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AccountResponseDto> getAllAccounts() {
+        log.info("Getting all accounts");
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(AccountResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AccountResponseDto> getAccountsByRole(String role) {
+        log.info("Getting accounts by role: {}", role);
+        List<User> users = userRepository.findByRole(role);
+        return users.stream()
+                .map(AccountResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AccountResponseDto getAccountById(Integer userId) {
+        log.info("Getting account by ID: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Account not found with ID: " + userId));
+        return new AccountResponseDto(user);
+    }
+
+    @Override
+    public AccountResponseDto createAccount(AccountRequestDto accountRequestDto) {
+        log.info("Creating new account with username: {}", accountRequestDto.getUsername());
+
+        // Kiểm tra username đã tồn tại chưa
+        if (userRepository.existsByUsername(accountRequestDto.getUsername())) {
+            throw new RuntimeException("Username đã tồn tại: " + accountRequestDto.getUsername());
+        }
+
+        // Kiểm tra email đã tồn tại chưa
+        if (userRepository.existsByEmail(accountRequestDto.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại: " + accountRequestDto.getEmail());
+        }
+
+        User user = buildUserFromRequest(accountRequestDto);
+        user.setPassword(passwordEncoder.encode("123456")); // Mật khẩu mặc định
+
+        User savedUser = userRepository.save(user);
+        log.info("Created account with ID: {}", savedUser.getUserId());
+
+        return new AccountResponseDto(savedUser);
+    }
+
+    @Override
+    public AccountResponseDto updateAccount(Integer userId, AccountRequestDto accountRequestDto) {
+        log.info("Updating account with ID: {}", userId);
+
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Account not found with ID: " + userId));
+
+        // Kiểm tra username đã tồn tại chưa (trừ user hiện tại)
+        if (!existingUser.getUsername().equals(accountRequestDto.getUsername()) &&
+            userRepository.existsByUsername(accountRequestDto.getUsername())) {
+            throw new RuntimeException("Username đã tồn tại: " + accountRequestDto.getUsername());
+        }
+
+        // Kiểm tra email đã tồn tại chưa (trừ user hiện tại)
+        if (!existingUser.getEmail().equals(accountRequestDto.getEmail()) &&
+            userRepository.existsByEmail(accountRequestDto.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại: " + accountRequestDto.getEmail());
+        }
+
+        // Cập nhật thông tin
+        existingUser.setUsername(accountRequestDto.getUsername());
+        existingUser.setEmail(accountRequestDto.getEmail());
+        existingUser.setPhone(accountRequestDto.getPhone());
+        existingUser.setFirstName(accountRequestDto.getFirstName());
+        existingUser.setLastName(accountRequestDto.getLastName());
+        existingUser.setGender(accountRequestDto.getGender());
+        existingUser.setDob(accountRequestDto.getDob());
+        existingUser.setAddress(accountRequestDto.getAddress());
+        existingUser.setRole(accountRequestDto.getRole());
+        existingUser.setStatus(accountRequestDto.getStatus());
+        existingUser.setAvatarUrl(accountRequestDto.getAvatarUrl());
+
+        User updatedUser = userRepository.save(existingUser);
+        log.info("Updated account with ID: {}", updatedUser.getUserId());
+
+        return new AccountResponseDto(updatedUser);
+    }
+
+    @Override
+    public AccountResponseDto toggleAccountStatus(Integer userId) {
+        log.info("Toggling account status for ID: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Account not found with ID: " + userId));
+
+        // Toggle status
+        if (user.getStatus() == User.Status.ACTIVE) {
+            user.setStatus(User.Status.INACTIVE);
+        } else {
+            user.setStatus(User.Status.ACTIVE);
+        }
+
+        User updatedUser = userRepository.save(user);
+        log.info("Toggled account status for ID: {} to {}", userId, updatedUser.getStatus());
+
+        return new AccountResponseDto(updatedUser);
+    }
+
+    @Override
+    public void deleteAccount(Integer userId) {
+        log.info("Deleting account with ID: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Account not found with ID: " + userId));
+
+        // Hard delete - xóa thật khỏi database
+        userRepository.delete(user);
+
+        log.info("Deleted account with ID: {}", userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    private User buildUserFromRequest(AccountRequestDto accountRequestDto) {
+        User user = new User();
+        user.setUsername(accountRequestDto.getUsername());
+        user.setEmail(accountRequestDto.getEmail());
+        user.setPhone(accountRequestDto.getPhone());
+        user.setFirstName(accountRequestDto.getFirstName());
+        user.setLastName(accountRequestDto.getLastName());
+        user.setGender(accountRequestDto.getGender());
+        user.setDob(accountRequestDto.getDob());
+        user.setAddress(accountRequestDto.getAddress());
+        user.setRole(accountRequestDto.getRole());
+        user.setStatus(accountRequestDto.getStatus());
+        user.setAvatarUrl(accountRequestDto.getAvatarUrl());
+        user.setIsDeleted(false);
+        return user;
+    }
+}
