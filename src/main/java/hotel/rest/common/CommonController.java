@@ -47,7 +47,6 @@ public class CommonController {
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
-//        model.addAttribute("user", user);
         if (user != null) {
             return "common/dashboard";
         }
@@ -56,8 +55,6 @@ public class CommonController {
 
     @GetMapping({"/", "", "/home"})
     public String home(HttpSession session, Model model) {
-//        User user = new User();
-//        session.setAttribute("user", user);
         return "common/home";
     }
 
@@ -177,16 +174,13 @@ public class CommonController {
                 return "redirect:/hotel/profile";
             }
 
-            // Call service to update avatar
             MessageResponse response = commonService.updateAvatar(user.getUsername(), file);
 
             if (response.isSuccess()) {
-                // Refresh user from DB to update avatarUrl
                 User updatedUser = commonService.getUserByUsername(user.getUsername());
                 if (user == null) {
                     return "redirect:/login";
                 }
-                // Update session
                 session.setAttribute("user", updatedUser);
 
                 redirectAttributes.addFlashAttribute("success", response.getMessage());
