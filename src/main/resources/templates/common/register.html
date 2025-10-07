@@ -34,7 +34,7 @@
 </head>
 <body>
 <!-- import header -->
-<div th:replace="common/header :: header"></div>
+<div th:replace="~{common/header :: header}"></div>
 
 <div class="limiter">
     <div class="container-login100">
@@ -174,7 +174,7 @@
 <p th:if="${error}" th:text="${error}" style="color:red;"></p>
 
 <!-- import footer -->
-<div th:replace="common/footer :: footer"></div>
+<div th:replace="~{common/footer :: footer}"></div>
 
 <!--===============================================================================================-->
 <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>

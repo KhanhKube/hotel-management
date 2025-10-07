@@ -20,7 +20,7 @@
 </head>
 <body>
 <!-- import header -->
-<div th:include="common/header :: header"></div>
+<div th:include="~{common/header :: header}"></div>
 
 <!-- main here -->
 <div class="container py-5">
@@ -89,7 +89,7 @@
 </div>
 
 <!-- import footer -->
-<div th:replace="common/footer :: footer"></div>
+<div th:replace="~{common/footer :: footer}"></div>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>

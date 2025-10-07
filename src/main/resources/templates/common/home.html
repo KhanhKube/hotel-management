@@ -18,7 +18,7 @@
 </head>
 <body>
 <!-- import header -->
-<div th:replace="common/header :: header"></div>
+<div th:replace="~{common/header :: header}"></div>
 
 <!-- ================ start banner area ================= -->
 <section class="home-banner-area" id="home">
@@ -511,8 +511,8 @@
 <!-- ================ news section end ================= -->
 
 </main>
-<!-- import footer -->
-<div th:replace="common/footer :: footer"></div>
+<!-- import header -->
+<div th:replace="~{common/footer :: footer}"></div>
 
 <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
 <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
