@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Tin Tức - Hệ Thống Khách Sạn</title>
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --secondary-gold: #F4E4BC;
+            --dark-navy: #1B2951;
+            --light-navy: #2C3E50;
+            --cream: #F8F6F0;
+            --charcoal: #2C2C2C;
+            --soft-gray: #E8E8E8;
+            --accent-blue: #4A90E2;
+            --success-green: #28a745;
+            --warning-orange: #ffc107;
+            --danger-red: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFFFF 100%);
+            min-height: 100vh;
+            color: var(--charcoal);
+            line-height: 1.6;
+        }
+
+        .luxury-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            background: linear-gradient(135deg, var(--dark-navy) 0%, var(--light-navy) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+        .nav-title h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .nav-title p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-luxury {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, #B8941F 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-luxury:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        /* Alert Messages */
+        .alert-luxury {
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 500;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, var(--success-green) 0%, #1e7e34 100%);
+            color: white;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, var(--danger-red) 0%, #c82333 100%);
+            color: white;
+        }
+
+        /* Control Bar */
+        .control-bar {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .form-control-luxury {
+            border: 2px solid var(--soft-gray);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control-luxury:focus {
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+            outline: none;
+        }
+
+        .btn-filter {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-filter:hover {
+            background: #357abd;
+            transform: translateY(-1px);
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-luxury {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .table-luxury th {
+            background: linear-gradient(135deg, var(--dark-navy) 0%, var(--light-navy) 100%);
+            color: white;
+            padding: 20px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .table-luxury td {
+            padding: 20px 15px;
+            border-bottom: 1px solid var(--soft-gray);
+            vertical-align: middle;
+        }
+
+        .table-luxury tbody tr:hover {
+            background: rgba(212, 175, 55, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .table-luxury tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-draft {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+
+        .status-published {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-green);
+        }
+
+        .status-archived {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning-orange);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-view {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-edit {
+            background: var(--warning-orange);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--danger-red);
+            color: white;
+        }
+
+        .btn-status {
+            background: var(--primary-gold);
+            color: white;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+            text-decoration: none;
+            color: white;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 30px;
+            padding: 20px;
+        }
+
+        .pagination-info {
+            color: var(--charcoal);
+            font-weight: 500;
+        }
+
+        .pagination-luxury {
+            display: flex;
+            gap: 5px;
+        }
+
+        .pagination-luxury .page-link {
+            padding: 10px 15px;
+            border: 2px solid var(--soft-gray);
+            color: var(--charcoal);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .pagination-luxury .page-link:hover {
+            border-color: var(--primary-gold);
+            background: var(--primary-gold);
+            color: white;
+            text-decoration: none;
+        }
+
+        .pagination-luxury .page-item.active .page-link {
+            background: var(--primary-gold);
+            border-color: var(--primary-gold);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .luxury-container {
+                padding: 20px 15px;
+            }
+
+            .nav-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-title h1 {
+                font-size: 2rem;
+            }
+
+            .control-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-controls {
+                justify-content: center;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* News Preview */
+        .news-preview {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .news-title {
+            font-weight: 600;
+            color: var(--dark-navy);
+            margin-bottom: 5px;
+        }
+
+        .news-meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="luxury-container">
+        <!-- Navigation Header -->
+        <div class="nav-header">
+            <div class="nav-content">
+                <div class="nav-left">
+                    <a href="/hotel" class="back-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Về Trang Chủ
+                    </a>
+                    <div class="nav-title">
+                        <h1>Quản Lý Tin Tức</h1>
+                        <p>Quản lý nội dung tin tức, trạng thái xuất bản và phân loại tin tức</p>
+                    </div>
+                </div>
+                <div class="nav-actions">
+                    <a href="/management/news/groups" class="btn-luxury btn-secondary">
+                        <i class="fas fa-tags"></i>
+                        Quản Lý Nhóm
+                    </a>
+                    <a href="/management/news/add" class="btn-luxury">
+                        <i class="fas fa-plus"></i>
+                        Thêm Tin Tức
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${message}" class="alert-luxury alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${message}"></span>
+        </div>
+
+        <div th:if="${error}" class="alert-luxury alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Control Bar -->
+        <div class="control-bar">
+            <div class="filter-controls">
+                <form method="get" th:action="@{/management/news}" class="d-flex gap-3 align-items-center">
+                    <input type="text" name="search" th:value="${search}" 
+                           placeholder="Tìm kiếm theo tiêu đề..." class="form-control-luxury" style="min-width: 250px;">
+                    
+                    <select name="status" th:value="${status}" class="form-control-luxury">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="DRAFT">Bản nháp</option>
+                        <option value="PUBLISHED">Đã xuất bản</option>
+                        <option value="ARCHIVED">Đã lưu trữ</option>
+                    </select>
+                    
+                    <button type="submit" class="btn-filter">
+                        <i class="fas fa-search"></i>
+                        Tìm kiếm
+                    </button>
+                    
+                    <a th:href="@{/management/news}" class="btn-action btn-secondary">
+                        <i class="fas fa-refresh"></i>
+                        Làm mới
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        <!-- News Table -->
+        <div class="table-container">
+            <table class="table-luxury">
+                <thead>
+                    <tr>
+                        <th>Tiêu đề</th>
+                        <th>Nhóm tin</th>
+                        <th>Trạng thái</th>
+                        <th>Lượt xem</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="news : ${newsPage.content}">
+                        <td>
+                            <div class="news-preview">
+                                <div class="news-title" th:text="${news.title}"></div>
+                                <div class="news-meta" th:text="${news.heading}"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:if="${news.newsGroupId != null}">
+                                <span th:each="group : ${newsGroups}" 
+                                      th:if="${group.newsGroupId == news.newsGroupId}" 
+                                      th:text="${group.name}"></span>
+                            </span>
+                            <span th:unless="${news.newsGroupId != null}" class="text-muted">Chưa phân loại</span>
+                        </td>
+                        <td>
+                            <span th:class="'status-badge status-' + ${#strings.toLowerCase(news.status)}" 
+                                  th:text="${#strings.equals(news.status, 'DRAFT') ? 'Bản nháp' : 
+                                           #strings.equals(news.status, 'PUBLISHED') ? 'Đã xuất bản' : 
+                                           #strings.equals(news.status, 'ARCHIVED') ? 'Đã lưu trữ' : news.status}">
+                            </span>
+                        </td>
+                        <td>
+                            <span th:text="${news.view != null ? news.view : 0}"></span>
+                        </td>
+                        <td th:text="${#temporals.format(news.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td>
+                            <div class="action-buttons">
+                                <a th:href="@{/management/news/view/{id}(id=${news.newsId})}" 
+                                   class="btn-action btn-view" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a th:href="@{/management/news/edit/{id}(id=${news.newsId})}" 
+                                   class="btn-action btn-edit" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                
+                                <!-- Status Change Dropdown -->
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn-action btn-status dropdown-toggle" type="button" 
+                                            data-bs-toggle="dropdown" title="Thay đổi trạng thái">
+                                        <i class="fas fa-toggle-on"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li th:if="${news.status != 'DRAFT'}">
+                                            <form th:action="@{/management/news/change-status/{id}(id=${news.newsId})}" 
+                                                  method="post" class="d-inline">
+                                                <input type="hidden" name="status" value="DRAFT">
+                                                <button type="submit" class="dropdown-item">
+                                                    <i class="fas fa-edit text-secondary"></i> Chuyển thành Bản nháp
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li th:if="${news.status != 'PUBLISHED'}">
+                                            <form th:action="@{/management/news/change-status/{id}(id=${news.newsId})}" 
+                                                  method="post" class="d-inline">
+                                                <input type="hidden" name="status" value="PUBLISHED">
+                                                <button type="submit" class="dropdown-item">
+                                                    <i class="fas fa-globe text-success"></i> Xuất bản
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li th:if="${news.status != 'ARCHIVED'}">
+                                            <form th:action="@{/management/news/change-status/{id}(id=${news.newsId})}" 
+                                                  method="post" class="d-inline">
+                                                <input type="hidden" name="status" value="ARCHIVED">
+                                                <button type="submit" class="dropdown-item">
+                                                    <i class="fas fa-archive text-warning"></i> Lưu trữ
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <form th:action="@{/management/news/delete/{id}(id=${news.newsId})}" 
+                                      method="post" class="d-inline" 
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa tin tức này?')">
+                                    <button type="submit" class="btn-action btn-delete" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(newsPage.content)}">
+                        <td colspan="6" class="text-center py-5">
+                            <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Chưa có tin tức nào</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container" th:if="${newsPage.totalPages > 1}">
+            <div class="pagination-info">
+                Hiển thị <span th:text="${newsPage.number * newsPage.size + 1}"></span> - 
+                <span th:text="${newsPage.number * newsPage.size + newsPage.numberOfElements}"></span> 
+                trong tổng số <span th:text="${newsPage.totalElements}"></span> tin tức
+            </div>
+            
+            <nav>
+                <ul class="pagination-luxury">
+                    <li th:if="${newsPage.hasPrevious()}">
+                        <a th:href="@{/management/news(page=${newsPage.number - 1}, size=${newsPage.size}, sortBy=${sortBy}, sortDir=${sortDir}, status=${status}, search=${search})}" 
+                           class="page-link">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    
+                    <li th:each="pageNum : ${#numbers.sequence(0, newsPage.totalPages - 1)}" 
+                        th:if="${pageNum >= newsPage.number - 2 and pageNum <= newsPage.number + 2}">
+                        <a th:href="@{/management/news(page=${pageNum}, size=${newsPage.size}, sortBy=${sortBy}, sortDir=${sortDir}, status=${status}, search=${search})}" 
+                           th:class="'page-link' + (${pageNum == newsPage.number} ? ' active' : '')"
+                           th:text="${pageNum + 1}"></a>
+                    </li>
+                    
+                    <li th:if="${newsPage.hasNext()}">
+                        <a th:href="@{/management/news(page=${newsPage.number + 1}, size=${newsPage.size}, sortBy=${sortBy}, sortDir=${sortDir}, status=${status}, search=${search})}" 
+                           class="page-link">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+</body>
+</html>
