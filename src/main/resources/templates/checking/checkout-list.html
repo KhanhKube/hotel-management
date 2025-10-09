@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử Check-Out - Hotel Management</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            margin-top: 50px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .title {
+            color: #2c3e50;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        .btn-group {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        td {
+            font-size: 14px;
+            color: #495057;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-checked-out {
+            background: #cce5ff;
+            color: #004085;
+        }
+        .damage-badge {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        .no-data i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            display: block;
+            color: #dee2e6;
+        }
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        .alert-success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        .alert-danger {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        .btn-margin-top {
+            margin-top: 20px;
+        }
+        .btn-group-inline {
+            margin: 0;
+        }
+        @media (max-width: 768px) {
+            .card {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+            .title {
+                font-size: 28px;
+            }
+            table {
+                font-size: 12px;
+            }
+            th, td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1 class="title">
+                    <i class="mdi mdi-history"></i>
+                    Lịch sử Check-Out
+                </h1>
+                <p class="subtitle">Xem lịch sử các booking đã check-out</p>
+            </div>
+
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+            <div class="btn-group">
+                <a href="/hotel-management/checkin" class="btn btn-success">
+                    <i class="mdi mdi-plus"></i>
+                    Check-In Mới
+                </a>
+                <a href="/hotel-management/checkout" class="btn btn-primary">
+                    <i class="mdi mdi-logout"></i>
+                    Check-Out
+                </a>
+                <a href="/hotel-management/checkin-list" class="btn btn-primary">
+                    <i class="mdi mdi-login"></i>
+                    Danh sách Check-In
+                </a>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Booking ID</th>
+                            <th>Phòng</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày Check-In</th>
+                            <th>Ngày Check-Out</th>
+                            <th>Tổng tiền</th>
+                            <th>Tiền phạt</th>
+                            <th>Tình trạng phòng</th>
+                            <th>Thiệt hại</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="checkout, iterStat : ${checkOutHistory}">
+                            <td th:text="${iterStat.index + 1}">1</td>
+                            <td th:text="'#' + ${checkout.bookingId}">#001</td>
+                            <td>
+                                <strong th:text="${checkout.roomNumber}">101</strong>
+                                <br>
+                                <small class="text-muted" th:text="${checkout.roomType}">Standard</small>
+                            </td>
+                            <td>
+                                <strong th:text="${checkout.customerName}">Nguyễn Văn A</strong>
+                                <br>
+                                <small class="text-muted" th:text="${checkout.customerPhone}">0123456789</small>
+                            </td>
+                            <td th:text="${checkout.checkInDate}">01/01/2024</td>
+                            <td th:text="${checkout.actualCheckOutDate}">03/01/2024</td>
+                            <td th:text="${checkout.totalAmount != null ? checkout.totalAmount + ' VNĐ' : '0 VNĐ'}">1,500,000 VNĐ</td>
+                            <td th:text="${checkout.penaltyAmount != null and checkout.penaltyAmount > 0 ? checkout.penaltyAmount + ' VNĐ' : '0 VNĐ'}">0 VNĐ</td>
+                            <td>
+                                <span class="status-badge" 
+                                      th:classappend="${checkout.roomCondition == 'EXCELLENT' ? 'status-checked-out' : 
+                                                      checkout.roomCondition == 'DAMAGED' ? 'damage-badge' : 'status-checked-out'}"
+                                      th:text="${checkout.roomCondition}">GOOD</span>
+                            </td>
+                            <td>
+                                <span th:if="${checkout.hasDamage}" class="damage-badge">Có thiệt hại</span>
+                                <span th:unless="${checkout.hasDamage}" class="status-badge status-checked-out">Không</span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-inline">
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                            th:onclick="'viewDetails(' + ${checkout.bookingId} + ')'">
+                                        <i class="mdi mdi-eye"></i>
+                                        Xem
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div th:if="${checkOutHistory == null or checkOutHistory.isEmpty()}" class="no-data">
+                    <i class="mdi mdi-information"></i>
+                    <h3>Không có dữ liệu</h3>
+                    <p>Hiện tại chưa có booking nào đã check-out</p>
+                    <a href="/hotel-management/checkin" class="btn btn-success btn-margin-top">
+                        <i class="mdi mdi-plus"></i>
+                        Tạo Check-In Mới
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function viewDetails(bookingId) {
+            alert('Xem chi tiết booking #' + bookingId);
+            // Có thể implement modal hoặc redirect đến trang chi tiết
+        }
+    </script>
+</body>
+</html>

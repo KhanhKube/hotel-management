@@ -26,9 +26,9 @@ public class NewsServiceImpl implements NewsService {
         if (news.getView() == null) {
             news.setView(0);
         }
-        if (news.getStatus() == null) {
-            news.setStatus("DRAFT");
-        }
+//        if (news.getStatus() == null) {
+//            news.setStatus("DRAFT");
+//        }
         return newsRepository.save(news);
     }
 
@@ -50,17 +50,17 @@ public class NewsServiceImpl implements NewsService {
         return newsRepository.findAll(pageable);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<News> findByStatus(String status) {
-        return newsRepository.findByStatusAndIsDeletedFalse(status);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<News> findByStatus(String status, Pageable pageable) {
-       return newsRepository.findByStatusAndIsDeletedFalse(status, pageable);
-    }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<News> findByStatus(String status) {
+//        return newsRepository.findByStatusAndIsDeletedFalse(status);
+//    }
+//
+//    @Override
+//    @Transactional(readOnly = true)
+//    public Page<News> findByStatus(String status, Pageable pageable) {
+//       return newsRepository.findByStatusAndIsDeletedFalse(status, pageable);
+//    }
 
     @Override
     public void deleteNews(Integer newsId) {
@@ -77,23 +77,23 @@ public class NewsServiceImpl implements NewsService {
         Optional<News> newsOpt = newsRepository.findById(newsId);
         if (newsOpt.isPresent()) {
             News news = newsOpt.get();
-            news.setStatus(status);
+//            news.setStatus(status);
             return newsRepository.save(news);
         }
         throw new RuntimeException("News not found with id: " + newsId);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<News> findByNewsGroupId(Integer newsGroupId) {
-        return newsRepository.findByNewsGroupIdAndIsDeletedFalse(newsGroupId);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<News> findByUserId(Integer userId) {
-        return newsRepository.findByUserIdAndIsDeletedFalse(userId);
-    }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<News> findByNewsGroupId(Integer newsGroupId) {
+//        return newsRepository.findByNewsGroupIdAndIsDeletedFalse(newsGroupId);
+//    }
+//
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<News> findByUserId(Integer userId) {
+//        return newsRepository.findByUserIdAndIsDeletedFalse(userId);
+//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -122,15 +122,15 @@ public class NewsServiceImpl implements NewsService {
         }
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<News> searchByTitle(String title) {
-        return newsRepository.findByTitleContainingIgnoreCaseAndIsDeletedFalse(title);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<News> searchByTitle(String title, Pageable pageable) {
-        return newsRepository.findByTitleContainingIgnoreCaseAndIsDeletedFalse(title, pageable);
-    }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<News> searchByTitle(String title) {
+//        return newsRepository.findByTitleContainingIgnoreCaseAndIsDeletedFalse(title);
+//    }
+//
+//    @Override
+//    @Transactional(readOnly = true)
+//    public Page<News> searchByTitle(String title, Pageable pageable) {
+//        return newsRepository.findByTitleContainingIgnoreCaseAndIsDeletedFalse(title, pageable);
+//    }
 }

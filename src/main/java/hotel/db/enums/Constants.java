@@ -1,6 +1,13 @@
 package hotel.db.enums;
 
 public class Constants {
+    //role
+    public static final String ADMIN = "ADMIN";
+    public static final String MANAGER = "MANAGER";
+    public static final String STAFF = "STAFF";
+    public static final String RECEPTIONIST = "RECEPTIONIST";
+    public static final String CUSTOMER = "CUSTOMER";
+
     public static final String MALE = "MALE";
     public static final String FEMALE = "FEMALE";
     public static final String USER = "USER";

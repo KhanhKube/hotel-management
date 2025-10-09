@@ -1,53 +1,494 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Check Out</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-Out - Hotel Management</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        h2 {
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            margin-top: 50px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .title {
+            color: #2c3e50;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        .booking-section {
+            margin-bottom: 40px;
+        }
+        .section-title {
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .booking-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .booking-card:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+        .booking-card.selected {
+            border-color: #667eea;
+            background: #e8f0fe;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .booking-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .booking-details h5 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .booking-details p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .booking-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        .required {
+            color: #e74c3c;
+        }
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fff;
+            box-sizing: border-box;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .form-control:disabled {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        .row {
+            display: flex;
+            gap: 20px;
+        }
+        .col-md-6 {
+            flex: 1;
+        }
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+            accent-color: #667eea;
+        }
+        .form-check-label {
+            font-weight: 500;
             color: #2c3e50;
         }
-
-        form {
-            max-width: 400px;
-        }
-
-        label {
-            display: block;
-            margin-top: 10px;
-        }
-
-        input {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-        }
-
-        button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: #e74c3c;
-            color: white;
+        .btn {
+            padding: 15px 30px;
             border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px;
         }
-
-        button:hover {
-            background-color: #c0392b;
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        .btn-group {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            color: #764ba2;
+            transform: translateX(-5px);
+        }
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        .alert-success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        .alert-danger {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .alert-info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+            color: #0c5460;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        .no-data-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .hidden-form {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .card {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+            .title {
+                font-size: 28px;
+            }
+            .booking-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
-<h2>Check Out</h2>
-<form action="/checkout" method="post">
-    <label>Booking ID:</label>
-    <input type="text" name="bookingId" required>
+    <div class="container">
+        <div class="card">
+            <a href="/hotel-management/checkout-list" class="back-link">
+                <i class="mdi mdi-arrow-left"></i>
+                Quay lại danh sách
+            </a>
+            
+            <div class="header">
+                <h1 class="title">
+                    <i class="mdi mdi-logout"></i>
+                    Check-Out Khách Hàng
+                </h1>
+                <p class="subtitle">Chọn booking và nhập thông tin để thực hiện check-out</p>
+            </div>
 
-    <button type="submit">Confirm Check Out</button>
-</form>
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+            <!-- Booking Selection -->
+            <div class="booking-section">
+                <h3 class="section-title">Chọn booking cần check-out</h3>
+                
+                <div th:each="booking : ${checkOutCandidates}" class="booking-card" th:onclick="'selectBooking(' + ${booking.bookingId} + ')'">
+                    <div class="booking-info">
+                        <div class="booking-details">
+                            <h5 th:text="'Booking #' + ${booking.bookingId}">Booking #001</h5>
+                            <p th:text="${booking.roomNumber + ' - ' + booking.roomType}">101 - Standard</p>
+                            <p th:text="${booking.customerName + ' (' + booking.customerPhone + ')'}">Nguyễn Văn A (0123456789)</p>
+                            <p th:text="'Check-in: ' + ${booking.checkInDate}">Check-in: 01/01/2024</p>
+                        </div>
+                        <div>
+                            <span class="booking-badge" th:text="${booking.roomType}">Standard</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:if="${checkOutCandidates == null or checkOutCandidates.isEmpty()}" class="no-data">
+                    <i class="mdi mdi-information no-data-icon"></i>
+                    <p>Không có booking nào cần check-out</p>
+                </div>
+            </div>
+
+            <!-- Check-Out Form -->
+            <form id="checkoutForm" th:action="@{/hotel-management/checkout/process}" th:object="${checkOutRequest}" method="post" class="hidden-form">
+                <h3 class="section-title">Thông tin check-out</h3>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="bookingId">
+                                ID Booking <span class="required">*</span>
+                            </label>
+                            <input type="number" class="form-control" th:field="*{bookingId}" 
+                                   id="bookingId" name="bookingId" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="actualCheckOutDate">
+                                Ngày check-out thực tế <span class="required">*</span>
+                            </label>
+                            <input type="date" class="form-control" th:field="*{actualCheckOutDate}" 
+                                   id="actualCheckOutDate" name="actualCheckOutDate" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="totalAmount">
+                                Tổng tiền thanh toán (VNĐ) <span class="required">*</span>
+                            </label>
+                            <input type="number" class="form-control" th:field="*{totalAmount}" 
+                                   id="totalAmount" name="totalAmount" min="0" step="1000" required>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="penaltyAmount">
+                                Tiền phạt (VNĐ)
+                            </label>
+                            <input type="number" class="form-control" th:field="*{penaltyAmount}" 
+                                   id="penaltyAmount" name="penaltyAmount" min="0" step="1000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="penaltyReason">
+                        Lý do phạt
+                    </label>
+                    <textarea class="form-control" th:field="*{penaltyReason}" 
+                              id="penaltyReason" name="penaltyReason" rows="3"
+                              placeholder="Nhập lý do phạt (nếu có)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="paymentMethod">
+                        Phương thức thanh toán <span class="required">*</span>
+                    </label>
+                    <select class="form-control" th:field="*{paymentMethod}" id="paymentMethod" name="paymentMethod" required>
+                        <option value="">-- Chọn phương thức --</option>
+                        <option value="CASH">Tiền mặt</option>
+                        <option value="CARD">Thẻ</option>
+                        <option value="BANK_TRANSFER">Chuyển khoản</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="roomCondition">
+                        Tình trạng phòng <span class="required">*</span>
+                    </label>
+                    <select class="form-control" th:field="*{roomCondition}" id="roomCondition" name="roomCondition" required>
+                        <option value="">-- Chọn tình trạng --</option>
+                        <option value="EXCELLENT">Tuyệt vời</option>
+                        <option value="GOOD">Tốt</option>
+                        <option value="FAIR">Khá</option>
+                        <option value="DAMAGED">Hư hỏng</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" th:field="*{hasDamage}" id="hasDamage" name="hasDamage">
+                        <label class="form-check-label" for="hasDamage">Phòng có thiệt hại</label>
+                    </div>
+                </div>
+
+                <div class="form-group hidden-form" id="damageDescriptionGroup">
+                    <label class="form-label" for="damageDescription">
+                        Mô tả thiệt hại
+                    </label>
+                    <textarea class="form-control" th:field="*{damageDescription}" 
+                              id="damageDescription" name="damageDescription" rows="3"
+                              placeholder="Mô tả chi tiết thiệt hại"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="notes">
+                        Ghi chú
+                    </label>
+                    <textarea class="form-control" th:field="*{notes}" 
+                              id="notes" name="notes" rows="3"
+                              placeholder="Nhập ghi chú (nếu có)"></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">
+                        <i class="mdi mdi-check"></i>
+                        Thực hiện Check-Out
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        <i class="mdi mdi-refresh"></i>
+                        Làm mới
+                    </button>
+                    <a href="/hotel-management/checkout-list" class="btn btn-primary">
+                        <i class="mdi mdi-arrow-left"></i>
+                        Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Select booking
+        function selectBooking(bookingId) {
+            // Remove previous selection
+            document.querySelectorAll('.booking-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selection to clicked card
+            event.currentTarget.classList.add('selected');
+            
+            // Fill form with booking ID
+            document.getElementById('bookingId').value = bookingId;
+            
+            // Show form
+            document.getElementById('checkoutForm').classList.remove('hidden-form');
+            
+            // Scroll to form
+            document.getElementById('checkoutForm').scrollIntoView({ behavior: 'smooth' });
+            
+            alert('Đã chọn booking #' + bookingId);
+        }
+
+        // Toggle damage description
+        document.getElementById('hasDamage').addEventListener('change', function() {
+            const damageGroup = document.getElementById('damageDescriptionGroup');
+            if (this.checked) {
+                damageGroup.classList.remove('hidden-form');
+            } else {
+                damageGroup.classList.add('hidden-form');
+                document.getElementById('damageDescription').value = '';
+            }
+        });
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('checkoutForm').reset();
+            document.getElementById('checkoutForm').classList.add('hidden-form');
+            document.querySelectorAll('.booking-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            alert('Form đã được làm mới');
+        }
+
+        // Form validation
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            const bookingId = document.getElementById('bookingId').value;
+            const actualCheckOutDate = document.getElementById('actualCheckOutDate').value;
+            const totalAmount = document.getElementById('totalAmount').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const roomCondition = document.getElementById('roomCondition').value;
+
+            if (!bookingId || !actualCheckOutDate || !totalAmount || !paymentMethod || !roomCondition) {
+                e.preventDefault();
+                alert('Vui lòng điền đầy đủ thông tin bắt buộc');
+                return false;
+            }
+        });
+
+        // Set minimum date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('actualCheckOutDate').min = today;
+        });
+    </script>
 </body>
 </html>

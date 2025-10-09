@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Check-In - Hotel Management</title>
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <style>
+        .card {
+            border: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .detail-section {
+            margin-bottom: 2rem;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+        .detail-value {
+            color: #666;
+        }
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .status-checked-in {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .back-btn {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-scroller">
+        <!-- Header -->
+        <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+            <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo" th:href="@{/hotel-management/home}">
+                    <img th:src="@{/img/Logo.png}" alt="logo" class="mr-2" style="height: 40px;">
+                    Hotel Management
+                </a>
+            </div>
+            <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+                <ul class="navbar-nav navbar-nav-right">
+                    <li class="nav-item nav-profile dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
+                            <span class="nav-profile-name">Admin</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <div class="container-fluid page-body-wrapper">
+            <nav class="sidebar sidebar-offcanvas" id="sidebar">
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/home}">
+                            <i class="mdi mdi-home menu-icon"></i>
+                            <span class="menu-title">Trang chủ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/checkin}">
+                            <i class="mdi mdi-login menu-icon"></i>
+                            <span class="menu-title">Check-In</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/checkout}">
+                            <i class="mdi mdi-logout menu-icon"></i>
+                            <span class="menu-title">Check-Out</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/checkin-list}">
+                            <i class="mdi mdi-format-list-bulleted menu-icon"></i>
+                            <span class="menu-title">Danh sách Check-In</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/hotel-management/checkout-list}">
+                            <i class="mdi mdi-history menu-icon"></i>
+                            <span class="menu-title">Lịch sử Check-Out</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Main Content -->
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h4 class="card-title">Chi tiết Check-In</h4>
+                                        <a th:href="@{/hotel-management/checkin-list}" class="back-btn">
+                                            <i class="mdi mdi-arrow-left"></i> Quay lại
+                                        </a>
+                                    </div>
+
+                                    <div th:if="${checkIn}" class="row">
+                                        <!-- Thông tin Booking -->
+                                        <div class="col-md-6">
+                                            <div class="detail-section">
+                                                <h5 class="mb-3">Thông tin Booking</h5>
+                                                <div class="row mb-2">
+                                                    <div class="col-4">
+                                                        <span class="detail-label">Booking ID:</span>
+                                                    </div>
+                                                    <div class="col-8">
+                                                        <span class="detail-value" th:text="#${checkIn.bookingId}">#1</span>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-4">
+                                                        <span class="detail-label">Trạng thái:</span>
+                                                    </div>
+                                                    <div class="col-8">
+                                                        <span class="status-badge status-checked-in" th:text="${checkIn.status}">CHECKED_IN</span>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-4">
+                                                        <span class="detail-label">Ngày tạo:</span>
+                                                    </div>
+                                                    <div class="col-8">
+                                                        <span class="detail-value" th:text="${checkIn.createdAt}">2025-10-10</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Thông tin Phòng -->
+                                        <div class="col-md-6">
+                                            <div class="detail-section">
+                                                <h5 class="mb-3">Thông tin Phòng</h5>
+                                                <div class="row mb-2">
+                                                    <div class="col-4">
+                                                        <span class="detail-label">Số phòng:</span>
+                                                    </div>
+                                                    <div class="col-8">
+                                                        <span class="detail-value" th:text="${checkIn.roomNumber}">101</span>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-4">
+                                                        <span class="detail-label">Loại phòng:</span>
+                                                    </div>
+                                                    <div class="col-8">
+                                                        <span class="detail-value" th:text="${checkIn.roomType}">Deluxe</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Thông tin Khách hàng -->
+                                        <div class="col-md-6">
+                                            <div class="detail-section">
+                                                <h5 class="mb-3">Thông tin Khách hàng</h5>
+                                                <div class="row mb-2">
+                                                    <div class="col-4">
+                                                        <span class="detail-label">Tên:</span>
+                                                    </div>
+                                                    <div class="col-8">
+                                                        <span class="detail-value" th:text="${checkIn.customerName}">Nguyễn Văn A</span>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-4">
+                                                        <span class="detail-label">Số điện thoại:</span>
+                                                    </div>
+                                                    <div class="col-8">
+                                                        <span class="detail-value" th:text="${checkIn.customerPhone}">0123456789</span>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-4">
+                                                        <span class="detail-label">Email:</span>
+                                                    </div>
+                                                    <div class="col-8">
+                                                        <span class="detail-value" th:text="${checkIn.customerEmail}">customer@email.com</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Thông tin Thời gian -->
+                                        <div class="col-md-6">
+                                            <div class="detail-section">
+                                                <h5 class="mb-3">Thông tin Thời gian</h5>
+                                                <div class="row mb-2">
+                                                    <div class="col-4">
+                                                        <span class="detail-label">Ngày Check-In:</span>
+                                                    </div>
+                                                    <div class="col-8">
+                                                        <span class="detail-value" th:text="${checkIn.checkInDate}">2025-10-10</span>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-4">
+                                                        <span class="detail-label">Ngày Check-Out dự kiến:</span>
+                                                    </div>
+                                                    <div class="col-8">
+                                                        <span class="detail-value" th:text="${checkIn.expectedCheckOutDate}">2025-10-15</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Thông tin bổ sung -->
+                                        <div class="col-12">
+                                            <div class="detail-section">
+                                                <h5 class="mb-3">Thông tin bổ sung</h5>
+                                                <div class="row mb-2">
+                                                    <div class="col-2">
+                                                        <span class="detail-label">Số người:</span>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <span class="detail-value" th:text="${checkIn.numberOfGuests}">2</span>
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <span class="detail-label">Tiền cọc:</span>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <span class="detail-value" th:text="${checkIn.depositAmount}">1,000,000 VNĐ</span>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-2">
+                                                        <span class="detail-label">Ghi chú:</span>
+                                                    </div>
+                                                    <div class="col-10">
+                                                        <span class="detail-value" th:text="${checkIn.notes}">Khách VIP</span>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-2">
+                                                        <span class="detail-label">Dịch vụ:</span>
+                                                    </div>
+                                                    <div class="col-10">
+                                                        <span class="detail-value" th:text="${checkIn.services}">Breakfast, WiFi</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div th:unless="${checkIn}" class="text-center">
+                                        <div class="alert alert-warning" role="alert">
+                                            <h4 class="alert-heading">Không tìm thấy thông tin!</h4>
+                                            <p>Không tìm thấy thông tin check-in với ID này.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/assets/js/misc.js}"></script>
+</body>
+</html>
+
