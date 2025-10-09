@@ -1,60 +1,103 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Status Toggle Functionality
-    const statusToggle = document.getElementById('statusToggle');
-
-    // Discount Type Selection
-    const percentRadio = document.querySelector('input[value="percent"]');
-    const priceRadio = document.querySelector('input[value="price"]');
+    // Get elements
+    const percentRadio = document.getElementById('percentRadio');
+    const fixedRadio = document.getElementById('fixedRadio');
     const percentOption = document.getElementById('percentOption');
-    const priceOption = document.getElementById('priceOption');
+    const fixedOption = document.getElementById('fixedOption');
+    const percentValue = document.getElementById('percentValue');
+    const fixedValue = document.getElementById('fixedValue');
+    const finalDiscountType = document.getElementById('finalDiscountType');
+    const finalValue = document.getElementById('finalValue');
 
+    // Update UI and enable/disable inputs
     function updateDiscountType() {
         if (percentRadio.checked) {
+            // Enable percent option
             percentOption.classList.add('selected');
-            priceOption.classList.remove('selected');
-        } else if (priceRadio.checked) {
-            priceOption.classList.add('selected');
+            fixedOption.classList.remove('selected');
+            fixedOption.classList.add('disabled');
+            
+            percentValue.disabled = false;
+            percentValue.required = true;
+            fixedValue.disabled = true;
+            fixedValue.required = false;
+            fixedValue.value = ''; // Clear disabled input
+            
+            // Update hidden fields
+            finalDiscountType.value = 'PERCENT';
+        } else if (fixedRadio.checked) {
+            // Enable fixed option
+            fixedOption.classList.add('selected');
             percentOption.classList.remove('selected');
+            percentOption.classList.add('disabled');
+            
+            fixedValue.disabled = false;
+            fixedValue.required = true;
+            percentValue.disabled = true;
+            percentValue.required = false;
+            percentValue.value = ''; // Clear disabled input
+            
+            // Update hidden fields
+            finalDiscountType.value = 'PRICE';
         }
     }
 
+    // Event listeners for radio buttons
     percentRadio.addEventListener('change', updateDiscountType);
-    priceRadio.addEventListener('change', updateDiscountType);
+    fixedRadio.addEventListener('change', updateDiscountType);
 
-    // Click on option container to select radio
-    percentOption.addEventListener('click', function () {
-        percentRadio.checked = true;
-        updateDiscountType();
+    // Click on entire option container to select
+    percentOption.addEventListener('click', function (e) {
+        if (e.target.type !== 'number') { // Don't trigger when clicking input
+            percentRadio.checked = true;
+            updateDiscountType();
+        }
     });
 
-    priceOption.addEventListener('click', function () {
-        priceRadio.checked = true;
-        updateDiscountType();
+    fixedOption.addEventListener('click', function (e) {
+        if (e.target.type !== 'number') { // Don't trigger when clicking input
+            fixedRadio.checked = true;
+            updateDiscountType();
+        }
     });
 
-    // Form submission
+    // Update final value when inputs change
+    percentValue.addEventListener('input', function() {
+        if (percentRadio.checked) {
+            finalValue.value = this.value;
+        }
+    });
+
+    fixedValue.addEventListener('input', function() {
+        if (fixedRadio.checked) {
+            finalValue.value = this.value;
+        }
+    });
+
+    // Initialize on page load
+    updateDiscountType();
+
+    // Form validation before submit
     document.querySelector('form').addEventListener('submit', function (e) {
-        e.preventDefault();
+        if (percentRadio.checked && !percentValue.value) {
+            e.preventDefault();
+            alert('Please enter a percentage value');
+            percentValue.focus();
+            return false;
+        }
+        
+        if (fixedRadio.checked && !fixedValue.value) {
+            e.preventDefault();
+            alert('Please enter a fixed amount value');
+            fixedValue.focus();
+            return false;
+        }
 
-        // Collect form data
-        const formData = {
-            voucherCode: document.getElementById('voucherCode').value,
-            title: document.getElementById('title').value,
-            startDate: document.getElementById('startDate').value,
-            endDate: document.getElementById('endDate').value,
-            totalUsageLimit: document.getElementById('totalUsageLimit').value,
-            minimumGuests: document.getElementById('minimumGuests').value,
-            status: statusToggle.checked ? 'ACTIVE' : 'INACTIVE',
-            discountType: document.querySelector('input[name="discountType"]:checked').value,
-            discountValue: percentRadio.checked ?
-                document.getElementById('percent').value :
-                document.getElementById('price').value,
-            percentLimit: percentRadio.checked ? document.getElementById('percentLimit').value : null,
-            roomTypes: Array.from(document.querySelectorAll('input[name="roomTypes"]:checked'))
-                .map(cb => cb.value)
-        };
-
-        console.log('Form Data:', formData);
-        alert('Form submitted! Check console for data.');
+        // Update final value before submit
+        if (percentRadio.checked) {
+            finalValue.value = percentValue.value;
+        } else if (fixedRadio.checked) {
+            finalValue.value = fixedValue.value;
+        }
     });
 });
