@@ -19,9 +19,9 @@ public interface NewsService {
     
     Page<News> findAll(Pageable pageable);
     
-    List<News> findByStatus(String status);
+//    List<News> findByStatus(String status);
     
-    Page<News> findByStatus(String status, Pageable pageable);
+//    Page<News> findByStatus(String status, Pageable pageable);
     
     void deleteNews(Integer newsId);
     
@@ -29,9 +29,9 @@ public interface NewsService {
     News changeNewsStatus(Integer newsId, String status);
     
     // Additional methods for news management
-    List<News> findByNewsGroupId(Integer newsGroupId);
+//    List<News> findByNewsGroupId(Integer newsGroupId);
     
-    List<News> findByUserId(Integer userId);
+//    List<News> findByUserId(Integer userId);
     
     List<NewsGroup> findAllNewsGroups();
     
@@ -42,7 +42,7 @@ public interface NewsService {
     void deleteNewsGroup(Integer newsGroupId);
     
     // Search functionality
-    List<News> searchByTitle(String title);
+//    List<News> searchByTitle(String title);
     
-    Page<News> searchByTitle(String title, Pageable pageable);
+//    Page<News> searchByTitle(String title, Pageable pageable);
 }
