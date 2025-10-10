@@ -18,4 +18,12 @@ public class NewsGroup extends AbstractVersion{
 
     @Column(name = "name", length = 150)
     private String name;
+
+    public Integer getNewsGroupId() {
+        return newsGroupId;
+    }
+
+    public void setNewsGroupId(Integer newsGroupId) {
+        this.newsGroupId = newsGroupId;
+    }
 }

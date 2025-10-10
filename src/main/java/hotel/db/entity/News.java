@@ -41,6 +41,10 @@ public class News extends AbstractVersion{
     @Column(name = "link", length = 255)
     private String link;
 
+
+    @Column(name = "status", length = 20)
+    private String status = "DRAFT"; // DRAFT, PUBLISHED, ARCHIVED
+
     public Integer getNewsId() {
         return newsId;
     }
@@ -59,6 +63,14 @@ public class News extends AbstractVersion{
 
     public String getTitle() {
         return title;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public void setTitle(String title) {
