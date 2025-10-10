@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Room Management</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .btn-group .btn {
+            margin-right: 5px;
+        }
+        .btn-group .btn:last-child {
+            margin-right: 0;
+        }
+        .card-title {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            min-width: 300px;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            animation: slideInRight 0.3s ease-out;
+            border-left: 4px solid;
+        }
+
+        .toast.success {
+            border-left-color: #28a745;
+        }
+
+        .toast.error {
+            border-left-color: #dc3545;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .toast.success .toast-icon {
+            color: #28a745;
+        }
+
+        .toast.error .toast-icon {
+            color: #dc3545;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            color: #333;
+        }
+
+        .toast-message {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            margin-left: 10px;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .toast.fade-out {
+            animation: slideOutRight 0.3s ease-in forwards;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Toast Notification Container -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+</div>
+
+<div class="container-scroller">
+
+    <!-- import sidebar -->
+    <div th:replace="common/sidebar"></div>
+
+    <div class="main-panel">
+
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h4 class="card-title mb-0">Quản lý Phòng</h4>
+                            <p class="card-description mb-0">
+                                Danh sách các phòng của khách sạn
+                            </p>
+                        </div>
+                        <a href="/hotel-management/rooms/new" class="btn btn-primary">
+                            <i class="mdi mdi-plus"></i> Thêm Phòng Mới
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th> # </th>
+                                <th> Room ID </th>
+                                <th> Số Phòng </th>
+                                <th> Trạng Thái </th>
+                                <th> Thao tác </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>101</td>
+                                <td>101</td>
+                                <td><span class="badge badge-success">Sẵn sàng</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="/hotel-management/rooms/edit/101" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Sửa">
+                                            <i class="mdi mdi-pencil"></i>
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-outline-danger" 
+                                                onclick="confirmDelete(101)"
+                                                title="Xóa">
+                                            <i class="mdi mdi-delete"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>102</td>
+                                <td>102</td>
+                                <td><span class="badge badge-warning">Đang sử dụng</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="/hotel-management/rooms/edit/102" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Sửa">
+                                            <i class="mdi mdi-pencil"></i>
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-outline-danger" 
+                                                onclick="confirmDelete(102)"
+                                                title="Xóa">
+                                            <i class="mdi mdi-delete"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+<!-- main-panel ends -->
+</div>
+<!-- page-body-wrapper ends -->
+<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+<script src="/assets/vendors/chart.js/Chart.min.js"></script>
+<script src="/assets/js/off-canvas.js"></script>
+<script src="/assets/js/hoverable-collapse.js"></script>
+<script src="/assets/js/misc.js"></script>
+<script src="/assets/js/settings.js"></script>
+<script src="/assets/js/todolist.js"></script>
+<script src="/assets/js/chart.js"></script>
+
+<script>
+// Toast Notification Functions
+function showToast(type, title, message, duration = 20000) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle';
+    
+    toast.innerHTML = `
+        <i class="mdi ${icon} toast-icon"></i>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close" onclick="removeToast(this.parentElement)">×</button>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Auto remove after duration
+    setTimeout(() => {
+        if (toast.parentElement) {
+            removeToast(toast);
+        }
+    }, duration);
+}
+
+function removeToast(toast) {
+    toast.classList.add('fade-out');
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.parentElement.removeChild(toast);
+        }
+    }, 300);
+}
+
+// Loading Functions
+function showLoading() {
+    document.getElementById('loading-overlay').style.display = 'flex';
+}
+
+function hideLoading() {
+    document.getElementById('loading-overlay').style.display = 'none';
+}
+
+// Enhanced Delete Function with Animation
+function confirmDelete(roomId) {
+    // Create custom confirmation modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10001;
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        ">
+            <i class="mdi mdi-alert-circle" style="font-size: 48px; color: #dc3545; margin-bottom: 20px;"></i>
+            <h4 style="margin-bottom: 15px; color: #333;">Xác nhận xóa</h4>
+            <p style="margin-bottom: 25px; color: #666;">Bạn có chắc chắn muốn xóa phòng này không? Hành động này không thể hoàn tác.</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="this.closest('div').parentElement.remove()" 
+                        style="padding: 10px 20px; border: 1px solid #ccc; background: white; border-radius: 5px; cursor: pointer;">
+                    Hủy
+                </button>
+                <button onclick="deleteRoom(${roomId}, this.closest('div').parentElement)" 
+                        style="padding: 10px 20px; border: none; background: #dc3545; color: white; border-radius: 5px; cursor: pointer;">
+                    Xóa
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Delete Room Function
+function deleteRoom(roomId, modal) {
+    showLoading();
+    
+    // Simulate API call (replace with actual fetch if needed)
+    fetch(`/hotel-management/rooms/delete/${roomId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        hideLoading();
+        modal.remove();
+        
+        if (response.ok) {
+            showToast('success', 'Xóa thành công!', 'Phòng đã được xóa khỏi hệ thống.');
+            
+            // Remove row from table with animation
+            const row = document.querySelector(`button[onclick*="${roomId}"]`).closest('tr');
+            row.style.transition = 'all 0.3s ease';
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(-100%)';
+            
+            setTimeout(() => {
+                row.remove();
+                // Reload page after animation
+                setTimeout(() => {
+                    window.location.reload();
+                }, 300);
+            }, 300);
+        } else {
+            showToast('error', 'Lỗi!', 'Không thể xóa phòng. Vui lòng thử lại.');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        modal.remove();
+        showToast('error', 'Lỗi!', 'Có lỗi xảy ra khi xóa phòng.');
+        console.error('Error:', error);
+    });
+}
+
+// Check for URL parameters to show success messages
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.get('success') === 'add') {
+        showToast('success', 'Thêm thành công!', 'Phòng mới đã được thêm vào hệ thống.');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    if (urlParams.get('success') === 'edit') {
+        showToast('success', 'Cập nhật thành công!', 'Thông tin phòng đã được cập nhật.');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    if (urlParams.get('success') === 'delete') {
+        showToast('success', 'Xóa thành công!', 'Phòng đã được xóa khỏi hệ thống.');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    if (urlParams.get('error') === 'delete') {
+        showToast('error', 'Lỗi xóa!', 'Không thể xóa phòng. Vui lòng thử lại.');
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
+
+// Add click animation to buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // Add ripple animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+</body>
+</html>
