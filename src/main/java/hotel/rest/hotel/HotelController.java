@@ -14,6 +14,10 @@ public class HotelController {
 
     private final HotelService hotelService;
 
+                    public HotelController(HotelService hotelService) {
+                        this.hotelService = hotelService;
+                    }
+
 
     // Xem chi tiết khách sạn
     @GetMapping("/{id}")

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Nhóm Tin Tức - Hệ Thống Khách Sạn</title>
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --secondary-gold: #F4E4BC;
+            --dark-navy: #1B2951;
+            --light-navy: #2C3E50;
+            --cream: #F8F6F0;
+            --charcoal: #2C2C2C;
+            --soft-gray: #E8E8E8;
+            --accent-blue: #4A90E2;
+            --success-green: #28a745;
+            --danger-red: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFFFF 100%);
+            min-height: 100vh;
+            color: var(--charcoal);
+            line-height: 1.6;
+        }
+
+        .luxury-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            background: linear-gradient(135deg, var(--dark-navy) 0%, var(--light-navy) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+        .nav-title h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .nav-title p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .btn-luxury {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, #B8941F 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-luxury:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Alert Messages */
+        .alert-luxury {
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 500;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, var(--success-green) 0%, #1e7e34 100%);
+            color: white;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, var(--danger-red) 0%, #c82333 100%);
+            color: white;
+        }
+
+        /* Form Container */
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark-navy);
+            font-size: 1.1rem;
+        }
+
+        .form-control-luxury {
+            width: 100%;
+            border: 2px solid var(--soft-gray);
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+        }
+
+        .form-control-luxury:focus {
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+            outline: none;
+        }
+
+        .form-control-luxury::placeholder {
+            color: #999;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .btn-secondary {
+            background: var(--soft-gray);
+            color: var(--charcoal);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: #d1d1d1;
+            color: var(--charcoal);
+        }
+
+        /* Groups Grid */
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .group-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .group-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-gold);
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .group-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark-navy);
+            margin: 0;
+        }
+
+        .group-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-edit {
+            background: var(--warning-orange);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--danger-red);
+            color: white;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+            text-decoration: none;
+            color: white;
+        }
+
+        .group-meta {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .group-meta i {
+            color: var(--primary-gold);
+            width: 16px;
+            margin-right: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #999;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .luxury-container {
+                padding: 20px 15px;
+            }
+
+            .nav-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-title h1 {
+                font-size: 2rem;
+            }
+
+            .form-container {
+                padding: 25px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .groups-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .group-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .group-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="luxury-container">
+        <!-- Navigation Header -->
+        <div class="nav-header">
+            <div class="nav-content">
+                <div class="nav-left">
+                    <a href="/management/news" class="back-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Quay lại
+                    </a>
+                    <div class="nav-title">
+                        <h1>Quản Lý Nhóm Tin Tức</h1>
+                        <p>Quản lý các nhóm phân loại tin tức</p>
+                    </div>
+                </div>
+                <a href="/management/news" class="btn-luxury">
+                    <i class="fas fa-newspaper"></i>
+                    Quản Lý Tin Tức
+                </a>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${message}" class="alert-luxury alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${message}"></span>
+        </div>
+
+        <div th:if="${error}" class="alert-luxury alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Add Group Form -->
+        <div class="form-container">
+            <h3 style="margin-bottom: 25px; color: var(--dark-navy); font-family: 'Playfair Display', serif;">
+                <i class="fas fa-plus-circle" style="color: var(--primary-gold); margin-right: 10px;"></i>
+                Thêm Nhóm Tin Tức Mới
+            </h3>
+            
+            <form th:action="@{/management/news/groups/save}" method="post">
+                <div class="form-group">
+                    <label for="name" class="form-label">
+                        <i class="fas fa-tag"></i>
+                        Tên nhóm tin tức *
+                    </label>
+                    <input type="text" id="name" name="name" 
+                           class="form-control-luxury" 
+                           placeholder="Nhập tên nhóm tin tức..." 
+                           maxlength="150" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="reset" class="btn-luxury btn-secondary">
+                        <i class="fas fa-undo"></i>
+                        Làm mới
+                    </button>
+                    <button type="submit" class="btn-luxury">
+                        <i class="fas fa-save"></i>
+                        Thêm nhóm
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Groups List -->
+        <div th:if="${!newsGroups.isEmpty()}">
+            <h3 style="margin-bottom: 25px; color: var(--dark-navy); font-family: 'Playfair Display', serif;">
+                <i class="fas fa-list" style="color: var(--primary-gold); margin-right: 10px;"></i>
+                Danh Sách Nhóm Tin Tức
+            </h3>
+            
+            <div class="groups-grid">
+                <div th:each="group : ${newsGroups}" class="group-card">
+                    <div class="group-header">
+                        <h4 class="group-name" th:text="${group.name}"></h4>
+                        <div class="group-actions">
+                            <form th:action="@{/management/news/groups/save}" method="post" class="d-inline">
+                                <input type="hidden" name="newsGroupId" th:value="${group.newsGroupId}">
+                                <input type="hidden" name="name" th:value="${group.name}">
+                                <button type="submit" class="btn-action btn-edit" title="Sửa tên nhóm">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </form>
+                            
+                            <form th:action="@{/management/news/groups/delete/{id}(id=${group.newsGroupId})}" 
+                                  method="post" class="d-inline" 
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhóm tin tức này?')">
+                                <button type="submit" class="btn-action btn-delete" title="Xóa nhóm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="group-meta">
+                        <div>
+                            <i class="fas fa-hashtag"></i>
+                            ID: <span th:text="${group.newsGroupId}"></span>
+                        </div>
+                        <div>
+                            <i class="fas fa-calendar"></i>
+                            Tạo: <span th:text="${#temporals.format(group.createdAt, 'dd/MM/yyyy')}"></span>
+                        </div>
+                        <div th:if="${group.updatedAt != group.createdAt}">
+                            <i class="fas fa-clock"></i>
+                            Cập nhật: <span th:text="${#temporals.format(group.updatedAt, 'dd/MM/yyyy')}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${newsGroups.isEmpty()}" class="empty-state">
+            <i class="fas fa-tags"></i>
+            <h3>Chưa có nhóm tin tức nào</h3>
+            <p>Hãy thêm nhóm tin tức đầu tiên để bắt đầu phân loại tin tức</p>
+        </div>
+    </div>
+
+    <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-focus on name input
+        document.getElementById('name').focus();
+        
+        // Form validation
+        const form = document.querySelector('form');
+        const nameInput = document.getElementById('name');
+        
+        form.addEventListener('submit', function(e) {
+            const name = nameInput.value.trim();
+            if (name.length < 2) {
+                e.preventDefault();
+                alert('Tên nhóm tin tức phải có ít nhất 2 ký tự');
+                nameInput.focus();
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>
