@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Vị Trí Phòng - Hệ Thống Khách Sạn</title>
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --secondary-gold: #F4E4BC;
+            --dark-navy: #1B2951;
+            --light-navy: #2C3E50;
+            --cream: #F8F6F0;
+            --charcoal: #2C2C2C;
+            --soft-gray: #E8E8E8;
+            --accent-blue: #4A90E2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFFFF 100%);
+            min-height: 100vh;
+            color: var(--charcoal);
+            line-height: 1.6;
+        }
+
+        .luxury-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .luxury-header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .luxury-header::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--secondary-gold));
+            border-radius: 2px;
+        }
+
+        .luxury-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .luxury-subtitle {
+            font-size: 1.1rem;
+            color: var(--light-navy);
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--soft-gray);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--secondary-gold));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .stat-icon.view { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-icon.size { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-icon.floor { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-icon.room { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-bottom: 8px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--light-navy);
+            font-weight: 500;
+        }
+
+        .management-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .management-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--soft-gray);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .management-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .management-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 32px;
+            color: white;
+        }
+
+        .management-icon.view { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .management-icon.size { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .management-icon.floor { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .management-icon.room { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+        .management-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark-navy);
+            margin-bottom: 12px;
+        }
+
+        .management-description {
+            font-size: 0.95rem;
+            color: var(--light-navy);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .btn-luxury {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-luxury.primary {
+            background: linear-gradient(135deg, var(--primary-gold), var(--secondary-gold));
+            color: white;
+        }
+
+        .btn-luxury.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-luxury.secondary {
+            background: var(--soft-gray);
+            color: var(--dark-navy);
+        }
+
+        .btn-luxury.secondary:hover {
+            background: var(--light-navy);
+            color: white;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .luxury-container {
+                padding: 20px 16px;
+            }
+            
+            .luxury-title {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .management-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="luxury-container">
+        <!-- Luxury Header -->
+        <div class="luxury-header">
+            <h1 class="luxury-title">Quản Lý Vị Trí Phòng</h1>
+            <p class="luxury-subtitle">Tổng quan và quản lý các thành phần định vị phòng trong hệ thống khách sạn</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon view">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stat-number" th:text="${viewCount}">0</div>
+                <div class="stat-label">Loại View</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon size">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </div>
+                <div class="stat-number" th:text="${sizeCount}">0</div>
+                <div class="stat-label">Kích Thước Phòng</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon floor">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div class="stat-number" th:text="${floorCount}">0</div>
+                <div class="stat-label">Tầng</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon room">
+                    <i class="fas fa-bed"></i>
+                </div>
+                <div class="stat-number" th:text="${roomCount}">0</div>
+                <div class="stat-label">Phòng</div>
+            </div>
+        </div>
+
+        <!-- Management Cards -->
+        <div class="management-grid">
+            <div class="management-card">
+                <div class="management-icon view">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h3 class="management-title">Quản Lý View</h3>
+                <p class="management-description">Quản lý các loại view của phòng như Sea View, City View, Garden View...</p>
+                <a th:href="@{/hotel-management/view}" class="btn-luxury primary">
+                    <i class="fas fa-cog"></i>
+                    Quản Lý View
+                </a>
+            </div>
+
+            <div class="management-card">
+                <div class="management-icon size">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </div>
+                <h3 class="management-title">Quản Lý Kích Thước</h3>
+                <p class="management-description">Quản lý các kích thước phòng như Standard, Deluxe, Suite...</p>
+                <a th:href="@{/hotel-management/size}" class="btn-luxury primary">
+                    <i class="fas fa-cog"></i>
+                    Quản Lý Kích Thước
+                </a>
+            </div>
+
+            <div class="management-card">
+                <div class="management-icon floor">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <h3 class="management-title">Quản Lý Tầng</h3>
+                <p class="management-description">Quản lý các tầng của khách sạn và phân bố phòng theo tầng</p>
+                <a th:href="@{/hotel-management/floor}" class="btn-luxury primary">
+                    <i class="fas fa-cog"></i>
+                    Quản Lý Tầng
+                </a>
+            </div>
+
+            <div class="management-card">
+                <div class="management-icon room">
+                    <i class="fas fa-bed"></i>
+                </div>
+                <h3 class="management-title">Quản Lý Phòng</h3>
+                <p class="management-description">Quản lý thông tin chi tiết của từng phòng trong khách sạn</p>
+                <a th:href="@{/hotel-management/rooms}" class="btn-luxury primary">
+                    <i class="fas fa-cog"></i>
+                    Quản Lý Phòng
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

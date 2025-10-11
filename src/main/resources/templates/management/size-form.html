@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Size Management - Create/Edit</title>
+    <base th:href="@{/}">
+    <!-- Corona Admin assets -->
+    <!-- plugins:css -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <!-- End plugins:css -->
+    <!-- Plugin css for this page -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/jvectormap/jquery-jvectormap.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/flag-icon-css/css/flag-icon.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.theme.default.min.css}">
+    <!-- End plugin css for this page -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <!-- End layout styles -->
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <!-- Custom CSS -->
+    <style>
+        .discount-form-container {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .form-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: end;
+        }
+        
+        .form-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+        
+        .save-button {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .save-button:hover {
+            background: linear-gradient(45deg, #0056b3, #004085);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            margin-left: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .card-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+        
+        .text-danger {
+            color: #dc3545 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-scroller">
+        <!-- Include sidebar -->
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+        <!-- partial -->
+        <div class="container-fluid page-body-wrapper">
+            <!-- partial:partials/_navbar.html -->
+            <nav class="navbar p-0 fixed-top d-flex flex-row">
+                <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                    <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                            alt="logo" /></a>
+                </div>
+                <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+                </div>
+            </nav>
+            <!-- partial -->
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="row">
+                        <div class="col-12 grid-margin">
+                            <div class="card">
+                                <div class="card-body">
+                                    <!-- Header -->
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h2 class="card-title mb-0" th:text="${sizeId != null ? 'Size Management - Edit' : 'Size Management - Create'}">Size Management</h2>
+                                    </div>
+
+                                    <!-- Create/Edit Form -->
+                                    <div class="discount-form-container">
+                                        <h5 class="form-title" th:text="${sizeId != null ? 'Edit Size' : 'Create New Size'}">Create/Edit</h5>
+
+                                        <form method="POST" 
+                                              th:action="${sizeId != null ? '/hotel-management/size/update/' + sizeId : '/hotel-management/size/save'}"
+                                              th:object="${sizeRequest}">
+                                            
+                                            <!-- Size Input -->
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="size">Kích Thước (m²) <span class="text-danger">*</span></label>
+                                                    <input type="number" 
+                                                           class="form-control" 
+                                                           id="size" 
+                                                           th:field="*{size}" 
+                                                           step="0.01" 
+                                                           min="0.01" 
+                                                           max="999.99"
+                                                           required
+                                                           placeholder="Nhập kích thước phòng (m²)">
+                                                </div>
+                                            </div>
+
+                                            <!-- Save Button -->
+                                            <button type="submit" class="save-button">
+                                                <i class="mdi mdi-check"></i> 
+                                                <span th:text="${sizeId != null ? 'Cập Nhật' : 'Thêm Mới'}">Thêm Mới</span>
+                                            </button>
+                                            <a th:href="@{/hotel-management/size}" class="btn-secondary">
+                                                <i class="mdi mdi-arrow-left"></i> Quay Lại
+                                            </a>
+                                            <div style="clear: both;"></div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- content-wrapper ends -->
+                <!-- partial:partials/_footer.html -->
+                <footer class="footer">
+                    <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                        <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright ©
+                            bootstrapdash.com 2020</span>
+                    </div>
+                </footer>
+                <!-- partial -->
+            </div>
+            <!-- main-panel ends -->
+        </div>
+        <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+
+    <!-- plugins:js -->
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <!-- End plugins:js -->
+    <!-- Plugin js for this page -->
+    <script th:src="@{/assets/vendors/chart.js/Chart.min.js}"></script>
+    <script th:src="@{/assets/vendors/progressbar.js/progressbar.min.js}"></script>
+    <script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap.min.js}"></script>
+    <script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js}"></script>
+    <script th:src="@{/assets/vendors/owl-carousel-2/owl.carousel.min.js}"></script>
+    <!-- End plugin js for this page -->
+    <!-- inject:js -->
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/assets/js/misc.js}"></script>
+    <script th:src="@{/assets/js/settings.js}"></script>
+    <script th:src="@{/assets/js/todolist.js}"></script>
+    <!-- endinject -->
+    
+    <!-- Custom JavaScript for form validation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const sizeInput = document.getElementById('size');
+            
+            // Real-time validation
+            sizeInput.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                if (value < 0.01) {
+                    this.setCustomValidity('Kích thước phải lớn hơn 0.01 m²');
+                } else if (value > 999.99) {
+                    this.setCustomValidity('Kích thước không được vượt quá 999.99 m²');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+            
+            // Form submission validation
+            form.addEventListener('submit', function(e) {
+                const value = parseFloat(sizeInput.value);
+                if (isNaN(value) || value < 0.01 || value > 999.99) {
+                    e.preventDefault();
+                    alert('Vui lòng nhập kích thước hợp lệ (0.01 - 999.99 m²)');
+                    sizeInput.focus();
+                    return false;
+                }
+            });
+            
+            // Auto-focus on size input
+            sizeInput.focus();
+        });
+    </script>
+
+</body>
+
+</html>
