@@ -10,10 +10,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const finalValue = document.getElementById('finalValue');
 
     // Update UI and enable/disable inputs
-    function updateDiscountType() {
+    function updateDiscountType(clearValues = true) {
         if (percentRadio.checked) {
             // Enable percent option
             percentOption.classList.add('selected');
+            percentOption.classList.remove('disabled');
             fixedOption.classList.remove('selected');
             fixedOption.classList.add('disabled');
             
@@ -21,13 +22,17 @@ document.addEventListener('DOMContentLoaded', function () {
             percentValue.required = true;
             fixedValue.disabled = true;
             fixedValue.required = false;
-            fixedValue.value = ''; // Clear disabled input
+            if (clearValues) {
+                fixedValue.value = ''; // Clear disabled input only when switching
+            }
             
             // Update hidden fields
             finalDiscountType.value = 'PERCENT';
+            finalValue.value = percentValue.value;
         } else if (fixedRadio.checked) {
             // Enable fixed option
             fixedOption.classList.add('selected');
+            fixedOption.classList.remove('disabled');
             percentOption.classList.remove('selected');
             percentOption.classList.add('disabled');
             
@@ -35,10 +40,13 @@ document.addEventListener('DOMContentLoaded', function () {
             fixedValue.required = true;
             percentValue.disabled = true;
             percentValue.required = false;
-            percentValue.value = ''; // Clear disabled input
+            if (clearValues) {
+                percentValue.value = ''; // Clear disabled input only when switching
+            }
             
             // Update hidden fields
             finalDiscountType.value = 'PRICE';
+            finalValue.value = fixedValue.value;
         }
     }
 
@@ -74,8 +82,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Initialize on page load
-    updateDiscountType();
+    // Initialize on page load (don't clear values on initial load)
+    updateDiscountType(false);
 
     // Form validation before submit
     document.querySelector('form').addEventListener('submit', function (e) {
