@@ -4,14 +4,19 @@ import hotel.db.dto.size.SizeRequestDto;
 import hotel.db.dto.size.SizeResponseDto;
 import hotel.db.dto.floor.FloorRequestDto;
 import hotel.db.dto.floor.FloorResponseDto;
+import hotel.db.dto.room.RoomRequestDto;
+import hotel.db.entity.Room;
 import hotel.service.view.ViewService;
 import hotel.service.size.SizeService;
 import hotel.service.floor.FloorService;
+import hotel.service.room.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/hotel-management")
@@ -21,6 +26,7 @@ public class ManagementController {
     private final ViewService viewService;
     private final SizeService sizeService;
     private final FloorService floorService;
+    private final RoomService roomService;
 
     @GetMapping("/location-room")
     public String locationRoomManagement(Model model) {
@@ -28,7 +34,7 @@ public class ManagementController {
         int viewCount = viewService.getAllViews().size();
         int sizeCount = sizeService.getAllActiveSizes().size();
         int floorCount = floorService.getAllActiveFloors().size();
-        int roomCount = 0; // Placeholder for room count
+        int roomCount = roomService.getAllRooms().size();
 
         model.addAttribute("viewCount", viewCount);
         model.addAttribute("sizeCount", sizeCount);
@@ -150,9 +156,115 @@ public class ManagementController {
         return "redirect:/hotel-management/floor";
     }
 
+    // ROOM MANAGEMENT
     @GetMapping("/rooms")
     public String roomManagement(Model model) {
-        model.addAttribute("message", "Room management page");
+        List<Room> rooms = roomService.getAllRooms();
+        model.addAttribute("rooms", rooms);
         return "management/room-management";
+    }
+
+    @GetMapping("/rooms/new")
+    public String newRoomForm(Model model) {
+        RoomRequestDto roomRequest = new RoomRequestDto();
+        // Set default values
+        roomRequest.setRoomNumber("");
+        roomRequest.setRoomType("Deluxe");
+        roomRequest.setBedType("King");
+        roomRequest.setFloorId(1L);
+        roomRequest.setSizeId(2L);
+        roomRequest.setStatus("AVAILABLE");
+        roomRequest.setPrice(new java.math.BigDecimal("1000000")); // 1 triệu VNĐ
+        roomRequest.setRoomDescription("Phòng deluxe với view đẹp");
+        
+        model.addAttribute("roomRequest", roomRequest);
+        return "management/room-form";
+    }
+
+    @PostMapping("/rooms/save")
+    public String saveRoom(@ModelAttribute("roomRequest") RoomRequestDto roomRequest, RedirectAttributes redirectAttributes) {
+        try {
+            Room room = new Room();
+            room.setRoomNumber(roomRequest.getRoomNumber());
+            room.setRoomType(roomRequest.getRoomType());
+            room.setBedType(roomRequest.getBedType());
+            room.setFloorId(roomRequest.getFloorId().intValue());
+            room.setSizeId(roomRequest.getSizeId().intValue());
+            room.setRoomDescription(roomRequest.getRoomDescription());
+            room.setPrice(roomRequest.getPrice());
+            room.setStatus(roomRequest.getStatus());
+            room.setSold(roomRequest.getSold() != null ? roomRequest.getSold() : 0);
+            room.setView(roomRequest.getView() != null ? roomRequest.getView() : 0);
+            
+            Room savedRoom = roomService.createRoom(room);
+            redirectAttributes.addFlashAttribute("success", "add");
+            redirectAttributes.addFlashAttribute("newRoomId", savedRoom.getRoomId());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "add");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/hotel-management/rooms";
+    }
+
+    @GetMapping("/rooms/edit/{id}")
+    public String editRoom(@PathVariable Integer id, Model model) {
+        try {
+            Room room = roomService.getRoomById(id);
+            RoomRequestDto roomRequest = new RoomRequestDto();
+            roomRequest.setRoomNumber(room.getRoomNumber());
+            roomRequest.setRoomType(room.getRoomType());
+            roomRequest.setBedType(room.getBedType());
+            roomRequest.setFloorId(room.getFloorId().longValue());
+            roomRequest.setSizeId(room.getSizeId().longValue());
+            roomRequest.setRoomDescription(room.getRoomDescription());
+            roomRequest.setPrice(room.getPrice());
+            roomRequest.setStatus(room.getStatus());
+            roomRequest.setSold(room.getSold());
+            roomRequest.setView(room.getView());
+            
+            model.addAttribute("roomRequest", roomRequest);
+            model.addAttribute("roomId", id);
+        } catch (Exception e) {
+            model.addAttribute("error", "Không tìm thấy phòng với ID: " + id);
+        }
+        return "management/room-form";
+    }
+
+    @PostMapping("/rooms/update/{id}")
+    public String updateRoom(@PathVariable Integer id, @ModelAttribute("roomRequest") RoomRequestDto roomRequest, RedirectAttributes redirectAttributes) {
+        try {
+            Room room = new Room();
+            room.setRoomNumber(roomRequest.getRoomNumber());
+            room.setRoomType(roomRequest.getRoomType());
+            room.setBedType(roomRequest.getBedType());
+            room.setFloorId(roomRequest.getFloorId().intValue());
+            room.setSizeId(roomRequest.getSizeId().intValue());
+            room.setRoomDescription(roomRequest.getRoomDescription());
+            room.setPrice(roomRequest.getPrice());
+            room.setStatus(roomRequest.getStatus());
+            room.setSold(roomRequest.getSold() != null ? roomRequest.getSold() : 0);
+            room.setView(roomRequest.getView() != null ? roomRequest.getView() : 0);
+            
+            Room updatedRoom = roomService.updateRoom(id, room);
+            redirectAttributes.addFlashAttribute("success", "edit");
+            redirectAttributes.addFlashAttribute("updatedRoomId", updatedRoom.getRoomId());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "edit");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/hotel-management/rooms";
+    }
+
+    @PostMapping("/rooms/delete/{id}")
+    public String deleteRoom(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            roomService.hardDeleteRoom(id);
+            redirectAttributes.addFlashAttribute("success", "delete");
+            redirectAttributes.addFlashAttribute("deletedRoomId", id);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "delete");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/hotel-management/rooms";
     }
 }

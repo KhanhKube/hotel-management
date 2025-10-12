@@ -13,8 +13,12 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @Controller
 @RequestMapping("/hotel-management/accounts")
@@ -91,25 +95,31 @@ public class AccountController extends BaseController {
      */
     @GetMapping("/edit/{id}")
     public String editAccountForm(@PathVariable Integer id, Model model) {
-        AccountResponseDto account = accountService.getAccountById(id);
-        
-        // Convert ResponseDto to RequestDto for form
-        AccountRequestDto accountRequestDto = new AccountRequestDto();
-        accountRequestDto.setUsername(account.getUsername());
-        accountRequestDto.setEmail(account.getEmail());
-        accountRequestDto.setPhone(account.getPhone());
-        accountRequestDto.setFirstName(account.getFirstName());
-        accountRequestDto.setLastName(account.getLastName());
-        accountRequestDto.setGender(account.getGender());
-        accountRequestDto.setDob(account.getDob());
-        accountRequestDto.setAddress(account.getAddress());
-        accountRequestDto.setRole(account.getRole());
-        accountRequestDto.setStatus(account.getStatus());
-        accountRequestDto.setAvatarUrl(account.getAvatarUrl());
-        
-        model.addAttribute("account", accountRequestDto);
-        model.addAttribute("accountId", id);
-        return "management/account/account-form";
+        try {
+            AccountResponseDto account = accountService.getAccountById(id);
+            
+            // Convert ResponseDto to RequestDto for form
+            AccountRequestDto accountRequestDto = new AccountRequestDto();
+            accountRequestDto.setUserId(account.getUserId());
+            accountRequestDto.setUsername(account.getUsername());
+            accountRequestDto.setEmail(account.getEmail());
+            accountRequestDto.setPhone(account.getPhone());
+            accountRequestDto.setFirstName(account.getFirstName());
+            accountRequestDto.setLastName(account.getLastName());
+            accountRequestDto.setGender(account.getGender());
+            accountRequestDto.setDob(account.getDob());
+            accountRequestDto.setAddress(account.getAddress());
+            accountRequestDto.setRole(account.getRole());
+            accountRequestDto.setStatus(account.getStatus());
+            accountRequestDto.setAvatarUrl(account.getAvatarUrl());
+            
+            model.addAttribute("account", accountRequestDto);
+            model.addAttribute("accountId", id);
+            return "management/account/account-form";
+        } catch (Exception e) {
+            log.error("Error loading account for edit: {}", id, e);
+            return "redirect:/hotel-management/accounts?error=notfound";
+        }
     }
 
     /**
@@ -151,20 +161,33 @@ public class AccountController extends BaseController {
         }
     }
 
+
     /**
-     * Xóa account
+     * Xóa tài khoản - SOFT DELETE ĐƠN GIẢN
      */
     @PostMapping("/delete/{id}")
-    public String deleteAccount(@PathVariable Integer id,
-                               RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public Map<String, Object> deleteAccount(@PathVariable Integer id) {
+        Map<String, Object> response = new HashMap<>();
+        
         try {
+            log.info("=== BẮT ĐẦU SOFT DELETE TÀI KHOẢN ID: {} ===", id);
+            
+            // Gọi service xóa
             accountService.deleteAccount(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Xóa account thành công!");
-            return "redirect:/hotel-management/accounts?success=delete";
+            
+            response.put("success", true);
+            response.put("message", "Xóa tài khoản thành công!");
+            log.info("=== SOFT DELETE THÀNH CÔNG ID: {} ===", id);
+            
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa account: " + e.getMessage());
-            return "redirect:/hotel-management/accounts";
+            log.error("=== LỖI SOFT DELETE ID: {} - {} ===", id, e.getMessage());
+            
+            response.put("success", false);
+            response.put("message", "Lỗi: " + e.getMessage());
         }
+        
+        return response;
     }
 
     /**
@@ -173,15 +196,12 @@ public class AccountController extends BaseController {
     @GetMapping("/check-username/{username}")
     @ResponseBody
     public boolean checkUsernameExists(@PathVariable String username) {
-        return accountService.existsByUsername(username);
+        try {
+            return accountService.existsByUsername(username);
+        } catch (Exception e) {
+            log.error("Error checking username: {}", username, e);
+            return false;
+        }
     }
 
-    /**
-     * Kiểm tra email đã tồn tại chưa (AJAX)
-     */
-    @GetMapping("/check-email/{email}")
-    @ResponseBody
-    public boolean checkEmailExists(@PathVariable String email) {
-        return accountService.existsByEmail(email);
-    }
 }
