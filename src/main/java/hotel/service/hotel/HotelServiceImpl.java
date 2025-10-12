@@ -17,11 +17,6 @@ public class HotelServiceImpl implements HotelService {
 
    private final HotelRepository hotelRepository;
 
-   @Autowired
-    public HotelServiceImpl(HotelRepository hotelRepository) {
-        this.hotelRepository = hotelRepository;
-    }
-
     @Override
     @Transactional
     public Hotel save(Hotel hotel) {

@@ -18,5 +18,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByRole(String role);
     Boolean existsByPhoneAndUsernameNot(String phone, String username);
     Boolean existsByEmailAndUsernameNot(String email, String username);
+    
+    // Soft delete methods
+    List<User> findByIsDeletedFalse();
+    List<User> findByRoleAndIsDeletedFalse(String role);
 
 }

@@ -422,56 +422,56 @@ function confirmDelete(userId) {
     document.body.appendChild(modal);
 }
 
-// Delete Account Function
+// Delete Account Function - SỬA LẠI ĐƠN GIẢN
 function deleteAccount(userId, modal) {
+    console.log('Bắt đầu xóa user ID:', userId);
     showLoading();
     
-    fetch(`/hotel-management/accounts/delete/${userId}`, {
+    // Gọi API xóa tài khoản
+    fetch('/hotel-management/accounts/delete/' + userId, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         }
     })
     .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
         hideLoading();
         modal.remove();
         
-        if (response.ok) {
-            showToast('success', 'Xóa thành công!', 'Tài khoản đã được xóa vĩnh viễn khỏi hệ thống.');
-            
-            // Remove row from table with animation
-            const row = document.querySelector(`button[onclick*="${userId}"]`).closest('tr');
-            row.style.transition = 'all 0.3s ease';
-            row.style.opacity = '0';
-            row.style.transform = 'translateX(-100%)';
-            
+        if (data.success) {
+            showToast('success', 'Thao tác thành công!', data.message);
+            // Reload trang sau 1 giây
             setTimeout(() => {
-                row.remove();
-                // Reload page to update numbering
-                setTimeout(() => {
-                    window.location.reload();
-                }, 300);
-            }, 300);
+                window.location.reload();
+            }, 1000);
         } else {
-            showToast('error', 'Lỗi!', 'Không thể xóa tài khoản. Vui lòng thử lại.');
+            showToast('error', 'Không thể xóa!', data.message);
         }
     })
     .catch(error => {
+        console.error('Lỗi:', error);
         hideLoading();
         modal.remove();
-        showToast('error', 'Lỗi!', 'Có lỗi xảy ra khi xóa tài khoản.');
-        console.error('Error:', error);
+        showToast('error', 'Lỗi hệ thống!', 'Có lỗi xảy ra khi xóa tài khoản: ' + error.message);
     });
 }
 
-// Toggle Status Function
+// Toggle Status Function - SỬA LẠI
 function toggleStatus(userId) {
     showLoading();
     
-    fetch(`/hotel-management/accounts/toggle-status/${userId}`, {
+    fetch('/hotel-management/accounts/toggle-status/' + userId, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         }
     })
     .then(response => {
@@ -479,7 +479,6 @@ function toggleStatus(userId) {
         
         if (response.ok) {
             showToast('success', 'Thay đổi trạng thái thành công!', 'Trạng thái tài khoản đã được cập nhật.');
-            
             // Reload page to show updated status
             setTimeout(() => {
                 window.location.reload();
@@ -490,7 +489,7 @@ function toggleStatus(userId) {
     })
     .catch(error => {
         hideLoading();
-        showToast('error', 'Lỗi!', 'Có lỗi xảy ra khi thay đổi trạng thái.');
+        showToast('error', 'Lỗi!', 'Có lỗi xảy ra khi thay đổi trạng thái: ' + error.message);
         console.error('Error:', error);
     });
 }

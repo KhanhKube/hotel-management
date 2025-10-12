@@ -26,7 +26,9 @@ public class AccountServiceImpl implements AccountService {
     @Transactional(readOnly = true)
     public List<AccountResponseDto> getAllAccounts() {
         log.info("Getting all accounts");
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findAll().stream()
+                .filter(user -> !user.getIsDeleted())
+                .collect(Collectors.toList());
         return users.stream()
                 .map(AccountResponseDto::new)
                 .collect(Collectors.toList());
@@ -36,7 +38,9 @@ public class AccountServiceImpl implements AccountService {
     @Transactional(readOnly = true)
     public List<AccountResponseDto> getAccountsByRole(String role) {
         log.info("Getting accounts by role: {}", role);
-        List<User> users = userRepository.findByRole(role);
+        List<User> users = userRepository.findByRole(role).stream()
+                .filter(user -> !user.getIsDeleted())
+                .collect(Collectors.toList());
         return users.stream()
                 .map(AccountResponseDto::new)
                 .collect(Collectors.toList());
@@ -65,6 +69,11 @@ public class AccountServiceImpl implements AccountService {
             throw new RuntimeException("Email đã tồn tại: " + accountRequestDto.getEmail());
         }
 
+        // Kiểm tra phone đã tồn tại chưa
+        if (userRepository.existsByPhoneAndUsernameNot(accountRequestDto.getPhone(), accountRequestDto.getUsername())) {
+            throw new RuntimeException("Số điện thoại đã tồn tại: " + accountRequestDto.getPhone());
+        }
+
         User user = buildUserFromRequest(accountRequestDto);
         user.setPassword(passwordEncoder.encode("123456")); // Mật khẩu mặc định
 
@@ -91,6 +100,12 @@ public class AccountServiceImpl implements AccountService {
         if (!existingUser.getEmail().equals(accountRequestDto.getEmail()) &&
             userRepository.existsByEmail(accountRequestDto.getEmail())) {
             throw new RuntimeException("Email đã tồn tại: " + accountRequestDto.getEmail());
+        }
+
+        // Kiểm tra phone đã tồn tại chưa (trừ user hiện tại)
+        if (!existingUser.getPhone().equals(accountRequestDto.getPhone()) &&
+            userRepository.existsByPhoneAndUsernameNot(accountRequestDto.getPhone(), existingUser.getUsername())) {
+            throw new RuntimeException("Số điện thoại đã tồn tại: " + accountRequestDto.getPhone());
         }
 
         // Cập nhật thông tin
@@ -132,17 +147,23 @@ public class AccountServiceImpl implements AccountService {
         return new AccountResponseDto(updatedUser);
     }
 
+
     @Override
     public void deleteAccount(Integer userId) {
-        log.info("Deleting account with ID: {}", userId);
-
+        log.info("=== BẮT ĐẦU XÓA TÀI KHOẢN ID: {} ===", userId);
+        
+        // Kiểm tra user có tồn tại không
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Account not found with ID: " + userId));
-
-        // Hard delete - xóa thật khỏi database
-        userRepository.delete(user);
-
-        log.info("Deleted account with ID: {}", userId);
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với ID: " + userId));
+        
+        log.info("Tìm thấy user: {} - {}", user.getUsername(), user.getEmail());
+        
+        // SOFT DELETE - Đơn giản và an toàn
+        user.setStatus(User.Status.INACTIVE);
+        user.setIsDeleted(true);
+        userRepository.save(user);
+        
+        log.info("=== SOFT DELETE THÀNH CÔNG ID: {} ===", userId);
     }
 
     @Override
