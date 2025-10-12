@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Room Form</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card-title {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+            border-color: #545b62;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-scroller">
+
+    <!-- import sidebar -->
+    <div th:replace="common/sidebar"></div>
+
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-container">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div>
+                                        <h4 class="card-title mb-0" th:text="${roomId != null ? 'Chỉnh sửa Phòng' : 'Thêm Phòng Mới'}">Thêm Phòng Mới</h4>
+                                        <p class="card-description mb-0">
+                                            <span th:if="${roomId != null}">Cập nhật thông tin phòng</span>
+                                            <span th:unless="${roomId != null}">Nhập thông tin phòng mới</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Error Messages -->
+                                <div th:if="${error}" class="alert alert-danger" role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <span th:text="${error}">Có lỗi xảy ra</span>
+                                </div>
+                                
+                                <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <span th:text="${errorMessage}">Chi tiết lỗi</span>
+                                </div>
+
+                                <form th:action="${roomId != null ? '/hotel-management/rooms/update/' + roomId : '/hotel-management/rooms/save'}" 
+                                      th:object="${roomRequest}" 
+                                      method="post"
+                                      autocomplete="off">
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="roomNumber">Số Phòng <span class="text-danger">*</span></label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="roomNumber" 
+                                               th:field="*{roomNumber}"
+                                               placeholder="Nhập số phòng"
+                                               required>
+                                        <div th:if="${#fields.hasErrors('roomNumber')}" class="text-danger">
+                                            <span th:errors="*{roomNumber}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="roomType">Loại Phòng</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="roomType" 
+                                               th:field="*{roomType}"
+                                               placeholder="Nhập loại phòng">
+                                        <div th:if="${#fields.hasErrors('roomType')}" class="text-danger">
+                                            <span th:errors="*{roomType}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="bedType">Loại Giường</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="bedType" 
+                                               th:field="*{bedType}"
+                                               placeholder="Nhập loại giường">
+                                        <div th:if="${#fields.hasErrors('bedType')}" class="text-danger">
+                                            <span th:errors="*{bedType}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="floorId">Tầng <span class="text-danger">*</span></label>
+                                        <select class="form-control" id="floorId" th:field="*{floorId}" required>
+                                            <option value="">Chọn tầng</option>
+                                            <option value="1">Tầng 1</option>
+                                            <option value="2">Tầng 2</option>
+                                            <option value="3">Tầng 3</option>
+                                            <option value="4">Tầng 4</option>
+                                            <option value="5">Tầng 5</option>
+                                        </select>
+                                        <div th:if="${#fields.hasErrors('floorId')}" class="text-danger">
+                                            <span th:errors="*{floorId}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="sizeId">Kích Thước Phòng <span class="text-danger">*</span></label>
+                                        <select class="form-control" id="sizeId" th:field="*{sizeId}" required>
+                                            <option value="">Chọn kích thước</option>
+                                            <option value="1">Single (1 người)</option>
+                                            <option value="2">Double (2 người)</option>
+                                            <option value="3">Twin (2 người)</option>
+                                            <option value="4">Triple (3 người)</option>
+                                            <option value="5">Family (4 người)</option>
+                                        </select>
+                                        <div th:if="${#fields.hasErrors('sizeId')}" class="text-danger">
+                                            <span th:errors="*{sizeId}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="status">Trạng Thái <span class="text-danger">*</span></label>
+                                        <select class="form-control" id="status" th:field="*{status}" required>
+                                            <option value="">Chọn trạng thái</option>
+                                            <option value="AVAILABLE">Sẵn sàng</option>
+                                            <option value="OCCUPIED">Đang sử dụng</option>
+                                            <option value="MAINTENANCE">Bảo trì</option>
+                                            <option value="CLEANING">Đang dọn dẹp</option>
+                                        </select>
+                                        <div th:if="${#fields.hasErrors('status')}" class="text-danger">
+                                            <span th:errors="*{status}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="price">Giá Phòng (VNĐ) <span class="text-danger">*</span></label>
+                                        <small class="form-text text-muted mb-2">
+                                            <i class="mdi mdi-information"></i> 
+                                            Nhập giá phòng tùy ý (chỉ cần lớn hơn 0)
+                                            <br>
+                                            <small class="text-success">
+                                                <i class="mdi mdi-check-circle"></i>
+                                                Hỗ trợ mọi mức giá: từ vài nghìn đến hàng tỷ VNĐ
+                                            </small>
+                                        </small>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="price" 
+                                               th:field="*{price}"
+                                               placeholder="Ví dụ: 1000000 (1 triệu VNĐ)"
+                                               min="0.01"
+                                               step="0.01"
+                                               required>
+                                        <div th:if="${#fields.hasErrors('price')}" class="text-danger">
+                                            <span th:errors="*{price}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-4">
+                                        <label for="roomDescription">Mô Tả</label>
+                                        <textarea class="form-control" 
+                                                  id="roomDescription" 
+                                                  th:field="*{roomDescription}"
+                                                  rows="4" 
+                                                  placeholder="Nhập mô tả phòng (không bắt buộc)"></textarea>
+                                        <div th:if="${#fields.hasErrors('roomDescription')}" class="text-danger">
+                                            <span th:errors="*{roomDescription}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="/hotel-management/rooms" class="btn btn-secondary">
+                                            <i class="mdi mdi-arrow-left"></i> Quay Lại
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="mdi mdi-content-save"></i>
+                                            <span th:text="${roomId != null ? 'Cập Nhật' : 'Lưu'}">Lưu</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+<script src="/assets/js/off-canvas.js"></script>
+<script src="/assets/js/hoverable-collapse.js"></script>
+<script src="/assets/js/misc.js"></script>
+<script src="/assets/js/settings.js"></script>
+
+<script>
+// Form validation and enhancement
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const roomNumberInput = document.getElementById('roomNumber');
+    const priceInput = document.getElementById('price');
+    
+    // Auto-format room number
+    roomNumberInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+    
+    // Auto-format price for large values
+    priceInput.addEventListener('input', function() {
+        // Allow only numbers and decimal point
+        let value = this.value.replace(/[^0-9.]/g, '');
+        
+        // Prevent multiple decimal points
+        let parts = value.split('.');
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        
+        this.value = value;
+        this.setAttribute('data-raw-value', value);
+    });
+    
+    // Format price on blur
+    priceInput.addEventListener('blur', function() {
+        let rawValue = this.getAttribute('data-raw-value') || this.value;
+        if (rawValue && !isNaN(rawValue)) {
+            let numValue = parseFloat(rawValue);
+            if (numValue > 0) {
+                // Format with Vietnamese locale
+                this.value = numValue.toLocaleString('vi-VN', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                });
+            }
+        }
+    });
+    
+    // Clear formatting on focus for easier editing
+    priceInput.addEventListener('focus', function() {
+        let rawValue = this.getAttribute('data-raw-value');
+        if (rawValue) {
+            this.value = rawValue;
+        }
+    });
+    
+    // Form submission with loading state
+    form.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        // Validate form before submit
+        const roomNumber = document.getElementById('roomNumber').value.trim();
+        const price = document.getElementById('price').value.trim();
+        const floorId = document.getElementById('floorId').value;
+        const sizeId = document.getElementById('sizeId').value;
+        const status = document.getElementById('status').value;
+        
+        if (!roomNumber) {
+            alert('Vui lòng nhập số phòng');
+            return;
+        }
+        
+        if (!price || parseFloat(price) <= 0) {
+            alert('Vui lòng nhập giá phòng hợp lệ (lớn hơn 0)');
+            return;
+        }
+        
+        if (!floorId) {
+            alert('Vui lòng chọn tầng');
+            return;
+        }
+        
+        if (!sizeId) {
+            alert('Vui lòng chọn kích thước phòng');
+            return;
+        }
+        
+        if (!status) {
+            alert('Vui lòng chọn trạng thái');
+            return;
+        }
+        
+        console.log('Form validation passed. Submitting...');
+        
+        // Clean price value before submit
+        const priceInput = document.getElementById('price');
+        if (priceInput) {
+            let rawValue = priceInput.getAttribute('data-raw-value') || priceInput.value;
+            if (rawValue) {
+                // Remove all formatting and keep only numbers and decimal point
+                let cleanValue = rawValue.replace(/[^0-9.]/g, '');
+                
+                // Ensure it's a valid number
+                if (cleanValue && !isNaN(parseFloat(cleanValue))) {
+                    priceInput.value = cleanValue;
+                    console.log('Cleaned price value:', cleanValue);
+                }
+            }
+        }
+        
+        // Add timestamp to prevent browser cache issues
+        const timestamp = new Date().getTime();
+        const form = this;
+        const action = form.getAttribute('action');
+        if (action && !action.includes('?')) {
+            form.setAttribute('action', action + '?t=' + timestamp);
+        }
+        
+        submitBtn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Đang xử lý...';
+        submitBtn.disabled = true;
+        
+        // Re-enable button after 3 seconds (in case of error)
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 3000);
+    });
+    
+    // Add ripple effect to buttons
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // Add ripple animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+
+</body>
+</html>
