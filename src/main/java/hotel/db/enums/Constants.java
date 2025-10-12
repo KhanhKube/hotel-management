@@ -13,6 +13,10 @@ public class Constants {
     public static final String USER = "USER";
 
 
+    //Basic message
+    public static final String SUCCESS = "Successfully!";
+    public static final String FAIL = "Failed!";
+
     //Validate
     public static final String LOGININVALID = "Invalid username or password";
     public static final String FILLALLFEILD = "Please fill all the required fields!";
