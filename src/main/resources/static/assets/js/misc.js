@@ -11,9 +11,12 @@
     //Active class can be hard coded directly in html file also as required
 
     function addActiveClass(element) {
+      var href = element.attr('href');
+      if (!href) return; // Skip if no href attribute
+      
       if (current === "") {
         //for root url
-        if (element.attr('href').indexOf("index.html") !== -1) {
+        if (href.indexOf("index.html") !== -1) {
           element.parents('.nav-item').last().addClass('active');
           if (element.parents('.sub-menu').length) {
             element.closest('.collapse').addClass('show');
@@ -22,7 +25,7 @@
         }
       } else {
         //for other url
-        if (element.attr('href').indexOf(current) !== -1) {
+        if (href.indexOf(current) !== -1) {
           element.parents('.nav-item').last().addClass('active');
           if (element.parents('.sub-menu').length) {
             element.closest('.collapse').addClass('show');

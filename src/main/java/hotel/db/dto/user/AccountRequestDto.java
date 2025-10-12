@@ -9,6 +9,8 @@ import java.time.LocalDate;
 @Data
 public class AccountRequestDto {
     
+    private Integer userId;
+    
     @NotBlank(message = "Username không được để trống")
     @Size(min = 3, max = 50, message = "Username phải có từ 3-50 ký tự")
     private String username;
@@ -43,6 +45,9 @@ public class AccountRequestDto {
     
     @NotNull(message = "Trạng thái không được để trống")
     private User.Status status;
+    
+    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
+    private String password;
     
     private String avatarUrl;
 }
