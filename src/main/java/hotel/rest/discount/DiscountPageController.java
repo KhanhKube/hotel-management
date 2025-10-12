@@ -6,10 +6,7 @@ import hotel.service.discount.DiscountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -35,14 +32,27 @@ public class DiscountPageController {
     @PostMapping("/create")
     public String createDiscount(@ModelAttribute Discount discount) {
         // Set default values
-        if (discount.getUsedCount() == null) {
-            discount.setUsedCount(0);
+        if (discount.getDiscountId() != null) {
+            discountRepository.save(discount);
+        } else {
+            if (discount.getUsedCount() == null) {
+                discount.setUsedCount(0);
+            }
+            if (discount.getStatus() == null) {
+                discount.setStatus("ACTIVE");
+            }
+            discountRepository.save(discount);
         }
-        if (discount.getStatus() == null) {
-            discount.setStatus("ACTIVE");
-        }
-        discountRepository.save(discount);
         return "redirect:/hotel-management/discount";
+    }
+    @GetMapping("/edit/{id}")
+    public String editDiscountForm(@PathVariable Long id, Model model) {
+        Discount discount =  discountRepository.findById(id).orElse(null);;
+        if  (discount == null) {
+            return "redirect:/hotel-management/discount";
+        }
+        model.addAttribute("discount", discount);
+        return "management.discount/discount-create-form";
     }
 }
 

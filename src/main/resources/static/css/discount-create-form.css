@@ -288,3 +288,28 @@
 .input-medium {
     width: 250px;
 }
+
+/* Close button */
+.btn-close-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: #dc3545;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-left: 15px;
+}
+
+.btn-close-form:hover {
+    background: #c82333;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.btn-close-form i {
+    font-size: 20px;
+}

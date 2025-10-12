@@ -85,8 +85,10 @@
                                                             th:text="${d.status != null ? d.status : 'INACTIVE'}">ACTIVE
                                                         </div>
                                                     </td>
-                                                    <td><a
-                                                            th:href="@{'/management/discount/' + ${d.discountId} + '/edit'}">Edit</a>
+                                                    <td>
+                                                        <a
+                                                            th:href="@{/hotel-management/discount/edit/{id}(id=${d.discountId})}">Edit
+                                                        </a>
                                                     </td>
                                                 </tr>
                                                 <tr th:if="${#lists.isEmpty(listDiscount)}">
