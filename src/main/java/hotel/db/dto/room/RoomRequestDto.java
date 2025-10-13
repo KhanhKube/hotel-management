@@ -33,7 +33,6 @@ public class RoomRequestDto {
     private String roomDescription;
 
     @DecimalMin(value = "0.0", inclusive = false, message = "Giá phòng phải lớn hơn 0")
-    @Digits(integer = 8, fraction = 2, message = "Giá phòng không hợp lệ")
     private BigDecimal price;
 
     @Size(max = 50, message = "Trạng thái không được vượt quá 50 ký tự")

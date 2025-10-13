@@ -203,47 +203,48 @@
                                 <th> # </th>
                                 <th> Room ID </th>
                                 <th> Số Phòng </th>
+                                <th> Loại Phòng </th>
+                                <th> Loại Giường </th>
+                                <th> Tầng </th>
+                                <th> Kích Thước </th>
+                                <th> Giá </th>
                                 <th> Trạng Thái </th>
                                 <th> Thao tác </th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>101</td>
-                                <td>101</td>
-                                <td><span class="badge badge-success">Sẵn sàng</span></td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="/hotel-management/rooms/edit/101" 
-                                           class="btn btn-sm btn-outline-primary" 
-                                           title="Sửa">
-                                            <i class="mdi mdi-pencil"></i>
-                                        </a>
-                                        <button type="button" 
-                                                class="btn btn-sm btn-outline-danger" 
-                                                onclick="confirmDelete(101)"
-                                                title="Xóa">
-                                            <i class="mdi mdi-delete"></i>
-                                        </button>
-                                    </div>
+                            <tr th:if="${#lists.isEmpty(rooms)}">
+                                <td colspan="10" class="text-center text-muted">
+                                    <i class="mdi mdi-information"></i>
+                                    Chưa có phòng nào trong hệ thống
                                 </td>
                             </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>102</td>
-                                <td>102</td>
-                                <td><span class="badge badge-warning">Đang sử dụng</span></td>
+                            <tr th:each="room, iterStat : ${rooms}">
+                                <td th:text="${iterStat.count}">1</td>
+                                <td th:text="${room.roomId}">101</td>
+                                <td th:text="${room.roomNumber}">101</td>
+                                <td th:text="${room.roomType}">Standard</td>
+                                <td th:text="${room.bedType}">King</td>
+                                <td th:text="${room.floorId}">1</td>
+                                <td th:text="${room.sizeId}">2</td>
+                                <td th:text="${room.price != null ? #numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : 'N/A'}">500,000 VNĐ</td>
+                                <td>
+                                    <span th:if="${room.status == 'AVAILABLE'}" class="badge badge-success">Sẵn sàng</span>
+                                    <span th:if="${room.status == 'OCCUPIED'}" class="badge badge-warning">Đang sử dụng</span>
+                                    <span th:if="${room.status == 'MAINTENANCE'}" class="badge badge-danger">Bảo trì</span>
+                                    <span th:if="${room.status == 'CLEANING'}" class="badge badge-info">Đang dọn dẹp</span>
+                                    <span th:if="${room.status == null or room.status == ''}" class="badge badge-secondary">Chưa xác định</span>
+                                </td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a href="/hotel-management/rooms/edit/102" 
-                                           class="btn btn-sm btn-outline-primary" 
+                                        <a th:href="@{/hotel-management/rooms/edit/{id}(id=${room.roomId})}"
+                                           class="btn btn-sm btn-outline-primary"
                                            title="Sửa">
                                             <i class="mdi mdi-pencil"></i>
                                         </a>
-                                        <button type="button" 
-                                                class="btn btn-sm btn-outline-danger" 
-                                                onclick="confirmDelete(102)"
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                th:onclick="'confirmDelete(' + ${room.roomId} + ')'"
                                                 title="Xóa">
                                             <i class="mdi mdi-delete"></i>
                                         </button>
@@ -405,32 +406,41 @@ function deleteRoom(roomId, modal) {
     });
 }
 
-// Check for URL parameters to show success messages
+// Check for flash messages from Spring Boot
 document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
+    // Check for success messages
+    const successMessage = /*[[${success}]]*/ null;
+    const newRoomId = /*[[${newRoomId}]]*/ null;
+    const updatedRoomId = /*[[${updatedRoomId}]]*/ null;
+    const deletedRoomId = /*[[${deletedRoomId}]]*/ null;
+    const errorMessage = /*[[${errorMessage}]]*/ null;
     
-    if (urlParams.get('success') === 'add') {
+    if (successMessage === 'add') {
         showToast('success', 'Thêm thành công!', 'Phòng mới đã được thêm vào hệ thống.');
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+        // Force reload to show updated data
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
     }
     
-    if (urlParams.get('success') === 'edit') {
+    if (successMessage === 'edit') {
         showToast('success', 'Cập nhật thành công!', 'Thông tin phòng đã được cập nhật.');
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+        // Force reload to show updated data
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
     }
     
-    if (urlParams.get('success') === 'delete') {
+    if (successMessage === 'delete') {
         showToast('success', 'Xóa thành công!', 'Phòng đã được xóa khỏi hệ thống.');
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+        // Force reload to show updated data
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
     }
     
-    if (urlParams.get('error') === 'delete') {
-        showToast('error', 'Lỗi xóa!', 'Không thể xóa phòng. Vui lòng thử lại.');
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+    if (errorMessage) {
+        showToast('error', 'Lỗi!', errorMessage);
     }
 });
 
