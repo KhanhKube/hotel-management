@@ -46,6 +46,13 @@
                         <div class="col-12 grid-margin">
                             <div class="card">
                                 <div class="card-body">
+                                    <h4 class="card-title mb-0">Tìm kiếm mã voucher</h4>
+                                    <!--Tìm kiếm voucher-->
+                                    <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search">
+                                        <input id="searchInput" type="text" class="form-control" placeholder="Tìm kiếm tên voucher">
+                                    </form>
+                                </div>
+                                <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <h4 class="card-title mb-0">Discount Voucher Status</h4>
                                         <a th:href="@{/hotel-management/discount/create}" class="btn btn-primary">
@@ -53,15 +60,15 @@
                                         </a>
                                     </div>
                                     <div class="table-responsive">
-                                        <table class="table">
+                                        <table class="table" id="discountTable">
                                             <thead>
                                                 <tr>
-                                                    <th> ID </th>
-                                                    <th> Discount Code </th>
-                                                    <th> Discount Value </th>
-                                                    <th> Room Type </th>
-                                                    <th> Start Date </th>
-                                                    <th> End Date </th>
+                                                    <th onclick="sortTable(0)"> ID </th>
+                                                    <th onclick="sortTable(1)"> Discount Code </th>
+                                                    <th onclick="sortTable(2)"> Discount Value </th>
+                                                    <th onclick="sortTable(3)"> Room Type </th>
+                                                    <th onclick="sortTable(4)"> Start Date </th>
+                                                    <th onclick="sortTable(5)"> End Date </th>
                                                     <th> Status </th>
                                                     <th> Update </th>
                                                 </tr>
@@ -137,7 +144,57 @@
     <!-- Custom js for this page -->
     <script th:src="@{/assets/js/dashboard.js}"></script>
     <!-- End custom js for this page -->
+    <script>
+                    <!--ScriptFilter-->
+        const searchInput = document.getElementById("searchInput");
+        const tableSearch = document.getElementById("discountTable");
+        const rows = tableSearch.getElementsByTagName("tr");
+
+        searchInput.addEventListener("keyup", function() {
+            const filter = searchInput.value.toLowerCase();
+            for (let i=1 ; i < rows.length ; i++) {
+                const td = rows[i].getElementsByTagName("td")[1];
+                if(td) {
+                    const vcode = td.textContent.toLowerCase();
+                    if (vcode.includes(filter)) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        });
+    </script>
+    <!--SortTable-->
+<script>
+    let sortDirection = true /*true=tăng dần;false=giảm dần*/
+     function sortTable(columIndex) {
+         const table = document.getElementById("discountTable");
+         const rows = Array.from(table.rows).slice(1); /*bỏ row đầu tiên (table Head)*/
+         rows.sort((a,b) => {
+             const cellA = a.cells[columIndex].textContent.trim().toLowerCase();
+             const cellB = b.cells[columIndex].textContent.trim().toLowerCase();
+
+             /*kiểm tra xem là số hay là chữ*/
+             const valA = isNaN(cellA) ? cellA : Number(cellA);
+             const valB = isNaN(cellB) ? cellB : Number(cellB);
+
+             if(valA<valB) {
+                 return sortDirection ? -1 : 1;
+             }
+             if(valA>valB) {
+                 return sortDirection ? 1: -1;
+             }
+             return 0;
+         });
+
+         const tbody = table.tBodies[0];
+         tbody.innerHTML = "";
+         rows.forEach(row => tbody.appendChild(row));
+
+         sortDirection = !sortDirection;
+     }
+</script>
 </body>
 
 </html>
-""
