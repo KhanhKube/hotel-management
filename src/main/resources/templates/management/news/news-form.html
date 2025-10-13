@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${news.newsId} == null ? 'Create News' : 'Edit News'"></title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <script th:src="@{/vendors/jquery/jquery-3.2.1.min.js}"></script>
+</head>
+<body>
+<div class="container">
+    <h1 th:text="${news.newsId} == null ? 'Create News' : 'Edit News'"></h1>
+
+    <form th:action="@{/management/news/save}" method="post" th:object="${news}">
+        <input type="hidden" th:field="*{newsId}" />
+
+        <div>
+            <label>Title</label>
+            <input type="text" th:field="*{title}" required />
+        </div>
+
+        <div>
+            <label>Heading</label>
+            <input type="text" th:field="*{heading}" />
+        </div>
+
+        <div>
+            <label>Group</label>
+            <select th:field="*{newsGroupId}">
+                <option th:each="g : ${newsGroups}" th:value="${g.newsGroupId}" th:text="${g.name}"></option>
+            </select>
+        </div>
+
+        <div>
+            <label>Content</label>
+            <textarea th:field="*{content}" rows="10"></textarea>
+        </div>
+
+        <div>
+            <label>Image URL</label>
+            <input type="text" th:field="*{image}" />
+        </div>
+
+        <div>
+            <label>Link</label>
+            <input type="text" th:field="*{link}" />
+        </div>
+
+        <div>
+            <label>Status</label>
+            <select th:field="*{status}">
+                <option value="DRAFT">Draft</option>
+                <option value="PUBLISHED">Published</option>
+                <option value="ARCHIVED">Archived</option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit">Save</button>
+            <a th:href="@{/management/news}">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>
+
+

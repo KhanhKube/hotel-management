@@ -1,0 +1,97 @@
+<!-- Thymeleaf Views -->
+<!-- templates/hotels/list.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hotels List</title>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Hotels Management</h2>
+
+    <!-- Search and Filter Form -->
+    <form th:action="@{/management/hotels}" method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <input type="text" name="name" th:value="${name}" class="form-control" placeholder="Search by name">
+            </div>
+            <div class="col-md-2">
+                <select name="stars" class="form-control">
+                    <option value="">All Stars</option>
+                    <option th:value="1" th:selected="${stars == 1}">1 Star</option>
+                    <option th:value="2" th:selected="${stars == 2}">2 Stars</option>
+                    <option th:value="3" th:selected="${stars == 3}">3 Stars</option>
+                    <option th:value="4" th:selected="${stars == 4}">4 Stars</option>
+                    <option th:value="5" th:selected="${stars == 5}">5 Stars</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-control">
+                    <option value="">All Status</option>
+                    <option value="DRAFT" th:selected="${status == 'DRAFT'}">DRAFT</option>
+                    <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">ACTIVE</option>
+                    <option value="INACTIVE" th:selected="${status == 'INACTIVE'}">INACTIVE</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="hidden" name="sortBy" th:value="${sortBy}">
+                <input type="hidden" name="sortDir" th:value="${sortDir}">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+            <div class="col-md-3">
+                <a th:href="@{/management/hotels/new}" class="btn btn-success float-end">Add New Hotel</a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Hotels Table -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Stars</th>
+            <th>Status</th>
+            <th>View Count</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="hotel : ${hotels.content}">
+            <td th:text="${hotel.id}"></td>
+            <td th:text="${hotel.name}"></td>
+            <td th:text="${hotel.address}"></td>
+            <td th:text="${hotel.stars}"></td>
+            <td th:text="${hotel.status}"></td>
+            <td th:text="${hotel.viewCount}"></td>
+            <td>
+                <a th:href="@{/management/hotels/view/{id}(id=${hotel.id})}" class="btn btn-info btn-sm">View</a>
+                <a th:href="@{/management/hotels/edit/{id}(id=${hotel.id})}" class="btn btn-warning btn-sm">Edit</a>
+                <a th:href="@{/management/hotels/delete/{id}(id=${hotel.id})}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav th:if="${totalPages > 1}">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" th:href="@{/management/hotels(page=${currentPage - 1}, size=10, name=${name}, stars=${stars}, status=${status}, sortBy=${sortBy}, sortDir=${sortDir})}">Previous</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link" th:href="@{/management/hotels(page=${i}, size=10, name=${name}, stars=${stars}, status=${status}, sortBy=${sortBy}, sortDir=${sortDir})}" th:text="${i + 1}"></a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                <a class="page-link" th:href="@{/management/hotels(page=${currentPage + 1}, size=10, name=${name}, stars=${stars}, status=${status}, sortBy=${sortBy}, sortDir=${sortDir})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>
