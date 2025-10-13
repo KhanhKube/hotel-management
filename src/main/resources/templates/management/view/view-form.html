@@ -174,17 +174,88 @@
         }
         
         .form-icon {
-            display: inline-block;
+            display: flex;
             width: 60px;
             height: 60px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 50%;
-            display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 20px;
             color: white;
             font-size: 1.5rem;
+        }
+        
+        .alert-banner {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+            border: 1px solid #ff5252;
+        }
+        
+        .alert-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .alert-icon {
+            flex-shrink: 0;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .alert-text {
+            flex: 1;
+            color: white;
+        }
+        
+        .alert-text h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .alert-text p {
+            margin: 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        
+        .alert-actions {
+            flex-shrink: 0;
+        }
+        
+        .btn-alert {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-alert:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
         }
     </style>
 </head>
@@ -206,8 +277,25 @@
                 <div th:if="${error}" class="error-message" th:text="${error}"></div>
                 <div th:if="${message}" class="success-message" th:text="${message}"></div>
                 
+                <div th:if="${param.error == 'duplicate'}" class="alert-banner">
+                    <div class="alert-content">
+                        <div class="alert-icon">
+                            <i class="mdi mdi-alert-circle"></i>
+                        </div>
+                        <div class="alert-text">
+                            <h4>⚠️ View đã tồn tại!</h4>
+                            <p>Loại view này đã có trong hệ thống. Vui lòng nhập tên view mới khác để tiếp tục.</p>
+                        </div>
+                        <div class="alert-actions">
+                            <button type="button" onclick="clearForm()" class="btn-alert">
+                                <i class="mdi mdi-refresh me-2"></i>Tạo view mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
                 <form th:action="${view.viewId != null ? '/hotel-management/view/update/' + view.viewId : '/hotel-management/view/save'}" 
-                      th:object="${view}" method="post">
+                      th:object="${view}" method="post" enctype="multipart/form-data">
                     
                     <div class="form-group">
                         <label for="viewType" class="form-label">
@@ -226,6 +314,51 @@
                             <span th:errors="*{viewType}">Lỗi validation</span>
                         </div>
                     </div>
+                    
+                    <div class="form-group">
+                        <label for="imageFile" class="form-label">
+                            <i class="mdi mdi-image me-2"></i>Ảnh Minh Họa
+                        </label>
+                        <input type="file" 
+                               class="form-input" 
+                               id="imageFile" 
+                               name="imageFile" 
+                               accept="image/*"
+                               onchange="previewImage(this)">
+                        <div class="form-description">
+                            Chọn ảnh minh họa cho view (JPG, PNG, GIF, WEBP - tối đa 5MB)
+                        </div>
+                        <div th:if="${param.error == 'upload'}" class="error-message">
+                            <i class="mdi mdi-alert-circle me-2"></i>
+                            Lỗi upload ảnh. Vui lòng kiểm tra định dạng và kích thước file.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="imagePreview" style="display: none;">
+                        <label class="form-label">
+                            <i class="mdi mdi-eye me-2"></i>Xem Trước Ảnh
+                        </label>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <img id="previewImg" alt="Preview image" style="max-width: 300px; max-height: 200px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        </div>
+                    </div>
+                    
+                    <div th:if="${view.viewId != null and viewImageService.getImageForView(view.viewId) != null}" class="form-group">
+                        <label class="form-label">
+                            <i class="mdi mdi-image me-2"></i>Ảnh Hiện Tại
+                        </label>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <img th:src="${viewImageService.getImageForView(view.viewId)}" 
+                                 th:alt="${view.viewType}"
+                                 style="max-width: 300px; max-height: 200px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display: none; padding: 20px; background: #f8f9fa; border-radius: 8px; color: #6c757d;">
+                                <i class="mdi mdi-image" style="font-size: 2rem;"></i>
+                                <p>Không thể hiển thị ảnh</p>
+                            </div>
+                        </div>
+                    </div>
+                    
                     
                     <div class="button-group">
                         <a href="/hotel-management/view" class="btn-secondary">
@@ -249,5 +382,57 @@
     <script src="/assets/js/settings.js"></script>
     <script src="/assets/js/todolist.js"></script>
     <script src="/assets/js/chart.js"></script>
+    
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const previewImg = document.getElementById('previewImg');
+                    const imagePreview = document.getElementById('imagePreview');
+                    
+                    previewImg.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // Validate file size
+        document.getElementById('imageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    alert('Kích thước file không được vượt quá 5MB');
+                    e.target.value = '';
+                    document.getElementById('imagePreview').style.display = 'none';
+                }
+            }
+        });
+        
+        // Clear form function
+        function clearForm() {
+            // Clear the view type input
+            document.getElementById('viewType').value = '';
+            
+            // Clear the image file input
+            document.getElementById('imageFile').value = '';
+            
+            // Hide image preview
+            document.getElementById('imagePreview').style.display = 'none';
+            
+            // Focus on the view type input
+            document.getElementById('viewType').focus();
+            
+            // Remove error parameter from URL
+            const url = new URL(window.location);
+            url.searchParams.delete('error');
+            url.searchParams.delete('message');
+            window.history.replaceState({}, '', url);
+        }
+    </script>
 </body>
 </html>

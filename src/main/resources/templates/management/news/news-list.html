@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>News Management</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body>
+<div class="container">
+    <h1>News</h1>
+
+    <div>
+        <a th:href="@{/management/news/add}">Create News</a>
+    </div>
+
+    <form method="get" th:action="@{/management/news}">
+        <input type="text" name="search" th:value="${search}" placeholder="Search title..." />
+        <select name="status">
+            <option th:selected="${status} == null" value="">All</option>
+            <option th:selected="${status} == 'DRAFT'" value="DRAFT">Draft</option>
+            <option th:selected="${status} == 'PUBLISHED'" value="PUBLISHED">Published</option>
+            <option th:selected="${status} == 'ARCHIVED'" value="ARCHIVED">Archived</option>
+        </select>
+        <button type="submit">Filter</button>
+    </form>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Views</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="n : ${newsPage}">
+            <td th:text="${n.newsId}"></td>
+            <td th:text="${n.title}"></td>
+            <td th:text="${n.status}"></td>
+            <td th:text="${n.view}"></td>
+            <td>
+                <a th:href="@{'/management/news/view/' + ${n.newsId}}">View</a>
+                <a th:href="@{'/management/news/edit/' + ${n.newsId}}">Edit</a>
+                <form th:action="@{'/management/news/delete/' + ${n.newsId}}" method="post" style="display:inline">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div>
+        <span th:text="'Page ' + ${currentPage + 1} + ' / ' + ${totalPages}"></span>
+        <div>
+            <a th:if="${currentPage > 0}" th:href="@{|/management/news?page=${currentPage - 1}|}">Prev</a>
+            <a th:if="${currentPage + 1 < totalPages}" th:href="@{|/management/news?page=${currentPage + 1}|}">Next</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+

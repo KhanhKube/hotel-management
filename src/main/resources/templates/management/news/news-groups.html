@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>News Groups</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body>
+<div class="container">
+    <a th:href="@{/management/news}">Back to News</a>
+    <h1>News Groups</h1>
+
+    <form th:action="@{/management/news/groups/save}" method="post" th:object="${newsGroup}">
+        <input type="hidden" th:field="*{newsGroupId}" />
+        <input type="text" th:field="*{name}" placeholder="Group name" required />
+        <button type="submit">Save Group</button>
+    </form>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="g : ${newsGroups}">
+            <td th:text="${g.newsGroupId}"></td>
+            <td th:text="${g.name}"></td>
+            <td>
+                <form th:action="@{'/management/news/groups/delete/' + ${g.newsGroupId}}" method="post" style="display:inline">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
+
+

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${news.title}">News Details</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body>
+<div class="container">
+    <a th:href="@{/management/news}">Back</a>
+    <h1 th:text="${news.title}"></h1>
+    <p th:text="${news.heading}"></p>
+    <img th:if="${news.image}" th:src="${news.image}" alt="image" style="max-width: 400px; display:block;" />
+    <div th:utext="${news.content}"></div>
+    <p>
+        <strong>Status:</strong> <span th:text="${news.status}"></span>
+        &nbsp; | &nbsp;
+        <strong>Views:</strong> <span th:text="${news.view}"></span>
+    </p>
+    <p th:if="${news.link}">
+        <a th:href="${news.link}" target="_blank">External link</a>
+    </p>
+    
+    <form th:action="@{'/management/news/change-status/' + ${news.newsId}}" method="post">
+        <select name="status">
+            <option value="DRAFT">Draft</option>
+            <option value="PUBLISHED">Published</option>
+            <option value="ARCHIVED">Archived</option>
+        </select>
+        <button type="submit">Change status</button>
+    </form>
+</div>
+</body>
+</html>
+
+
