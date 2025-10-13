@@ -3,6 +3,7 @@ package hotel.rest.news;
 import hotel.db.entity.News;
 import hotel.db.entity.NewsGroup;
 import hotel.service.news.NewsService;
+import hotel.util.RenderBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,48 +23,44 @@ public class NewsController {
 
     private final NewsService newsService;
 
-//                    public NewsController(NewsService newsService) {
-//                        this.newsService = newsService;
-//                    }
-
     // F_30: Quản lý chi tiết tin (thêm, sửa, xem)
-//    @GetMapping
-//    public String newsList(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size,
-//            @RequestParam(defaultValue = "createdAt") String sortBy,
-//            @RequestParam(defaultValue = "desc") String sortDir,
-//            @RequestParam(required = false) String status,
-//            @RequestParam(required = false) String search,
-//            Model model) {
-//
-//        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-//            Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//
-//        Page<News> newsPage;
-//        if (search != null && !search.trim().isEmpty()) {
-//            newsPage = newsService.searchByTitle(search, pageable);
-//        } else if (status != null && !status.trim().isEmpty()) {
-//            newsPage = newsService.findByStatus(status, pageable);
-//        } else {
-//            newsPage = newsService.findAll(pageable);
-//        }
-//
-//        List<NewsGroup> newsGroups = newsService.findAllNewsGroups();
-//
-//        model.addAttribute("newsPage", newsPage);
-//        model.addAttribute("newsGroups", newsGroups);
-//        model.addAttribute("currentPage", page);
-//        model.addAttribute("totalPages", newsPage.getTotalPages());
-//        model.addAttribute("totalItems", newsPage.getTotalElements());
-//        model.addAttribute("sortBy", sortBy);
-//        model.addAttribute("sortDir", sortDir);
-//        model.addAttribute("status", status);
-//        model.addAttribute("search", search);
-//
-//        return "management/news/news-list";
-//    }
+    @GetMapping
+    public String newsList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
+            Model model) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<News> newsPage;
+        if (search != null && !search.trim().isEmpty()) {
+            newsPage = newsService.searchByTitle(search, pageable);
+        } else if (status != null && !status.trim().isEmpty()) {
+            newsPage = newsService.findByStatus(status, pageable);
+        } else {
+            newsPage = newsService.findAll(pageable);
+        }
+
+        List<NewsGroup> newsGroups = newsService.findAllNewsGroups();
+
+        model.addAttribute("newsPage", newsPage);
+        model.addAttribute("newsGroups", newsGroups);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", newsPage.getTotalPages());
+        model.addAttribute("totalItems", newsPage.getTotalElements());
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("status", status);
+        model.addAttribute("search", search);
+
+        return "management/news/news-list";
+    }
 
     @GetMapping("/add")
     public String addNewsForm(Model model) {
@@ -77,8 +74,8 @@ public class NewsController {
     public String saveNews(@ModelAttribute News news, RedirectAttributes redirectAttributes) {
         try {
             newsService.saveNews(news);
-            redirectAttributes.addFlashAttribute("message", 
-                news.getNewsId() == null ? "Thêm tin tức thành công!" : "Cập nhật tin tức thành công!");
+            redirectAttributes.addFlashAttribute("message",
+                    news.getNewsId() == null ? "Thêm tin tức thành công!" : "Cập nhật tin tức thành công!");
             return "redirect:/management/news";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
@@ -90,9 +87,9 @@ public class NewsController {
     public String editNewsForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
         try {
             News news = newsService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tin tức với ID: " + id));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy tin tức với ID: " + id));
             List<NewsGroup> newsGroups = newsService.findAllNewsGroups();
-            
+
             model.addAttribute("news", news);
             model.addAttribute("newsGroups", newsGroups);
             return "management/news/news-form";
@@ -106,12 +103,12 @@ public class NewsController {
     public String viewNews(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
         try {
             News news = newsService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tin tức với ID: " + id));
-            
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy tin tức với ID: " + id));
+
             // Increment view count
             news.setView(news.getView() != null ? news.getView() + 1 : 1);
             newsService.saveNews(news);
-            
+
             model.addAttribute("news", news);
             return "management/news/news-details";
         } catch (Exception e) {
@@ -134,14 +131,14 @@ public class NewsController {
     // F_31: Thay đổi trạng thái hiển thị tin
     @PostMapping("/change-status/{id}")
     public String changeNewsStatus(
-            @PathVariable Integer id, 
-            @RequestParam String status, 
+            @PathVariable Integer id,
+            @RequestParam String status,
             RedirectAttributes redirectAttributes) {
         try {
             newsService.changeNewsStatus(id, status);
             String statusText = getStatusText(status);
-            redirectAttributes.addFlashAttribute("message", 
-                "Thay đổi trạng thái tin tức thành " + statusText + " thành công!");
+            redirectAttributes.addFlashAttribute("message",
+                    "Thay đổi trạng thái tin tức thành " + statusText + " thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
         }
@@ -160,8 +157,8 @@ public class NewsController {
     public String saveNewsGroup(@ModelAttribute NewsGroup newsGroup, RedirectAttributes redirectAttributes) {
         try {
             newsService.saveNewsGroup(newsGroup);
-            redirectAttributes.addFlashAttribute("message", 
-                newsGroup.getNewsGroupId() == null ? "Thêm nhóm tin tức thành công!" : "Cập nhật nhóm tin tức thành công!");
+            redirectAttributes.addFlashAttribute("message",
+                    newsGroup.getNewsGroupId() == null ? "Thêm nhóm tin tức thành công!" : "Cập nhật nhóm tin tức thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
         }
@@ -180,20 +177,20 @@ public class NewsController {
     }
 
     // Public news page (existing functionality)
-//    @GetMapping("/public")
-//    public String publicNewsPage(Model model) {
-//        List<News> publishedNews = newsService.findByStatus("PUBLISHED");
-//        model.addAttribute("newsList", publishedNews);
-//        return "news/news";
-//    }
-    
+    @GetMapping("/public")
+    public String publicNewsPage(Model model) {
+        List<News> publishedNews = newsService.findByStatus("PUBLISHED");
+        model.addAttribute("newsList", publishedNews);
+        return "news/news";
+    }
+
     // Original news endpoint for backward compatibility
-//    @GetMapping("/news")
-//    public String newsPage(Model model) {
-//        List<News> publishedNews = newsService.findByStatus("PUBLISHED");
-//        model.addAttribute("newsList", publishedNews);
-//        return "news/news";
-//    }
+    @GetMapping("/news")
+    public String newsPage(Model model) {
+        List<News> publishedNews = newsService.findByStatus("PUBLISHED");
+        model.addAttribute("newsList", publishedNews);
+        return "news/news";
+    }
 
     private String getStatusText(String status) {
         switch (status.toUpperCase()) {

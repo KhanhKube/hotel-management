@@ -1,25 +1,45 @@
 package hotel.db.entity;
 
-
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@Data
+import java.util.List;
+
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "hotels")
-public class Hotel {
+public class Hotel  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
-    private String name;        // Tên khách sạn
-    private String address;     // Địa chỉ
-    private String phone;       // Số điện thoại
-    private String email;       // Email
-    private String description; // Mô tả
-    private Integer stars;      // Số sao (3,4,5 sao)
+    @Column(name = "name")
+    private String name;
 
-    private String services;    // Danh sách dịch vụ (có thể là JSON hoặc 1 bảng riêng)
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "stars")
+    private Integer stars;
+
+    @Column(name = "status")
+    private String status = "DRAFT";
+
+    @Column(name = "view_count")
+    private Integer viewCount = 0;
 }
