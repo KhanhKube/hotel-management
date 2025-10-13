@@ -4,13 +4,21 @@ import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.entity.User;
 import hotel.db.repository.user.UserRepository;
 import hotel.util.MessageResponse;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static ch.qos.logback.core.util.StringUtil.isNullOrEmpty;
 import static hotel.db.enums.Constants.*;
@@ -34,6 +42,57 @@ public class ReceptionistServiceImpl implements ReceptionistService {
     @Override
     public User getReceptionist(Integer id){
         return userRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Page<User> searchReceptionists(String keyword, String gender, String status, String sort, int page, int size) {
+        // Build dynamic query
+        Specification<User> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Only show receptionists
+            predicates.add(cb.equal(root.get("role"), RECEPTIONIST));
+
+            // Keyword: search by name, email, or phone
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String pattern = "%" + keyword.toLowerCase(Locale.ROOT) + "%";
+                Predicate nameMatch = cb.or(
+                        cb.like(cb.lower(root.get("firstName")), pattern),
+                        cb.like(cb.lower(root.get("lastName")), pattern),
+                        cb.like(cb.lower(root.get("email")), pattern),
+                        cb.like(cb.lower(root.get("phone")), pattern)
+                );
+                predicates.add(nameMatch);
+            }
+
+            // Gender filter
+            if (gender != null && !gender.isEmpty()) {
+                predicates.add(cb.equal(cb.lower(root.get("gender")), gender.toLowerCase()));
+            }
+
+            // Status filter
+            if (status != null && !status.isEmpty()) {
+                predicates.add(cb.equal(cb.lower(root.get("status")), status.toLowerCase()));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // Sort
+        Sort sortConfig = Sort.unsorted();
+        if (sort != null) {
+            switch (sort) {
+                case "nameAsc" -> sortConfig = Sort.by("firstName").ascending();
+                case "nameDesc" -> sortConfig = Sort.by("firstName").descending();
+                case "dobAsc" -> sortConfig = Sort.by("dob").ascending();
+                case "dobDesc" -> sortConfig = Sort.by("dob").descending();
+                case "createdAsc" -> sortConfig = Sort.by("createdAt").ascending();
+                case "createdDesc" -> sortConfig = Sort.by("createdAt").descending();
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sortConfig);
+        return userRepository.findAll(spec, pageable);
     }
 
     @Override
