@@ -12,29 +12,34 @@ import java.util.List;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Integer> {
-    List<Room> findByStatus(RoomStatus status);
-    
-    Boolean existsByRoomNumber(String roomNumber);
-    
-    // Hard delete method - xóa vĩnh viễn khỏi database
-    @Modifying
-    @Query("DELETE FROM Room r WHERE r.roomId = :roomId")
-    void hardDeleteRoom(@Param("roomId") Integer roomId);
-    
-    // Xóa các bản ghi liên quan đến room
-    @Modifying
-    @Query(value = "DELETE FROM room_views WHERE room_id = :roomId", nativeQuery = true)
-    void deleteRoomViewsByRoomId(@Param("roomId") Integer roomId);
-    
-    @Modifying
-    @Query(value = "DELETE FROM room_furnishings WHERE room_id = :roomId", nativeQuery = true)
-    void deleteRoomFurnishingsByRoomId(@Param("roomId") Integer roomId);
-    
-    @Modifying
-    @Query(value = "DELETE FROM room_images WHERE room_id = :roomId", nativeQuery = true)
-    void deleteRoomImagesByRoomId(@Param("roomId") Integer roomId);
-    
-    @Modifying
-    @Query(value = "DELETE FROM order_details WHERE room_id = :roomId", nativeQuery = true)
-    void deleteOrderDetailsByRoomId(@Param("roomId") Integer roomId);
+	List<Room> findByStatus(RoomStatus status);
+
+	List<Room> findAllByIsDeletedIsFalse();
+
+
+	List<Room> findAll();
+
+	Boolean existsByRoomNumber(String roomNumber);
+
+	// Hard delete method - xóa vĩnh viễn khỏi database
+	@Modifying
+	@Query("DELETE FROM Room r WHERE r.roomId = :roomId")
+	void hardDeleteRoom(@Param("roomId") Integer roomId);
+
+	// Xóa các bản ghi liên quan đến room
+	@Modifying
+	@Query(value = "DELETE FROM room_views WHERE room_id = :roomId", nativeQuery = true)
+	void deleteRoomViewsByRoomId(@Param("roomId") Integer roomId);
+
+	@Modifying
+	@Query(value = "DELETE FROM room_furnishings WHERE room_id = :roomId", nativeQuery = true)
+	void deleteRoomFurnishingsByRoomId(@Param("roomId") Integer roomId);
+
+	@Modifying
+	@Query(value = "DELETE FROM room_images WHERE room_id = :roomId", nativeQuery = true)
+	void deleteRoomImagesByRoomId(@Param("roomId") Integer roomId);
+
+	@Modifying
+	@Query(value = "DELETE FROM order_details WHERE room_id = :roomId", nativeQuery = true)
+	void deleteOrderDetailsByRoomId(@Param("roomId") Integer roomId);
 }
