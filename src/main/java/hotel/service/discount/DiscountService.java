@@ -11,4 +11,6 @@ public interface DiscountService {
 	 java.util.List<DiscountResponseDto> getAll();
 
 	 Page<DiscountResponseDto> getAll(Pageable pageable);
+
+     String calculateStatus(Discount d); //Tính giá trị cho status
 }

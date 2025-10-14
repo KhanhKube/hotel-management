@@ -17,6 +17,7 @@ public class DiscountResponseDto {
     private String roomType;
     private LocalDate startDate;
     private LocalDate endDate;
+    private String status;
 }
 
 
