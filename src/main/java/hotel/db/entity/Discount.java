@@ -2,7 +2,9 @@ package hotel.db.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -31,18 +33,16 @@ public class Discount extends AbstractVersion{
     @Column(name = "room_type", nullable = false, length = 100)
     private String roomType;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;
-
+    private LocalDate startDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "end_date", nullable = false)
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
-    @Column(name = "usage_limit")
+    @Column(name = "usage_limit", nullable = false)
     private Integer usageLimit;
 
     @Column(name = "used_count")
     private Integer usedCount;
-
-    @Column(name = "status", nullable = false, length = 20)
-    private String status;
 }

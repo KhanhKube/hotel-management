@@ -63,7 +63,7 @@
                                         <table class="table" id="discountTable">
                                             <thead>
                                                 <tr>
-                                                    <th onclick="sortTable(0)"> ID </th>
+                                                    <th> # </th>
                                                     <th onclick="sortTable(1)"> Discount Code </th>
                                                     <th onclick="sortTable(2)"> Discount Value </th>
                                                     <th onclick="sortTable(3)"> Room Type </th>
@@ -75,7 +75,7 @@
                                             </thead>
                                             <tbody>
                                                 <tr th:each="d, stat : ${listDiscount}">
-                                                    <td th:text="${d.discountId}"></td>
+                                                    <td th:text="${stat.count}"></td>
                                                     <td th:text="${d.code != null ? d.code : 'N/A'}"></td>
                                                     <td
                                                         th:text="${d.value != null ? (d.value + (d.discountType == 'PERCENT' ? ' %' : ' VND')) : 'N/A'}">
@@ -88,9 +88,7 @@
                                                         th:text="${d.endDate != null ? #temporals.format(d.endDate, 'dd/MM/yyyy') : 'N/A'}">
                                                     </td>
                                                     <td>
-                                                        <div class="badge badge-outline-success"
-                                                            th:text="${d.status != null ? d.status : 'INACTIVE'}">ACTIVE
-                                                        </div>
+                                                        <div class="badge badge-outline-success">ACTIVE</div>
                                                     </td>
                                                     <td>
                                                         <a

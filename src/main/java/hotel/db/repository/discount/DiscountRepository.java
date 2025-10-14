@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface DiscountRepository extends JpaRepository<Discount, Long> {
     Optional<Discount> findByCodeAndIsDeletedFalse(String code);
 
+    boolean existsByCodeAndIsDeletedFalse(String code);
+
 }
