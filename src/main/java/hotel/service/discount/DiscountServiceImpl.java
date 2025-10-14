@@ -1,6 +1,5 @@
 package hotel.service.discount;
 import hotel.db.entity.Discount;
-import hotel.db.enums.DiscountStatus;
 import hotel.db.dto.discount.DiscountResponseDto;
 
 import hotel.db.repository.discount.DiscountRepository;
@@ -8,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,14 +23,11 @@ public class DiscountServiceImpl implements DiscountService {
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
 
         // kiểm tra hạn sử dụng
-        if (discount.getEndDate().isBefore(LocalDateTime.now())) {
+        if (discount.getEndDate().isBefore(LocalDate.now())) {
             throw new RuntimeException("Voucher đã hết hạn");
         }
 
         // kiểm tra trạng thái
-        if (!DiscountStatus.ACTIVE.name().equalsIgnoreCase(discount.getStatus())) {
-            throw new RuntimeException("Voucher không khả dụng");
-        }
 
         // kiểm tra số lần dùng
         if (discount.getUsageLimit() != null && discount.getUsedCount() >= discount.getUsageLimit()) {
@@ -48,8 +45,7 @@ public class DiscountServiceImpl implements DiscountService {
                 d.getValue(),
                 d.getRoomType(),
                 d.getStartDate(),
-                d.getEndDate(),
-                d.getStatus()
+                d.getEndDate()
         );
     }
 

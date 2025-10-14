@@ -6,6 +6,7 @@ import hotel.service.discount.DiscountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -25,24 +26,22 @@ public class DiscountPageController {
 
     @GetMapping("/create")
     public String createDiscountForm(Model model) {
-        model.addAttribute("discount", new Discount());
+        Discount discount = new Discount();
+        discount.setDiscountType("percent");
+        model.addAttribute("discount", discount);
         return "management.discount/discount-create-form";
     }
 
     @PostMapping("/create")
-    public String createDiscount(@ModelAttribute Discount discount) {
-        // Set default values
-        if (discount.getDiscountId() != null) {
-            discountRepository.save(discount);
-        } else {
-            if (discount.getUsedCount() == null) {
-                discount.setUsedCount(0);
-            }
-            if (discount.getStatus() == null) {
-                discount.setStatus("ACTIVE");
-            }
-            discountRepository.save(discount);
+    public String createDiscount(@ModelAttribute("discount") Discount discount,
+                                 BindingResult result, Model model) {
+        if (discountRepository.existsByCodeAndIsDeletedFalse(discount.getCode())) {
+            model.addAttribute("errorMessage", "Mã giảm giá này đã tồn tại, Vui lòng nhập mã khác!");
+            model.addAttribute("discount", discount);
+            return "management.discount/discount-create-form";
         }
+
+        discountRepository.save(discount);
         return "redirect:/hotel-management/discount";
     }
     @GetMapping("/edit/{id}")
