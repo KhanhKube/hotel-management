@@ -81,19 +81,23 @@
                                                         th:text="${d.value != null ? (d.value + (d.discountType == 'PERCENT' ? ' %' : ' VND')) : 'N/A'}">
                                                     </td>
                                                     <td th:text="${d.roomType != null ? d.roomType : 'N/A'}"></td>
-                                                    <td
+                                                    <td id="startDate"
                                                         th:text="${d.startDate != null ? #temporals.format(d.startDate, 'dd/MM/yyyy') : 'N/A'}">
                                                     </td>
-                                                    <td
+                                                    <td id="endDate"
                                                         th:text="${d.endDate != null ? #temporals.format(d.endDate, 'dd/MM/yyyy') : 'N/A'}">
                                                     </td>
                                                     <td>
-                                                        <div class="badge badge-outline-success">ACTIVE</div>
+                                                        <div th:switch="${d.status}">
+                                                            <span th:case="'EXHAUSTED'" class="badge badge-outline-danger">EXHAUSTED</span>
+                                                            <span th:case="'EXPIRED'" class="badge badge-outline-secondary">EXPIRED</span>
+                                                            <span th:case="'PENDING'" class="badge badge-outline-warning">PENDING</span>
+                                                            <span th:case="'ACTIVE'" class="badge badge-outline-success">ACTIVE</span>
+                                                        </div>
                                                     </td>
                                                     <td>
-                                                        <a
-                                                            th:href="@{/hotel-management/discount/edit/{id}(id=${d.discountId})}">Edit
-                                                        </a>
+                                                        <a th:href="@{/hotel-management/discount/edit/{id}(id=${d.discountId})}">Edit</a>
+                                                        <a th:href="@{/hotel-management/discount/delete/{id}(id=${d.discountId})}">Delete</a>
                                                     </td>
                                                 </tr>
                                                 <tr th:if="${#lists.isEmpty(listDiscount)}">
@@ -192,6 +196,11 @@
 
          sortDirection = !sortDirection;
      }
+</script>
+
+<script>
+    const status = document.getElementById('status');
+    const startDate = document.getElementById('')
 </script>
 </body>
 

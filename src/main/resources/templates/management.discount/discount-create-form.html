@@ -38,34 +38,38 @@
                                     <form th:action="@{/hotel-management/discount/create}" method="post"
                                         th:object="${discount}">
 
+                                        <!-- Thêm hidden để bắt được discountId khi nhấn update -->
+                                        <input type="hidden" th:field="*{discountId}" />
+
                                         <div th:if="${errorMessage}" class="alert alert-danger"
                                             th:text="${errorMessage}"></div>
 
                                         <label for="vcode">Mã giảm giá:</label>
-                                        <input id="vcode" type="text" th:field="*{code}" required>
+                                        <input id="vcode" type="text" th:field="*{code}" required><br>
 
                                         <label for="des">Mô tả:</label>
                                         <input id="des" type="text" th:field="*{description}" required>
 
                                         <!-- Chọn loại giảm -->
                                         <div>
-                                            <label>Loại giảm giá:</label>
-                                            <label for="percentRadio">Phần trăm (%)</label>
+                                            <label>Loại giảm giá:</label><br>
                                             <input id="percentRadio" type="radio" th:field="*{discountType}"
-                                                value="percent" onchange="valueValidate()">
-                                            <label for="amountRadio">Thành tiền ($)</label>
+                                                value="PERCENT" onchange="valueValidate()">
+                                            <label for="percentRadio">Phần trăm (%)</label>
+
                                             <input id="amountRadio" type="radio" th:field="*{discountType}"
-                                                value="amount" onchange="valueValidate()">
+                                                value="AMOUNT" onchange="valueValidate()">
+                                            <label for="amountRadio">Thành tiền ($)</label>
                                         </div>
 
                                         <!-- Nhập giá trị -->
                                         <div>
                                             <label for="value">Giá trị giảm:</label>
                                             <input id="value" type="number" step="0.01" th:field="*{value}" required>
-                                        </div>
+                                        </div><br>
 
                                         <label for="roomtype">Loại phòng được giảm:</label>
-                                        <input id="roomtype" type="text" th:field="*{roomType}" required>
+                                        <input id="roomtype" type="text" th:field="*{roomType}" required><br>
 
                                         <label for="startdate">Ngày bắt đầu:</label>
                                         <!--Nếu mới tạo thì chỉ cho phép startDate min là thời gian hiện tại,
@@ -78,10 +82,10 @@
                                         <label for="enddate">Ngày hết hạn:</label>
                                         <input id="enddate" type="date" th:field="*{endDate}"
                                             th:value="${#temporals.format(discount.endDate, 'dd-MM-yyyy')}"
-                                            onblur="validateEndDate()" required>
+                                            onblur="validateEndDate()" required><br>
 
                                         <label for="limit">Số lượng phát hành:</label>
-                                        <input id="limit" type="number" th:field="*{usageLimit}" required>
+                                        <input id="limit" type="number" th:field="*{usageLimit}" required><br>
 
                                         <input type="submit" value="Lưu giảm giá">
                                     </form>

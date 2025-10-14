@@ -43,6 +43,6 @@ public class Discount extends AbstractVersion{
     @Column(name = "usage_limit", nullable = false)
     private Integer usageLimit;
 
-    @Column(name = "used_count")
-    private Integer usedCount;
+    @Column(name = "used_count", columnDefinition = "INT DEFAULT 0")
+    private Integer usedCount = 0;
 }

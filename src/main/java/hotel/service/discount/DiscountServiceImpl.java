@@ -36,6 +36,20 @@ public class DiscountServiceImpl implements DiscountService {
 
         return discount;
     }
+    @Override
+    public String calculateStatus(Discount d) {
+        LocalDate now = LocalDate.now();
+        if (d.getUsedCount() >= d.getUsageLimit()) {
+            return "EXHAUSTED"; // Hết số lượng
+        }
+        if (d.getEndDate().isBefore(now)) {
+            return "EXPIRED"; // Hết hạn
+        }
+        if (d.getStartDate().isAfter(now)) {
+            return "PENDING"; // Chưa bắt đầu
+        }
+        return "ACTIVE"; // Đang HD
+    }
 
     private DiscountResponseDto toDto(Discount d) {
         return new DiscountResponseDto(
@@ -45,13 +59,14 @@ public class DiscountServiceImpl implements DiscountService {
                 d.getValue(),
                 d.getRoomType(),
                 d.getStartDate(),
-                d.getEndDate()
+                d.getEndDate(),
+                calculateStatus(d)
         );
     }
 
     @Override
     public List<DiscountResponseDto> getAll() {
-        List<Discount> entities = discountRepository.findAll();
+        List<Discount> entities = discountRepository.findAllByIsDeletedFalse();
         List<DiscountResponseDto> result = new ArrayList<>();
         for (Discount d : entities) {
             result.add(toDto(d)); // toDto nhận Discount, trả DiscountResponseDto
