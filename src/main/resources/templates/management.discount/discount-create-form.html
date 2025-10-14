@@ -35,42 +35,53 @@
                                 <div class="card-body">
                                     <h4 class="card-title mb-0">Create Discount Voucher</h4>
                                     <!-- Nội dung của bạn ở đây -->
-                                    <form th:action="@{/hotel-management/discount/create}" method="post" th:object="${discount}">
+                                    <form th:action="@{/hotel-management/discount/create}" method="post"
+                                        th:object="${discount}">
 
-                                        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+                                        <div th:if="${errorMessage}" class="alert alert-danger"
+                                            th:text="${errorMessage}"></div>
 
                                         <label for="vcode">Mã giảm giá:</label>
-                                        <input id="vcode" type="text" th:field="*{code}">
+                                        <input id="vcode" type="text" th:field="*{code}" required>
 
                                         <label for="des">Mô tả:</label>
-                                        <input id="des" type="text" th:field="*{description}">
+                                        <input id="des" type="text" th:field="*{description}" required>
 
                                         <!-- Chọn loại giảm -->
                                         <div>
                                             <label>Loại giảm giá:</label>
-                                            <input id="percentRadio" type="radio" th:field="*{discountType}" value="percent" onchange="valueValidate()"> Phần trăm (%)
-                                            <input id="amountRadio" type="radio" th:field="*{discountType}" value="amount" onchange="valueValidate()"> Thành tiền ($)
+                                            <label for="percentRadio">Phần trăm (%)</label>
+                                            <input id="percentRadio" type="radio" th:field="*{discountType}"
+                                                value="percent" onchange="valueValidate()">
+                                            <label for="amountRadio">Thành tiền ($)</label>
+                                            <input id="amountRadio" type="radio" th:field="*{discountType}"
+                                                value="amount" onchange="valueValidate()">
                                         </div>
 
                                         <!-- Nhập giá trị -->
                                         <div>
                                             <label for="value">Giá trị giảm:</label>
-                                            <input id="value" type="number" step="0.01" th:field="*{value}">
+                                            <input id="value" type="number" step="0.01" th:field="*{value}" required>
                                         </div>
 
                                         <label for="roomtype">Loại phòng được giảm:</label>
-                                        <input id="roomtype" type="text" th:field="*{roomType}">
+                                        <input id="roomtype" type="text" th:field="*{roomType}" required>
 
                                         <label for="startdate">Ngày bắt đầu:</label>
-                                        <input id="startdate" type="date" th:field="*{startDate}"
-                                               th:value="${#temporals.format(discount.startDate, 'dd-MM-yyy')}">
+                                        <!--Nếu mới tạo thì chỉ cho phép startDate min là thời gian hiện tại,
+                                       Nếu update thì set min startDate là thời gian cũ lúc mới tạo. (tránh bắt user nhập lại)-->
+                                        <input id="startdate" type="date" th:field="*{startDate}" th:attr="min=${discount.startDate == null ?
+                                                        #dates.format(#dates.createNow(), 'yyyy-MM-dd') :
+                                                        #temporals.format(discount.startDate, 'yyyy-MM-dd')}"
+                                            onblur="validateEndDate()" required>
 
                                         <label for="enddate">Ngày hết hạn:</label>
                                         <input id="enddate" type="date" th:field="*{endDate}"
-                                               th:value="${#temporals.format(discount.endDate, 'dd-MM-yyyy')}">
+                                            th:value="${#temporals.format(discount.endDate, 'dd-MM-yyyy')}"
+                                            onblur="validateEndDate()" required>
 
                                         <label for="limit">Số lượng phát hành:</label>
-                                        <input id="limit" type="number" th:field="*{usageLimit}">
+                                        <input id="limit" type="number" th:field="*{usageLimit}" required>
 
                                         <input type="submit" value="Lưu giảm giá">
                                     </form>
@@ -84,7 +95,7 @@
             </div>
         </div>
     </div>
-<!--    validate người dùng chọn DiscountType và Số tiền giảm-->
+    <!--    validate người dùng chọn DiscountType và Số tiền giảm-->
     <script>
         function valueValidate() {
             const percent = document.getElementById('percentRadio');
@@ -106,14 +117,14 @@
             const percent = document.getElementById('percentRadio');
             const value = parseFloat(this.value);
 
-            if(percent.checked) {
-                if (value <= 0 || value>100) {
+            if (percent.checked) {
+                if (value <= 0 || value > 100) {
                     this.setCustomValidity("Giá trị % phải lớn hơn 0 và nhỏ hơn hoặc bằng 100")
                 } else {
                     this.setCustomValidity("");
                 }
             } else {
-                if (value<=0) {
+                if (value <= 0) {
                     this.setCustomValidity("Số tiền giảm phải hớn hơn 0!");
                 } else {
                     this.setCustomValidity("");
@@ -121,9 +132,25 @@
             }
         });
     </script>
-
+    <!--        validate ngày tháng bắt đầu và kết thúc-->
     <script>
+        function validateEndDate() {
+            const startDate = document.getElementById('startdate');
+            const endDate = document.getElementById('enddate');
 
+            if (!startDate.value) return; //Người dùng chưa nhập startDate bỏ qua.
+
+            const startDateValue = new Date(startDate.value);
+            startDateValue.setDate(startDateValue.getDate() + 1);
+            const minEndDate = startDateValue.toISOString().split('T')[0];
+            endDate.min = minEndDate;
+
+            if (endDate.value && endDate.value < minEndDate) {
+                endDate.setCustomValidity("Hạn cho Voucher tối thiểu là 1 ngày. Vui lòng nhập lại!");
+            } else {
+                endDate.setCustomValidity("");
+            }
+        }
     </script>
 
 

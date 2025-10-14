@@ -26,7 +26,9 @@ public class DiscountPageController {
 
     @GetMapping("/create")
     public String createDiscountForm(Model model) {
-        model.addAttribute("discount", new Discount());
+        Discount discount = new Discount();
+        discount.setDiscountType("percent");
+        model.addAttribute("discount", discount);
         return "management.discount/discount-create-form";
     }
 
