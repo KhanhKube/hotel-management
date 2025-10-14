@@ -9,4 +9,5 @@ public interface ViewService {
     View getViewById(Integer id);
     View saveView(View view);
     void deleteView(Integer id);
+    boolean existsByViewType(String viewType);
 }

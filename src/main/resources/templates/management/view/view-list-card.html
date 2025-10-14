@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Loại View - Hệ Thống Khách Sạn</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        
+        .container-scroller {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .main-panel {
+            flex: 1;
+            padding: 30px;
+            background: #1a1a1a;
+        }
+        
+        .control-bar {
+            background: #2d2d2d;
+            padding: 20px 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .sort-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .sort-label {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .sort-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .sort-btn.active {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a1a;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .sort-btn:not(.active) {
+            background: #404040;
+            color: #ffffff;
+        }
+        
+        .sort-btn:not(.active):hover {
+            background: #505050;
+            transform: translateY(-2px);
+        }
+        
+        .add-btn {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            margin-right: 10px;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            color: #ffffff;
+            text-decoration: none;
+        }
+        
+        .views-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .view-card {
+            background: #2d2d2d;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            border: 1px solid #404040;
+        }
+        
+        .view-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            border-color: #ffd700;
+        }
+        
+        .view-image-container {
+            position: relative;
+            height: 200px;
+            background: #404040;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .view-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            border: 2px solid #404040;
+            border-radius: 8px;
+        }
+        
+        .view-card:hover .view-image {
+            transform: scale(1.05);
+            border-color: #667eea;
+        }
+        
+        .view-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #404040 0%, #505050 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 3rem;
+            border-radius: 8px;
+            border: 2px dashed #666666;
+        }
+        
+        .view-id-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a1a;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .view-eye-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: #ffffff;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .view-eye-icon:hover {
+            background: rgba(255, 215, 0, 0.8);
+            color: #1a1a1a;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+        
+        .view-card:hover .view-eye-icon {
+            opacity: 1;
+        }
+        
+        .view-content {
+            padding: 25px;
+        }
+        
+        .view-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .view-dates {
+            margin-bottom: 25px;
+        }
+        
+        .view-date {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+        
+        .view-date i {
+            color: #ffd700;
+            width: 16px;
+        }
+        
+        .view-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .edit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .delete-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: #2d2d2d;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .empty-state i {
+            font-size: 5rem;
+            color: #404040;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h3 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .empty-state p {
+            color: #cccccc;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: #ffffff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .error-message {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: #ffffff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .views-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-bar {
+                flex-direction: column;
+                gap: 20px;
+                align-items: stretch;
+            }
+            
+            .sort-section {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-scroller">
+        <!-- Import sidebar -->
+        <div th:replace="common/sidebar"></div>
+        
+        <div class="main-panel">
+            
+            <div th:if="${param.error}" class="error-message">
+                <i class="mdi mdi-alert-circle me-2"></i>
+                <span th:if="${param.error == 'delete'}">❌ Có lỗi xảy ra khi xóa view!</span>
+                <span th:if="${param.error == 'notfound'}">❌ Không tìm thấy view để xóa!</span>
+            </div>
+            
+            <div th:if="${param.success}" class="success-message">
+                <i class="mdi mdi-check-circle me-2"></i>
+                <span th:if="${param.success == 'delete'}">✅ View đã được xóa thành công!</span>
+                <span th:if="${param.success == 'refresh'}">🔄 Đã làm mới danh sách ảnh!</span>
+            </div>
+            
+            <div th:if="${param.created}" class="success-message">
+                <i class="mdi mdi-check-circle me-2"></i>
+                <span>✅ View mới đã được tạo thành công!</span>
+            </div>
+            
+            <div th:if="${param.updated}" class="success-message">
+                <i class="mdi mdi-check-circle me-2"></i>
+                <span>✅ View đã được cập nhật thành công!</span>
+            </div>
+            
+            <div class="control-bar">
+                <div class="sort-section">
+                    <span class="sort-label">SẮP XẾP THEO:</span>
+                    <button class="sort-btn active" onclick="sortViews('default')">
+                        Mặc định
+                    </button>
+                    <button class="sort-btn" onclick="sortViews('az')">
+                        A-Z
+                    </button>
+                </div>
+                <div>
+                    <a href="/hotel-management/view/refresh-images" class="refresh-btn" title="Làm mới danh sách ảnh">
+                        <i class="mdi mdi-refresh"></i>
+                        Làm mới ảnh
+                    </a>
+                    <a href="/hotel-management/view/new" class="add-btn">
+                        <i class="mdi mdi-plus"></i>
+                        Thêm View Mới
+                    </a>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(views)}" class="empty-state">
+                <i class="mdi mdi-eye-off"></i>
+                <h3>Chưa có view nào</h3>
+                <p>Bắt đầu bằng cách thêm view đầu tiên cho khách sạn của bạn</p>
+                <a href="/hotel-management/view/new" class="add-btn">
+                    <i class="mdi mdi-plus"></i>
+                    Thêm View Đầu Tiên
+                </a>
+            </div>
+            
+            <div th:unless="${#lists.isEmpty(views)}" class="views-grid" id="viewsGrid">
+                <div th:each="view, iterStat : ${views}" class="view-card" th:data-view-type="${view.viewType}">
+                    <div class="view-image-container">
+                        <div th:if="${viewImageService.getImageForView(view.viewId) != null}">
+                            <img th:src="${viewImageService.getImageForView(view.viewId)}" th:alt="${view.viewType}" 
+                                 class="view-image"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="view-image-placeholder" style="display: none;">
+                                <i class="mdi mdi-image"></i>
+                            </div>
+                        </div>
+                        <div th:unless="${viewImageService.getImageForView(view.viewId) != null}" class="view-image-placeholder">
+                            <i class="mdi mdi-image"></i>
+                        </div>
+                        <div class="view-id-badge" th:text="'ID: ' + ${view.viewId}">ID: 1</div>
+                        <a th:href="@{/hotel-management/view/detail/{id}(id=${view.viewId})}" class="view-eye-icon">
+                            <i class="mdi mdi-eye"></i>
+                        </a>
+                    </div>
+                    
+                    <div class="view-content">
+                        <h3 class="view-title" th:text="${view.viewType}">View Biển</h3>
+                        
+                        <div class="view-dates">
+                            <div class="view-date">
+                                <i class="mdi mdi-calendar"></i>
+                                <span>Tạo: <span th:text="${#temporals.format(view.createdAt, 'dd/MM/yyyy')}">05/10/2025</span></span>
+                            </div>
+                            <div class="view-date">
+                                <i class="mdi mdi-clock-outline"></i>
+                                <span>Cập nhật: <span th:text="${#temporals.format(view.updatedAt, 'dd/MM/yyyy')}">05/10/2025</span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="view-actions">
+                            <a th:href="@{/hotel-management/view/edit/{id}(id=${view.viewId})}" class="action-btn edit-btn">
+                                <i class="mdi mdi-pencil"></i>
+                                Sửa
+                            </a>
+                            <a th:href="@{/hotel-management/view/delete/{id}(id=${view.viewId})}" 
+                               class="action-btn delete-btn"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa view này?')">
+                                <i class="mdi mdi-delete"></i>
+                                Xóa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="/assets/vendors/chart.js/Chart.min.js"></script>
+    <script src="/assets/js/off-canvas.js"></script>
+    <script src="/assets/js/hoverable-collapse.js"></script>
+    <script src="/assets/js/misc.js"></script>
+    <script src="/assets/js/settings.js"></script>
+    <script src="/assets/js/todolist.js"></script>
+    <script src="/assets/js/chart.js"></script>
+    
+    <script>
+        function sortViews(type) {
+            // Update active button
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const grid = document.getElementById('viewsGrid');
+            const cards = Array.from(grid.children);
+            
+            if (type === 'az') {
+                cards.sort((a, b) => {
+                    const nameA = a.querySelector('.view-title').textContent;
+                    const nameB = b.querySelector('.view-title').textContent;
+                    return nameA.localeCompare(nameB, 'vi');
+                });
+            } else {
+                // Default sort by ID
+                cards.sort((a, b) => {
+                    const idA = parseInt(a.querySelector('.view-id-badge').textContent.split(': ')[1]);
+                    const idB = parseInt(b.querySelector('.view-id-badge').textContent.split(': ')[1]);
+                    return idA - idB;
+                });
+            }
+            
+            // Re-append sorted cards
+            cards.forEach(card => grid.appendChild(card));
+        }
+    </script>
+</body>
+</html>
