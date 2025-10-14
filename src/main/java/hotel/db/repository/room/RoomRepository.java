@@ -20,4 +20,21 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     @Modifying
     @Query("DELETE FROM Room r WHERE r.roomId = :roomId")
     void hardDeleteRoom(@Param("roomId") Integer roomId);
+    
+    // Xóa các bản ghi liên quan đến room
+    @Modifying
+    @Query(value = "DELETE FROM room_views WHERE room_id = :roomId", nativeQuery = true)
+    void deleteRoomViewsByRoomId(@Param("roomId") Integer roomId);
+    
+    @Modifying
+    @Query(value = "DELETE FROM room_furnishings WHERE room_id = :roomId", nativeQuery = true)
+    void deleteRoomFurnishingsByRoomId(@Param("roomId") Integer roomId);
+    
+    @Modifying
+    @Query(value = "DELETE FROM room_images WHERE room_id = :roomId", nativeQuery = true)
+    void deleteRoomImagesByRoomId(@Param("roomId") Integer roomId);
+    
+    @Modifying
+    @Query(value = "DELETE FROM order_details WHERE room_id = :roomId", nativeQuery = true)
+    void deleteOrderDetailsByRoomId(@Param("roomId") Integer roomId);
 }

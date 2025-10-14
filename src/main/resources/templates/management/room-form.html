@@ -232,6 +232,53 @@ document.addEventListener('DOMContentLoaded', function() {
         this.value = this.value.replace(/[^0-9]/g, '');
     });
     
+    // Check for duplicate room number
+    let roomCheckTimeout;
+    roomNumberInput.addEventListener('input', function() {
+        const roomNumber = this.value.trim();
+        
+        // Clear previous timeout
+        clearTimeout(roomCheckTimeout);
+        
+        // Remove previous error styling
+        this.style.borderColor = '';
+        const existingError = this.parentNode.querySelector('.room-error');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        if (roomNumber && roomNumber.length >= 3) {
+            // Debounce the check
+            roomCheckTimeout = setTimeout(() => {
+                checkRoomNumberExists(roomNumber, this);
+            }, 500);
+        }
+    });
+    
+    // Function to check if room number exists
+    function checkRoomNumberExists(roomNumber, inputElement) {
+        fetch(`/hotel-management/api/rooms/check-exists?roomNumber=${encodeURIComponent(roomNumber)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    // Show error
+                    inputElement.style.borderColor = '#e74c3c';
+                    
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'room-error text-danger mt-1';
+                    errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Phòng ${roomNumber} đã tồn tại. Vui lòng nhập số phòng khác.`;
+                    
+                    inputElement.parentNode.appendChild(errorDiv);
+                } else {
+                    // Clear error
+                    inputElement.style.borderColor = '#28a745';
+                }
+            })
+            .catch(error => {
+                console.error('Error checking room number:', error);
+            });
+    }
+    
     // Auto-format price for large values
     priceInput.addEventListener('input', function() {
         // Allow only numbers and decimal point
@@ -284,6 +331,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!roomNumber) {
             alert('Vui lòng nhập số phòng');
+            return;
+        }
+        
+        // Check if there's a room error (duplicate room number)
+        const roomError = document.querySelector('.room-error');
+        if (roomError) {
+            alert('Vui lòng sửa lỗi số phòng trước khi tiếp tục');
+            document.getElementById('roomNumber').focus();
             return;
         }
         

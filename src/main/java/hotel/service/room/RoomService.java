@@ -20,4 +20,7 @@ public interface RoomService {
     void hardDeleteRoom(Integer roomId);
     
     List<Room> getRoomsByStatus(String status);
+    
+    // Check if room number exists
+    boolean existsByRoomNumber(String roomNumber);
 }

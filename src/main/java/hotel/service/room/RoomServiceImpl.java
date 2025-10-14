@@ -37,7 +37,7 @@ public class RoomServiceImpl implements RoomService {
         
         // Kiểm tra room number có trùng không
         if (roomRepository.existsByRoomNumber(room.getRoomNumber())) {
-            throw new RuntimeException("Số phòng đã tồn tại: " + room.getRoomNumber());
+            throw new RuntimeException("Phòng " + room.getRoomNumber() + " đã tồn tại. Vui lòng nhập số phòng khác.");
         }
         
         Room savedRoom = roomRepository.save(room);
@@ -54,7 +54,7 @@ public class RoomServiceImpl implements RoomService {
         // Kiểm tra room number có trùng không (trừ phòng hiện tại)
         if (!existingRoom.getRoomNumber().equals(room.getRoomNumber()) && 
             roomRepository.existsByRoomNumber(room.getRoomNumber())) {
-            throw new RuntimeException("Số phòng đã tồn tại: " + room.getRoomNumber());
+            throw new RuntimeException("Phòng " + room.getRoomNumber() + " đã tồn tại. Vui lòng nhập số phòng khác.");
         }
         
         existingRoom.setRoomNumber(room.getRoomNumber());
@@ -88,9 +88,22 @@ public class RoomServiceImpl implements RoomService {
         log.info("Hard deleting room with ID: {}", roomId);
         
         // Kiểm tra phòng có tồn tại không
-        Room room = getRoomById(roomId);
+        getRoomById(roomId);
         
-        // Xóa vĩnh viễn khỏi database
+        // Xóa các bản ghi liên quan trước khi xóa room
+        // Xóa room views
+        roomRepository.deleteRoomViewsByRoomId(roomId);
+        
+        // Xóa room furnishings  
+        roomRepository.deleteRoomFurnishingsByRoomId(roomId);
+        
+        // Xóa room images
+        roomRepository.deleteRoomImagesByRoomId(roomId);
+        
+        // Xóa order details liên quan đến room này
+        roomRepository.deleteOrderDetailsByRoomId(roomId);
+        
+        // Cuối cùng xóa room
         roomRepository.hardDeleteRoom(roomId);
         log.info("Hard deleted room with ID: {}", roomId);
     }
@@ -107,5 +120,12 @@ public class RoomServiceImpl implements RoomService {
             throw new RuntimeException("Trạng thái phòng không hợp lệ: " + status);
         }
         return roomRepository.findByStatus(roomStatus);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByRoomNumber(String roomNumber) {
+        log.info("Checking if room number exists: {}", roomNumber);
+        return roomRepository.existsByRoomNumber(roomNumber);
     }
 }
