@@ -8,13 +8,11 @@
 <body>
 <div class="container">
     <a th:href="@{/management/news}">Back to News</a>
-    <h1>Newsgroups</h1>
+    <h1>News Groups</h1>
 
     <form th:action="@{/management/news/groups/save}" method="post" th:object="${newsGroup}">
         <input type="hidden" th:field="*{newsGroupId}" />
-        <label>
-            <input type="text" th:field="*{name}" placeholder="Group name" required />
-        </label>
+        <input type="text" th:field="*{name}" placeholder="Group name" required />
         <button type="submit">Save Group</button>
     </form>
 

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${hotel.id != null} ? 'Edit Hotel' : 'New Hotel'">Hotel Form</title>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 2.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+        .form-header h2 {
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .form-header p {
+            color: #6c757d;
+            margin: 0;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .form-label i {
+            color: #667eea;
+            margin-right: 0.5rem;
+        }
+        .form-control, .form-select {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .form-control:hover, .form-select:hover {
+            border-color: #667eea;
+        }
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .btn-group-custom {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #e9ecef;
+        }
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .btn-cancel {
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+            color: white;
+        }
+        .required-asterisk {
+            color: #dc3545;
+            margin-left: 0.25rem;
+        }
+        .char-counter {
+            font-size: 0.875rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+        .form-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .form-section-title {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="form-container">
+        <!-- Form Header -->
+        <div class="form-header">
+            <h2>
+                <i th:class="${hotel.id != null ? 'fas fa-edit' : 'fas fa-plus-circle'}"></i>
+                <span th:text="${hotel.id != null ? 'Edit Hotel' : 'New Hotel'}"></span>
+            </h2>
+            <p th:if="${hotel.id != null}">Hotel ID: <strong th:text="${hotel.id}"></strong></p>
+        </div>
+
+        <!-- Form -->
+        <form th:action="@{/management/hotels}" th:object="${hotel}" method="post" id="hotelForm">
+            <input type="hidden" th:field="*{id}">
+
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fas fa-info-circle me-2"></i>Basic Information
+                </div>
+
+                <!-- Name -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-hotel"></i>Hotel Name
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <input type="text" 
+                           th:field="*{name}" 
+                           class="form-control" 
+                           placeholder="Enter hotel name..."
+                           required 
+                           maxlength="200"
+                           id="hotelName" />
+                    <div class="char-counter">
+                        <span id="nameCounter">0</span>/200 characters
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-map-marker-alt"></i>Address
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <input type="text" 
+                           th:field="*{address}" 
+                           class="form-control" 
+                           placeholder="Enter hotel address..."
+                           required 
+                           maxlength="300"
+                           id="hotelAddress" />
+                    <div class="char-counter">
+                        <span id="addressCounter">0</span>/300 characters
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Phone -->
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label">
+                            <i class="fas fa-phone"></i>Phone
+                        </label>
+                        <input type="text" 
+                               th:field="*{phone}" 
+                               class="form-control" 
+                               placeholder="Enter phone number..." />
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label">
+                            <i class="fas fa-envelope"></i>Email
+                        </label>
+                        <input type="email" 
+                               th:field="*{email}" 
+                               class="form-control" 
+                               placeholder="Enter email address..." />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Stars -->
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label">
+                            <i class="fas fa-star"></i>Stars Rating
+                        </label>
+                        <select th:field="*{stars}" class="form-select">
+                            <option value="1">⭐ 1 Star</option>
+                            <option value="2">⭐⭐ 2 Stars</option>
+                            <option value="3">⭐⭐⭐ 3 Stars</option>
+                            <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+                            <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label">
+                            <i class="fas fa-toggle-on"></i>Status
+                        </label>
+                        <select th:field="*{status}" class="form-select">
+                            <option value="DRAFT">Draft</option>
+                            <option value="ACTIVE">Active</option>
+                            <option value="INACTIVE">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fas fa-align-left me-2"></i>Description & Services
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-file-alt"></i>Description
+                    </label>
+                    <textarea th:field="*{description}" 
+                              class="form-control" 
+                              placeholder="Enter hotel description..."
+                              rows="4"
+                              maxlength="1000"
+                              id="hotelDescription"></textarea>
+                    <div class="char-counter">
+                        <span id="descCounter">0</span>/1000 characters
+                    </div>
+                </div>
+
+                <!-- Services -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-concierge-bell"></i>Services
+                    </label>
+                    <textarea th:field="*{services}" 
+                              class="form-control" 
+                              rows="3" 
+                              placeholder="Enter comma-separated services (e.g., WiFi, Pool, Gym, Restaurant)"></textarea>
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> Separate multiple services with commas
+                    </small>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-group-custom">
+                <button class="btn btn-save" type="submit">
+                    <i class="fas fa-save me-2"></i>
+                    <span th:text="${hotel.id != null ? 'Update Hotel' : 'Create Hotel'}"></span>
+                </button>
+                <a th:href="@{/management/hotels}" class="btn btn-cancel">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Character counter for hotel name
+    const hotelName = document.getElementById('hotelName');
+    const nameCounter = document.getElementById('nameCounter');
+    if (hotelName) {
+        nameCounter.textContent = hotelName.value.length;
+        hotelName.addEventListener('input', function() {
+            nameCounter.textContent = this.value.length;
+        });
+    }
+
+    // Character counter for address
+    const hotelAddress = document.getElementById('hotelAddress');
+    const addressCounter = document.getElementById('addressCounter');
+    if (hotelAddress) {
+        addressCounter.textContent = hotelAddress.value.length;
+        hotelAddress.addEventListener('input', function() {
+            addressCounter.textContent = this.value.length;
+        });
+    }
+
+    // Character counter for description
+    const hotelDescription = document.getElementById('hotelDescription');
+    const descCounter = document.getElementById('descCounter');
+    if (hotelDescription) {
+        descCounter.textContent = hotelDescription.value.length;
+        hotelDescription.addEventListener('input', function() {
+            descCounter.textContent = this.value.length;
+        });
+    }
+</script>
+</body>
+</html>
