@@ -3,19 +3,19 @@ package hotel.service.hotel;
 import hotel.db.entity.Hotel;
 import hotel.db.repository.hoteldetail.HotelRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class HotelServiceImpl implements HotelService {
 
-   private final HotelRepository hotelRepository;
+    private final HotelRepository hotelRepository;
 
     @Override
     @Transactional
@@ -39,29 +39,22 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public Page<Hotel> searchHotelsByName(String name, Pageable pageable) {
-      //  return hotelRepository.findByNameContainingIgnoreCase(name, pageable);
-        return null;
-
+        return hotelRepository.findByNameContainingIgnoreCase(name, pageable);
     }
 
     @Override
     public Page<Hotel> filterHotelsByStars(Integer stars, Pageable pageable) {
-     //   return hotelRepository.findByStars(stars, pageable);
-        return null;
-
+        return hotelRepository.findByStars(stars, pageable);
     }
 
     @Override
     public Page<Hotel> filterHotelsByStatus(String status, Pageable pageable) {
-       // return hotelRepository.findByStatus(status, pageable);
-        return null;
-
+        return hotelRepository.findByStatus(status, pageable);
     }
 
     @Override
     public Page<Hotel> getHotelsWithFilters(String name, Integer stars, String status, Pageable pageable) {
-      //  return hotelRepository.findByFilters(name, stars, status, pageable);
-        return null;
+        return hotelRepository.findByFilters(name, stars, status, pageable);
     }
 
     @Override
@@ -84,7 +77,7 @@ public class HotelServiceImpl implements HotelService {
     public Hotel changeStatus(Long id, String status) {
         Hotel hotel = findById(id);
         if (hotel != null) {
-        //    hotel.setStatus(status);
+            hotel.setStatus(status);
             return hotelRepository.save(hotel);
         }
         throw new RuntimeException("Không tìm thấy khách sạn với ID: " + id);

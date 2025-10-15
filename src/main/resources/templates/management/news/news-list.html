@@ -14,13 +14,17 @@
     </div>
 
     <form method="get" th:action="@{/management/news}">
-        <input type="text" name="search" th:value="${search}" placeholder="Search title..." />
-        <select name="status">
-            <option th:selected="${status} == null" value="">All</option>
-            <option th:selected="${status} == 'DRAFT'" value="DRAFT">Draft</option>
-            <option th:selected="${status} == 'PUBLISHED'" value="PUBLISHED">Published</option>
-            <option th:selected="${status} == 'ARCHIVED'" value="ARCHIVED">Archived</option>
-        </select>
+        <label>
+            <input type="text" name="search" th:value="${search}" placeholder="Search title..." />
+        </label>
+        <label>
+            <select name="status">
+                <option th:selected="${status} == null" value="">All</option>
+                <option th:selected="${status} == 'DRAFT'" value="DRAFT">Draft</option>
+                <option th:selected="${status} == 'PUBLISHED'" value="PUBLISHED">Published</option>
+                <option th:selected="${status} == 'ARCHIVED'" value="ARCHIVED">Archived</option>
+            </select>
+        </label>
         <button type="submit">Filter</button>
     </form>
 

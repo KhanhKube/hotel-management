@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <title th:text="${news.newsId} == null ? 'Create News' : 'Edit News'"></title>
@@ -15,7 +15,9 @@
 
         <div>
             <label>Title</label>
-            <input type="text" th:field="*{title}" required />
+            <label>
+                <input type="text" th:field="*{title}" required />
+            </label>
         </div>
 
         <div>
@@ -25,33 +27,43 @@
 
         <div>
             <label>Group</label>
-            <select th:field="*{newsGroupId}">
-                <option th:each="g : ${newsGroups}" th:value="${g.newsGroupId}" th:text="${g.name}"></option>
-            </select>
+            <label>
+                <select th:field="*{newsGroupId}">
+                    <option th:each="g : ${newsGroups}" th:value="${g.newsGroupId}" th:text="${g.name}"></option>
+                </select>
+            </label>
         </div>
 
         <div>
             <label>Content</label>
-            <textarea th:field="*{content}" rows="10"></textarea>
+            <label>
+                <textarea th:field="*{content}" rows="10"></textarea>
+            </label>
         </div>
 
         <div>
             <label>Image URL</label>
-            <input type="text" th:field="*{image}" />
+            <label>
+                <input type="text" th:field="*{image}" />
+            </label>
         </div>
 
         <div>
             <label>Link</label>
-            <input type="text" th:field="*{link}" />
+            <label>
+                <input type="text" th:field="*{link}" />
+            </label>
         </div>
 
         <div>
             <label>Status</label>
-            <select th:field="*{status}">
-                <option value="DRAFT">Draft</option>
-                <option value="PUBLISHED">Published</option>
-                <option value="ARCHIVED">Archived</option>
-            </select>
+            <label>
+                <select th:field="*{status}">
+                    <option value="DRAFT">Draft</option>
+                    <option value="PUBLISHED">Published</option>
+                    <option value="ARCHIVED">Archived</option>
+                </select>
+            </label>
         </div>
 
         <div>

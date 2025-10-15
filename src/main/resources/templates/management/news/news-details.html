@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <title th:text="${news.title}">News Details</title>
@@ -10,7 +10,7 @@
     <a th:href="@{/management/news}">Back</a>
     <h1 th:text="${news.title}"></h1>
     <p th:text="${news.heading}"></p>
-    <img th:if="${news.image}" th:src="${news.image}" alt="image" style="max-width: 400px; display:block;" />
+    <img th:if="${news.image}" th:src="${news.image}" alt="image" style="max-width: 400px; display:block;"  src=""/>
     <div th:utext="${news.content}"></div>
     <p>
         <strong>Status:</strong> <span th:text="${news.status}"></span>
@@ -20,13 +20,15 @@
     <p th:if="${news.link}">
         <a th:href="${news.link}" target="_blank">External link</a>
     </p>
-    
+
     <form th:action="@{'/management/news/change-status/' + ${news.newsId}}" method="post">
-        <select name="status">
-            <option value="DRAFT">Draft</option>
-            <option value="PUBLISHED">Published</option>
-            <option value="ARCHIVED">Archived</option>
-        </select>
+        <label>
+            <select name="status">
+                <option value="DRAFT">Draft</option>
+                <option value="PUBLISHED">Published</option>
+                <option value="ARCHIVED">Archived</option>
+            </select>
+        </label>
         <button type="submit">Change status</button>
     </form>
 </div>
