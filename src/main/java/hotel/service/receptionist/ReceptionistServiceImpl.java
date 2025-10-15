@@ -154,4 +154,53 @@ public class ReceptionistServiceImpl implements ReceptionistService {
         return new MessageResponse(true, REGISTERSUCCESS);
 
     }
+
+    @Override
+    public MessageResponse updateReceptionist(Integer receptionistId, User user){
+        if (user == null) {
+            return new MessageResponse(false, FILLALLFEILD);
+        }
+        boolean exists = userRepository.findById(receptionistId).isPresent();
+        if(!exists){
+            return new MessageResponse(false, USERNOTEXIST);
+        }
+        if (isNullOrEmpty(user.getEmail()) ||
+                isNullOrEmpty(user.getFirstName()) ||
+                isNullOrEmpty(user.getLastName()) ||
+                isNullOrEmpty(user.getPhone()) ||
+                user.getDob() == null) {
+            return new MessageResponse(false, FILLALLFEILD);
+        }
+        if (!user.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            return new MessageResponse(false, EMAILINVALID);
+        }
+        if (!user.getPhone().matches("^0\\d{9}$")) {
+            return new MessageResponse(false, PHONEINVALID);
+        }
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return new MessageResponse(false, EMAILDUPLICATE);
+        }
+        if (userRepository.existsByPhone(user.getPhone())) {
+            return new MessageResponse(false, PHONEDUPLICATE);
+        }
+        LocalDate today = LocalDate.now();
+        if (Period.between(user.getDob(), today).getYears() < 12) {
+            return new MessageResponse(false, DOBINVALID);
+        }
+        User.Gender gender = Boolean.TRUE.equals(user.getGender()) ? User.Gender.MALE : User.Gender.FEMALE;
+
+        User userResult = userRepository.findById(receptionistId).get();
+        userResult.setUsername(user.getUsername());
+        userResult.setEmail(user.getEmail());
+        userResult.setPhone(user.getPhone());
+        userResult.setFirstName(user.getFirstName());
+        userResult.setLastName(user.getLastName());
+        userResult.setGender(gender);
+        userResult.setDob(user.getDob());
+        userResult.setAddress(user.getAddress());
+        userRepository.save(userResult);
+        return new MessageResponse(true, REGISTERSUCCESS);
+
+    }
+
 }

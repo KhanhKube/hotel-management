@@ -16,4 +16,6 @@ public interface ReceptionistService {
     MessageResponse createReceptionist(UserRegisterDto user);
 
     Page<User> searchReceptionists(String keyword, String gender, String status, String sort, int page, int size);
+
+    MessageResponse updateReceptionist(Integer receptionistId, User user);
 }
