@@ -8,11 +8,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface DiscountRepository extends JpaRepository<Discount, Long> {
-    Optional<Discount> findByCodeAndIsDeletedFalse(String code);
 
     //check xem code voucher da ton tai hay chua.
     boolean existsByCodeAndIsDeletedFalse(String code);
@@ -21,7 +21,10 @@ public interface DiscountRepository extends JpaRepository<Discount, Long> {
     boolean existsByCodeAndDiscountIdNotAndIsDeletedFalse(String code, Long discountId);
 
     //lay tat ca discount chua bi xoa
-    java.util.List<Discount> findAllByIsDeletedFalse();
+    List<Discount> findAllByIsDeletedFalse();
+
+    //Tim discount theo id de hien thi details
+    Discount findDiscountByDiscountId(Long discountId);
 
     //soft delete
     @Modifying
