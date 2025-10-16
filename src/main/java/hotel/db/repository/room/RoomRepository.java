@@ -13,20 +13,14 @@ import java.util.List;
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Integer> {
 	List<Room> findByStatus(RoomStatus status);
-
-	List<Room> findAllByIsDeletedIsFalse();
-
-
-	List<Room> findAll();
-
 	Boolean existsByRoomNumber(String roomNumber);
 
-	// Hard delete method - xóa vĩnh viễn khỏi database
+	// Hard delete method - xoa vinh vien khoi database
 	@Modifying
 	@Query("DELETE FROM Room r WHERE r.roomId = :roomId")
 	void hardDeleteRoom(@Param("roomId") Integer roomId);
 
-	// Xóa các bản ghi liên quan đến room
+	// Xoa cac bang ghi lien quan den room
 	@Modifying
 	@Query(value = "DELETE FROM room_views WHERE room_id = :roomId", nativeQuery = true)
 	void deleteRoomViewsByRoomId(@Param("roomId") Integer roomId);
