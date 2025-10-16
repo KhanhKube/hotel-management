@@ -13,6 +13,7 @@ import java.util.List;
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Integer> {
 	List<Room> findByStatus(RoomStatus status);
+	List<Room> findAllByIsDeletedIsFalse();
 	Boolean existsByRoomNumber(String roomNumber);
 
 	// Hard delete method - xoa vinh vien khoi database
