@@ -18,25 +18,6 @@ public class DiscountServiceImpl implements DiscountService {
     private final DiscountRepository discountRepository;
 
     @Override
-    public Discount applyVoucher(String code) {
-        Discount discount = discountRepository.findByCodeAndIsDeletedFalse(code)
-                .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
-
-        // kiểm tra hạn sử dụng
-        if (discount.getEndDate().isBefore(LocalDate.now())) {
-            throw new RuntimeException("Voucher đã hết hạn");
-        }
-
-        // kiểm tra trạng thái
-
-        // kiểm tra số lần dùng
-        if (discount.getUsageLimit() != null && discount.getUsedCount() >= discount.getUsageLimit()) {
-            throw new RuntimeException("Voucher đã được dùng hết số lần cho phép");
-        }
-
-        return discount;
-    }
-    @Override
     public String calculateStatus(Discount d) {
         LocalDate now = LocalDate.now();
         if (d.getUsedCount() >= d.getUsageLimit()) {
@@ -51,7 +32,7 @@ public class DiscountServiceImpl implements DiscountService {
         return "ACTIVE"; // Đang HD
     }
 
-    private DiscountResponseDto toDto(Discount d) {
+    private DiscountResponseDto getListDiscountDto(Discount d) {
         return new DiscountResponseDto(
                 d.getDiscountId(),
                 d.getCode(),
@@ -65,18 +46,18 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public List<DiscountResponseDto> getAll() {
+    public List<DiscountResponseDto> getListDiscount() {
         List<Discount> entities = discountRepository.findAllByIsDeletedFalse();
         List<DiscountResponseDto> result = new ArrayList<>();
         for (Discount d : entities) {
-            result.add(toDto(d)); // toDto nhận Discount, trả DiscountResponseDto
+            result.add(getListDiscountDto(d)); // toDto nhận Discount, trả DiscountResponseDto
         }
         return result;
     }
 
     @Override
-    public Page<DiscountResponseDto> getAll(Pageable pageable) {
-        return discountRepository.findAll(pageable)
-                .map(this::toDto);
+    public Discount getDiscountById(Long discountId) {
+        return discountRepository.findDiscountByDiscountId(discountId);
     }
+
 }
