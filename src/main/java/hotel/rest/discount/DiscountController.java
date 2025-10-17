@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/hotel-management/discount")
-public class DiscountPageController {
+public class DiscountController {
 
     private final DiscountService discountService;
     private final DiscountRepository discountRepository;
