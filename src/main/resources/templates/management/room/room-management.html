@@ -42,7 +42,7 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h4 class="card-title mb-0">Quản Lý Phòng</h4>
-                                    <a th:href="@{/hotel-management/discount/create}" class="btn btn-primary">
+                                    <a th:href="@{/hotel-management/room/create}" class="btn btn-primary">
                                         <i class="mdi mdi-plus"></i> Thêm Phòng
                                     </a>
                                 </div>
@@ -62,7 +62,7 @@
                                         </thead>
                                         <tbody>
                                         <tr th:each="d, stat : ${listRoom}"
-                                            th:onclick="|window.location.href='@{/hotel-management/discount/detail/{id}(id=${2})}';|"
+                                            th:onclick="|window.location.href='@{/hotel-management/room/detail/{id}(id=${d.roomId})}';|"
                                             style="cursor: pointer;">
 
                                             <td th:text="${stat.count}"></td>
@@ -74,8 +74,8 @@
                                             <td th:text="${d.status != null ? d.status : 'N/A'}"></td>
 
                                             <td onclick="event.stopPropagation();">
-                                                <a th:href="@{/hotel-management/discount/edit/{id}(id=${d.roomId})}">Sửa</a>
-                                                <a th:href="@{/hotel-management/discount/delete/{id}(id=${d.roomId})}">Xóa</a>
+                                                <a th:href="@{/hotel-management/room/edit/{id}(id=${d.roomId})}">Sửa</a>
+                                                <a th:href="@{/hotel-management/room/delete/{id}(id=${d.roomId})}">Xóa</a>
                                             </td>
                                         </tr>
 
