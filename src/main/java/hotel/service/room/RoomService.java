@@ -1,6 +1,7 @@
 package hotel.service.room;
 
 import hotel.db.dto.room.ListRoomResponse;
+import hotel.db.dto.room.RoomListDto;
 import hotel.db.entity.Room;
 
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.List;
 public interface RoomService {
 
 	List<Room> getAllRooms();
+
+    List<RoomListDto> getRoomList();
 
 	ListRoomResponse getAllRoomForSearch();
 
@@ -17,12 +20,9 @@ public interface RoomService {
 
 	Room updateRoom(Integer roomId, Room room);
 
-	void deleteRoom(Integer roomId);
-
 	// Hard delete method - xóa vĩnh viễn khỏi database
 	void hardDeleteRoom(Integer roomId);
 
-	List<Room> getRoomsByStatus(String status);
 
 	// Check if room number exists
 	boolean existsByRoomNumber(String roomNumber);

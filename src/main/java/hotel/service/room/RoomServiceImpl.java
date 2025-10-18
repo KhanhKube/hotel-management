@@ -1,7 +1,10 @@
 package hotel.service.room;
 
+import hotel.db.dto.discount.DiscountResponseDto;
 import hotel.db.dto.room.ListRoomResponse;
+import hotel.db.dto.room.RoomListDto;
 import hotel.db.dto.room.RoomResponseDto;
+import hotel.db.entity.Discount;
 import hotel.db.entity.Room;
 import hotel.db.repository.room.RoomRepository;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +24,29 @@ import java.util.stream.Collectors;
 @Transactional
 public class RoomServiceImpl implements RoomService {
 	private final RoomRepository roomRepository;
+
+    //Trả về về List chứa các field cần thiết.
+    public List<RoomListDto> getRoomList() {
+        return roomRepository.findAll().stream()
+                .map(this::toListDto)
+                .collect(Collectors.toList());
+    }
+
+    private RoomListDto toListDto(Room room) {
+        Double sizeValue = room.getSize() != null ? room.getSize().getSize().doubleValue() : null;
+
+        return new RoomListDto(
+                room.getRoomId(),
+                room.getRoomNumber(),
+                room.getRoomType(),
+                room.getFloorId(),
+                sizeValue,
+                room.getPrice(),
+                room.getStatus()
+        );
+    }
+
+
 
 	@Override
 	@NotNull
@@ -118,15 +145,6 @@ public class RoomServiceImpl implements RoomService {
 	}
 
 	@Override
-	public void deleteRoom(Integer roomId) {
-		log.info("Deleting room with ID: {}", roomId);
-
-		Room room = getRoomById(roomId);
-		roomRepository.delete(room);
-		log.info("Deleted room with ID: {}", roomId);
-	}
-
-	@Override
 	@Transactional
 	public void hardDeleteRoom(Integer roomId) {
 		log.info("Hard deleting room with ID: {}", roomId);
@@ -150,20 +168,6 @@ public class RoomServiceImpl implements RoomService {
 		// Cuối cùng xóa room
 		roomRepository.hardDeleteRoom(roomId);
 		log.info("Hard deleted room with ID: {}", roomId);
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<Room> getRoomsByStatus(String status) {
-		log.info("Getting rooms by status: {}", status);
-		// Convert String to RoomStatus enum
-		hotel.db.enums.RoomStatus roomStatus;
-		try {
-			roomStatus = hotel.db.enums.RoomStatus.valueOf(status.toUpperCase());
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException("Trạng thái phòng không hợp lệ: " + status);
-		}
-		return roomRepository.findByStatus(roomStatus);
 	}
 
 	@Override
