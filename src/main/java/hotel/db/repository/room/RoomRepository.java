@@ -16,6 +16,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
 	List<Room> findAllByIsDeletedIsFalse();
 
+	List<Room> findTop3ByOrderBySoldDesc();
 
 	List<Room> findAll();
 
