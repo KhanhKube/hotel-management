@@ -1,19 +1,20 @@
 package hotel.service.room;
 
-import hotel.db.dto.discount.DiscountResponseDto;
 import hotel.db.dto.room.ListRoomResponse;
 import hotel.db.dto.room.RoomListDto;
 import hotel.db.dto.room.RoomResponseDto;
-import hotel.db.entity.Discount;
+import hotel.db.entity.Floor;
 import hotel.db.entity.Room;
+import hotel.db.entity.Size;
+import hotel.db.repository.floor.FloorRepository;
 import hotel.db.repository.room.RoomRepository;
+import hotel.db.repository.size.SizeRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,29 +24,31 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional
 public class RoomServiceImpl implements RoomService {
+
 	private final RoomRepository roomRepository;
+	private final FloorRepository floorRepository;
+	private final SizeRepository sizeRepository;
 
-    //Trả về về List chứa các field cần thiết.
-    public List<RoomListDto> getRoomList() {
-        return roomRepository.findAll().stream()
-                .map(this::toListDto)
-                .collect(Collectors.toList());
-    }
+	//Trả về về List chứa các field cần thiết.
+	public List<RoomListDto> getRoomList() {
+		return roomRepository.findAll().stream()
+				.map(this::toListDto)
+				.collect(Collectors.toList());
+	}
 
-    private RoomListDto toListDto(Room room) {
-        Double sizeValue = room.getSize() != null ? room.getSize().getSize().doubleValue() : null;
+	private RoomListDto toListDto(Room room) {
+		Double sizeValue = room.getSize() != null ? room.getSize().getSize().doubleValue() : null;
 
-        return new RoomListDto(
-                room.getRoomId(),
-                room.getRoomNumber(),
-                room.getRoomType(),
-                room.getFloorId(),
-                sizeValue,
-                room.getPrice(),
-                room.getStatus()
-        );
-    }
-
+		return new RoomListDto(
+				room.getRoomId(),
+				room.getRoomNumber(),
+				room.getRoomType(),
+				room.getFloorId(),
+				sizeValue,
+				room.getPrice(),
+				room.getStatus()
+		);
+	}
 
 
 	@Override
@@ -76,13 +79,17 @@ public class RoomServiceImpl implements RoomService {
 	private RoomResponseDto buildRoomResponse(Room room) {
 		if (room == null) return null;
 
+		Floor floor = floorRepository.findById(room.getFloorId()).orElse(null);
+		Size size = sizeRepository.findById(room.getSizeId()).orElse(null);
+		if (floor == null) return null;
+		if (size == null) return null;
 		return RoomResponseDto.builder()
 				.roomId(room.getRoomId() != null ? room.getRoomId().longValue() : null)
 				.roomNumber(room.getRoomNumber())
 				.roomType(room.getRoomType())
 				.bedType(room.getBedType())
-				.floorId(room.getFloorId() != null ? room.getFloorId().longValue() : null)
-				.sizeId(room.getSizeId() != null ? room.getSizeId().longValue() : null)
+				.floorNumber(floor.getFloorNumber())
+				.size(size.getSize())
 				.roomDescription(room.getRoomDescription())
 				.price(room.getPrice())
 				.status(room.getStatus())
