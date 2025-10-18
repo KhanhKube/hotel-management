@@ -9,9 +9,15 @@ import java.util.List;
 
 public interface RoomService {
 
+    List<RoomListDto> getRoomList();
+
 	List<Room> getAllRooms();
 
-    List<RoomListDto> getRoomList();
+    String[] getAllStatus();
+
+    String[] getAllRoomTypes();
+
+    String[] getAllBedTypes();
 
 	ListRoomResponse getAllRoomForSearch();
 
