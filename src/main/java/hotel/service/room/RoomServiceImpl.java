@@ -97,8 +97,8 @@ public class RoomServiceImpl implements RoomService {
 				.roomNumber(room.getRoomNumber())
 				.roomType(room.getRoomType())
 				.bedType(room.getBedType())
-				.floorId(room.getFloorId() != null ? room.getFloorId().longValue() : null)
-				.sizeId(room.getSizeId() != null ? room.getSizeId().longValue() : null)
+				.floorNumber(room.getFloor() != null ? room.getFloor().getFloorNumber() : null)
+				.size(room.getSize() != null ? room.getSize().getSize() : null)
 				.roomDescription(room.getRoomDescription())
 				.price(room.getPrice())
 				.status(room.getStatus())
@@ -191,5 +191,11 @@ public class RoomServiceImpl implements RoomService {
 	public boolean existsByRoomNumber(String roomNumber) {
 		log.info("Checking if room number exists: {}", roomNumber);
 		return roomRepository.existsByRoomNumber(roomNumber);
+	}
+
+	@Override
+	public List<hotel.db.dto.room.RoomHomepageResponseDto> getTop3Rooms() {
+		// TODO: Implement this method
+		return Collections.emptyList();
 	}
 }
