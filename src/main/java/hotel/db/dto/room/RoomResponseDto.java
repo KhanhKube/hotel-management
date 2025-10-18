@@ -17,8 +17,8 @@ public class RoomResponseDto {
 	private String roomNumber;
 	private String roomType;
 	private String bedType;
-	private Long floorId;
-	private Long sizeId;
+	private Integer floorNumber;
+	private BigDecimal size;
 	private String roomDescription;
 	private BigDecimal price;
 	private String status;
