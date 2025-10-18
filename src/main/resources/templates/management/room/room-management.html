@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Tạo mã giảm giá</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <style>
+        tbody tr:hover {
+            /*background-color: #e3f2fd;  !* Xanh nhạt *!*/
+            cursor: pointer;
+            opacity: 0.65;
+            transition: background-color 0.2s;  /* Hiệu ứng mượt */
+        }
+    </style>
+</head>
+
+<body>
+<div class="container-scroller">
+    <!-- Include sidebar -->
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"alt="logo" /></a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            </div>
+        </nav>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Quản Lý Phòng</h4>
+                                    <a th:href="@{/hotel-management/discount/create}" class="btn btn-primary">
+                                        <i class="mdi mdi-plus"></i> Thêm Phòng
+                                    </a>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table" id="roomTable">
+                                        <thead>
+                                        <tr>
+                                            <th> STT </th>
+                                            <th> Số Phòng </th>
+                                            <th> Loại phòng </th>
+                                            <th> Tầng  </th>
+                                            <th> Diện tích </th>
+                                            <th> Giá  </th>
+                                            <th> Trạng thái </th>
+                                            <th> Hành động </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="d, stat : ${listRoom}"
+                                            th:onclick="|window.location.href='@{/hotel-management/discount/detail/{id}(id=${2})}';|"
+                                            style="cursor: pointer;">
+
+                                            <td th:text="${stat.count}"></td>
+                                            <td th:text="${d.roomNumber != null ? d.roomNumber : 'N/A'}"></td>
+                                            <td th:text="${d.roomType != null ? d.roomType : 'N/A'}"></td>
+                                            <td th:text="${d.floorNumber != null ? d.floorNumber : 'N/A'}"></td>
+                                            <td th:text="${d.sizeId != null ? d.sizeId : 'N/A'}"></td>
+                                            <td th:text="${d.price != null ? d.price : 'N/A'}"></td>
+                                            <td th:text="${d.status != null ? d.status : 'N/A'}"></td>
+
+                                            <td onclick="event.stopPropagation();">
+                                                <a th:href="@{/hotel-management/discount/edit/{id}(id=${d.roomId})}">Sửa</a>
+                                                <a th:href="@{/hotel-management/discount/delete/{id}(id=${d.roomId})}">Xóa</a>
+                                            </td>
+                                        </tr>
+
+                                        <tr th:if="${#lists.isEmpty(listRoom)}">
+                                            <td colspan="9" class="text-center text-muted">Không có phòng nào khả dụng.</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+</body>
+
+</html>
