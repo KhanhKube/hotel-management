@@ -35,4 +35,5 @@ public class Constants {
     public static final String LOGINFIRST = "Bạn cần đăng nhập trước!";
     public static final String CHOOSEPICTURE = "Vui lòng chọn ảnh!";
     public static final String FILEINVALID = "Invalid file type. Please upload an image.";
+    public static final String ROOMNOTEXIST = "Phòng không tồn tại";
 }

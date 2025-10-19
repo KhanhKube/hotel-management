@@ -174,7 +174,7 @@
                         <div class="card-body">
                             <h3 class="card-explore__price" th:text="${#numbers.formatInteger(r.price.intValue(), 3, 'POINT')} + ' VNĐ'">350.000 <sub>/ Ngày</sub></h3>
                             <h4 class="card-explore__title">
-                                <a th:text="${r.roomType}" th:href="@{/rooms/{id}(id=${r.roomId})}">Classic Bed Room</a>
+                                <a th:text="${r.roomType}" th:href="@{/hotel/room/{id}(id=${r.roomId})}">Classic Bed Room</a>
                             </h4>
                             <p th:text="${r.roomDescription}">Room description</p>
                             <a class="card-explore__link" th:href="@{/hotel/room/{id}(id=${r.roomId})}">

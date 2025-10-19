@@ -1,15 +1,17 @@
 package hotel.service.room;
 
 import hotel.db.dto.discount.DiscountResponseDto;
-import hotel.db.dto.room.ListRoomResponse;
-import hotel.db.dto.room.RoomListDto;
-import hotel.db.dto.room.RoomResponseDto;
+import hotel.db.dto.room.*;
 import hotel.db.entity.Discount;
 import hotel.db.entity.Room;
+import hotel.db.entity.RoomImage;
+import hotel.db.entity.Size;
 import hotel.db.enums.BedType;
 import hotel.db.enums.RoomStatus;
 import hotel.db.enums.RoomType;
 import hotel.db.repository.room.RoomRepository;
+import hotel.db.repository.roomimage.RoomImageRepository;
+import hotel.db.repository.size.SizeRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +31,10 @@ import java.util.stream.Collectors;
 public class RoomServiceImpl implements RoomService {
 
 	private final RoomRepository roomRepository;
+
+	private final RoomImageRepository roomImageRepository;
+
+	private final SizeRepository sizeRepository;
 
     /*
     Trả về về List chứa các field cần thiết.
@@ -194,8 +201,64 @@ public class RoomServiceImpl implements RoomService {
 	}
 
 	@Override
-	public List<hotel.db.dto.room.RoomHomepageResponseDto> getTop3Rooms() {
-		// TODO: Implement this method
-		return Collections.emptyList();
+	public List<RoomHomepageResponseDto> getTop3Rooms() {
+		List<Room> rooms = roomRepository.findTop3ByOrderBySoldDesc();
+		List<RoomHomepageResponseDto> results = new ArrayList<>();
+
+		for (Room room : rooms) {
+			RoomHomepageResponseDto dto = new RoomHomepageResponseDto();
+			dto.setRoomId(room.getRoomId());
+			dto.setPrice(room.getPrice());
+			dto.setRoomType(room.getRoomType());
+			dto.setRoomDescription(room.getRoomDescription());
+
+			List<RoomImage> roomImages = roomImageRepository.findByRoomId(room.getRoomId());
+			if (roomImages != null && !roomImages.isEmpty()) {
+				dto.setImageRoom(roomImages.get(0).getRoomImageUrl());
+			}
+
+			results.add(dto);
+		}
+
+		return results;
+	}
+
+
+	@Override
+	public RoomDetailResponseDto getRoomDetailById(Integer roomId) {
+		Room room = roomRepository.findByRoomId(roomId);
+		if (room == null) {
+			return null;
+		}
+
+		// Lấy thông tin kích thước phòng (size)
+		Size size = sizeRepository.findBySizeIdAndIsDeletedIsFalse(room.getSizeId());
+
+		// Tạo DTO trả về
+		RoomDetailResponseDto dto = new RoomDetailResponseDto();
+		dto.setRoomId(room.getRoomId());
+		dto.setRoomNumber(room.getRoomNumber());
+		dto.setRoomType(room.getRoomType());
+		dto.setBedType(room.getBedType());
+		dto.setFloorNumber(room.getFloorId());
+		dto.setSize(size != null ? size.getSize() : null);
+		dto.setPrice(room.getPrice());
+		dto.setStatus(room.getStatus());
+		dto.setSold(room.getSold());
+		dto.setView(room.getView());
+		dto.setRoomDescription(room.getRoomDescription());
+
+		List<RoomImage> roomImages = roomImageRepository.findByRoomId(room.getRoomId());
+		List<String> imageUrls = new ArrayList<>();
+
+		if (roomImages != null && !roomImages.isEmpty()) {
+			for (RoomImage roomImage : roomImages) {
+				imageUrls.add(roomImage.getRoomImageUrl());
+			}
+		}
+
+		dto.setImages(imageUrls);
+
+		return dto;
 	}
 }
