@@ -19,8 +19,8 @@ public class DiscountController {
 
     @GetMapping
     public String view(Model model) {
-        // Tạm thời trả về list rỗng để tránh lỗi
         model.addAttribute("listDiscount", discountService.getListDiscount());
+        model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
         return "management/discount/discountmanage";
     }
 
@@ -29,6 +29,7 @@ public class DiscountController {
         Discount discount = new Discount();
         discount.setDiscountType("percent");
         model.addAttribute("discount", discount);
+        model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
         return "management/discount/discount-create-form";
     }
 
@@ -40,6 +41,7 @@ public class DiscountController {
             if (discountRepository.existsByCodeAndIsDeletedFalse(discount.getCode())) {
                 model.addAttribute("errorMessage", "Mã giảm giá này đã tồn tại!");
                 model.addAttribute("discount", discount);
+                model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
                 return "management/discount/discount-create-form";
             }
         } else {
@@ -48,6 +50,7 @@ public class DiscountController {
                     discount.getCode(), discount.getDiscountId())) {
                 model.addAttribute("errorMessage", "Mã giảm giá này đã tồn tại!");
                 model.addAttribute("discount", discount);
+                model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
                 return "management/discount/discount-create-form";
             }
         }
@@ -63,11 +66,34 @@ public class DiscountController {
             return "redirect:/hotel-management/discount";
         }
         model.addAttribute("discount", discount);
+        model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
         return "management/discount/discount-create-form";
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteDiscount(@PathVariable Long id) {
+    public String deleteDiscount(@PathVariable Long id, Model model) {
+        // Lấy discount để check status
+        Discount discount = discountService.getDiscountById(id);
+        
+        if (discount == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy mã giảm giá!");
+            model.addAttribute("listDiscount", discountService.getListDiscount());
+            model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
+            return "management/discount/discountmanage";
+        }
+        
+        // Tính status
+        String status = discountService.calculateStatus(discount);
+        
+        // Không cho xóa nếu đang ACTIVE
+        if ("ACTIVE".equals(status)) {
+            model.addAttribute("errorMessage", "Không thể xóa mã giảm giá đang hoạt động! Vui lòng đợi đến khi hết hạn hoặc hết số lượng.");
+            model.addAttribute("listDiscount", discountService.getListDiscount());
+            model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
+            return "management/discount/discountmanage";
+        }
+        
+        // Cho phép xóa nếu PENDING, EXPIRED, hoặc EXHAUSTED
         discountRepository.softDeleteById(id);
         return "redirect:/hotel-management/discount";
     }

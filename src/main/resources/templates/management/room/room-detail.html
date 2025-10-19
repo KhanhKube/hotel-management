@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Tạo mã giảm giá</title>
+    <title>Quản lí phòng</title>
     <base th:href="@{/static}">
     <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
     <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
@@ -32,26 +32,147 @@
                     <div class="col-12 grid-margin">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title mb-0">Chi Tiết Phòng</h4>
-                                <br><br>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h4 class="card-title mb-0">
+                                        <i class="mdi mdi-home-variant"></i> Chi Tiết Phòng
+                                    </h4>
+                                    <div>
+                                        <a th:href="@{/hotel-management/room/edit/{id}(id=${room.roomId})}" class="btn btn-primary btn-sm">
+                                            <i class="mdi mdi-pencil"></i> Chỉnh sửa
+                                        </a>
+                                        <a th:href="@{/hotel-management/room}" class="btn btn-secondary btn-sm">
+                                            <i class="mdi mdi-arrow-left"></i> Quay lại
+                                        </a>
+                                    </div>
+                                </div>
 
-                                <strong>ID Phòng:</strong> <span th:text="${room.roomId}"></span><br>
-                                <strong>Số Phòng:</strong> <span th:text="${room.roomNumber}"></span><br>
-                                <strong>Loại Phòng:</strong> <span th:text="${room.roomType}"></span><br>
-                                <strong>Loại Giường:</strong> <span th:text="${room.bedType}"></span><br>
-                                <strong>Tầng:</strong> <span th:text="${room.floorId}"></span><br>
-                                <strong>Diện Tích:</strong> <span th:text="${room.sizeId}"></span><br>
-                                <strong>Giá/Đêm:</strong> <span th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')}"></span> VNĐ<br>
-                                <strong>Trạng Thái:</strong> <span th:text="${room.status}"></span><br>
-                                <strong>Mô Tả:</strong> <span th:text="${room.roomDescription}"></span><br>
-                                <strong>Số Lượt Đặt:</strong> <span th:text="${room.sold}"></span><br>
-                                <strong>Số Lượt Xem:</strong> <span th:text="${room.view}"></span><br>
-                                <strong>Ngày Tạo:</strong> <span th:text="${#temporals.format(room.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span><br>
-                                <strong>Ngày Cập Nhật:</strong> <span th:text="${#temporals.format(room.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></span><br>
-                                <br>
+                                <!-- Room Number Display -->
+                                <div class="alert alert-info" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                                    <div class="text-center text-white">
+                                        <i class="mdi mdi-door" style="font-size: 48px;"></i>
+                                        <h2 class="mt-2 mb-0">Phòng <span th:text="${room.roomNumber}"></span></h2>
+                                        <p class="mb-0" th:text="${room.roomType}"></p>
+                                    </div>
+                                </div>
 
-                                <a th:href="@{/hotel-management/room}" class="btn btn-secondary">Quay Lại</a>
-                                <a th:href="@{/hotel-management/room/edit/{id}(id=${room.roomId})}" class="btn btn-primary">Chỉnh Sửa</a>
+                                <!-- Main Info -->
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <div class="card mb-3" style="border-left: 4px solid #667eea;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-information"></i> Thông Tin Cơ Bản
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td style="width: 40%;"><i class="mdi mdi-identifier"></i> <strong>ID:</strong></td>
+                                                        <td><span class="badge badge-dark" th:text="${room.roomId}"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-door"></i> <strong>Số phòng:</strong></td>
+                                                        <td><span class="badge badge-primary" th:text="${room.roomNumber}"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-home-variant"></i> <strong>Loại phòng:</strong></td>
+                                                        <td th:text="${room.roomType}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-bed"></i> <strong>Loại giường:</strong></td>
+                                                        <td th:text="${room.bedType}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-stairs"></i> <strong>Tầng:</strong></td>
+                                                        <td th:text="${room.floorId}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-ruler-square"></i> <strong>Diện tích:</strong></td>
+                                                        <td><span th:text="${room.sizeId}"></span> m²</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="card mb-3" style="border-left: 4px solid #f093fb;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-cash-multiple"></i> Giá & Trạng Thái
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td style="width: 40%;"><i class="mdi mdi-currency-usd"></i> <strong>Giá/đêm:</strong></td>
+                                                        <td>
+                                                            <span class="text-primary" style="font-size: 18px; font-weight: bold;">
+                                                                <span th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')}"></span> VNĐ
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-information"></i> <strong>Trạng thái:</strong></td>
+                                                        <td>
+                                                            <span th:if="${room.status == 'Trống'}" class="badge badge-success">Trống</span>
+                                                            <span th:if="${room.status == 'Đang thuê'}" class="badge badge-danger">Đang thuê</span>
+                                                            <span th:if="${room.status == 'Bảo trì'}" class="badge badge-warning">Bảo trì</span>
+                                                            <span th:if="${room.status == 'Đã đặt'}" class="badge badge-info">Đã đặt</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-cart"></i> <strong>Số lượt đặt:</strong></td>
+                                                        <td><span class="badge badge-warning" th:text="${room.sold}"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-eye"></i> <strong>Số lượt xem:</strong></td>
+                                                        <td><span class="badge badge-info" th:text="${room.view}"></span></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="card mb-3" style="border-left: 4px solid #4facfe;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="mdi mdi-text"></i> Mô Tả Phòng
+                                        </h5>
+                                        <p class="mb-0" th:text="${room.roomDescription != null ? room.roomDescription : 'Chưa có mô tả'}"></p>
+                                    </div>
+                                </div>
+
+                                <!-- System Info -->
+                                <div class="card" style="border-left: 4px solid #43e97b;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="mdi mdi-cog"></i> Thông Tin Hệ Thống
+                                        </h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p class="mb-2">
+                                                    <i class="mdi mdi-clock-plus"></i> <strong>Ngày tạo:</strong>
+                                                    <span class="text-muted" th:text="${#temporals.format(room.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                                                </p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p class="mb-2">
+                                                    <i class="mdi mdi-clock-edit"></i> <strong>Cập nhật lần cuối:</strong>
+                                                    <span class="text-muted" th:text="${#temporals.format(room.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="mt-4 text-center">
+                                    <a th:href="@{/hotel-management/room}" class="btn btn-secondary btn-lg">
+                                        <i class="mdi mdi-arrow-left"></i> Quay lại danh sách
+                                    </a>
+                                    <a th:href="@{/hotel-management/room/edit/{id}(id=${room.roomId})}" class="btn btn-primary btn-lg">
+                                        <i class="mdi mdi-pencil"></i> Chỉnh sửa phòng
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -9,6 +9,7 @@ import hotel.db.entity.Size;
 import hotel.db.enums.BedType;
 import hotel.db.enums.RoomStatus;
 import hotel.db.enums.RoomType;
+import hotel.db.repository.floor.FloorRepository;
 import hotel.db.repository.room.RoomRepository;
 import hotel.db.repository.roomimage.RoomImageRepository;
 import hotel.db.repository.size.SizeRepository;
@@ -31,8 +32,7 @@ import java.util.stream.Collectors;
 public class RoomServiceImpl implements RoomService {
 
 	private final RoomRepository roomRepository;
-	private final hotel.db.repository.floor.FloorRepository floorRepository;
-	private final hotel.db.repository.size.SizeRepository sizeRepository;
+	private final FloorRepository floorRepository;
 
 	private final RoomImageRepository roomImageRepository;
 

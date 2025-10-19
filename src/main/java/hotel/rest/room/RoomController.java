@@ -83,7 +83,24 @@ public class RoomController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteRoom(@PathVariable Integer id) {
+    public String deleteRoom(@PathVariable Integer id, Model model) {
+        // Lấy room để check status
+        Room room = roomService.getRoomById(id);
+        
+        if (room == null) {
+            model.addAttribute("errorMessage", "Không tìm thấy phòng!");
+            model.addAttribute("listRoom", roomService.getRoomList());
+            return "management/room/room-management";
+        }
+        
+        // Không cho xóa nếu phòng đang hoạt động (Đang thuê hoặc Đã đặt)
+        if ("Đang thuê".equals(room.getStatus()) || "Đã đặt".equals(room.getStatus())) {
+            model.addAttribute("errorMessage", "Không thể xóa phòng đang hoạt động! Phòng đang ở trạng thái: " + room.getStatus());
+            model.addAttribute("listRoom", roomService.getRoomList());
+            return "management/room/room-management";
+        }
+        
+        // Cho phép xóa nếu Trống hoặc Bảo trì
         roomService.DeleteRoom(id);
         return "redirect:/hotel-management/room";
     }

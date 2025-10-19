@@ -14,4 +14,6 @@ public interface DiscountService {
     String calculateStatus(Discount d); //Tính giá trị cho status
 
     Discount getDiscountById(Long discountId);
+    
+    List<String> getRoomTypesForDiscount();
 }
