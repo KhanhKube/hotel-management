@@ -88,7 +88,7 @@
                                     <label>Mô tả phòng:</label><br>
                                     <textarea th:field="*{roomDescription}" rows="4" cols="50"></textarea><br><br>
 
-                                    <button type="button" onclick="history.back()">Hủy</button>
+                                    <button><a th:href="@{/hotel-management/room}">Huỷ</a></button>
                                     <button type="submit">Lưu phòng</button>
 
                                 </form>

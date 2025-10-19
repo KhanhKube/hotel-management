@@ -88,6 +88,13 @@ public class RoomController {
         return "redirect:/hotel-management/room";
     }
 
+    @GetMapping("/detail/{id}")
+    public String detailRoom(@PathVariable Integer id,Model model) {
+        Room room = roomService.getRoomById(id);
+        model.addAttribute("room", room);
+        return "management/room/room-detail";
+    }
+
 	@PostMapping("/search")
 	public ListRoomResponse listRooms(@RequestBody SearchRoomRequest request) {
 		return bookingService.listRoom(request);
