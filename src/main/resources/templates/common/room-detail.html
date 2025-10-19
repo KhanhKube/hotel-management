@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/vendors/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="/vendors/linericon/style.css">
+    <link rel="stylesheet" href="/vendors/magnefic-popup/magnific-popup.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.theme.default.min.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.carousel.min.css">
+    <link rel="stylesheet" href="/vendors/nice-select/nice-select.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .room-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .room-header h2 {
+            font-weight: bold;
+        }
+
+        .price {
+            color: #ff6600;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .carousel-item img {
+            height: 400px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .room-description {
+            white-space: pre-line;
+        }
+
+        .add-cart-btn {
+            background-color: #ff6600;
+            color: white;
+            font-weight: 600;
+        }
+
+        .add-cart-btn:hover {
+            background-color: #e65c00;
+        }
+    </style>
+</head>
+<body>
+<!-- import header -->
+<div th:replace="~{common/header :: header}"></div>
+<section class="home-banner-area" id="home">
+    <div class="container h-100">
+        <div class="home-banner">
+            <div class="text-center">
+                <h4>Xem sự khác biệt mà một kỳ nghỉ mang lại!</h4>
+                <h1>Sang trọng <em>và</em> Riêng Tư</h1>
+                <a class="button home-banner-btn" href="#">Đặt ngay</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-margin">
+    <div class="container mt-4 mb-5">
+
+        <!-- Carousel hình ảnh -->
+        <div id="roomCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+            <div class="carousel-inner" th:if="${room.images != null}">
+                <div class="carousel-item" th:each="img, iterStat : ${room.images}"
+                     th:classappend="${iterStat.index == 0} ? 'active'">
+                    <img th:src="${img}" class="d-block w-100" alt="Hình ảnh phòng">
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#roomCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#roomCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+        </div>
+
+        <!-- Thông tin phòng -->
+        <div class="room-header mb-3">
+            <h2 th:text="${room.roomType}">Loại phòng</h2>
+            <span class="price"
+                  th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ / đêm'">
+              350.000 VNĐ / đêm
+        </span>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>Số phòng:</strong> <span th:text="${room.roomNumber}"></span></p>
+            <p><strong>Loại giường:</strong> <span th:text="${room.bedType}"></span></p>
+            <p><strong>Tầng:</strong> <span th:text="${room.floorNumber}"></span></p>
+            <p><strong>Kích thước:</strong> <span th:text="${room.size} + ' m²'"></span></p>
+            <p><strong>Trạng thái:</strong> <span th:text="${room.status}"></span></p>
+            <p><strong>Mô tả:</strong></p>
+            <p class="room-description" th:text="${room.roomDescription}"></p>
+        </div>
+
+        <!-- Form chọn ngày -->
+        <form th:action="@{/cart/add}" method="post" class="p-3 border rounded bg-white shadow-sm">
+            <input type="hidden" name="roomId" th:value="${room.roomId}">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Ngày nhận phòng:</label>
+                    <input type="date" name="checkIn" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Ngày trả phòng:</label>
+                    <input type="date" name="checkOut" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <button type="submit" class="btn add-cart-btn px-4 py-2">Thêm vào giỏ</button>
+            </div>
+        </form>
+
+    </div>
+
+</section>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<!-- import header -->
+<div th:replace="~{common/footer :: footer}"></div>
+
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
+<script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
+<script src="/vendors/easing.min.js"></script>
+<script src="/vendors/superfish.min.js"></script>
+<script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
+<script src="/vendors/jquery.ajaxchimp.min.js"></script>
+<script src="/vendors/mail-script.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>

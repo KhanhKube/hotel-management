@@ -113,7 +113,7 @@
                                     <td th:text="${r.address}">Hà Nội</td>
                                     <td th:text="${r.gender}">Nam</td>
                                     <td>
-                                        <a th:href="@{/hotel-management/receptionist/edit/{id}(id=${r.userId})}"
+                                        <a th:href="@{/hotel-management/receptionist/{id}(id=${r.userId})}"
                                            class="btn btn-sm btn-warning">Sửa</a>
                                         <a th:href="@{/hotel-management/receptionist/delete/{id}(id=${r.userId})}"
                                            class="btn btn-sm btn-danger"

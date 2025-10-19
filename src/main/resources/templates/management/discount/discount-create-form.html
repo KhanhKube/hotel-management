@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Tạo mã giảm giá</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+</head>
+
+<body>
+    <div class="container-scroller">
+        <!-- Include sidebar -->
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="container-fluid page-body-wrapper">
+            <nav class="navbar p-0 fixed-top d-flex flex-row">
+                <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                    <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                            alt="logo" /></a>
+                </div>
+                <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+                </div>
+            </nav>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="row">
+                        <div class="col-12 grid-margin">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title mb-0">Create Discount Voucher</h4>
+                                    <!-- Nội dung của bạn ở đây -->
+                                    <form th:action="@{/hotel-management/discount/create}" method="post"
+                                        th:object="${discount}">
+
+                                        <!-- Thêm hidden để bắt được discountId khi nhấn update -->
+                                        <input type="hidden" th:field="*{discountId}" />
+
+                                        <div th:if="${errorMessage}" class="alert alert-danger"
+                                            th:text="${errorMessage}"></div>
+
+                                        <label for="vcode">Mã giảm giá:</label>
+                                        <input id="vcode" type="text" th:field="*{code}" required><br>
+
+                                        <label for="des">Mô tả:</label>
+                                        <input id="des" type="text" th:field="*{description}" required>
+
+                                        <!-- Chọn loại giảm -->
+                                        <div>
+                                            <label>Loại giảm giá:</label><br>
+                                            <input id="percentRadio" type="radio" th:field="*{discountType}"
+                                                value="PERCENT" onchange="valueValidate()">
+                                            <label for="percentRadio">Phần trăm (%)</label>
+
+                                            <input id="amountRadio" type="radio" th:field="*{discountType}"
+                                                value="AMOUNT" onchange="valueValidate()">
+                                            <label for="amountRadio">Thành tiền ($)</label>
+                                        </div>
+
+                                        <!-- Nhập giá trị -->
+                                        <div>
+                                            <label for="value">Giá trị giảm:</label>
+                                            <input id="value" type="number" step="0.01" th:field="*{value}" required>
+                                        </div><br>
+
+                                        <label for="roomtype">Loại phòng được giảm:</label>
+                                        <input id="roomtype" type="text" th:field="*{roomType}" required><br>
+
+                                        <label for="startdate">Ngày bắt đầu:</label>
+                                        <!--Nếu mới tạo thì chỉ cho phép startDate min là thời gian hiện tại,
+                                       Nếu update thì set min startDate là thời gian cũ lúc mới tạo. (tránh bắt user nhập lại)-->
+                                        <input id="startdate" type="date" th:field="*{startDate}" th:attr="min=${discount.startDate == null ?
+                                                        #dates.format(#dates.createNow(), 'yyyy-MM-dd') :
+                                                        #temporals.format(discount.startDate, 'yyyy-MM-dd')}"
+                                            onblur="validateEndDate()" required>
+
+                                        <label for="enddate">Ngày hết hạn:</label>
+                                        <input id="enddate" type="date" th:field="*{endDate}"
+                                            th:value="${#temporals.format(discount.endDate, 'dd-MM-yyyy')}"
+                                            onblur="validateEndDate()" required><br>
+
+                                        <label for="limit">Số lượng phát hành:</label>
+                                        <input id="limit" type="number" th:field="*{usageLimit}" required><br>
+
+                                        <input type="submit" value="Lưu giảm giá">
+                                    </form>
+                                    <button><a th:href="@{/hotel-management/discount}">Huỷ</a></button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--    validate người dùng chọn DiscountType và Số tiền giảm-->
+    <script>
+        function valueValidate() {
+            const percent = document.getElementById('percentRadio');
+            const valueIn = document.getElementById('value');
+
+            if (percent.checked) {
+                valueIn.min = 0.01;
+                valueIn.max = 100;
+                valueIn.placeholder = "% Số tiền giảm"
+            } else {
+                valueIn.min = 10000;
+                valueIn.removeAttribute('max');
+                valueIn.placeholder = "$ Số tiền giảm"
+            }
+            valueIn.value = '';
+        }
+
+        document.getElementById('value').addEventListener('input', function () {
+            const percent = document.getElementById('percentRadio');
+            const value = parseFloat(this.value);
+
+            if (percent.checked) {
+                if (value <= 0 || value > 100) {
+                    this.setCustomValidity("Giá trị % phải lớn hơn 0 và nhỏ hơn hoặc bằng 100")
+                } else {
+                    this.setCustomValidity("");
+                }
+            } else {
+                if (value <= 0) {
+                    this.setCustomValidity("Số tiền giảm phải hớn hơn 0!");
+                } else {
+                    this.setCustomValidity("");
+                }
+            }
+        });
+    </script>
+    <!--        validate ngày tháng bắt đầu và kết thúc-->
+    <script>
+        function validateEndDate() {
+            const startDate = document.getElementById('startdate');
+            const endDate = document.getElementById('enddate');
+
+            if (!startDate.value) return; //Người dùng chưa nhập startDate bỏ qua.
+
+            const startDateValue = new Date(startDate.value);
+            startDateValue.setDate(startDateValue.getDate() + 1);
+            const minEndDate = startDateValue.toISOString().split('T')[0];
+            endDate.min = minEndDate;
+
+            if (endDate.value && endDate.value < minEndDate) {
+                endDate.setCustomValidity("Hạn cho Voucher tối thiểu là 1 ngày. Vui lòng nhập lại!");
+            } else {
+                endDate.setCustomValidity("");
+            }
+        }
+    </script>
+
+
+
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/assets/js/misc.js}"></script>
+</body>
+
+</html>

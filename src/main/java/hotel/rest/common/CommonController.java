@@ -53,11 +53,6 @@ public class CommonController {
         return "common/login";
     }
 
-    @GetMapping({"/", "", "/home"})
-    public String home(HttpSession session, Model model) {
-        return "common/home";
-    }
-
     @GetMapping("/login")
     public String loginForm(HttpSession session, Model model) {
         model.addAttribute("userLogin", new UserLoginDto());

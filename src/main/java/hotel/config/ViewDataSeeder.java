@@ -2,6 +2,7 @@ package hotel.config;
 
 import hotel.db.entity.View;
 import hotel.db.repository.view.ViewRepository;
+import hotel.service.common.ViewImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -11,9 +12,13 @@ import org.springframework.stereotype.Component;
 public class ViewDataSeeder implements CommandLineRunner {
 
     private final ViewRepository viewRepository;
+    private final ViewImageService viewImageService;
 
     @Override
     public void run(String... args) throws Exception {
+        // Initialize existing images first
+        viewImageService.initializeDefaultImages();
+        
         // Check if views already exist
         if (viewRepository.count() > 0) {
             return;
@@ -39,6 +44,6 @@ public class ViewDataSeeder implements CommandLineRunner {
             viewRepository.save(view);
         }
 
-        System.out.println("✅ Đã tạo thành công các loại view mẫu!");
+        System.out.println(" Đã tạo thành công các loại view mẫu!");
     }
 }

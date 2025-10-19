@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Tạo mã giảm giá</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+</head>
+
+<body>
+<div class="container-scroller">
+    <!-- Include sidebar -->
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"alt="logo" /></a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            </div>
+        </nav>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title mb-0">Discount Voucher Detail</h4>
+
+                                <p><strong>ID:</strong> <span th:text="${discount.discountId}"></span></p>
+                                <p><strong>Code:</strong> <span th:text="${discount.code}"></span></p>
+                                <p><strong>Description:</strong> <span th:text="${discount.description}"></span></p>
+                                <p><strong>Discount Type:</strong> <span th:text="${discount.discountType}"></span></p>
+                                <p><strong>Value:</strong> <span th:text="${discount.value}"></span></p>
+                                <p><strong>Room Type:</strong> <span th:text="${discount.roomType}"></span></p>
+                                <p><strong>Start Date:</strong> <span th:text="${#temporals.format(discount.startDate, 'dd/MM/yyyy')}"></span></p>
+                                <p><strong>End Date:</strong> <span th:text="${#temporals.format(discount.endDate, 'dd/MM/yyyy')}"></span></p>
+                                <p><strong>Usage Limit:</strong> <span th:text="${discount.usageLimit}"></span></p>
+                                <p><strong>Used Count:</strong> <span th:text="${discount.usedCount}"></span></p>
+                                <p><strong>Created At:</strong> <span th:text="${#temporals.format(discount.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span></p>
+                                <p><strong>Updated At:</strong> <span th:text="${#temporals.format(discount.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></span></p>
+
+                                <a th:href="@{/hotel-management/discount}" class="btn btn-secondary">Back</a>
+                                <a th:href="@{/hotel-management/discount/edit/{id}(id=${discount.discountId})}" class="btn btn-primary">Edit</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+</body>
+
+</html>

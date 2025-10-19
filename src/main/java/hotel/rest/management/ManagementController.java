@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @Controller
 @RequestMapping("/hotel-management")
@@ -266,5 +268,39 @@ public class ManagementController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/hotel-management/rooms";
+    }
+    
+    // API endpoint to check if room number exists
+    @GetMapping("/api/rooms/check-exists")
+    @ResponseBody
+    public Map<String, Object> checkRoomNumberExists(@RequestParam String roomNumber) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            boolean exists = roomService.existsByRoomNumber(roomNumber);
+            response.put("exists", exists);
+            response.put("message", exists ? "Phòng " + roomNumber + " đã tồn tại" : "Số phòng " + roomNumber + " có thể sử dụng");
+        } catch (Exception e) {
+            response.put("exists", false);
+            response.put("message", "Lỗi kiểm tra số phòng");
+            response.put("error", e.getMessage());
+        }
+        return response;
+    }
+    
+    // View room detail
+    @GetMapping("/rooms/detail/{id}")
+    public String viewRoomDetail(@PathVariable Integer id, Model model) {
+        try {
+            Room room = roomService.getRoomById(id);
+            model.addAttribute("room", room);
+            
+            // Get additional room information if needed
+            // You can add more services here to get room images, views, etc.
+            
+            return "management/room/room-detail";
+        } catch (Exception e) {
+            model.addAttribute("error", "Không thể tải thông tin phòng: " + e.getMessage());
+            return "redirect:/hotel-management/rooms";
+        }
     }
 }

@@ -1,17 +1,17 @@
 package hotel.rest.receptionist;
 
+import hotel.db.dto.user.UserLoginDto;
 import hotel.db.entity.User;
 import hotel.service.receptionist.ReceptionistService;
+import hotel.util.MessageResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -95,6 +95,35 @@ public class ReceptionistController {
             return "management/receptionist/receptionist-detail";
         }
         return "redirect:/hotel";
+    }
+
+    @PostMapping("/{id}")
+    public String updateReceptionist(@PathVariable("id") Integer id,
+                                     @ModelAttribute("receptionist") User dto,
+                                     HttpSession session,
+                                     Model model,
+                                     RedirectAttributes redirectAttrs) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if(user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if(user.getRole().equals(STAFF) ||
+                user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel/dashboard";
+        }
+        MessageResponse response = receptionistService.updateReceptionist(id, dto);
+        if (response.isSuccess()) {
+            model.addAttribute("message", response.getMessage());
+            redirectAttrs.addFlashAttribute("message", response.getMessage());
+            return "redirect:/hotel-management/receptionist";
+        } else {
+            model.addAttribute("error", response.getMessage());
+            redirectAttrs.addFlashAttribute("error", response.getMessage());
+            return "redirect:/hotel-management/receptionist/"+id;
+        }
     }
 
 }

@@ -1,27 +1,58 @@
 package hotel.rest.room;
 
+import hotel.db.dto.room.ListRoomResponse;
+import hotel.db.dto.room.SearchRoomRequest;
 import hotel.db.entity.Room;
-//import hotel.repository.room.RoomRepository;
+import hotel.service.booking.BookingService;
+import hotel.service.room.RoomService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-@RestController
-@RequestMapping("/api/rooms")
+@Controller
 @RequiredArgsConstructor
+@RequestMapping("/hotel-management/room")
 public class RoomController {
-//    private final RoomRepository roomRepo;
-//
-//    @GetMapping
-//    public List<Room> list(@RequestParam(required = false) RoomStatus status) {
-//        return status==null ? roomRepo.findAll() : roomRepo.findByStatus(status);
-//    }
-//
-//    @PatchMapping("/{id}/status")
-//    public Room changeStatus(@PathVariable Long id, @RequestParam RoomStatus status) {
-//        Room r = roomRepo.findById(id).orElseThrow();
-//        r.setStatus(status);
-//        return roomRepo.save(r);
-//    }
+
+	private final BookingService bookingService;
+	private final RoomService roomService;
+
+    /*
+    View danh sách các phòng
+    */
+    @GetMapping
+    public String view(Model model) {
+        model.addAttribute("listRoom", roomService.getRoomList());
+        return "management/room/room-management";
+    }
+
+    @GetMapping("/create")
+    public String create(Model model) {
+        model.addAttribute("statuses", roomService.getAllRooms());
+        model.addAttribute("roomTypes", roomService.getAllRoomTypes());
+        model.addAttribute("bedTypes", roomService.getAllBedTypes());
+        model.addAttribute("room", new Room());
+        return "management/room/room-create-form";
+    }
+
+	@PostMapping("/search")
+	public ListRoomResponse listRooms(@RequestBody SearchRoomRequest request) {
+		return bookingService.listRoom(request);
+	}
+
+	@GetMapping("/api/list")
+	public ResponseEntity<Map<String, Object>> getRooms() {
+		ListRoomResponse rooms = roomService.getAllRoomForSearch();
+		Map<String, Object> response = new HashMap<>();
+		response.put("data", rooms);
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(response);
+	}
 }

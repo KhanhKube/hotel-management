@@ -1,6 +1,5 @@
 package hotel.service.discount;
 import hotel.db.entity.Discount;
-import hotel.db.enums.DiscountStatus;
 import hotel.db.dto.discount.DiscountResponseDto;
 
 import hotel.db.repository.discount.DiscountRepository;
@@ -8,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,29 +18,21 @@ public class DiscountServiceImpl implements DiscountService {
     private final DiscountRepository discountRepository;
 
     @Override
-    public Discount applyVoucher(String code) {
-        Discount discount = discountRepository.findByCodeAndIsDeletedFalse(code)
-                .orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
-
-        // kiểm tra hạn sử dụng
-        if (discount.getEndDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Voucher đã hết hạn");
+    public String calculateStatus(Discount d) {
+        LocalDate now = LocalDate.now();
+        if (d.getUsedCount() >= d.getUsageLimit()) {
+            return "EXHAUSTED"; // Hết số lượng
         }
-
-        // kiểm tra trạng thái
-        if (!DiscountStatus.ACTIVE.name().equalsIgnoreCase(discount.getStatus())) {
-            throw new RuntimeException("Voucher không khả dụng");
+        if (d.getEndDate().isBefore(now)) {
+            return "EXPIRED"; // Hết hạn
         }
-
-        // kiểm tra số lần dùng
-        if (discount.getUsageLimit() != null && discount.getUsedCount() >= discount.getUsageLimit()) {
-            throw new RuntimeException("Voucher đã được dùng hết số lần cho phép");
+        if (d.getStartDate().isAfter(now)) {
+            return "PENDING"; // Chưa bắt đầu
         }
-
-        return discount;
+        return "ACTIVE"; // Đang HD
     }
 
-    private DiscountResponseDto toDto(Discount d) {
+    private DiscountResponseDto getListDiscountDto(Discount d) {
         return new DiscountResponseDto(
                 d.getDiscountId(),
                 d.getCode(),
@@ -49,23 +41,23 @@ public class DiscountServiceImpl implements DiscountService {
                 d.getRoomType(),
                 d.getStartDate(),
                 d.getEndDate(),
-                d.getStatus()
+                calculateStatus(d)
         );
     }
 
     @Override
-    public List<DiscountResponseDto> getAll() {
-        List<Discount> entities = discountRepository.findAll();
+    public List<DiscountResponseDto> getListDiscount() {
+        List<Discount> entities = discountRepository.findAllByIsDeletedFalse();
         List<DiscountResponseDto> result = new ArrayList<>();
         for (Discount d : entities) {
-            result.add(toDto(d)); // toDto nhận Discount, trả DiscountResponseDto
+            result.add(getListDiscountDto(d)); // toDto nhận Discount, trả DiscountResponseDto
         }
         return result;
     }
 
     @Override
-    public Page<DiscountResponseDto> getAll(Pageable pageable) {
-        return discountRepository.findAll(pageable)
-                .map(this::toDto);
+    public Discount getDiscountById(Long discountId) {
+        return discountRepository.findDiscountByDiscountId(discountId);
     }
+
 }
