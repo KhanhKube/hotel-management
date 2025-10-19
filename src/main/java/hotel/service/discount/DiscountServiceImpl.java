@@ -1,7 +1,7 @@
 package hotel.service.discount;
 import hotel.db.entity.Discount;
 import hotel.db.dto.discount.DiscountResponseDto;
-
+import hotel.db.enums.RoomType;
 import hotel.db.repository.discount.DiscountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -58,6 +59,11 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     public Discount getDiscountById(Long discountId) {
         return discountRepository.findDiscountByDiscountId(discountId);
+    }
+
+    @Override
+    public List<String> getRoomTypesForDiscount() {
+        return Arrays.asList(RoomType.ALL); // Chỉ trả về các loại phòng từ enum, không có "Tất cả"
     }
 
 }

@@ -32,23 +32,152 @@
                     <div class="col-12 grid-margin">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title mb-0">Discount Voucher Detail</h4>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h4 class="card-title mb-0">
+                                        <i class="mdi mdi-ticket-percent"></i> Chi Tiết Mã Giảm Giá
+                                    </h4>
+                                    <div>
+                                        <a th:href="@{/hotel-management/discount/edit/{id}(id=${discount.discountId})}" 
+                                           class="btn btn-primary btn-sm">
+                                            <i class="mdi mdi-pencil"></i> Chỉnh sửa
+                                        </a>
+                                        <a th:href="@{/hotel-management/discount}" class="btn btn-secondary btn-sm">
+                                            <i class="mdi mdi-arrow-left"></i> Quay lại
+                                        </a>
+                                    </div>
+                                </div>
 
-                                <p><strong>ID:</strong> <span th:text="${discount.discountId}"></span></p>
-                                <p><strong>Code:</strong> <span th:text="${discount.code}"></span></p>
-                                <p><strong>Description:</strong> <span th:text="${discount.description}"></span></p>
-                                <p><strong>Discount Type:</strong> <span th:text="${discount.discountType}"></span></p>
-                                <p><strong>Value:</strong> <span th:text="${discount.value}"></span></p>
-                                <p><strong>Room Type:</strong> <span th:text="${discount.roomType}"></span></p>
-                                <p><strong>Start Date:</strong> <span th:text="${#temporals.format(discount.startDate, 'dd/MM/yyyy')}"></span></p>
-                                <p><strong>End Date:</strong> <span th:text="${#temporals.format(discount.endDate, 'dd/MM/yyyy')}"></span></p>
-                                <p><strong>Usage Limit:</strong> <span th:text="${discount.usageLimit}"></span></p>
-                                <p><strong>Used Count:</strong> <span th:text="${discount.usedCount}"></span></p>
-                                <p><strong>Created At:</strong> <span th:text="${#temporals.format(discount.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span></p>
-                                <p><strong>Updated At:</strong> <span th:text="${#temporals.format(discount.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></span></p>
+                                <!-- Voucher Code Display -->
+                                <div class="alert alert-info" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                                    <div class="text-center text-white">
+                                        <i class="mdi mdi-barcode" style="font-size: 48px;"></i>
+                                        <h2 class="mt-2 mb-0" th:text="${discount.code}"></h2>
+                                        <p class="mb-0" th:text="${discount.description}"></p>
+                                    </div>
+                                </div>
 
-                                <a th:href="@{/hotel-management/discount}" class="btn btn-secondary">Back</a>
-                                <a th:href="@{/hotel-management/discount/edit/{id}(id=${discount.discountId})}" class="btn btn-primary">Edit</a>
+                                <!-- Main Info -->
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <div class="card mb-3" style="border-left: 4px solid #667eea;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-information"></i> Thông Tin Cơ Bản
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td style="width: 40%;"><i class="mdi mdi-identifier"></i> <strong>ID:</strong></td>
+                                                        <td><span class="badge badge-dark" th:text="${discount.discountId}"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-format-list-bulleted-type"></i> <strong>Loại giảm giá:</strong></td>
+                                                        <td>
+                                                            <span th:if="${discount.discountType == 'PERCENT'}" class="badge badge-success">
+                                                                <i class="mdi mdi-percent"></i> Phần trăm
+                                                            </span>
+                                                            <span th:if="${discount.discountType == 'AMOUNT'}" class="badge badge-info">
+                                                                <i class="mdi mdi-cash"></i> Số tiền cố định
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-currency-usd"></i> <strong>Giá trị:</strong></td>
+                                                        <td>
+                                                            <span class="text-primary" style="font-size: 18px; font-weight: bold;">
+                                                                <span th:if="${discount.discountType == 'PERCENT'}" 
+                                                                      th:text="${discount.value + '%'}"></span>
+                                                                <span th:if="${discount.discountType == 'AMOUNT'}" 
+                                                                      th:text="${#numbers.formatDecimal(discount.value, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></span>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-home-variant"></i> <strong>Loại phòng:</strong></td>
+                                                        <td><span class="badge badge-primary" th:text="${discount.roomType}"></span></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="card mb-3" style="border-left: 4px solid #f093fb;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-calendar-clock"></i> Thời Gian & Sử Dụng
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td style="width: 40%;"><i class="mdi mdi-calendar-start"></i> <strong>Ngày bắt đầu:</strong></td>
+                                                        <td th:text="${#temporals.format(discount.startDate, 'dd/MM/yyyy')}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-calendar-end"></i> <strong>Ngày kết thúc:</strong></td>
+                                                        <td th:text="${#temporals.format(discount.endDate, 'dd/MM/yyyy')}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-counter"></i> <strong>Số lượng:</strong></td>
+                                                        <td th:text="${discount.usageLimit}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-check-circle"></i> <strong>Đã sử dụng:</strong></td>
+                                                        <td>
+                                                            <span class="badge badge-warning" th:text="${discount.usedCount}"></span>
+                                                            <span class="text-muted">
+                                                                / <span th:text="${discount.usageLimit}"></span>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                
+                                                <!-- Progress Bar -->
+                                                <div class="mt-3">
+                                                    <small class="text-muted">Tỷ lệ sử dụng:</small>
+                                                    <div class="progress" style="height: 20px;">
+                                                        <div class="progress-bar bg-warning" role="progressbar" 
+                                                             th:style="'width: ' + ${discount.usedCount * 100 / discount.usageLimit} + '%'"
+                                                             th:text="${#numbers.formatDecimal(discount.usedCount * 100 / discount.usageLimit, 0, 0)} + '%'">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- System Info -->
+                                <div class="card" style="border-left: 4px solid #4facfe;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="mdi mdi-cog"></i> Thông Tin Hệ Thống
+                                        </h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p class="mb-2">
+                                                    <i class="mdi mdi-clock-plus"></i> <strong>Ngày tạo:</strong>
+                                                    <span class="text-muted" th:text="${#temporals.format(discount.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                                                </p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p class="mb-2">
+                                                    <i class="mdi mdi-clock-edit"></i> <strong>Cập nhật lần cuối:</strong>
+                                                    <span class="text-muted" th:text="${#temporals.format(discount.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="mt-4 text-center">
+                                    <a th:href="@{/hotel-management/discount}" class="btn btn-secondary btn-lg">
+                                        <i class="mdi mdi-arrow-left"></i> Quay lại danh sách
+                                    </a>
+                                    <a th:href="@{/hotel-management/discount/edit/{id}(id=${discount.discountId})}" 
+                                       class="btn btn-primary btn-lg">
+                                        <i class="mdi mdi-pencil"></i> Chỉnh sửa voucher
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

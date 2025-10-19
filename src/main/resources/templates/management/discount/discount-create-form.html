@@ -33,63 +33,140 @@
                         <div class="col-12 grid-margin">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="card-title mb-0">Create Discount Voucher</h4>
-                                    <!-- Nội dung của bạn ở đây -->
+                                    <h4 class="card-title mb-4">
+                                        <i class="mdi mdi-ticket-percent"></i>
+                                        <span
+                                            th:text="${discount.discountId != null ? 'Cập Nhật Mã Giảm Giá' : 'Tạo Mã Giảm Giá Mới'}"></span>
+                                    </h4>
+
                                     <form th:action="@{/hotel-management/discount/create}" method="post"
                                         th:object="${discount}">
-
-                                        <!-- Thêm hidden để bắt được discountId khi nhấn update -->
                                         <input type="hidden" th:field="*{discountId}" />
 
-                                        <div th:if="${errorMessage}" class="alert alert-danger"
-                                            th:text="${errorMessage}"></div>
-
-                                        <label for="vcode">Mã giảm giá:</label>
-                                        <input id="vcode" type="text" th:field="*{code}" required><br>
-
-                                        <label for="des">Mô tả:</label>
-                                        <input id="des" type="text" th:field="*{description}" required>
-
-                                        <!-- Chọn loại giảm -->
-                                        <div>
-                                            <label>Loại giảm giá:</label><br>
-                                            <input id="percentRadio" type="radio" th:field="*{discountType}"
-                                                value="PERCENT" onchange="valueValidate()">
-                                            <label for="percentRadio">Phần trăm (%)</label>
-
-                                            <input id="amountRadio" type="radio" th:field="*{discountType}"
-                                                value="AMOUNT" onchange="valueValidate()">
-                                            <label for="amountRadio">Thành tiền ($)</label>
+                                        <!-- Error Message -->
+                                        <div th:if="${errorMessage}"
+                                            class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            <i class="mdi mdi-alert-circle"></i>
+                                            <span th:text="${errorMessage}"></span>
+                                            <button type="button" class="close" data-dismiss="alert">
+                                                <span>&times;</span>
+                                            </button>
                                         </div>
 
-                                        <!-- Nhập giá trị -->
-                                        <div>
-                                            <label for="value">Giá trị giảm:</label>
-                                            <input id="value" type="number" step="0.01" th:field="*{value}" required>
-                                        </div><br>
+                                        <!-- Mã giảm giá -->
+                                        <div class="form-group">
+                                            <label for="vcode">
+                                                <i class="mdi mdi-barcode"></i> Mã giảm giá: <span
+                                                    class="text-danger">*</span>
+                                            </label>
+                                            <input id="vcode" type="text" class="form-control" th:field="*{code}"
+                                                placeholder="VD: SUMMER2024" required>
+                                        </div>
 
-                                        <label for="roomtype">Loại phòng được giảm:</label>
-                                        <input id="roomtype" type="text" th:field="*{roomType}" required><br>
+                                        <!-- Mô tả -->
+                                        <div class="form-group">
+                                            <label for="des">
+                                                <i class="mdi mdi-text"></i> Mô tả: <span class="text-danger">*</span>
+                                            </label>
+                                            <textarea id="des" class="form-control" th:field="*{description}" rows="3"
+                                                placeholder="Nhập mô tả chi tiết về mã giảm giá..." required></textarea>
+                                        </div>
 
-                                        <label for="startdate">Ngày bắt đầu:</label>
-                                        <!--Nếu mới tạo thì chỉ cho phép startDate min là thời gian hiện tại,
-                                       Nếu update thì set min startDate là thời gian cũ lúc mới tạo. (tránh bắt user nhập lại)-->
-                                        <input id="startdate" type="date" th:field="*{startDate}" th:attr="min=${discount.startDate == null ?
-                                                        #dates.format(#dates.createNow(), 'yyyy-MM-dd') :
-                                                        #temporals.format(discount.startDate, 'yyyy-MM-dd')}"
-                                            onblur="validateEndDate()" required>
+                                        <!-- Loại giảm giá -->
+                                        <div class="form-group">
+                                            <label>
+                                                <i class="mdi mdi-format-list-bulleted-type"></i> Loại giảm giá: <span
+                                                    class="text-danger">*</span>
+                                            </label>
+                                            <div class="form-check">
+                                                <label class="form-check-label">
+                                                    <input id="percentRadio" type="radio" class="form-check-input"
+                                                        th:field="*{discountType}" value="PERCENT"
+                                                        onchange="valueValidate()">
+                                                    <i class="mdi mdi-percent"></i> Phần trăm (%)
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <label class="form-check-label">
+                                                    <input id="amountRadio" type="radio" class="form-check-input"
+                                                        th:field="*{discountType}" value="AMOUNT"
+                                                        onchange="valueValidate()">
+                                                    <i class="mdi mdi-cash"></i> Số tiền cố định (VNĐ)
+                                                </label>
+                                            </div>
+                                        </div>
 
-                                        <label for="enddate">Ngày hết hạn:</label>
-                                        <input id="enddate" type="date" th:field="*{endDate}"
-                                            th:value="${#temporals.format(discount.endDate, 'dd-MM-yyyy')}"
-                                            onblur="validateEndDate()" required><br>
+                                        <!-- Giá trị giảm -->
+                                        <div class="form-group">
+                                            <label for="value">
+                                                <i class="mdi mdi-currency-usd"></i> Giá trị giảm: <span
+                                                    class="text-danger">*</span>
+                                            </label>
+                                            <input id="value" type="number" step="0.01" class="form-control"
+                                                th:field="*{value}" placeholder="Nhập giá trị giảm" required>
+                                        </div>
 
-                                        <label for="limit">Số lượng phát hành:</label>
-                                        <input id="limit" type="number" th:field="*{usageLimit}" required><br>
+                                        <!-- Loại phòng -->
+                                        <div class="form-group">
+                                            <label for="roomtype">
+                                                <i class="mdi mdi-home-variant"></i> Loại phòng áp dụng: <span
+                                                    class="text-danger">*</span>
+                                            </label>
+                                            <select id="roomtype" class="form-control" th:field="*{roomType}" required>
+                                                <option value="">-- Chọn loại phòng --</option>
+                                                <option th:each="type : ${roomTypes}" th:value="${type}"
+                                                    th:text="${type}"></option>
+                                            </select>
+                                        </div>
 
-                                        <input type="submit" value="Lưu giảm giá">
+                                        <!-- Ngày bắt đầu và kết thúc -->
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="startdate">
+                                                        <i class="mdi mdi-calendar-start"></i> Ngày bắt đầu: <span
+                                                            class="text-danger">*</span>
+                                                    </label>
+                                                    <input id="startdate" type="date" class="form-control"
+                                                        th:field="*{startDate}"
+                                                        th:attr="min=${discount.startDate == null ? #dates.format(#dates.createNow(), 'yyyy-MM-dd') : #temporals.format(discount.startDate, 'yyyy-MM-dd')}"
+                                                        onblur="validateEndDate()" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="enddate">
+                                                        <i class="mdi mdi-calendar-end"></i> Ngày kết thúc: <span
+                                                            class="text-danger">*</span>
+                                                    </label>
+                                                    <input id="enddate" type="date" class="form-control"
+                                                        th:field="*{endDate}"
+                                                        th:value="${#temporals.format(discount.endDate, 'dd-MM-yyyy')}"
+                                                        onblur="validateEndDate()" required>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Số lượng phát hành -->
+                                        <div class="form-group">
+                                            <label for="limit">
+                                                <i class="mdi mdi-counter"></i> Số lượng phát hành: <span
+                                                    class="text-danger">*</span>
+                                            </label>
+                                            <input id="limit" type="number" class="form-control"
+                                                th:field="*{usageLimit}" placeholder="VD: 100" min="1" required>
+                                        </div>
+
+                                        <!-- Buttons -->
+                                        <div class="form-group mt-4">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="mdi mdi-content-save"></i> Lưu mã giảm giá
+                                            </button>
+                                            <a th:href="@{/hotel-management/discount}" class="btn btn-secondary btn-lg">
+                                                <i class="mdi mdi-close"></i> Hủy
+                                            </a>
+                                        </div>
                                     </form>
-                                    <button><a th:href="@{/hotel-management/discount}">Huỷ</a></button>
 
                                 </div>
                             </div>

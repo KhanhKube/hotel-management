@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Tạo mã giảm giá</title>
+    <title>Quản lí phòng</title>
     <base th:href="@{/static}">
     <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
     <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
@@ -49,64 +49,93 @@
                                         </a>
                                     </div>
 
+                                    <!-- Error Message -->
+                                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <i class="mdi mdi-alert-circle"></i>
+                                        <strong>Lỗi!</strong> <span th:text="${errorMessage}"></span>
+                                        <button type="button" class="close" data-dismiss="alert">
+                                            <span>&times;</span>
+                                        </button>
+                                    </div>
+
                                     <!-- Search & Filter Bar -->
-                                    <div class="filter-section"
-                                        style="background: #f5f5f5; padding: 20px; margin-bottom: 20px; border-radius: 5px;">
-                                        <h5>🔍 Tìm Kiếm & Lọc</h5>
-
-                                        <!-- Row 1: Search + Dropdowns -->
-                                        <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
-                                            <!-- Search số phòng -->
-                                            <input type="text" id="searchRoomNumber" placeholder="Tìm số phòng..."
-                                                style="flex: 1; min-width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
-
-                                            <!-- Filter Loại phòng -->
-                                            <select id="filterRoomType"
-                                                style="flex: 1; min-width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
-                                                <option value="">-- Tất cả loại phòng --</option>
-                                                <option th:each="type : ${roomTypes}" th:value="${type}"
-                                                    th:text="${type}"></option>
-                                            </select>
-
-                                            <!-- Filter Trạng thái -->
-                                            <select id="filterStatus"
-                                                style="flex: 1; min-width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
-                                                <option value="">-- Tất cả trạng thái --</option>
-                                                <option th:each="status : ${statuses}" th:value="${status}"
-                                                    th:text="${status}"></option>
-                                            </select>
-
-                                            <!-- Filter Tầng -->
-                                            <select id="filterFloor"
-                                                style="flex: 1; min-width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
-                                                <option value="">-- Tất cả tầng --</option>
-                                                <option th:each="floor : ${floors}" th:value="${floor.floorNumber}"
-                                                    th:text="'Tầng ' + ${floor.floorNumber}"></option>
-                                            </select>
+                                    <div class="filter-section mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px;">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
+                                            <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Phòng</h5>
                                         </div>
 
-                                        <!-- Row 2: Price Range + Buttons -->
-                                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                                            <input type="number" id="filterPriceFrom" placeholder="Giá từ..."
-                                                style="flex: 1; min-width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                                        <!-- Row 1: Search -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-white border-end-0">
+                                                        <i class="mdi mdi-magnify text-primary"></i>
+                                                    </span>
+                                                    <input id="searchRoomNumber" type="text" class="form-control border-start-0" 
+                                                           placeholder="Tìm kiếm số phòng...">
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                            <input type="number" id="filterPriceTo" placeholder="Giá đến..."
-                                                style="flex: 1; min-width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                                        <!-- Row 2: Filters -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select id="filterRoomType" class="form-select">
+                                                    <option value="">-- Tất cả loại phòng --</option>
+                                                    <option th:each="type : ${roomTypes}" th:value="${type}" th:text="${type}"></option>
+                                                </select>
+                                            </div>
 
-                                            <button onclick="applyFilters()" class="btn btn-primary"
-                                                style="padding: 8px 20px;">
-                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
-                                            </button>
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select id="filterStatus" class="form-select">
+                                                    <option value="">-- Tất cả trạng thái --</option>
+                                                    <option th:each="status : ${statuses}" th:value="${status}" th:text="${status}"></option>
+                                                </select>
+                                            </div>
 
-                                            <button onclick="resetFilters()" class="btn btn-secondary"
-                                                style="padding: 8px 20px;">
-                                                <i class="mdi mdi-refresh"></i> Reset
-                                            </button>
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select id="filterFloor" class="form-select">
+                                                    <option value="">-- Tất cả tầng --</option>
+                                                    <option th:each="floor : ${floors}" th:value="${floor.floorNumber}" 
+                                                            th:text="'Tầng ' + ${floor.floorNumber}"></option>
+                                                </select>
+                                            </div>
 
-                                            <span id="resultCount"
-                                                style="margin-left: auto; font-weight: bold; color: #333;">
-                                                Tổng: <span th:text="${#lists.size(listRoom)}">0</span> phòng
-                                            </span>
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select id="filterSize" class="form-select">
+                                                    <option value="">-- Tất cả diện tích --</option>
+                                                    <option th:each="size : ${sizes}" th:value="${size.size}" 
+                                                            th:text="${size.size} + 'm²'"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 3: Price Range + Buttons -->
+                                        <div class="row align-items-center">
+                                            <div class="col-md-2 col-sm-6 mb-2">
+                                                <input type="number" id="filterPriceFrom" class="form-control" placeholder="Giá từ...">
+                                            </div>
+
+                                            <div class="col-md-2 col-sm-6 mb-2">
+                                                <input type="number" id="filterPriceTo" class="form-control" placeholder="Giá đến...">
+                                            </div>
+
+                                            <div class="col-md-5 col-sm-12 mb-2">
+                                                <button onclick="applyAllFilters()" class="btn btn-info me-2">
+                                                    <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                                </button>
+                                                <button onclick="resetAllFilters()" class="btn btn-light">
+                                                    <i class="mdi mdi-refresh"></i> Reset
+                                                </button>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-12 mb-2 text-end">
+                                                <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
+                                                    <i class="mdi mdi-home-group"></i>
+                                                    Tổng: <strong id="resultCount" th:text="${#lists.size(listRoom)}">0</strong> phòng
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -115,11 +144,21 @@
                                             <thead>
                                                 <tr>
                                                     <th> STT </th>
-                                                    <th> Số Phòng </th>
-                                                    <th> Loại phòng </th>
-                                                    <th> Tầng </th>
-                                                    <th> Diện tích </th>
-                                                    <th> Giá </th>
+                                                    <th onclick="sortTable(1, this)" style="cursor: pointer;">
+                                                        Số Phòng <i class="mdi mdi-sort"></i>
+                                                    </th>
+                                                    <th onclick="sortTable(2, this)" style="cursor: pointer;">
+                                                        Loại phòng <i class="mdi mdi-sort"></i>
+                                                    </th>
+                                                    <th onclick="sortTable(3, this)" style="cursor: pointer;">
+                                                        Tầng <i class="mdi mdi-sort"></i>
+                                                    </th>
+                                                    <th onclick="sortTable(4, this)" style="cursor: pointer;">
+                                                        Diện tích <i class="mdi mdi-sort"></i>
+                                                    </th>
+                                                    <th onclick="sortTable(5, this)" style="cursor: pointer;">
+                                                        Giá <i class="mdi mdi-sort"></i>
+                                                    </th>
                                                     <th> Trạng thái </th>
                                                     <th> Hành động </th>
                                                 </tr>
@@ -174,95 +213,160 @@
         </div>
     </div>
 
+    <!-- Filter Script với AND logic -->
     <script>
+        // Lấy tất cả elements
         const searchInput = document.getElementById('searchRoomNumber');
-        const tableSearch = document.getElementById('roomTable');
-        const rows = tableSearch.getElementsByTagName('tr');
+        const filterRoomType = document.getElementById('filterRoomType');
+        const filterStatus = document.getElementById('filterStatus');
+        const filterFloor = document.getElementById('filterFloor');
+        const filterSize = document.getElementById('filterSize');
+        const filterPriceFrom = document.getElementById('filterPriceFrom');
+        const filterPriceTo = document.getElementById('filterPriceTo');
+        const roomTable = document.getElementById('roomTable');
+        const tableRows = Array.from(roomTable.getElementsByTagName('tr')).slice(1); // Bỏ header
+        const resultCount = document.getElementById('resultCount');
 
-        searchInput.addEventListener("keyup", function () {
-            const search = searchInput.value.toLowerCase();
+        // Function apply tất cả filters (AND logic)
+        function applyAllFilters() {
+            const searchText = searchInput.value.toLowerCase().trim();
+            const selectedRoomType = filterRoomType.value.trim();
+            const selectedStatus = filterStatus.value.trim();
+            const selectedFloor = filterFloor.value.trim();
+            const selectedSize = filterSize.value.trim();
+            const priceFrom = parseFloat(filterPriceFrom.value) || 0;
+            const priceTo = parseFloat(filterPriceTo.value) || Infinity;
+            
+            let visibleCount = 0;
 
-            for (let i = 1; i < rows.length; i++) {
-                const td = rows[i].getElementsByTagName("td")[1];
-
-                if (td) {
-                    const roomNb = td.textContent.toLowerCase();
-
-                    if (roomNb.includes(search)) {
-                        rows[i].style.display = '';
-                    } else {
-                        rows[i].style.display = 'none';
-                    }
+            tableRows.forEach(row => {
+                // Bỏ qua row empty message
+                if (row.querySelector('td[colspan]')) {
+                    row.style.display = 'none';
+                    return;
                 }
-            }
-        });
+
+                // Lấy giá trị từ các columns
+                const roomNumber = row.cells[1]?.textContent.toLowerCase().trim() || '';
+                const roomType = row.cells[2]?.textContent.trim() || '';
+                const floor = row.cells[3]?.textContent.trim() || '';
+                const sizeText = row.cells[4]?.textContent.trim() || '';
+                const priceText = row.cells[5]?.textContent.trim() || '';
+                const status = row.cells[6]?.textContent.trim() || '';
+
+                // Parse size (bỏ m²)
+                const size = sizeText.replace('m²', '').trim();
+                
+                // Parse price (bỏ dấu phẩy và ký tự không phải số)
+                const price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
+
+                // Kiểm tra TẤT CẢ điều kiện (AND logic)
+                const matchSearch = searchText === '' || roomNumber.includes(searchText);
+                const matchRoomType = selectedRoomType === '' || roomType === selectedRoomType;
+                const matchStatus = selectedStatus === '' || status === selectedStatus;
+                const matchFloor = selectedFloor === '' || floor === selectedFloor;
+                const matchSize = selectedSize === '' || size === selectedSize;
+                const matchPrice = price >= priceFrom && price <= priceTo;
+
+                // Chỉ hiện row nếu TẤT CẢ điều kiện đều đúng
+                if (matchSearch && matchRoomType && matchStatus && matchFloor && matchSize && matchPrice) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Update count
+            resultCount.textContent = visibleCount;
+        }
+
+        // Function reset filters
+        function resetAllFilters() {
+            searchInput.value = '';
+            filterRoomType.value = '';
+            filterStatus.value = '';
+            filterFloor.value = '';
+            filterSize.value = '';
+            filterPriceFrom.value = '';
+            filterPriceTo.value = '';
+            applyAllFilters();
+        }
+
+        // Gắn event listeners
+        searchInput.addEventListener('keyup', applyAllFilters);
+        filterRoomType.addEventListener('change', applyAllFilters);
+        filterStatus.addEventListener('change', applyAllFilters);
+        filterFloor.addEventListener('change', applyAllFilters);
+        filterSize.addEventListener('change', applyAllFilters);
     </script>
 
+    <!-- Sort Script với 3 trạng thái -->
     <script>
-        // Filter Loại phòng
-        const filterRoomType = document.getElementById('filterRoomType');
-        const roomTable = document.getElementById('roomTable');
-        const tableRows = roomTable.getElementsByTagName('tr');
+        const sortStates = {};
+        let originalRowsOrder = [];
 
-        filterRoomType.addEventListener('change', function () {
-            const selectedValue = this.value.toLowerCase().trim();
-
-            for (let i = 1; i < tableRows.length; i++) {
-                const roomTypeCell = tableRows[i].getElementsByTagName('td')[2]; // Column "Loại phòng"
-
-                if (roomTypeCell) {
-                    const cellValue = roomTypeCell.textContent.toLowerCase().trim();
-
-                    if (selectedValue === '' || cellValue === selectedValue) {
-                        tableRows[i].style.display = '';
-                    } else {
-                        tableRows[i].style.display = 'none';
-                    }
-                }
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            const table = document.getElementById("roomTable");
+            originalRowsOrder = Array.from(table.tBodies[0].rows);
         });
 
-        // Filter Trạng thái
-        const filterStatus = document.getElementById('filterStatus');
-
-        filterStatus.addEventListener('change', function () {
-            const selectedValue = this.value.toLowerCase().trim();
-
-            for (let i = 1; i < tableRows.length; i++) {
-                const statusCell = tableRows[i].getElementsByTagName('td')[6]; // Column "Trạng thái"
-
-                if (statusCell) {
-                    const cellValue = statusCell.textContent.toLowerCase().trim();
-
-                    if (selectedValue === '' || cellValue === selectedValue) {
-                        tableRows[i].style.display = '';
-                    } else {
-                        tableRows[i].style.display = 'none';
-                    }
-                }
+        function sortTable(columnIndex, headerElement) {
+            const table = document.getElementById("roomTable");
+            const tbody = table.tBodies[0];
+            
+            if (sortStates[columnIndex] === undefined) {
+                sortStates[columnIndex] = 0;
             }
-        });
-
-        // Filter Tầng
-        const filterFloor = document.getElementById('filterFloor');
-
-        filterFloor.addEventListener('change', function () {
-            const selectedValue = this.value.toLowerCase().trim();
-
-            for (let i = 1; i < tableRows.length; i++) {
-                const floorCell = tableRows[i].getElementsByTagName('td')[3]; // Column "Tầng"
-
-                if (floorCell) {
-                    const cellValue = floorCell.textContent.toLowerCase().trim();
-
-                    if (selectedValue === '' || cellValue === selectedValue) {
-                        tableRows[i].style.display = '';
-                    } else {
-                        tableRows[i].style.display = 'none';
-                    }
+            
+            sortStates[columnIndex] = (sortStates[columnIndex] + 1) % 3;
+            
+            // Reset icon của tất cả headers
+            const allHeaders = table.querySelectorAll('thead th');
+            allHeaders.forEach(th => {
+                const icon = th.querySelector('i');
+                if (icon) {
+                    icon.className = 'mdi mdi-sort';
+                    icon.style.color = '';
                 }
+            });
+            
+            // Update icon của header hiện tại
+            const icon = headerElement.querySelector('i');
+            if (sortStates[columnIndex] === 0) {
+                icon.className = 'mdi mdi-sort';
+                icon.style.color = '';
+                tbody.innerHTML = "";
+                originalRowsOrder.forEach(row => tbody.appendChild(row.cloneNode(true)));
+                return;
+            } else if (sortStates[columnIndex] === 1) {
+                icon.className = 'mdi mdi-sort-ascending';
+                icon.style.color = '#667eea';
+            } else {
+                icon.className = 'mdi mdi-sort-descending';
+                icon.style.color = '#667eea';
             }
-        });
+            
+            const rows = Array.from(tbody.rows);
+            rows.sort((a, b) => {
+                let cellA = a.cells[columnIndex].textContent.trim();
+                let cellB = b.cells[columnIndex].textContent.trim();
+
+                // Xử lý số (bỏ m², dấu phẩy, etc)
+                cellA = cellA.replace(/[^\d.]/g, '');
+                cellB = cellB.replace(/[^\d.]/g, '');
+
+                const valA = isNaN(cellA) || cellA === '' ? a.cells[columnIndex].textContent.trim().toLowerCase() : Number(cellA);
+                const valB = isNaN(cellB) || cellB === '' ? b.cells[columnIndex].textContent.trim().toLowerCase() : Number(cellB);
+
+                if (valA < valB) return sortStates[columnIndex] === 1 ? -1 : 1;
+                if (valA > valB) return sortStates[columnIndex] === 1 ? 1 : -1;
+                return 0;
+            });
+
+            tbody.innerHTML = "";
+            rows.forEach(row => tbody.appendChild(row));
+        }
     </script>
 
     <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>

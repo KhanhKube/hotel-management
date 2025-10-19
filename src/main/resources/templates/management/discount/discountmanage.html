@@ -54,13 +54,101 @@
                     <div class="col-12 grid-margin">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title mb-0">Tìm kiếm mã voucher</h4>
-                                <!--Tìm kiếm voucher-->
-                                <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search">
-                                    <input id="searchInput" type="text" class="form-control" placeholder="Tìm kiếm tên voucher">
-                                </form>
+                                <!-- Search & Filter Bar -->
+                                <div class="filter-section mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px;">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
+                                        <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Voucher</h5>
+                                    </div>
+
+                                    <!-- Row 1: Search -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <i class="mdi mdi-magnify text-primary"></i>
+                                                </span>
+                                                <input id="searchInput" type="text" class="form-control border-start-0" 
+                                                       placeholder="Tìm kiếm mã voucher...">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 2: Filters -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-3 col-sm-6 mb-2">
+                                            <select id="filterDiscountType" class="form-select">
+                                                <option value="">-- Tất cả loại giảm giá --</option>
+                                                <option value="PERCENT">Phần trăm (%)</option>
+                                                <option value="AMOUNT">Số tiền cố định</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3 col-sm-6 mb-2">
+                                            <select id="filterRoomType" class="form-select">
+                                                <option value="">-- Tất cả loại phòng --</option>
+                                                <option th:each="type : ${roomTypes}" 
+                                                        th:value="${type}" 
+                                                        th:text="${type}"></option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3 col-sm-6 mb-2">
+                                            <select id="filterStatus" class="form-select">
+                                                <option value="">-- Tất cả trạng thái --</option>
+                                                <option value="ACTIVE">Đang hoạt động</option>
+                                                <option value="PENDING">Chưa bắt đầu</option>
+                                                <option value="EXPIRED">Hết hạn</option>
+                                                <option value="EXHAUSTED">Hết số lượng</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3 col-sm-6 mb-2">
+                                            <input type="date" id="filterDate" class="form-control" 
+                                                   placeholder="Lọc theo ngày">
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 3: Value Range + Buttons -->
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2 col-sm-6 mb-2">
+                                            <input type="number" id="filterValueFrom" class="form-control" 
+                                                   placeholder="Giá trị từ...">
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-6 mb-2">
+                                            <input type="number" id="filterValueTo" class="form-control" 
+                                                   placeholder="Giá trị đến...">
+                                        </div>
+
+                                        <div class="col-md-5 col-sm-12 mb-2">
+                                            <button onclick="applyAllFilters()" class="btn btn-info me-2">
+                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                            </button>
+                                            <button onclick="resetAllFilters()" class="btn btn-light">
+                                                <i class="mdi mdi-refresh"></i> Reset
+                                            </button>
+                                        </div>
+
+                                        <div class="col-md-3 col-sm-12 mb-2 text-end">
+                                            <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
+                                                <i class="mdi mdi-ticket-percent"></i>
+                                                Tổng: <strong id="resultCount" th:text="${#lists.size(listDiscount)}">0</strong> voucher
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-body">
+                                <!-- Error Message -->
+                                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <strong>Lỗi!</strong> <span th:text="${errorMessage}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h4 class="card-title mb-0">Discount Voucher Status</h4>
                                     <a th:href="@{/hotel-management/discount/create}" class="btn btn-primary">
@@ -71,12 +159,22 @@
                                     <table class="table" id="discountTable">
                                         <thead>
                                         <tr>
-                                            <th> # </th>
-                                            <th onclick="sortTable(1)"> Discount Code </th>
-                                            <th onclick="sortTable(2)"> Discount Value </th>
-                                            <th onclick="sortTable(3)"> Room Type </th>
-                                            <th onclick="sortTable(4)"> Start Date </th>
-                                            <th onclick="sortTable(5)"> End Date </th>
+                                            <th> STT </th>
+                                            <th onclick="sortTable(1, this)" style="cursor: pointer;">
+                                                Discount Code <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th onclick="sortTable(2, this)" style="cursor: pointer;">
+                                                Discount Value <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th onclick="sortTable(3, this)" style="cursor: pointer;">
+                                                Room Type <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th onclick="sortTable(4, this)" style="cursor: pointer;">
+                                                Start Date <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th onclick="sortTable(5, this)" style="cursor: pointer;">
+                                                End Date <i class="mdi mdi-sort"></i>
+                                            </th>
                                             <th> Status </th>
                                             <th> Update </th>
                                         </tr>
@@ -153,60 +251,182 @@
 <script th:src="@{/assets/js/dashboard.js}"></script>
 <!-- End custom js for this page -->
 <script>
-    <!--ScriptFilter-->
-    const searchInput = document.getElementById("searchInput");
-    const tableSearch = document.getElementById("discountTable");
-    const rows = tableSearch.getElementsByTagName("tr");
+    // Lấy tất cả elements
+    const searchInput = document.getElementById('searchInput');
+    const filterDiscountType = document.getElementById('filterDiscountType');
+    const filterRoomType = document.getElementById('filterRoomType');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterDate = document.getElementById('filterDate');
+    const filterValueFrom = document.getElementById('filterValueFrom');
+    const filterValueTo = document.getElementById('filterValueTo');
+    const discountTable = document.getElementById('discountTable');
+    const tableRows = Array.from(discountTable.getElementsByTagName('tr')).slice(1); // Bỏ header
+    const resultCount = document.getElementById('resultCount');
 
-    searchInput.addEventListener("keyup", function() {
-        const filter = searchInput.value.toLowerCase();
-        for (let i=1 ; i < rows.length ; i++) {
-            const td = rows[i].getElementsByTagName("td")[1];
-            if(td) {
-                const vcode = td.textContent.toLowerCase();
-                if (vcode.includes(filter)) {
-                    rows[i].style.display = '';
-                } else {
-                    rows[i].style.display = 'none';
-                }
+    // Function apply tất cả filters (AND logic)
+    function applyAllFilters() {
+        const searchText = searchInput.value.toLowerCase().trim();
+        const selectedDiscountType = filterDiscountType.value.toUpperCase();
+        const selectedRoomType = filterRoomType.value.trim();
+        const selectedStatus = filterStatus.value.toUpperCase();
+        const selectedDate = filterDate.value;
+        const valueFrom = parseFloat(filterValueFrom.value) || 0;
+        const valueTo = parseFloat(filterValueTo.value) || Infinity;
+        
+        let visibleCount = 0;
+
+        tableRows.forEach(row => {
+            // Bỏ qua row empty message
+            if (row.querySelector('td[colspan]')) {
+                row.style.display = 'none';
+                return;
             }
-        }
-    });
-</script>
-<!--SortTable-->
-<script>
-    let sortDirection = true /*true=tăng dần;false=giảm dần*/
-    function sortTable(columIndex) {
-        const table = document.getElementById("discountTable");
-        const rows = Array.from(table.rows).slice(1); /*bỏ row đầu tiên (table Head)*/
-        rows.sort((a,b) => {
-            const cellA = a.cells[columIndex].textContent.trim().toLowerCase();
-            const cellB = b.cells[columIndex].textContent.trim().toLowerCase();
 
-            /*kiểm tra xem là số hay là chữ*/
+            // Lấy giá trị từ các columns
+            const code = row.cells[1]?.textContent.toLowerCase().trim() || '';
+            const valueText = row.cells[2]?.textContent.trim() || '';
+            const roomType = row.cells[3]?.textContent.trim() || '';
+            const startDate = row.cells[4]?.textContent.trim() || '';
+            const endDate = row.cells[5]?.textContent.trim() || '';
+            const status = row.cells[6]?.textContent.toUpperCase().trim() || '';
+
+            // Parse value (bỏ % hoặc VND)
+            const value = parseFloat(valueText.replace(/[^\d.]/g, '')) || 0;
+            
+            // Xác định discount type từ value text
+            const discountType = valueText.includes('%') ? 'PERCENT' : 'AMOUNT';
+
+            // Kiểm tra TẤT CẢ điều kiện (AND logic)
+            const matchSearch = searchText === '' || code.includes(searchText);
+            const matchDiscountType = selectedDiscountType === '' || discountType === selectedDiscountType;
+            const matchRoomType = selectedRoomType === '' || roomType === selectedRoomType;
+            const matchStatus = selectedStatus === '' || status === selectedStatus;
+            const matchValue = value >= valueFrom && value <= valueTo;
+            
+            // Kiểm tra date (nếu có chọn date, check xem date có nằm trong khoảng start-end không)
+            let matchDate = true;
+            if (selectedDate) {
+                const filterDateObj = new Date(selectedDate);
+                const startDateObj = parseDate(startDate);
+                const endDateObj = parseDate(endDate);
+                matchDate = filterDateObj >= startDateObj && filterDateObj <= endDateObj;
+            }
+
+            // Chỉ hiện row nếu TẤT CẢ điều kiện đều đúng
+            if (matchSearch && matchDiscountType && matchRoomType && matchStatus && matchValue && matchDate) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Update count
+        resultCount.textContent = visibleCount;
+    }
+
+    // Helper function parse date dd/MM/yyyy
+    function parseDate(dateStr) {
+        if (!dateStr || dateStr === 'N/A') return new Date(0);
+        const parts = dateStr.split('/');
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+
+    // Function reset filters
+    function resetAllFilters() {
+        searchInput.value = '';
+        filterDiscountType.value = '';
+        filterRoomType.value = '';
+        filterStatus.value = '';
+        filterDate.value = '';
+        filterValueFrom.value = '';
+        filterValueTo.value = '';
+        applyAllFilters();
+    }
+
+    // Gắn event listeners
+    searchInput.addEventListener('keyup', applyAllFilters);
+    filterDiscountType.addEventListener('change', applyAllFilters);
+    filterRoomType.addEventListener('change', applyAllFilters);
+    filterStatus.addEventListener('change', applyAllFilters);
+    filterDate.addEventListener('change', applyAllFilters);
+</script>
+<!--SortTable với 3 trạng thái-->
+<script>
+    // Lưu trạng thái sort cho từng column
+    const sortStates = {}; // { columnIndex: 0|1|2 } - 0: none, 1: asc, 2: desc
+    let originalRowsOrder = []; // Lưu thứ tự ban đầu
+
+    // Lưu thứ tự ban đầu khi load trang
+    document.addEventListener('DOMContentLoaded', function() {
+        const table = document.getElementById("discountTable");
+        originalRowsOrder = Array.from(table.tBodies[0].rows);
+    });
+
+    function sortTable(columnIndex, headerElement) {
+        const table = document.getElementById("discountTable");
+        const tbody = table.tBodies[0];
+        
+        // Khởi tạo state nếu chưa có
+        if (sortStates[columnIndex] === undefined) {
+            sortStates[columnIndex] = 0;
+        }
+        
+        // Chuyển sang state tiếp theo: 0 -> 1 -> 2 -> 0
+        sortStates[columnIndex] = (sortStates[columnIndex] + 1) % 3;
+        
+        // Reset icon của tất cả headers
+        const allHeaders = table.querySelectorAll('thead th');
+        allHeaders.forEach(th => {
+            const icon = th.querySelector('i');
+            if (icon) {
+                icon.className = 'mdi mdi-sort';
+                icon.style.color = '';
+            }
+        });
+        
+        // Update icon của header hiện tại
+        const icon = headerElement.querySelector('i');
+        if (sortStates[columnIndex] === 0) {
+            // None - quay về thứ tự ban đầu
+            icon.className = 'mdi mdi-sort';
+            icon.style.color = '';
+            tbody.innerHTML = "";
+            originalRowsOrder.forEach(row => tbody.appendChild(row.cloneNode(true)));
+            return;
+        } else if (sortStates[columnIndex] === 1) {
+            // Ascending
+            icon.className = 'mdi mdi-sort-ascending';
+            icon.style.color = '#667eea';
+        } else {
+            // Descending
+            icon.className = 'mdi mdi-sort-descending';
+            icon.style.color = '#667eea';
+        }
+        
+        // Lấy rows và sort
+        const rows = Array.from(tbody.rows);
+        rows.sort((a, b) => {
+            const cellA = a.cells[columnIndex].textContent.trim().toLowerCase();
+            const cellB = b.cells[columnIndex].textContent.trim().toLowerCase();
+
+            // Kiểm tra xem là số hay là chữ
             const valA = isNaN(cellA) ? cellA : Number(cellA);
             const valB = isNaN(cellB) ? cellB : Number(cellB);
 
-            if(valA<valB) {
-                return sortDirection ? -1 : 1;
+            if (valA < valB) {
+                return sortStates[columnIndex] === 1 ? -1 : 1; // 1=asc, 2=desc
             }
-            if(valA>valB) {
-                return sortDirection ? 1: -1;
+            if (valA > valB) {
+                return sortStates[columnIndex] === 1 ? 1 : -1;
             }
             return 0;
         });
 
-        const tbody = table.tBodies[0];
+        // Render lại table
         tbody.innerHTML = "";
         rows.forEach(row => tbody.appendChild(row));
-
-        sortDirection = !sortDirection;
     }
-</script>
-
-<script>
-    const status = document.getElementById('status');
-    const startDate = document.getElementById('')
 </script>
 </body>
 
