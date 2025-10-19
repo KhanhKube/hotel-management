@@ -2,6 +2,8 @@ package hotel.db.dto.discount;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,8 +15,8 @@ public class DiscountResponseDto {
     private String discountType;
     private Double value;
     private String roomType;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private String status;
 }
 

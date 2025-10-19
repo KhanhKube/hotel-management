@@ -24,6 +24,7 @@ public class Constants {
     public static final String USERNAMEDUPLICATE = "Username already taken!";
     public static final String DOBINVALID = "User must be at least 18 years old!";
     public static final String EMAILDUPLICATE = "Email already registered!";
+    public static final String PHONEDUPLICATE = "Phone already registered!";
     public static final String REGISTERSUCCESS = "User registered successfully!";
     public static final String UPDATESUCCESS = "Updated information successfully!";
     public static final String PHONEINVALID = "Số điện thoại không hợp lệ!";
@@ -34,4 +35,5 @@ public class Constants {
     public static final String LOGINFIRST = "Bạn cần đăng nhập trước!";
     public static final String CHOOSEPICTURE = "Vui lòng chọn ảnh!";
     public static final String FILEINVALID = "Invalid file type. Please upload an image.";
+    public static final String ROOMNOTEXIST = "Phòng không tồn tại";
 }

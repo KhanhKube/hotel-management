@@ -237,6 +237,11 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
+                                        <a th:href="@{/hotel-management/rooms/detail/{id}(id=${room.roomId})}"
+                                           class="btn btn-sm btn-outline-info"
+                                           title="Xem chi tiết">
+                                            <i class="mdi mdi-eye"></i>
+                                        </a>
                                         <a th:href="@{/hotel-management/rooms/edit/{id}(id=${room.roomId})}"
                                            class="btn btn-sm btn-outline-primary"
                                            title="Sửa">

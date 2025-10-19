@@ -12,5 +12,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ListRoomResponse {
-	List<RoomResponseDto> listRoomResponse;
+	private List<RoomResponseDto> data;
 }

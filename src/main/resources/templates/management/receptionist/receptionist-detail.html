@@ -15,6 +15,105 @@
   <div th:replace="common/sidebar"></div>
 
   <div class="main-panel">
+    <div class="col-12 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Thông tin lễ tân</h4>
+          <p class="card-description">Chỉnh sửa thông tin cá nhân lễ tân</p>
+
+          <form class="forms-sample" th:action="@{/hotel-management/receptionist/update}"
+                th:object="${receptionist}" method="post" enctype="multipart/form-data">
+
+            <!-- Hidden ID -->
+            <input type="hidden" th:field="*{userId}" />
+
+            <!-- Avatar Upload -->
+            <div class="form-group text-center">
+              <label>Ảnh đại diện</label><br>
+              <img th:src="${receptionist.avatarUrl != null ? receptionist.avatarUrl : '/assets/images/faces-clipart/pic-1.png'}"
+                   alt="avatar"
+                   class="mb-3"
+                   style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
+              <div class="input-group col-xs-12">
+                <input type="file" class="form-control" name="avatarFile" accept="image/*">
+              </div>
+            </div>
+
+            <!-- First Name -->
+            <div class="form-group">
+              <label for="firstName">Họ</label>
+              <input type="text" class="form-control" id="firstName"
+                     placeholder="Nhập họ" th:field="*{firstName}">
+            </div>
+
+            <!-- Last Name -->
+            <div class="form-group">
+              <label for="lastName">Tên</label>
+              <input type="text" class="form-control" id="lastName"
+                     placeholder="Nhập tên" th:field="*{lastName}">
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" class="form-control" id="email"
+                     placeholder="Địa chỉ email" th:field="*{email}" readonly>
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+              <label for="phone">Số điện thoại</label>
+              <input type="text" class="form-control" id="phone"
+                     placeholder="Nhập số điện thoại" th:field="*{phone}">
+            </div>
+
+            <!-- Date of Birth -->
+            <div class="form-group">
+              <label for="dob">Ngày sinh</label>
+              <input type="date" class="form-control" id="dob" th:field="*{dob}">
+            </div>
+
+            <!-- Gender -->
+            <div class="form-group">
+              <label for="gender">Giới tính</label>
+              <select class="form-control" id="gender" th:field="*{gender}">
+                <option th:value="MALE">Nam</option>
+                <option th:value="FEMALE">Nữ</option>
+                <option th:value="OTHER">Khác</option>
+              </select>
+            </div>
+
+            <!-- Address -->
+            <div class="form-group">
+              <label for="address">Địa chỉ</label>
+              <input type="text" class="form-control" id="address"
+                     placeholder="Nhập địa chỉ" th:field="*{address}">
+            </div>
+
+            <!-- Username (optional display only) -->
+            <div class="form-group">
+              <label for="username">Tên đăng nhập</label>
+              <input type="text" class="form-control" id="username"
+                     th:field="*{username}" readonly>
+            </div>
+
+            <!-- Status (if admin can change it) -->
+            <div class="form-group">
+              <label for="status">Trạng thái</label>
+              <select class="form-control" id="status" th:field="*{status}">
+                <option th:value="ACTIVE">Đang hoạt động</option>
+                <option th:value="INACTIVE">Ngừng hoạt động</option>
+                <option th:value="SUSPENDED">Bị khóa</option>
+              </select>
+            </div>
+
+            <!-- Submit Buttons -->
+            <button type="submit" class="btn btn-primary mr-2">Lưu thay đổi</button>
+            <a th:href="@{/hotel-management/receptionist/list}" class="btn btn-dark">Hủy</a>
+          </form>
+        </div>
+      </div>
+    </div>
 
   </div>
   <!-- main-panel ends -->

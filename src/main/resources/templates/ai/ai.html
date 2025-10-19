@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Bot</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            font-family: sans-serif;
+            background: #1c1e22;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #4c4c6a;
+            border-radius: 2px;
+        }
+
+        .chatbox {
+            width: 300px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);
+            background: #2f323b;
+        }
+
+        .chat-window {
+            flex: 1;
+            background: #2f323b;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .chat-input {
+            flex: 0 0 auto;
+            height: 60px;
+            background: #40434e;
+            border-top: 1px solid #2671ff;
+            display: flex;
+            align-items: center;
+            padding: 0;
+        }
+
+        .chat-input input {
+            flex: 1;
+            height: 59px;
+            line-height: 60px;
+            outline: none;
+            border: none;
+            color: white;
+            padding: 0 10px;
+            font-size: 12pt;
+            background: #40434e;
+        }
+
+        .chat-input input::placeholder {
+            color: rgba(255,255,255,.5);
+        }
+
+        .chat-input button {
+            outline: none;
+            border: none;
+            background: rgba(255,255,255,.25);
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            margin: 10px;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .chat-input input:valid + button,
+        .chat-input input[good] + button {
+            box-shadow: 0 0 2px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.24);
+            background: #2671ff;
+        }
+
+        .chat-input input:valid + button:hover,
+        .chat-input input[good] + button:hover {
+            box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+        }
+
+        .chat-input button svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .chat-input input[good] + button path,
+        .chat-input input:valid + button path {
+            fill: white;
+        }
+
+        .msg-container {
+            display: flex;
+            width: 100%;
+            margin-bottom: 10px;
+            align-items: flex-end;
+        }
+
+        .msg-container.msg-self {
+            justify-content: flex-end;
+        }
+
+        .msg-box {
+            display: flex;
+            background: #5b5e6c;
+            padding: 10px;
+            border-radius: 0 6px 6px 0;
+            max-width: 80%;
+            width: auto;
+            box-shadow: 0 0 2px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.24);
+            gap: 10px;
+        }
+
+        .msg-container.msg-self .msg-box {
+            border-radius: 6px 0 0 6px;
+            background: #2671ff;
+            flex-direction: row-reverse;
+        }
+
+        .user-img {
+            display: inline-block;
+            border-radius: 50%;
+            height: 40px;
+            width: 40px;
+            min-width: 40px;
+            background: #2671ff;
+            flex-shrink: 0;
+        }
+
+        .msg-container.msg-self .user-img {
+            background: #5b5e6c;
+        }
+
+        .flr {
+            display: flex;
+            flex-direction: column;
+            width: auto;
+        }
+
+        .messages {
+            flex: 1 0 auto;
+        }
+
+        .msg {
+            display: inline-block;
+            font-size: 11pt;
+            line-height: 13pt;
+            color: rgba(255,255,255,.7);
+            margin: 0 0 4px 0;
+            word-wrap: break-word;
+        }
+
+        .msg:first-of-type {
+            margin-top: 0;
+        }
+
+        .msg:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .timestamp {
+            color: rgba(0,0,0,.38);
+            font-size: 8pt;
+            margin-top: 4px;
+            white-space: nowrap;
+        }
+
+        .msg-container.msg-self .timestamp {
+            text-align: right;
+        }
+
+        .username {
+            margin-right: 3px;
+        }
+
+        .posttime {
+            margin-left: 3px;
+        }
+    </style>
+</head>
+<body>
+<section class="chatbox">
+    <section class="chat-window">
+        <article class="msg-container msg-remote">
+            <div class="msg-box">
+                <img class="user-img" src="//gravatar.com/avatar/00034587632094500000000000000000?d=retro" alt="User avatar" />
+                <div class="flr">
+                    <div class="messages">
+                        <p class="msg">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent varius, neque non tristique tincidunt, mauris nunc efficitur erat, elementum semper justo odio id nisi.</p>
+                    </div>
+                    <span class="timestamp"><span class="username">Bot</span>&bull;<span class="posttime">3 minutes ago</span></span>
+                </div>
+            </div>
+        </article>
+
+        <article class="msg-container msg-self">
+            <div class="msg-box">
+                <img class="user-img" src="//gravatar.com/avatar/56234674574535734573000000000001?d=retro" alt="Your avatar" />
+                <div class="flr">
+                    <div class="messages">
+                        <p class="msg">Lorem ipsum dolor sit amet</p>
+                        <p class="msg">Praesent varius</p>
+                    </div>
+                    <span class="timestamp"><span class="username">You</span>&bull;<span class="posttime">2 minutes ago</span></span>
+                </div>
+            </div>
+        </article>
+
+        <article class="msg-container msg-remote">
+            <div class="msg-box">
+                <img class="user-img" src="//gravatar.com/avatar/002464562345234523523568978962?d=retro" alt="User avatar" />
+                <div class="flr">
+                    <div class="messages">
+                        <p class="msg">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </div>
+                    <span class="timestamp"><span class="username">Bot</span>&bull;<span class="posttime">1 minute ago</span></span>
+                </div>
+            </div>
+        </article>
+
+        <article class="msg-container msg-remote">
+            <div class="msg-box">
+                <img class="user-img" src="//gravatar.com/avatar/00034587632094500000000000000000?d=retro" alt="User avatar" />
+                <div class="flr">
+                    <div class="messages">
+                        <p class="msg">Lorem ipsum dolor sit amet.</p>
+                    </div>
+                    <span class="timestamp"><span class="username">Bot</span>&bull;<span class="posttime">Now</span></span>
+                </div>
+            </div>
+        </article>
+
+        <article class="msg-container msg-self">
+            <div class="msg-box">
+                <img class="user-img"/>
+                <div class="flr">
+                    <div class="messages">
+                        <p class="msg">Lorem ipsum</p>
+                    </div>
+                    <span class="timestamp"><span class="username">You</span>&bull;<span class="posttime">Now</span></span>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <form class="chat-input" onsubmit="return false;">
+        <input type="text" autocomplete="on" placeholder="Type a message" required />
+        <button type="button" aria-label="Send message">
+            <svg viewBox="0 0 24 24"><path fill="rgba(0,0,0,.38)" d="M17,12L12,17V14H8V10H12V7L17,12M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L5,8.09V15.91L12,19.85L19,15.91V8.09L12,4.15Z" /></svg>
+        </button>
+    </form>
+</section>
+
+<script>
+    $('.chat-input input').on('keyup', function() {
+        if ($(this).val().trim() === '') {
+            $(this).removeAttr('good');
+        } else {
+            $(this).attr('good', '');
+        }
+    });
+
+    $('.chat-input form').on('submit', function(e) {
+        e.preventDefault();
+        const input = $('.chat-input input');
+        const message = input.val().trim();
+
+        if (message) {
+            console.log('Message sent:', message);
+            input.val('').removeAttr('good').focus();
+        }
+    });
+
+    $('.chat-input button').on('click', function() {
+        $('.chat-input form').submit();
+    });
+</script>
+</body>
+</html>

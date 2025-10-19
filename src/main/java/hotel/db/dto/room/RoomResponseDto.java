@@ -1,7 +1,5 @@
 package hotel.db.dto.room;
 
-import hotel.db.dto.floor.FloorResponseDto;
-import hotel.db.dto.size.SizeResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,18 +13,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class RoomResponseDto {
-
-    private Long roomId;
-    private String roomNumber;
-    private String roomType;
-    private String bedType;
-    private FloorResponseDto floor;
-    private SizeResponseDto size;
-    private String roomDescription;
-    private BigDecimal price;
-    private String status;
-    private Integer sold;
-    private Integer view;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+	private Long roomId;
+	private String roomNumber;
+	private String roomType;
+	private String bedType;
+	private Integer floorNumber;
+	private BigDecimal size;
+	private String roomDescription;
+	private BigDecimal price;
+	private String status;
+	private Integer sold;
+	private Integer view;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
+	private Boolean isDeleted;
 }

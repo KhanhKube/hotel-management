@@ -36,8 +36,27 @@ public class ViewServiceImpl implements  ViewService{
         if (trimmed.length() > 100) {
             throw new IllegalArgumentException("viewType must be <= 100 characters");
         }
+        
+        // Check for duplicate view type (case-insensitive) only for new views
+        if (view.getViewId() == null && existsByViewType(trimmed)) {
+            throw new IllegalArgumentException("Loại view '" + trimmed + "' đã tồn tại!");
+        }
+        
+        // For existing views, check if the new name conflicts with other views
+        if (view.getViewId() != null) {
+            List<View> existingViews = viewRepository.findByViewTypeIgnoreCaseAndViewIdNot(trimmed, view.getViewId());
+            if (!existingViews.isEmpty()) {
+                throw new IllegalArgumentException("Loại view '" + trimmed + "' đã tồn tại!");
+            }
+        }
+        
         view.setViewType(trimmed);
         return viewRepository.save(view);
+    }
+
+    @Override
+    public boolean existsByViewType(String viewType) {
+        return viewRepository.existsByViewTypeIgnoreCase(viewType);
     }
 
     @Override
