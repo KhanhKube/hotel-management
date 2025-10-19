@@ -2,64 +2,310 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${news.newsId} == null ? 'Create News' : 'Edit News'"></title>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-    <script th:src="@{/vendors/jquery/jquery-3.2.1.min.js}"></script>
+    <title th:text="${news.newsId} == null ? 'Create News' : 'Edit News'">News Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 2.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+        .form-header h2 {
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .form-header p {
+            color: #6c757d;
+            margin: 0;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .form-label i {
+            color: #667eea;
+            margin-right: 0.5rem;
+        }
+        .form-control, .form-select {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .form-control:hover, .form-select:hover {
+            border-color: #667eea;
+        }
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        .btn-group-custom {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #e9ecef;
+        }
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .btn-cancel {
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+            color: white;
+        }
+        .required-asterisk {
+            color: #dc3545;
+            margin-left: 0.25rem;
+        }
+        .char-counter {
+            font-size: 0.875rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+        .form-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .form-section-title {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <h1 th:text="${news.newsId} == null ? 'Create News' : 'Edit News'"></h1>
-
-    <form th:action="@{/management/news/save}" method="post" th:object="${news}">
-        <input type="hidden" th:field="*{newsId}" />
-
-        <div>
-            <label>Title</label>
-            <input type="text" th:field="*{title}" required />
+    <div class="form-container">
+        <!-- Form Header -->
+        <div class="form-header">
+            <h2>
+                <i th:class="${news.newsId == null ? 'fas fa-plus-circle' : 'fas fa-edit'}"></i>
+                <span th:text="${news.newsId == null ? 'Create News' : 'Edit News'}"></span>
+            </h2>
+            <p th:if="${news.newsId != null}">News ID: <strong th:text="${news.newsId}"></strong></p>
         </div>
 
-        <div>
-            <label>Heading</label>
-            <input type="text" th:field="*{heading}" />
-        </div>
+        <!-- Form -->
+        <form th:action="@{/management/news/save}" method="post" th:object="${news}" id="newsForm">
+            <input type="hidden" th:field="*{newsId}" />
 
-        <div>
-            <label>Group</label>
-            <select th:field="*{newsGroupId}">
-                <option th:each="g : ${newsGroups}" th:value="${g.newsGroupId}" th:text="${g.name}"></option>
-            </select>
-        </div>
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fas fa-info-circle me-2"></i>Basic Information
+                </div>
 
-        <div>
-            <label>Content</label>
-            <textarea th:field="*{content}" rows="10"></textarea>
-        </div>
+                <!-- Title -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-heading"></i>Title
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <input type="text" 
+                           th:field="*{title}" 
+                           class="form-control" 
+                           placeholder="Enter news title..."
+                           required 
+                           maxlength="200"
+                           id="newsTitle" />
+                    <div class="char-counter">
+                        <span id="titleCounter">0</span>/200 characters
+                    </div>
+                </div>
 
-        <div>
-            <label>Image URL</label>
-            <input type="text" th:field="*{image}" />
-        </div>
+                <!-- Heading -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-text-height"></i>Heading
+                    </label>
+                    <input type="text" 
+                           th:field="*{heading}" 
+                           class="form-control" 
+                           placeholder="Enter news heading..."
+                           maxlength="300"
+                           id="newsHeading" />
+                    <div class="char-counter">
+                        <span id="headingCounter">0</span>/300 characters
+                    </div>
+                </div>
 
-        <div>
-            <label>Link</label>
-            <input type="text" th:field="*{link}" />
-        </div>
+                <!-- Group -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-layer-group"></i>News Group
+                    </label>
+                    <select th:field="*{newsGroupId}" class="form-select">
+                        <option value="">Select a group...</option>
+                        <option th:each="g : ${newsGroups}" th:value="${g.newsGroupId}" th:text="${g.name}"></option>
+                    </select>
+                </div>
 
-        <div>
-            <label>Status</label>
-            <select th:field="*{status}">
-                <option value="DRAFT">Draft</option>
-                <option value="PUBLISHED">Published</option>
-                <option value="ARCHIVED">Archived</option>
-            </select>
-        </div>
+                <!-- Status -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-toggle-on"></i>Status
+                    </label>
+                    <select th:field="*{status}" class="form-select">
+                        <option value="DRAFT">Draft</option>
+                        <option value="PUBLISHED">Published</option>
+                        <option value="ARCHIVED">Archived</option>
+                    </select>
+                </div>
+            </div>
 
-        <div>
-            <button type="submit">Save</button>
-            <a th:href="@{/management/news}">Cancel</a>
-        </div>
-    </form>
+            <!-- Content Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fas fa-file-alt me-2"></i>Content
+                </div>
+
+                <!-- Content -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-align-left"></i>Content
+                    </label>
+                    <textarea th:field="*{content}" 
+                              class="form-control" 
+                              placeholder="Write your news content here..."
+                              rows="10"
+                              maxlength="5000"
+                              id="newsContent"></textarea>
+                    <div class="char-counter">
+                        <span id="contentCounter">0</span>/5000 characters
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media Section -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fas fa-image me-2"></i>Media & Links
+                </div>
+
+                <!-- Image URL -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-image"></i>Image URL
+                    </label>
+                    <input type="url" 
+                           th:field="*{image}" 
+                           class="form-control" 
+                           placeholder="https://example.com/image.jpg" />
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> Enter the full URL of the news image
+                    </small>
+                </div>
+
+                <!-- Link -->
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-link"></i>External Link
+                    </label>
+                    <input type="url" 
+                           th:field="*{link}" 
+                           class="form-control" 
+                           placeholder="https://example.com" />
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> Optional external link for this news
+                    </small>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-group-custom">
+                <button class="btn btn-save" type="submit">
+                    <i class="fas fa-save me-2"></i>
+                    <span th:text="${news.newsId == null ? 'Create News' : 'Update News'}"></span>
+                </button>
+                <a th:href="@{/management/news}" class="btn btn-cancel">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Character counter for title
+    const newsTitle = document.getElementById('newsTitle');
+    const titleCounter = document.getElementById('titleCounter');
+    if (newsTitle) {
+        titleCounter.textContent = newsTitle.value.length;
+        newsTitle.addEventListener('input', function() {
+            titleCounter.textContent = this.value.length;
+        });
+    }
+
+    // Character counter for heading
+    const newsHeading = document.getElementById('newsHeading');
+    const headingCounter = document.getElementById('headingCounter');
+    if (newsHeading) {
+        headingCounter.textContent = newsHeading.value.length;
+        newsHeading.addEventListener('input', function() {
+            headingCounter.textContent = this.value.length;
+        });
+    }
+
+    // Character counter for content
+    const newsContent = document.getElementById('newsContent');
+    const contentCounter = document.getElementById('contentCounter');
+    if (newsContent) {
+        contentCounter.textContent = newsContent.value.length;
+        newsContent.addEventListener('input', function() {
+            contentCounter.textContent = this.value.length;
+        });
+    }
+</script>
 </body>
 </html>
 

@@ -16,14 +16,14 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractVersion {
 
-	@CreatedDate
-	@Column(name = "created_at", updatable = false)
-	LocalDateTime createdAt;
+    @CreatedDate
+    @Column(name = "created_at", updatable = false)
+    LocalDateTime createdAt;
 
-	@LastModifiedDate
-	@Column(name = "updated_at")
-	LocalDateTime updatedAt;
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    LocalDateTime updatedAt;
 
-	@Column(name = "is_deleted", nullable = false)
-	Boolean isDeleted = false;
+    @Column(name = "is_deleted", nullable = false)
+    Boolean isDeleted = false;
 }

@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @Table(name = "floors")
 public class Floor extends AbstractVersion {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "floor_id")
-	private Integer floorId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "floor_id")
+    private Integer floorId;
 
-	@Column(name = "floor_number")
-	private Integer floorNumber;
+    @Column(name = "floor_number")
+    private Integer floorNumber;
 }

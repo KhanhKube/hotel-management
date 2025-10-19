@@ -3,33 +3,299 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${news.title}">News Details</title>
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .view-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 0;
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        .view-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2.5rem;
+            text-align: center;
+        }
+        .view-header h2 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+        .view-header .news-meta {
+            opacity: 0.9;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        .view-body {
+            padding: 2.5rem;
+        }
+        .info-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .info-label i {
+            color: #667eea;
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+        .info-value {
+            color: #212529;
+            font-size: 1.1rem;
+            padding-left: 2rem;
+        }
+        .status-view-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+        }
+        .status-view-card .row > div {
+            text-align: center;
+            padding: 1rem;
+        }
+        .status-view-card .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        .status-view-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .status-badge-large {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .status-draft {
+            background: linear-gradient(135deg, #ffa751 0%, #ffe259 100%);
+            color: white;
+        }
+        .status-published {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            color: white;
+        }
+        .status-archived {
+            background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+            color: white;
+        }
+        .content-box {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            min-height: 200px;
+            line-height: 1.8;
+        }
+        .content-box h5 {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .content-box h5 i {
+            margin-right: 0.5rem;
+        }
+        .news-image {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 1.5rem auto;
+            display: block;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e9ecef;
+        }
+        .btn-custom {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .btn-edit {
+            background: linear-gradient(135deg, #ffa751 0%, #ffe259 100%);
+            color: #fff;
+        }
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 167, 81, 0.4);
+            color: #fff;
+        }
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-back:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+            color: white;
+        }
+        .status-change-form {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+        .status-change-form h6 {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .external-link-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+        .external-link-box a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .external-link-box a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <a th:href="@{/management/news}">Back</a>
-    <h1 th:text="${news.title}"></h1>
-    <p th:text="${news.heading}"></p>
-    <img th:if="${news.image}" th:src="${news.image}" alt="image" style="max-width: 400px; display:block;" />
-    <div th:utext="${news.content}"></div>
-    <p>
-        <strong>Status:</strong> <span th:text="${news.status}"></span>
-        &nbsp; | &nbsp;
-        <strong>Views:</strong> <span th:text="${news.view}"></span>
-    </p>
-    <p th:if="${news.link}">
-        <a th:href="${news.link}" target="_blank">External link</a>
-    </p>
-    
-    <form th:action="@{'/management/news/change-status/' + ${news.newsId}}" method="post">
-        <select name="status">
-            <option value="DRAFT">Draft</option>
-            <option value="PUBLISHED">Published</option>
-            <option value="ARCHIVED">Archived</option>
-        </select>
-        <button type="submit">Change status</button>
-    </form>
+    <div class="view-container">
+        <!-- Header -->
+        <div class="view-header">
+            <h2>
+                <i class="fas fa-newspaper me-2"></i>
+                <span th:text="${news.title}">News Title</span>
+            </h2>
+            <div class="news-meta">
+                News ID: <strong th:text="${news.newsId}"></strong>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="view-body">
+            <!-- Status and Views Card -->
+            <div class="status-view-card">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="label">
+                            <i class="fas fa-toggle-on me-2"></i>Status
+                        </div>
+                        <div class="value">
+                            <span th:class="'status-badge-large status-' + ${#strings.toLowerCase(news.status)}" 
+                                  th:text="${news.status}"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="label">
+                            <i class="fas fa-eye me-2"></i>Total Views
+                        </div>
+                        <div class="value" th:text="${news.view}">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heading -->
+            <div class="info-card" th:if="${news.heading != null and !#strings.isEmpty(news.heading)}">
+                <div class="info-label">
+                    <i class="fas fa-text-height"></i>
+                    Heading
+                </div>
+                <div class="info-value" th:text="${news.heading}">Heading text</div>
+            </div>
+
+            <!-- Image -->
+            <div th:if="${news.image != null and !#strings.isEmpty(news.image)}">
+                <img th:src="${news.image}" alt="News Image" class="news-image" />
+            </div>
+
+            <!-- Content Box -->
+            <div class="content-box">
+                <h5>
+                    <i class="fas fa-file-alt"></i>
+                    News Content
+                </h5>
+                <div th:utext="${news.content}">Content will be displayed here</div>
+            </div>
+
+            <!-- External Link -->
+            <div th:if="${news.link != null and !#strings.isEmpty(news.link)}">
+                <div class="external-link-box">
+                    <i class="fas fa-external-link-alt me-2"></i>
+                    <a th:href="${news.link}" target="_blank">View External Link</a>
+                </div>
+            </div>
+
+            <!-- Status Change Form -->
+            <div class="status-change-form">
+                <h6>
+                    <i class="fas fa-exchange-alt me-2"></i>Change Status
+                </h6>
+                <form th:action="@{'/management/news/change-status/' + ${news.newsId}}" method="post" class="d-flex gap-2">
+                    <select name="status" class="form-select" style="max-width: 200px;">
+                        <option value="DRAFT" th:selected="${news.status == 'DRAFT'}">Draft</option>
+                        <option value="PUBLISHED" th:selected="${news.status == 'PUBLISHED'}">Published</option>
+                        <option value="ARCHIVED" th:selected="${news.status == 'ARCHIVED'}">Archived</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check me-2"></i>Update Status
+                    </button>
+                </form>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a th:href="@{'/management/news/edit/' + ${news.newsId}}" 
+                   class="btn btn-custom btn-edit">
+                    <i class="fas fa-edit me-2"></i>Edit News
+                </a>
+                <a th:href="@{/management/news}" 
+                   class="btn btn-custom btn-back">
+                    <i class="fas fa-arrow-left me-2"></i>Back to List
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 
