@@ -26,8 +26,5 @@ public class Service extends AbstractVersion {
     @Column(name = "price")
     private Double price;
 
-    // Mối quan hệ nhiều - một với Hotel
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hotel_id")
-    private Hotel hotel;
+
 }

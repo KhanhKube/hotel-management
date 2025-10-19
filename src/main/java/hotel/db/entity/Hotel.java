@@ -44,7 +44,4 @@ public class Hotel  {
     private Integer viewCount = 0;
 
 
-    // Mối quan hệ 1-nhiều với Service
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Service> services;
 }
