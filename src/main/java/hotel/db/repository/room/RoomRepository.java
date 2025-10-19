@@ -7,11 +7,21 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Integer> {
+
+    List<Room> findAllByIsDeletedFalse();
+
+    //check xem code voucher da ton tai hay chua.
+    Boolean existsByRoomNumber(String roomNumber);
+
+    //check xem code da bi ton tai ngoai code cua chinh no hay chua (dung cho update)
+    boolean existsByRoomNumberAndRoomId(String roomNumber, Long roomId);
+
 	List<Room> findByStatus(RoomStatus status);
 
 	List<Room> findAllByIsDeletedIsFalse();
@@ -22,7 +32,11 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
 	List<Room> findAll();
 
-	Boolean existsByRoomNumber(String roomNumber);
+    //soft delete
+    @Modifying
+    @Transactional
+    @Query("UPDATE Room d SET d.isDeleted = true WHERE d.roomId = :id")
+    void softDeleteById(@Param("id") Integer id);
 
 	// Hard delete method - xóa vĩnh viễn khỏi database
 	@Modifying

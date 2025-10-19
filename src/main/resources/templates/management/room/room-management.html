@@ -15,75 +15,156 @@
             /*background-color: #e3f2fd;  !* Xanh nhạt *!*/
             cursor: pointer;
             opacity: 0.65;
-            transition: background-color 0.2s;  /* Hiệu ứng mượt */
+            transition: background-color 0.2s;
+            /* Hiệu ứng mượt */
         }
     </style>
 </head>
 
 <body>
-<div class="container-scroller">
-    <!-- Include sidebar -->
-    <div th:replace="~{common/sidebar :: sidebar}"></div>
+    <div class="container-scroller">
+        <!-- Include sidebar -->
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
 
-    <div class="container-fluid page-body-wrapper">
-        <nav class="navbar p-0 fixed-top d-flex flex-row">
-            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
-                <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"alt="logo" /></a>
-            </div>
-            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
-            </div>
-        </nav>
+        <div class="container-fluid page-body-wrapper">
+            <nav class="navbar p-0 fixed-top d-flex flex-row">
+                <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                    <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                            alt="logo" /></a>
+                </div>
+                <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+                </div>
+            </nav>
 
-        <div class="main-panel">
-            <div class="content-wrapper">
-                <div class="row">
-                    <div class="col-12 grid-margin">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h4 class="card-title mb-0">Quản Lý Phòng</h4>
-                                    <a th:href="@{/hotel-management/room/create}" class="btn btn-primary">
-                                        <i class="mdi mdi-plus"></i> Thêm Phòng
-                                    </a>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table" id="roomTable">
-                                        <thead>
-                                        <tr>
-                                            <th> STT </th>
-                                            <th> Số Phòng </th>
-                                            <th> Loại phòng </th>
-                                            <th> Tầng  </th>
-                                            <th> Diện tích </th>
-                                            <th> Giá  </th>
-                                            <th> Trạng thái </th>
-                                            <th> Hành động </th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <tr th:each="d, stat : ${listRoom}"
-                                            th:onclick="|window.location.href='@{/hotel-management/room/detail/{id}(id=${d.roomId})}';|"
-                                            style="cursor: pointer;">
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="row">
+                        <div class="col-12 grid-margin">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h4 class="card-title mb-0">Quản Lý Phòng</h4>
+                                        <a th:href="@{/hotel-management/room/create}" class="btn btn-primary">
+                                            <i class="mdi mdi-plus"></i> Thêm Phòng
+                                        </a>
+                                    </div>
 
-                                            <td th:text="${stat.count}"></td>
-                                            <td th:text="${d.roomNumber != null ? d.roomNumber : 'N/A'}"></td>
-                                            <td th:text="${d.roomType != null ? d.roomType : 'N/A'}"></td>
-                                            <td th:text="${d.floorNumber != null ? d.floorNumber : 'N/A'}"></td>
-                                            <td th:text="${d.sizeId != null ? d.sizeId : 'N/A'}"></td>
-                                            <td th:text="${d.price != null ? d.price : 'N/A'}"></td>
-                                            <td th:text="${d.status != null ? d.status : 'N/A'}"></td>
+                                    <!-- Search & Filter Bar -->
+                                    <div class="filter-section"
+                                        style="background: #f5f5f5; padding: 20px; margin-bottom: 20px; border-radius: 5px;">
+                                        <h5>🔍 Tìm Kiếm & Lọc</h5>
 
-                                            <td onclick="event.stopPropagation();">
-                                                <a th:href="@{/hotel-management/room/edit/{id}(id=${d.roomId})}">Sửa</a>
-                                                <a th:href="@{/hotel-management/room/delete/{id}(id=${d.roomId})}">Xóa</a>
-                                            </td>
-                                        </tr>
+                                        <!-- Row 1: Search + Dropdowns -->
+                                        <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                                            <!-- Search số phòng -->
+                                            <input type="text" id="searchRoomNumber" placeholder="Tìm số phòng..."
+                                                style="flex: 1; min-width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
 
-                                        <tr th:if="${#lists.isEmpty(listRoom)}">
-                                            <td colspan="9" class="text-center text-muted">Không có phòng nào khả dụng.</td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
+                                            <!-- Filter Loại phòng -->
+                                            <select id="filterRoomType"
+                                                style="flex: 1; min-width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                                                <option value="">-- Tất cả loại phòng --</option>
+                                                <option th:each="type : ${roomTypes}" th:value="${type}"
+                                                    th:text="${type}"></option>
+                                            </select>
+
+                                            <!-- Filter Trạng thái -->
+                                            <select id="filterStatus"
+                                                style="flex: 1; min-width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                                                <option value="">-- Tất cả trạng thái --</option>
+                                                <option th:each="status : ${statuses}" th:value="${status}"
+                                                    th:text="${status}"></option>
+                                            </select>
+
+                                            <!-- Filter Tầng -->
+                                            <select id="filterFloor"
+                                                style="flex: 1; min-width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                                                <option value="">-- Tất cả tầng --</option>
+                                                <option th:each="floor : ${floors}" th:value="${floor.floorNumber}"
+                                                    th:text="'Tầng ' + ${floor.floorNumber}"></option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Row 2: Price Range + Buttons -->
+                                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                            <input type="number" id="filterPriceFrom" placeholder="Giá từ..."
+                                                style="flex: 1; min-width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+
+                                            <input type="number" id="filterPriceTo" placeholder="Giá đến..."
+                                                style="flex: 1; min-width: 120px; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+
+                                            <button onclick="applyFilters()" class="btn btn-primary"
+                                                style="padding: 8px 20px;">
+                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                            </button>
+
+                                            <button onclick="resetFilters()" class="btn btn-secondary"
+                                                style="padding: 8px 20px;">
+                                                <i class="mdi mdi-refresh"></i> Reset
+                                            </button>
+
+                                            <span id="resultCount"
+                                                style="margin-left: auto; font-weight: bold; color: #333;">
+                                                Tổng: <span th:text="${#lists.size(listRoom)}">0</span> phòng
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table" id="roomTable">
+                                            <thead>
+                                                <tr>
+                                                    <th> STT </th>
+                                                    <th> Số Phòng </th>
+                                                    <th> Loại phòng </th>
+                                                    <th> Tầng </th>
+                                                    <th> Diện tích </th>
+                                                    <th> Giá </th>
+                                                    <th> Trạng thái </th>
+                                                    <th> Hành động </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="d, stat : ${listRoom}"
+                                                    th:onclick="|window.location.href='@{/hotel-management/room/detail/{id}(id=${d.roomId})}';|"
+                                                    style="cursor: pointer;">
+
+                                                    <td th:text="${stat.count}"></td>
+                                                    <td th:text="${d.roomNumber != null ? d.roomNumber : 'N/A'}"></td>
+                                                    <td th:text="${d.roomType != null ? d.roomType : 'N/A'}"></td>
+                                                    <td th:text="${d.floorNumber != null ? d.floorNumber : 'N/A'}"></td>
+                                                    <td th:text="${d.size != null ? d.size + 'm²' : 'N/A'}"></td>
+                                                    <td th:text="${d.price != null ? d.price : 'N/A'}"></td>
+                                                    <td>
+                                                        <div th:switch="${d.status}">
+                                                            <span th:case="'Trống'"
+                                                                class="badge badge-outline-success">Trống</span>
+                                                            <span th:case="'Đang thuê'"
+                                                                class="badge badge-outline-danger">Đang thuê</span>
+                                                            <span th:case="'Bảo trì'"
+                                                                class="badge badge-outline-warning">Bảo trì</span>
+                                                            <span th:case="'Đã đặt'" class="badge badge-outline-info">Đã
+                                                                đặt</span>
+                                                            <span th:case="*"
+                                                                class="badge badge-outline-secondary">N/A</span>
+                                                        </div>
+                                                    </td>
+
+                                                    <td onclick="event.stopPropagation();">
+                                                        <a
+                                                            th:href="@{/hotel-management/room/edit/{id}(id=${d.roomId})}">Sửa</a>
+                                                        <a
+                                                            th:href="@{/hotel-management/room/delete/{id}(id=${d.roomId})}">Xóa</a>
+                                                    </td>
+                                                </tr>
+
+                                                <tr th:if="${#lists.isEmpty(listRoom)}">
+                                                    <td colspan="9" class="text-center text-muted">Không có phòng nào
+                                                        khả dụng.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -92,14 +173,102 @@
             </div>
         </div>
     </div>
-</div>
 
+    <script>
+        const searchInput = document.getElementById('searchRoomNumber');
+        const tableSearch = document.getElementById('roomTable');
+        const rows = tableSearch.getElementsByTagName('tr');
 
+        searchInput.addEventListener("keyup", function () {
+            const search = searchInput.value.toLowerCase();
 
-<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
-<script th:src="@{/assets/js/off-canvas.js}"></script>
-<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
-<script th:src="@{/assets/js/misc.js}"></script>
+            for (let i = 1; i < rows.length; i++) {
+                const td = rows[i].getElementsByTagName("td")[1];
+
+                if (td) {
+                    const roomNb = td.textContent.toLowerCase();
+
+                    if (roomNb.includes(search)) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script>
+        // Filter Loại phòng
+        const filterRoomType = document.getElementById('filterRoomType');
+        const roomTable = document.getElementById('roomTable');
+        const tableRows = roomTable.getElementsByTagName('tr');
+
+        filterRoomType.addEventListener('change', function () {
+            const selectedValue = this.value.toLowerCase().trim();
+
+            for (let i = 1; i < tableRows.length; i++) {
+                const roomTypeCell = tableRows[i].getElementsByTagName('td')[2]; // Column "Loại phòng"
+
+                if (roomTypeCell) {
+                    const cellValue = roomTypeCell.textContent.toLowerCase().trim();
+
+                    if (selectedValue === '' || cellValue === selectedValue) {
+                        tableRows[i].style.display = '';
+                    } else {
+                        tableRows[i].style.display = 'none';
+                    }
+                }
+            }
+        });
+
+        // Filter Trạng thái
+        const filterStatus = document.getElementById('filterStatus');
+
+        filterStatus.addEventListener('change', function () {
+            const selectedValue = this.value.toLowerCase().trim();
+
+            for (let i = 1; i < tableRows.length; i++) {
+                const statusCell = tableRows[i].getElementsByTagName('td')[6]; // Column "Trạng thái"
+
+                if (statusCell) {
+                    const cellValue = statusCell.textContent.toLowerCase().trim();
+
+                    if (selectedValue === '' || cellValue === selectedValue) {
+                        tableRows[i].style.display = '';
+                    } else {
+                        tableRows[i].style.display = 'none';
+                    }
+                }
+            }
+        });
+
+        // Filter Tầng
+        const filterFloor = document.getElementById('filterFloor');
+
+        filterFloor.addEventListener('change', function () {
+            const selectedValue = this.value.toLowerCase().trim();
+
+            for (let i = 1; i < tableRows.length; i++) {
+                const floorCell = tableRows[i].getElementsByTagName('td')[3]; // Column "Tầng"
+
+                if (floorCell) {
+                    const cellValue = floorCell.textContent.toLowerCase().trim();
+
+                    if (selectedValue === '' || cellValue === selectedValue) {
+                        tableRows[i].style.display = '';
+                    } else {
+                        tableRows[i].style.display = 'none';
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/assets/js/misc.js}"></script>
 </body>
 
 </html>

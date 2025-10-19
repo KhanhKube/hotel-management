@@ -2,6 +2,7 @@ package hotel.rest.room;
 
 import hotel.db.dto.room.ListRoomResponse;
 import hotel.db.dto.room.SearchRoomRequest;
+import hotel.db.entity.Discount;
 import hotel.db.entity.Room;
 import hotel.service.booking.BookingService;
 import hotel.service.room.RoomService;
@@ -10,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -22,10 +24,19 @@ public class RoomController {
 
 	private final BookingService bookingService;
 	private final RoomService roomService;
+	private final hotel.db.repository.floor.FloorRepository floorRepository;
+	private final hotel.db.repository.size.SizeRepository sizeRepository;
 
-    /*
-    View danh sách các phòng
-    */
+    // Tự động load data cho dropdown trong mọi request
+    @ModelAttribute
+    public void loadDropdownData(Model model) {
+        model.addAttribute("roomTypes", roomService.getAllRoomTypes());
+        model.addAttribute("bedTypes", roomService.getAllBedTypes());
+        model.addAttribute("statuses", roomService.getAllStatus());
+        model.addAttribute("floors", floorRepository.findAll());
+        model.addAttribute("sizes", sizeRepository.findAll());
+    }
+
     @GetMapping
     public String view(Model model) {
         model.addAttribute("listRoom", roomService.getRoomList());
@@ -34,11 +45,54 @@ public class RoomController {
 
     @GetMapping("/create")
     public String create(Model model) {
-        model.addAttribute("statuses", roomService.getAllRooms());
-        model.addAttribute("roomTypes", roomService.getAllRoomTypes());
-        model.addAttribute("bedTypes", roomService.getAllBedTypes());
-        model.addAttribute("room", new Room());
+        Room room = new Room();
+        model.addAttribute("room", room);
         return "management/room/room-create-form";
+    }
+    @PostMapping("/create")
+    public String create(@ModelAttribute("room") Room room,
+                         BindingResult result, Model model) {
+        if (room.getRoomId() == null) {
+            if (roomService.checkForCreateRoomNumber(room.getRoomNumber())) {
+                model.addAttribute("room", room);
+                model.addAttribute("errorMessage", "Số phòng này đã tồn tại, vui lòng lấy số phòng khác!");
+                return "management/room/room-create-form";
+            }
+        } else {
+            if (!roomService.checkForEditRoomNumber(room.getRoomNumber(), Long.valueOf(room.getRoomId()))) {
+                model.addAttribute("room", room);
+                model.addAttribute("errorMessage", "Số phòng này đã tồn tại, vui lòng lấy số phòng khác!");
+                return "management/room/room-create-form";
+            }
+        }
+        if(!roomService.saveRoom(room)) {
+            model.addAttribute("errorMessage", "Có lỗi xảy ra, vui lòng tạo lại!");
+            return "management/room/room-create-form";
+        }
+        return "redirect:/hotel-management/room";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editRoomtForm(@PathVariable Integer id, Model model) {
+        Room room =  roomService.getRoomById(id);
+        if  (room == null) {
+            return "redirect:/hotel-management/room";
+        }
+        model.addAttribute("room", room);
+        return "management/room/room-create-form";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteRoom(@PathVariable Integer id) {
+        roomService.DeleteRoom(id);
+        return "redirect:/hotel-management/room";
+    }
+
+    @GetMapping("/detail/{id}")
+    public String detailRoom(@PathVariable Integer id,Model model) {
+        Room room = roomService.getRoomById(id);
+        model.addAttribute("room", room);
+        return "management/room/room-detail";
     }
 
 	@PostMapping("/search")

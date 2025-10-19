@@ -20,6 +20,14 @@ public interface RoomService {
 
     String[] getAllBedTypes();
 
+    boolean checkForCreateRoomNumber(String roomNumber);
+
+    boolean checkForEditRoomNumber(String roomNumber, Long roomId);
+
+    boolean saveRoom(Room room);
+
+    void DeleteRoom(Integer id);
+
 	ListRoomResponse getAllRoomForSearch();
 
 	Room getRoomById(Integer roomId);

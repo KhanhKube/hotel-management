@@ -31,16 +31,8 @@ public class Room extends AbstractVersion {
     @Column(name = "floor_id")
     private Integer floorId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "floor_id", insertable = false, updatable = false)
-    private Floor floor;
-
     @Column(name = "size_id")
     private Integer sizeId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "size_id", insertable = false, updatable = false)
-    private Size size;
 
     @Column(name = "room_description", columnDefinition = "TEXT")
     private String roomDescription;
