@@ -37,6 +37,12 @@
                                 <!-- Nội dung của bạn ở đây -->
                                 <form th:action="@{/hotel-management/room/create}" th:object="${room}" method="post">
 
+                                    <!-- Thêm hidden để bắt được discountId khi nhấn update -->
+                                    <input type="hidden" th:field="*{roomId}" />
+
+                                    <div th:if="${errorMessage}" class="alert alert-danger"
+                                         th:text="${errorMessage}"></div>
+
                                     <label>Số phòng: *</label><br>
                                     <input type="text" th:field="*{roomNumber}" required><br><br>
 
@@ -54,14 +60,20 @@
 
                                     <label>Tầng: *</label><br>
                                     <select th:field="*{floorId}" required>
-                                        <option value="">-- Chọn tầng --</option>
-                                        <option th:each="floor : ${floors}" th:value="${floor.floorId}" th:text="'Tầng ' + ${floor.floorNumber}"></option>
+                                        <option value="">>-- Chọn tầng --< </option>
+                                        <option th:each="floor : ${floors}"
+                                                th:value="${floor.floorId}"
+                                                th:text="'Tầng ' + ${floor.floorNumber}">
+                                        </option>
                                     </select><br><br>
 
                                     <label>Diện tích: *</label><br>
                                     <select th:field="*{sizeId}" required>
                                         <option value="">-- Chọn diện tích --</option>
-                                        <option th:each="size : ${sizes}" th:value="${size.sizeId}" th:text="${size.size} + 'm²'"></option>
+                                        <option th:each="size : ${sizes}"
+                                                th:value="${size.sizeId}"
+                                                th:text="${size.size} + 'm²'">
+                                        </option>
                                     </select><br><br>
 
                                     <label>Giá/đêm (VNĐ): *</label><br>

@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 public class RoomServiceImpl implements RoomService {
 
 	private final RoomRepository roomRepository;
+	private final hotel.db.repository.floor.FloorRepository floorRepository;
+	private final hotel.db.repository.size.SizeRepository sizeRepository;
 
 	private final RoomImageRepository roomImageRepository;
 
@@ -39,20 +41,35 @@ public class RoomServiceImpl implements RoomService {
     /*
     Trả về về List chứa các field cần thiết.
     */
+    @Override
     public List<RoomListDto> getRoomList() {
-        return roomRepository.findAll().stream()
+        return roomRepository.findAllByIsDeletedFalse().stream()
                 .map(this::toListDto)
                 .collect(Collectors.toList());
     }
 
     private RoomListDto toListDto(Room room) {
-        Double sizeValue = room.getSize() != null ? room.getSize().getSize().doubleValue() : null;
+        // Query floor number từ repository
+        Integer floorNumber = null;
+        if (room.getFloorId() != null) {
+            floorNumber = floorRepository.findById(room.getFloorId())
+                    .map(floor -> floor.getFloorNumber())
+                    .orElse(null);
+        }
+
+        // Query size từ repository
+        Double sizeValue = null;
+        if (room.getSizeId() != null) {
+            sizeValue = sizeRepository.findById(room.getSizeId())
+                    .map(size -> size.getSize().doubleValue())
+                    .orElse(null);
+        }
 
         return new RoomListDto(
                 room.getRoomId(),
                 room.getRoomNumber(),
                 room.getRoomType(),
-                room.getFloorId(),
+                floorNumber,
                 sizeValue,
                 room.getPrice(),
                 room.getStatus()
@@ -61,14 +78,38 @@ public class RoomServiceImpl implements RoomService {
     /*
     Lấy list các option enums của Status,Bedtype,RoomType
     */
+    @Override
     public String[] getAllStatus() {
         return RoomStatus.ALL;
     }
+    @Override
     public String[] getAllRoomTypes() {
         return RoomType.ALL;
     }
+    @Override
     public String[] getAllBedTypes() {
         return BedType.ALL;
+    }
+    @Override
+    public boolean checkForCreateRoomNumber(String roomNumber) {
+        return roomRepository.existsByRoomNumber(roomNumber);
+    }
+    @Override
+    public boolean checkForEditRoomNumber(String roomNumber, Long roomId) {
+        return roomRepository.existsByRoomNumberAndRoomId(roomNumber, roomId);
+    }
+    @Override
+    public boolean saveRoom(Room room) {
+        try {
+            roomRepository.save(room);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    @Override
+    public void DeleteRoom(Integer id) {
+        roomRepository.softDeleteById(id);
     }
 
 	@Override
@@ -99,13 +140,28 @@ public class RoomServiceImpl implements RoomService {
 	private RoomResponseDto buildRoomResponse(Room room) {
 		if (room == null) return null;
 
+		// Query floor và size từ repository
+		Integer floorNumber = null;
+		if (room.getFloorId() != null) {
+			floorNumber = floorRepository.findById(room.getFloorId())
+					.map(floor -> floor.getFloorNumber())
+					.orElse(null);
+		}
+
+		BigDecimal size = null;
+		if (room.getSizeId() != null) {
+			size = sizeRepository.findById(room.getSizeId())
+					.map(s -> s.getSize())
+					.orElse(null);
+		}
+
 		return RoomResponseDto.builder()
 				.roomId(room.getRoomId() != null ? room.getRoomId().longValue() : null)
 				.roomNumber(room.getRoomNumber())
 				.roomType(room.getRoomType())
 				.bedType(room.getBedType())
-				.floorNumber(room.getFloor() != null ? room.getFloor().getFloorNumber() : null)
-				.size(room.getSize() != null ? room.getSize().getSize() : null)
+				.floorNumber(floorNumber)
+				.size(size)
 				.roomDescription(room.getRoomDescription())
 				.price(room.getPrice())
 				.status(room.getStatus())

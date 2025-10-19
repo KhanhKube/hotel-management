@@ -69,9 +69,17 @@
                                             <td th:text="${d.roomNumber != null ? d.roomNumber : 'N/A'}"></td>
                                             <td th:text="${d.roomType != null ? d.roomType : 'N/A'}"></td>
                                             <td th:text="${d.floorNumber != null ? d.floorNumber : 'N/A'}"></td>
-                                            <td th:text="${d.sizeId != null ? d.sizeId : 'N/A'}"></td>
+                                            <td th:text="${d.size != null ? d.size + 'm²' : 'N/A'}"></td>
                                             <td th:text="${d.price != null ? d.price : 'N/A'}"></td>
-                                            <td th:text="${d.status != null ? d.status : 'N/A'}"></td>
+                                            <td>
+                                                <div th:switch="${d.status}">
+                                                    <span th:case="'Trống'" class="badge badge-outline-success">Trống</span>
+                                                    <span th:case="'Đang thuê'" class="badge badge-outline-danger">Đang thuê</span>
+                                                    <span th:case="'Bảo trì'" class="badge badge-outline-warning">Bảo trì</span>
+                                                    <span th:case="'Đã đặt'" class="badge badge-outline-info">Đã đặt</span>
+                                                    <span th:case="*" class="badge badge-outline-secondary">N/A</span>
+                                                </div>
+                                            </td>
 
                                             <td onclick="event.stopPropagation();">
                                                 <a th:href="@{/hotel-management/room/edit/{id}(id=${d.roomId})}">Sửa</a>
