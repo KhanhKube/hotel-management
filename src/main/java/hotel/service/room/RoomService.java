@@ -1,6 +1,7 @@
 package hotel.service.room;
 
 import hotel.db.dto.room.ListRoomResponse;
+import hotel.db.dto.room.RoomDetailResponseDto;
 import hotel.db.dto.room.RoomHomepageResponseDto;
 import hotel.db.dto.room.RoomListDto;
 import hotel.db.entity.Room;
@@ -35,4 +36,6 @@ public interface RoomService {
 	boolean existsByRoomNumber(String roomNumber);
 
 	List<RoomHomepageResponseDto> getTop3Rooms();
+
+	RoomDetailResponseDto getRoomDetailById(Integer roomId);
 }
