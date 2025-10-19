@@ -1,8 +1,6 @@
 package hotel.service.room;
 
-import hotel.db.dto.discount.DiscountResponseDto;
 import hotel.db.dto.room.*;
-import hotel.db.entity.Discount;
 import hotel.db.entity.Room;
 import hotel.db.entity.RoomImage;
 import hotel.db.entity.Size;
