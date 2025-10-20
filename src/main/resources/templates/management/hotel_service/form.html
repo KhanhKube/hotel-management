@@ -1,241 +1,241 @@
-<!--<!DOCTYPE html>-->
-<!--<html xmlns:th="http://www.thymeleaf.org">-->
-<!--<head>-->
-<!--    <title th:text="${service.serviceId == null ? 'Add Service' : 'Edit Service'}">Service Form</title>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">-->
-<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">-->
-<!--    <style>-->
-<!--        body {-->
-<!--            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);-->
-<!--            min-height: 100vh;-->
-<!--            padding: 2rem 0;-->
-<!--        }-->
-<!--        .form-container {-->
-<!--            background: white;-->
-<!--            border-radius: 15px;-->
-<!--            box-shadow: 0 10px 30px rgba(0,0,0,0.2);-->
-<!--            padding: 2.5rem;-->
-<!--            max-width: 700px;-->
-<!--            margin: 0 auto;-->
-<!--        }-->
-<!--        .form-header {-->
-<!--            text-align: center;-->
-<!--            margin-bottom: 2rem;-->
-<!--            padding-bottom: 1.5rem;-->
-<!--            border-bottom: 3px solid #667eea;-->
-<!--        }-->
-<!--        .form-header h2 {-->
-<!--            color: #667eea;-->
-<!--            font-weight: 700;-->
-<!--            margin-bottom: 0.5rem;-->
-<!--        }-->
-<!--        .form-header p {-->
-<!--            color: #6c757d;-->
-<!--            margin: 0;-->
-<!--        }-->
-<!--        .form-label {-->
-<!--            font-weight: 600;-->
-<!--            color: #495057;-->
-<!--            margin-bottom: 0.5rem;-->
-<!--        }-->
-<!--        .form-label i {-->
-<!--            color: #667eea;-->
-<!--            margin-right: 0.5rem;-->
-<!--        }-->
-<!--        .form-control, .form-select {-->
-<!--            border: 2px solid #e9ecef;-->
-<!--            border-radius: 8px;-->
-<!--            padding: 0.75rem 1rem;-->
-<!--            transition: all 0.3s ease;-->
-<!--        }-->
-<!--        .form-control:focus, .form-select:focus {-->
-<!--            border-color: #667eea;-->
-<!--            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);-->
-<!--        }-->
-<!--        .form-control:hover, .form-select:hover {-->
-<!--            border-color: #667eea;-->
-<!--        }-->
-<!--        textarea.form-control {-->
-<!--            min-height: 120px;-->
-<!--            resize: vertical;-->
-<!--        }-->
-<!--        .btn-group-custom {-->
-<!--            display: flex;-->
-<!--            gap: 1rem;-->
-<!--            margin-top: 2rem;-->
-<!--            padding-top: 1.5rem;-->
-<!--            border-top: 2px solid #e9ecef;-->
-<!--        }-->
-<!--        .btn-save {-->
-<!--            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);-->
-<!--            border: none;-->
-<!--            color: white;-->
-<!--            padding: 0.75rem 2rem;-->
-<!--            border-radius: 8px;-->
-<!--            font-weight: 600;-->
-<!--            transition: all 0.3s ease;-->
-<!--            flex: 1;-->
-<!--        }-->
-<!--        .btn-save:hover {-->
-<!--            transform: translateY(-2px);-->
-<!--            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);-->
-<!--            color: white;-->
-<!--        }-->
-<!--        .btn-cancel {-->
-<!--            background: #6c757d;-->
-<!--            border: none;-->
-<!--            color: white;-->
-<!--            padding: 0.75rem 2rem;-->
-<!--            border-radius: 8px;-->
-<!--            font-weight: 600;-->
-<!--            transition: all 0.3s ease;-->
-<!--            flex: 1;-->
-<!--        }-->
-<!--        .btn-cancel:hover {-->
-<!--            background: #5a6268;-->
-<!--            transform: translateY(-2px);-->
-<!--            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);-->
-<!--            color: white;-->
-<!--        }-->
-<!--        .input-group-text {-->
-<!--            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);-->
-<!--            color: white;-->
-<!--            border: none;-->
-<!--            font-weight: 600;-->
-<!--        }-->
-<!--        .required-asterisk {-->
-<!--            color: #dc3545;-->
-<!--            margin-left: 0.25rem;-->
-<!--        }-->
-<!--        .char-counter {-->
-<!--            font-size: 0.875rem;-->
-<!--            color: #6c757d;-->
-<!--            text-align: right;-->
-<!--            margin-top: 0.25rem;-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--<div class="container">-->
-<!--    <div class="form-container">-->
-<!--        &lt;!&ndash; Form Header &ndash;&gt;-->
-<!--        <div class="form-header">-->
-<!--            <h2>-->
-<!--                <i th:class="${service.serviceId == null ? 'fas fa-plus-circle' : 'fas fa-edit'}"></i>-->
-<!--                <span th:text="${service.serviceId == null ? 'Add New Service' : 'Edit Service'}"></span>-->
-<!--            </h2>-->
-<!--            <p>Hotel ID: <strong th:text="${hotelId}"></strong></p>-->
-<!--        </div>-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${service.serviceId == null ? 'Add Service' : 'Edit Service'}">Service Form</title>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 2.5rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+        .form-header h2 {
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .form-header p {
+            color: #6c757d;
+            margin: 0;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .form-label i {
+            color: #667eea;
+            margin-right: 0.5rem;
+        }
+        .form-control, .form-select {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .form-control:hover, .form-select:hover {
+            border-color: #667eea;
+        }
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .btn-group-custom {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #e9ecef;
+        }
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .btn-cancel {
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+            color: white;
+        }
+        .input-group-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        .required-asterisk {
+            color: #dc3545;
+            margin-left: 0.25rem;
+        }
+        .char-counter {
+            font-size: 0.875rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="form-container">
+        <!-- Form Header -->
+        <div class="form-header">
+            <h2>
+                <i th:class="${service.serviceId == null ? 'fas fa-plus-circle' : 'fas fa-edit'}"></i>
+                <span th:text="${service.serviceId == null ? 'Add New Service' : 'Edit Service'}"></span>
+            </h2>
+            <p>Hotel ID: <strong th:text="${hotelId}"></strong></p>
+        </div>
 
-<!--        &lt;!&ndash; Form &ndash;&gt;-->
-<!--        <form th:action="@{'/management/hotel/' + ${hotelId} + '/services/save'}" th:object="${service}" method="post" id="serviceForm">-->
-<!--            <input type="hidden" th:field="*{serviceId}">-->
-<!--            -->
-<!--            &lt;!&ndash; Service Name &ndash;&gt;-->
-<!--            <div class="mb-4">-->
-<!--                <label class="form-label">-->
-<!--                    <i class="fas fa-concierge-bell"></i>Service Name-->
-<!--                    <span class="required-asterisk">*</span>-->
-<!--                </label>-->
-<!--                <input type="text" -->
-<!--                       th:field="*{serviceName}" -->
-<!--                       class="form-control" -->
-<!--                       placeholder="Enter service name (e.g., Room Service, Spa, Laundry)"-->
-<!--                       required -->
-<!--                       maxlength="100"-->
-<!--                       id="serviceName" />-->
-<!--                <div class="char-counter">-->
-<!--                    <span id="nameCounter">0</span>/100 characters-->
-<!--                </div>-->
-<!--            </div>-->
+        <!-- Form -->
+        <form th:action="@{'/management/hotel/' + ${hotelId} + '/services/save'}" th:object="${service}" method="post" id="serviceForm">
+            <input type="hidden" th:field="*{serviceId}">
 
-<!--            &lt;!&ndash; Service Description &ndash;&gt;-->
-<!--            <div class="mb-4">-->
-<!--                <label class="form-label">-->
-<!--                    <i class="fas fa-align-left"></i>Description-->
-<!--                </label>-->
-<!--                <textarea th:field="*{serviceDescription}" -->
-<!--                          class="form-control" -->
-<!--                          placeholder="Provide a detailed description of the service..."-->
-<!--                          maxlength="500"-->
-<!--                          id="serviceDescription"></textarea>-->
-<!--                <div class="char-counter">-->
-<!--                    <span id="descCounter">0</span>/500 characters-->
-<!--                </div>-->
-<!--            </div>-->
+            <!-- Service Name -->
+            <div class="mb-4">
+                <label class="form-label">
+                    <i class="fas fa-concierge-bell"></i>Service Name
+                    <span class="required-asterisk">*</span>
+                </label>
+                <input type="text"
+                       th:field="*{serviceName}"
+                       class="form-control"
+                       placeholder="Enter service name (e.g., Room Service, Spa, Laundry)"
+                       required
+                       maxlength="100"
+                       id="serviceName" />
+                <div class="char-counter">
+                    <span id="nameCounter">0</span>/100 characters
+                </div>
+            </div>
 
-<!--            &lt;!&ndash; Service Price &ndash;&gt;-->
-<!--            <div class="mb-4">-->
-<!--                <label class="form-label">-->
-<!--                    <i class="fas fa-dollar-sign"></i>Price (VND)-->
-<!--                    <span class="required-asterisk">*</span>-->
-<!--                </label>-->
-<!--                <div class="input-group">-->
-<!--                    <span class="input-group-text">-->
-<!--                        <i class="fas fa-money-bill-wave"></i>-->
-<!--                    </span>-->
-<!--                    <input type="number" -->
-<!--                           th:field="*{price}" -->
-<!--                           class="form-control" -->
-<!--                           placeholder="0.00"-->
-<!--                           step="0.01" -->
-<!--                           min="0"-->
-<!--                           required />-->
-<!--                    <span class="input-group-text">VND</span>-->
-<!--                </div>-->
-<!--                <small class="text-muted">-->
-<!--                    <i class="fas fa-info-circle"></i> Enter the price in Vietnamese Dong-->
-<!--                </small>-->
-<!--            </div>-->
+            <!-- Service Description -->
+            <div class="mb-4">
+                <label class="form-label">
+                    <i class="fas fa-align-left"></i>Description
+                </label>
+                <textarea th:field="*{serviceDescription}"
+                          class="form-control"
+                          placeholder="Provide a detailed description of the service..."
+                          maxlength="500"
+                          id="serviceDescription"></textarea>
+                <div class="char-counter">
+                    <span id="descCounter">0</span>/500 characters
+                </div>
+            </div>
 
-<!--            &lt;!&ndash; Buttons &ndash;&gt;-->
-<!--            <div class="btn-group-custom">-->
-<!--                <button class="btn btn-save" type="submit">-->
-<!--                    <i class="fas fa-save me-2"></i>-->
-<!--                    <span th:text="${service.serviceId == null ? 'Create Service' : 'Update Service'}"></span>-->
-<!--                </button>-->
-<!--                <a th:href="@{'/management/hotel/' + ${hotelId} + '/services'}" class="btn btn-cancel">-->
-<!--                    <i class="fas fa-times me-2"></i>Cancel-->
-<!--                </a>-->
-<!--            </div>-->
-<!--        </form>-->
-<!--    </div>-->
-<!--</div>-->
+            <!-- Service Price -->
+            <div class="mb-4">
+                <label class="form-label">
+                    <i class="fas fa-dollar-sign"></i>Price (VND)
+                    <span class="required-asterisk">*</span>
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </span>
+                    <input type="number"
+                           th:field="*{price}"
+                           class="form-control"
+                           placeholder="0.00"
+                           step="0.01"
+                           min="0"
+                           required />
+                    <span class="input-group-text">VND</span>
+                </div>
+                <small class="text-muted">
+                    <i class="fas fa-info-circle"></i> Enter the price in Vietnamese Dong
+                </small>
+            </div>
 
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>-->
-<!--<script>-->
-<!--    // Character counter for service name-->
-<!--    const serviceName = document.getElementById('serviceName');-->
-<!--    const nameCounter = document.getElementById('nameCounter');-->
-<!--    -->
-<!--    if (serviceName) {-->
-<!--        nameCounter.textContent = serviceName.value.length;-->
-<!--        serviceName.addEventListener('input', function() {-->
-<!--            nameCounter.textContent = this.value.length;-->
-<!--        });-->
-<!--    }-->
+            <!-- Buttons -->
+            <div class="btn-group-custom">
+                <button class="btn btn-save" type="submit">
+                    <i class="fas fa-save me-2"></i>
+                    <span th:text="${service.serviceId == null ? 'Create Service' : 'Update Service'}"></span>
+                </button>
+                <a th:href="@{'/management/hotel/' + ${hotelId} + '/services'}" class="btn btn-cancel">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
 
-<!--    // Character counter for description-->
-<!--    const serviceDescription = document.getElementById('serviceDescription');-->
-<!--    const descCounter = document.getElementById('descCounter');-->
-<!--    -->
-<!--    if (serviceDescription) {-->
-<!--        descCounter.textContent = serviceDescription.value.length;-->
-<!--        serviceDescription.addEventListener('input', function() {-->
-<!--            descCounter.textContent = this.value.length;-->
-<!--        });-->
-<!--    }-->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Character counter for service name
+    const serviceName = document.getElementById('serviceName');
+    const nameCounter = document.getElementById('nameCounter');
 
-<!--    // Form validation-->
-<!--    document.getElementById('serviceForm').addEventListener('submit', function(e) {-->
-<!--        const price = document.querySelector('input[name="price"]').value;-->
-<!--        if (price < 0) {-->
-<!--            e.preventDefault();-->
-<!--            alert('Price cannot be negative!');-->
-<!--            return false;-->
-<!--        }-->
-<!--    });-->
-<!--</script>-->
-<!--</body>-->
-<!--</html>-->
+    if (serviceName) {
+        nameCounter.textContent = serviceName.value.length;
+        serviceName.addEventListener('input', function() {
+            nameCounter.textContent = this.value.length;
+        });
+    }
+
+    // Character counter for description
+    const serviceDescription = document.getElementById('serviceDescription');
+    const descCounter = document.getElementById('descCounter');
+
+    if (serviceDescription) {
+        descCounter.textContent = serviceDescription.value.length;
+        serviceDescription.addEventListener('input', function() {
+            descCounter.textContent = this.value.length;
+        });
+    }
+
+    // Form validation
+    document.getElementById('serviceForm').addEventListener('submit', function(e) {
+        const price = document.querySelector('input[name="price"]').value;
+        if (price < 0) {
+            e.preventDefault();
+            alert('Price cannot be negative!');
+            return false;
+        }
+    });
+</script>
+</body>
+</html>
