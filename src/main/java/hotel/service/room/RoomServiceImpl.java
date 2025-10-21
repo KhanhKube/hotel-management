@@ -1,6 +1,7 @@
 package hotel.service.room;
 
 import hotel.db.dto.room.*;
+import hotel.db.entity.Floor;
 import hotel.db.entity.Room;
 import hotel.db.entity.RoomImage;
 import hotel.db.entity.Size;
@@ -16,11 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -97,17 +97,70 @@ public class RoomServiceImpl implements RoomService {
         return roomRepository.existsByRoomNumberAndRoomId(roomNumber, roomId);
     }
     @Override
-    public boolean saveRoom(Room room) {
+    public HashMap<String, String> saveRoom(Room room) {
+        HashMap<String, String> result = new HashMap<>();
+
         try {
+            // Validate
+            String validationError = validateRoomNumber(room.getRoomNumber(), room.getFloorId());
+            if (validationError != null) {
+                result.put("error", validationError);
+                return result;
+            }
+
             roomRepository.save(room);
-            return true;
+            result.put("success", "Thành công");
+            return result;
+
         } catch (Exception e) {
-            return false;
+            log.error("Error saving room: {}", e.getMessage());
+            result.put("error", e.getMessage());
+            return result;
         }
     }
     @Override
     public void DeleteRoom(Integer id) {
         roomRepository.softDeleteById(id);
+    }
+
+    @Override
+    public String validateRoomNumber(String roomNumber, Integer floorId) {
+        //lấy floor number từ floorId
+        Integer floorNumber = floorRepository.findById(floorId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))
+                .getFloorNumber();
+
+        // kiểm tra format số phòng
+        if (!roomNumber.matches("\\d{3}")) {
+            return "Số phòng phải có đúng 3 chữ số (VD: 101, 205). Vui lòng nhập lại!";
+        }
+
+        //Lấy chữ số đầu tiên
+        int roomFloorNumber = Integer.parseInt(roomNumber.substring(0, 1));
+
+        //lấy các số còn lại
+        int roomNumberInFloor = Integer.parseInt(roomNumber.substring(1));
+
+        // Validate: Số đầu là số tầng
+        if (roomFloorNumber != floorNumber) {
+            return "Chữ số đầu tiên phải trùng với số tầng. Vui lòng nhập lại!";
+        }
+
+        // Validate: 2 số cuối hardocde 11/tầng phòng 0,1,2,3,4,5,6,7,8,9,10.
+        if (roomNumberInFloor < 0 || roomNumberInFloor > 10) {
+            return "Vui lòng nhập số phòng từ 0-10!";
+        }
+
+        // Validate: Kiểm tra số lượng phòng trên tầng (không quá 11)
+        long roomCountOnFloor = roomRepository.findAllByIsDeletedFalse().stream()
+                .filter(r -> r.getFloorId().equals(floorId))
+                .count();
+
+        if (roomCountOnFloor >= 11) {
+            return "Số lượng phòng trên tầng "
+                    + floorNumber + " đã đầy!";
+        }
+        return null;
     }
 
 	@Override

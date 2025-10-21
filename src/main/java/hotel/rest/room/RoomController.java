@@ -65,8 +65,11 @@ public class RoomController {
                 return "management/room/room-create-form";
             }
         }
-        if(!roomService.saveRoom(room)) {
-            model.addAttribute("errorMessage", "Có lỗi xảy ra, vui lòng tạo lại!");
+        HashMap<String, String> saveResult = roomService.saveRoom(room);
+
+        if (saveResult.containsKey("error")) {
+            model.addAttribute("room", room);
+            model.addAttribute("errorMessage", saveResult.get("error"));
             return "management/room/room-create-form";
         }
         return "redirect:/hotel-management/room";

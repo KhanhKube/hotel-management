@@ -5,7 +5,9 @@ import hotel.db.dto.room.RoomDetailResponseDto;
 import hotel.db.dto.room.RoomHomepageResponseDto;
 import hotel.db.dto.room.RoomListDto;
 import hotel.db.entity.Room;
+import org.springframework.ui.Model;
 
+import java.util.HashMap;
 import java.util.List;
 
 public interface RoomService {
@@ -24,9 +26,11 @@ public interface RoomService {
 
     boolean checkForEditRoomNumber(String roomNumber, Long roomId);
 
-    boolean saveRoom(Room room);
+    HashMap<String, String> saveRoom(Room room);
 
     void DeleteRoom(Integer id);
+
+    String validateRoomNumber(String roomNumber, Integer floorId);
 
 	ListRoomResponse getAllRoomForSearch();
 
