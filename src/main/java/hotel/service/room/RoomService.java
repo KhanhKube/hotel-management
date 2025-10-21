@@ -28,6 +28,8 @@ public interface RoomService {
 
     void DeleteRoom(Integer id);
 
+    void validateRoomNumber(String roomNumber, Integer floorId);
+
 	ListRoomResponse getAllRoomForSearch();
 
 	Room getRoomById(Integer roomId);

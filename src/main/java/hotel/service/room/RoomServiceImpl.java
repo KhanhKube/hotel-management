@@ -1,6 +1,7 @@
 package hotel.service.room;
 
 import hotel.db.dto.room.*;
+import hotel.db.entity.Floor;
 import hotel.db.entity.Room;
 import hotel.db.entity.RoomImage;
 import hotel.db.entity.Size;
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -108,6 +110,52 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public void DeleteRoom(Integer id) {
         roomRepository.softDeleteById(id);
+    }
+
+    @Override
+    private void validateRoomNumber(String roomNumber, Integer floorId) {
+        // Lấy floor number từ floorId
+        Integer floorNumber = floorRepository.findById(floorId)
+                .map(floor -> floor.getFloorNumber())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"));
+
+        // Kiểm tra format số phòng (phải là số và có 3 chữ số)
+        if (!roomNumber.matches("\\d{3}")) {
+            throw new RuntimeException("Số phòng phải có đúng 3 chữ số (VD: 101, 205)");
+        }
+
+        // Lấy chữ số đầu tiên (floor number trong room number)
+        int roomFloorNumber = Integer.parseInt(roomNumber.substring(0, 1));
+
+        // Lấy 2 chữ số cuối (room number trong floor)
+        int roomNumberInFloor = Integer.parseInt(roomNumber.substring(1));
+
+        // Validate: Số đầu phải trùng với floor number
+        if (roomFloorNumber != floorNumber) {
+            throw new RuntimeException(
+                    String.format("Số phòng phải bắt đầu bằng %d (tầng %d). VD: %d01, %d02, ..., %d10",
+                            floorNumber, floorNumber, floorNumber, floorNumber, floorNumber)
+            );
+        }
+
+        // Validate: 2 số cuối phải từ 01-10
+        if (roomNumberInFloor < 1 || roomNumberInFloor > 10) {
+            throw new RuntimeException(
+                    String.format("Số phòng trong tầng phải từ 01-10. VD: %d01 đến %d10",
+                            floorNumber, floorNumber)
+            );
+        }
+
+        // Validate: Kiểm tra số lượng phòng trên tầng (không quá 10)
+        long roomCountOnFloor = roomRepository.findAllByIsDeletedFalse().stream()
+                .filter(r -> r.getFloorId().equals(floorId))
+                .count();
+
+        if (roomCountOnFloor >= 10) {
+            throw new RuntimeException(
+                    String.format("Tầng %d đã đủ 10 phòng. Không thể thêm phòng mới!", floorNumber)
+            );
+        }
     }
 
 	@Override
