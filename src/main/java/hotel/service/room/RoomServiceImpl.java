@@ -17,12 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -99,12 +97,25 @@ public class RoomServiceImpl implements RoomService {
         return roomRepository.existsByRoomNumberAndRoomId(roomNumber, roomId);
     }
     @Override
-    public boolean saveRoom(Room room) {
+    public HashMap<String, String> saveRoom(Room room) {
+        HashMap<String, String> result = new HashMap<>();
+
         try {
+            // Validate
+            String validationError = validateRoomNumber(room.getRoomNumber(), room.getFloorId());
+            if (validationError != null) {
+                result.put("error", validationError);
+                return result;
+            }
+
             roomRepository.save(room);
-            return true;
+            result.put("success", "Thành công");
+            return result;
+
         } catch (Exception e) {
-            return false;
+            log.error("Error saving room: {}", e.getMessage());
+            result.put("error", e.getMessage());
+            return result;
         }
     }
     @Override
@@ -113,49 +124,43 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    private void validateRoomNumber(String roomNumber, Integer floorId) {
-        // Lấy floor number từ floorId
+    public String validateRoomNumber(String roomNumber, Integer floorId) {
+        //lấy floor number từ floorId
         Integer floorNumber = floorRepository.findById(floorId)
-                .map(floor -> floor.getFloorNumber())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))
+                .getFloorNumber();
 
-        // Kiểm tra format số phòng (phải là số và có 3 chữ số)
+        // kiểm tra format số phòng
         if (!roomNumber.matches("\\d{3}")) {
-            throw new RuntimeException("Số phòng phải có đúng 3 chữ số (VD: 101, 205)");
+            return "Số phòng phải có đúng 3 chữ số (VD: 101, 205). Vui lòng nhập lại!";
         }
 
-        // Lấy chữ số đầu tiên (floor number trong room number)
+        //Lấy chữ số đầu tiên
         int roomFloorNumber = Integer.parseInt(roomNumber.substring(0, 1));
 
-        // Lấy 2 chữ số cuối (room number trong floor)
+        //lấy các số còn lại
         int roomNumberInFloor = Integer.parseInt(roomNumber.substring(1));
 
-        // Validate: Số đầu phải trùng với floor number
+        // Validate: Số đầu là số tầng
         if (roomFloorNumber != floorNumber) {
-            throw new RuntimeException(
-                    String.format("Số phòng phải bắt đầu bằng %d (tầng %d). VD: %d01, %d02, ..., %d10",
-                            floorNumber, floorNumber, floorNumber, floorNumber, floorNumber)
-            );
+            return "Chữ số đầu tiên phải trùng với số tầng. Vui lòng nhập lại!";
         }
 
-        // Validate: 2 số cuối phải từ 01-10
-        if (roomNumberInFloor < 1 || roomNumberInFloor > 10) {
-            throw new RuntimeException(
-                    String.format("Số phòng trong tầng phải từ 01-10. VD: %d01 đến %d10",
-                            floorNumber, floorNumber)
-            );
+        // Validate: 2 số cuối hardocde 11/tầng phòng 0,1,2,3,4,5,6,7,8,9,10.
+        if (roomNumberInFloor < 0 || roomNumberInFloor > 10) {
+            return "Vui lòng nhập số phòng từ 0-10!";
         }
 
-        // Validate: Kiểm tra số lượng phòng trên tầng (không quá 10)
+        // Validate: Kiểm tra số lượng phòng trên tầng (không quá 11)
         long roomCountOnFloor = roomRepository.findAllByIsDeletedFalse().stream()
                 .filter(r -> r.getFloorId().equals(floorId))
                 .count();
 
-        if (roomCountOnFloor >= 10) {
-            throw new RuntimeException(
-                    String.format("Tầng %d đã đủ 10 phòng. Không thể thêm phòng mới!", floorNumber)
-            );
+        if (roomCountOnFloor >= 11) {
+            return "Số lượng phòng trên tầng "
+                    + floorNumber + " đã đầy!";
         }
+        return null;
     }
 
 	@Override
