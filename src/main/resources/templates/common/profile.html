@@ -39,11 +39,7 @@
         <form th:action="@{/hotel/update-avatar}" method="post" enctype="multipart/form-data">
           <input type="file" name="avatar" accept="image/*" class="form-control mb-2" required>
           <button type="submit" class="btn btn-sm btn-primary">Sửa ảnh</button>
-        </form>
-        <div class="d-flex justify-content-center gap-2 mt-3">
-          <button class="btn btn-primary btn-sm">Theo dõi</button>
-          <button class="btn btn-outline-secondary btn-sm">Liên hệ</button>
-        </div>
+
         <hr>
         <div class="social-links">
           <a href="#"><i class="bi bi-github"></i></a>
@@ -91,29 +87,6 @@
           </tbody>
         </table>
         <a th:href="@{/hotel/edit-profile}" class="btn btn-info btn-sm">Sửa thông tin</a>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6">
-          <div class="profile-card">
-            <h6 class="text-muted">Project Status</h6>
-            <p>Web Design</p>
-            <div class="progress mb-2"><div class="progress-bar bg-success" style="width: 80%"></div></div>
-            <p>Website Markup</p>
-            <div class="progress mb-2"><div class="progress-bar bg-info" style="width: 60%"></div></div>
-            <p>One Page</p>
-            <div class="progress mb-2"><div class="progress-bar bg-warning" style="width: 40%"></div></div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="profile-card">
-            <h6 class="text-muted">Project Status</h6>
-            <p>Mobile Template</p>
-            <div class="progress mb-2"><div class="progress-bar bg-primary" style="width: 70%"></div></div>
-            <p>Backend API</p>
-            <div class="progress mb-2"><div class="progress-bar bg-danger" style="width: 90%"></div></div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
