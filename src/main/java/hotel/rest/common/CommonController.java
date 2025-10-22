@@ -55,11 +55,16 @@ public class CommonController {
 
     @GetMapping("/login")
     public String loginForm(HttpSession session, Model model) {
-        model.addAttribute("userLogin", new UserLoginDto());
         User user = (User) session.getAttribute("user");
         if (user != null) {
             return "common/home";
         }
+        UserLoginDto userLoginDto = (UserLoginDto) model.getAttribute("userLogin");
+        if(userLoginDto == null) {
+            model.addAttribute("userLogin", new UserLoginDto());
+            return "common/login";
+        }
+        model.addAttribute("userLogin", userLoginDto);
         return "common/login";
     }
 
@@ -85,6 +90,7 @@ public class CommonController {
                 })
                 .orElseGet(() -> {
                     redirectAttrs.addFlashAttribute("error", LOGININVALID);
+                    redirectAttrs.addFlashAttribute("userLogin", formUser);
                     return "redirect:/hotel/login";
                 });
     }

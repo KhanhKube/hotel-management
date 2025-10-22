@@ -55,7 +55,9 @@
 
                 <!-- Username (email field đổi sang username) -->
                 <div class="wrap-input100 validate-input" data-validate="Username is required">
-                    <input class="input100" type="text" th:field="*{username}" placeholder="Tài khoản" required/>
+                    <input class="input100" type="text"
+                           th:field="*{username}"
+                           placeholder="Tài khoản" required />
                     <span class="focus-input100"></span>
                     <span class="symbol-input100">
             <i class="fa fa-user" aria-hidden="true"></i>
@@ -64,7 +66,9 @@
 
                 <!-- Password -->
                 <div class="wrap-input100 validate-input" data-validate="Password is required">
-                    <input class="input100" type="password" th:field="*{password}" placeholder="Mật khẩu" required/>
+                    <input class="input100" type="password"
+                           th:field="*{password}"
+                           placeholder="Mật khẩu" required />
                     <span class="focus-input100"></span>
                     <span class="symbol-input100">
             <i class="fa fa-lock" aria-hidden="true"></i>
