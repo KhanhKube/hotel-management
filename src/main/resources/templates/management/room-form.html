@@ -73,7 +73,7 @@
                                     <span th:text="${errorMessage}">Chi tiết lỗi</span>
                                 </div>
 
-                                <form th:action="${roomId != null ? '/hotel-management/rooms/update/' + roomId : '/hotel-management/rooms/save'}" 
+                                <form th:action="${roomId != null ? '/hotel-management/room/update/' + roomId : '/hotel-management/room/save'}" 
                                       th:object="${roomRequest}" 
                                       method="post"
                                       autocomplete="off">
@@ -196,7 +196,7 @@
                                     </div>
 
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="/hotel-management/rooms" class="btn btn-secondary">
+                                        <a href="/hotel-management/room" class="btn btn-secondary">
                                             <i class="mdi mdi-arrow-left"></i> Quay Lại
                                         </a>
                                         <button type="submit" class="btn btn-primary">

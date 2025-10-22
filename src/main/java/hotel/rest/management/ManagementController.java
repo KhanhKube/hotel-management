@@ -36,12 +36,10 @@ public class ManagementController {
         int viewCount = viewService.getAllViews().size();
         int sizeCount = sizeService.getAllActiveSizes().size();
         int floorCount = floorService.getAllActiveFloors().size();
-        int roomCount = roomService.getAllRooms().size();
 
         model.addAttribute("viewCount", viewCount);
         model.addAttribute("sizeCount", sizeCount);
         model.addAttribute("floorCount", floorCount);
-        model.addAttribute("roomCount", roomCount);
 
         return "management/location-room-management";
     }

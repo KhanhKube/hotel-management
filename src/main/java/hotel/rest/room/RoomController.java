@@ -1,5 +1,6 @@
 package hotel.rest.room;
 
+import hotel.db.dto.room.ListIdRoomResponse;
 import hotel.db.dto.room.ListRoomResponse;
 import hotel.db.dto.room.SearchRoomRequest;
 import hotel.db.entity.Room;
@@ -118,8 +119,12 @@ public class RoomController {
     }
 
 	@PostMapping("/search")
-	public ListRoomResponse listRooms(@RequestBody SearchRoomRequest request) {
-		return bookingService.listRoom(request);
+	@ResponseBody
+	public ResponseEntity<ListIdRoomResponse> listRooms(@RequestBody SearchRoomRequest request) {
+		ListIdRoomResponse listRoomResponse = bookingService.listRoom(request);
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(listRoomResponse);
 	}
 
 	@GetMapping("/api/list")

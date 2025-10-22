@@ -192,7 +192,7 @@
                                 Danh sách các phòng của khách sạn
                             </p>
                         </div>
-                        <a href="/hotel-management/rooms/new" class="btn btn-primary">
+                        <a href="/hotel-management/room/new" class="btn btn-primary">
                             <i class="mdi mdi-plus"></i> Thêm Phòng Mới
                         </a>
                     </div>
@@ -237,12 +237,12 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a th:href="@{/hotel-management/rooms/detail/{id}(id=${room.roomId})}"
+                                        <a th:href="@{/hotel-management/room/detail/{id}(id=${room.roomId})}"
                                            class="btn btn-sm btn-outline-info"
                                            title="Xem chi tiết">
                                             <i class="mdi mdi-eye"></i>
                                         </a>
-                                        <a th:href="@{/hotel-management/rooms/edit/{id}(id=${room.roomId})}"
+                                        <a th:href="@{/hotel-management/room/edit/{id}(id=${room.roomId})}"
                                            class="btn btn-sm btn-outline-primary"
                                            title="Sửa">
                                             <i class="mdi mdi-pencil"></i>
@@ -373,7 +373,7 @@ function deleteRoom(roomId, modal) {
     showLoading();
     
     // Simulate API call (replace with actual fetch if needed)
-    fetch(`/hotel-management/rooms/delete/${roomId}`, {
+    fetch(`/hotel-management/room/delete/${roomId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
