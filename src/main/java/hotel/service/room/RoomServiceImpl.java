@@ -1,13 +1,9 @@
 package hotel.service.room;
 
 import hotel.db.dto.room.*;
-import hotel.db.entity.Floor;
 import hotel.db.entity.Room;
 import hotel.db.entity.RoomImage;
 import hotel.db.entity.Size;
-import hotel.db.enums.BedType;
-import hotel.db.enums.RoomStatus;
-import hotel.db.enums.RoomType;
 import hotel.db.repository.floor.FloorRepository;
 import hotel.db.repository.room.RoomRepository;
 import hotel.db.repository.roomimage.RoomImageRepository;
@@ -17,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -73,21 +68,7 @@ public class RoomServiceImpl implements RoomService {
                 room.getStatus()
         );
     }
-    /*
-    Lấy list các option enums của Status,Bedtype,RoomType
-    */
-    @Override
-    public String[] getAllStatus() {
-        return RoomStatus.ALL;
-    }
-    @Override
-    public String[] getAllRoomTypes() {
-        return RoomType.ALL;
-    }
-    @Override
-    public String[] getAllBedTypes() {
-        return BedType.ALL;
-    }
+
     @Override
     public boolean checkForCreateRoomNumber(String roomNumber) {
         return roomRepository.existsByRoomNumber(roomNumber);
@@ -123,8 +104,7 @@ public class RoomServiceImpl implements RoomService {
         roomRepository.softDeleteById(id);
     }
 
-    @Override
-    public String validateRoomNumber(String roomNumber, Integer floorId) {
+    private String validateRoomNumber(String roomNumber, Integer floorId) {
         //lấy floor number từ floorId
         Integer floorNumber = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))
