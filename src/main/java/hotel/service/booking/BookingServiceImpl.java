@@ -1,6 +1,6 @@
 package hotel.service.booking;
 
-import hotel.db.dto.room.ListRoomResponse;
+import hotel.db.dto.room.ListIdRoomResponse;
 import hotel.db.dto.room.SearchRoomRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,8 +11,8 @@ public class BookingServiceImpl implements BookingService {
 	private final SearchRoomService searchRoomService;
 
 	@Override
-	public ListRoomResponse listRoom(SearchRoomRequest request) {
-		ListRoomResponse response = searchRoomService.getRoom(request);
+	public ListIdRoomResponse listRoom(SearchRoomRequest request) {
+		ListIdRoomResponse response = searchRoomService.getRoom(request);
 
 		// Có thể log hoặc kiểm tra ở đây
 		if (response == null || response.getData() == null || response.getData().isEmpty()) {
