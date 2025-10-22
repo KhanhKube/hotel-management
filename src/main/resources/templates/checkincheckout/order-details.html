@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết Order - Hotel Management</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .card-title {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .info-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .btn-group .btn {
+            margin-right: 5px;
+        }
+        .btn-group .btn:last-child {
+            margin-right: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-scroller">
+        <!-- Sidebar -->
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+        
+        <!-- Main Content -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">
+                                    <i class="mdi mdi-eye"></i>
+                                    Chi tiết Order
+                                </h4>
+                                
+                                <!-- Order Information -->
+                                <div th:if="${order}" class="row">
+                                    <div class="col-md-6">
+                                        <div class="card info-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-information"></i>
+                                                    Thông tin Order
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td><strong>Order ID:</strong></td>
+                                                        <td th:text="${order.orderId}">1</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Trạng thái:</strong></td>
+                                                        <td>
+                                                            <span class="badge badge-info" th:text="${order.status}">CHECKED_IN</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Check-In:</strong></td>
+                                                        <td th:text="${#temporals.format(order.checkIn, 'dd/MM/yyyy HH:mm')}">01/01/2024 14:00</td>
+                                                    </tr>
+                                                    <tr th:if="${order.checkOut != null}">
+                                                        <td><strong>Check-Out:</strong></td>
+                                                        <td th:text="${#temporals.format(order.checkOut, 'dd/MM/yyyy HH:mm')}">03/01/2024 12:00</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="card info-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-bed"></i>
+                                                    Thông tin Phòng
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td><strong>Room ID:</strong></td>
+                                                        <td th:text="${room != null ? room.roomId : order.floorId}">101</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Số phòng:</strong></td>
+                                                        <td th:text="${room != null ? room.roomNumber : 'N/A'}">101</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Loại phòng:</strong></td>
+                                                        <td th:text="${room != null ? room.roomType : 'N/A'}">Deluxe</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Giá:</strong></td>
+                                                        <td th:text="${room != null ? room.price + ' VNĐ' : 'N/A'}">1,000,000 VNĐ</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Customer Information -->
+                                <div th:if="${customer}" class="row mt-4">
+                                    <div class="col-12">
+                                        <div class="card info-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-account"></i>
+                                                    Thông tin Khách hàng
+                                                </h5>
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <strong>Tên:</strong><br>
+                                                        <span th:text="${customer.firstName + ' ' + customer.lastName}">Nguyễn Văn A</span>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <strong>Email:</strong><br>
+                                                        <span th:text="${customer.email}">nguyenvana@email.com</span>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <strong>Số điện thoại:</strong><br>
+                                                        <span th:text="${customer.phone}">0123456789</span>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <strong>Địa chỉ:</strong><br>
+                                                        <span th:text="${customer.address}">Hà Nội</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="form-group mt-4">
+                                    <div class="btn-group">
+                                        <a href="/hotel-management/checkin-checkout" class="btn btn-primary">
+                                            <i class="mdi mdi-arrow-left"></i>
+                                            Quay lại
+                                        </a>
+                                        <a th:if="${order.status == 'CHECKED_IN'}" 
+                                           th:href="@{/hotel-management/checkout/{id}(id=${order.orderId})}" 
+                                           class="btn btn-warning">
+                                            <i class="mdi mdi-logout"></i>
+                                            Check-Out
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="/assets/js/off-canvas.js"></script>
+    <script src="/assets/js/hoverable-collapse.js"></script>
+    <script src="/assets/js/misc.js"></script>
+    <script src="/assets/js/settings.js"></script>
+    <script src="/assets/js/todolist.js"></script>
+</body>
+</html>

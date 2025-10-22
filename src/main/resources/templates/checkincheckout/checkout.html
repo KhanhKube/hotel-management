@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Check-Out - Hotel Management</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .card-title {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .btn-group .btn {
+            margin-right: 5px;
+        }
+        .btn-group .btn:last-child {
+            margin-right: 0;
+        }
+        .info-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-scroller">
+        <!-- Sidebar -->
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+        
+        <!-- Main Content -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">
+                                    <i class="mdi mdi-logout"></i>
+                                    Check-Out Khách Hàng
+                                </h4>
+                                
+                                <!-- Success/Error Messages -->
+                                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-check-circle"></i>
+                                    <span th:text="${successMessage}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                
+                                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <span th:text="${errorMessage}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+
+                                <!-- Order Information -->
+                                <div th:if="${order}" class="card info-card mb-4">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="mdi mdi-information"></i>
+                                            Thông tin Order
+                                        </h5>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>Order ID:</strong><br>
+                                                <span th:text="${order.orderId}">1</span>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Phòng:</strong><br>
+                                                <span th:text="${room != null ? room.roomNumber : order.floorId}">101</span>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Khách hàng:</strong><br>
+                                                <span th:text="${customer != null ? customer.firstName + ' ' + customer.lastName : 'Khách hàng ' + order.userId}">Nguyễn Văn A</span>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Check-In:</strong><br>
+                                                <span th:text="${#temporals.format(order.checkIn, 'dd/MM/yyyy HH:mm')}">01/01/2024 14:00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <form th:action="@{/hotel-management/checkout}" method="post">
+                                    <input type="hidden" name="orderId" th:value="${order.orderId}">
+                                    
+                                    <div class="form-group">
+                                        <label for="notes">Ghi chú</label>
+                                        <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                                  placeholder="Nhập ghi chú về check-out (nếu có)"></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="btn-group">
+                                            <button type="submit" class="btn btn-warning">
+                                                <i class="mdi mdi-check"></i>
+                                                Xác nhận Check-Out
+                                            </button>
+                                            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                                <i class="mdi mdi-refresh"></i>
+                                                Làm mới
+                                            </button>
+                                            <a href="/hotel-management/checkin-checkout" class="btn btn-primary">
+                                                <i class="mdi mdi-arrow-left"></i>
+                                                Quay lại
+                                            </a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="/assets/js/off-canvas.js"></script>
+    <script src="/assets/js/hoverable-collapse.js"></script>
+    <script src="/assets/js/misc.js"></script>
+    <script src="/assets/js/settings.js"></script>
+    <script src="/assets/js/todolist.js"></script>
+    
+    <script>
+        function resetForm() {
+            document.querySelector('form').reset();
+            alert('Form đã được làm mới');
+        }
+    </script>
+</body>
+</html>

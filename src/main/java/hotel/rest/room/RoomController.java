@@ -2,7 +2,6 @@ package hotel.rest.room;
 
 import hotel.db.dto.room.ListRoomResponse;
 import hotel.db.dto.room.SearchRoomRequest;
-import hotel.service.booking.BookingService;
 import hotel.service.room.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -30,12 +29,11 @@ public class RoomController {
 //        return roomRepo.save(r);
 //    }
 
-	private final BookingService bookingService;
 	private final RoomService roomService;
 
 	@PostMapping("/search")
 	public ListRoomResponse listRooms(@RequestBody SearchRoomRequest request) {
-		return bookingService.listRoom(request);
+		return roomService.getAllRoomForSearch();
 	}
 
 	@GetMapping

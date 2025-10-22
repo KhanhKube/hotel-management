@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Check-In/Check-Out Management</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .btn-group .btn {
+            margin-right: 5px;
+        }
+        .btn-group .btn:last-child {
+            margin-right: 0;
+        }
+        .card-title {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-outline-success:hover {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn-outline-warning:hover {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-checked-in {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-checked-out {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .status-confirmed {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            min-width: 300px;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            animation: slideInRight 0.3s ease-out;
+            border-left: 4px solid;
+        }
+
+        .toast.success {
+            border-left-color: #28a745;
+        }
+
+        .toast.error {
+            border-left-color: #dc3545;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .toast.success .toast-icon {
+            color: #28a745;
+        }
+
+        .toast.error .toast-icon {
+            color: #dc3545;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            color: #333;
+        }
+
+        .toast-message {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            margin-left: 10px;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .toast.fade-out {
+            animation: slideOutRight 0.3s ease-in forwards;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Toast Notification Container -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+</div>
+
+<div class="container-scroller">
+
+    <!-- import sidebar -->
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+    <div class="main-panel">
+
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h4 class="card-title mb-0">Quản lý Check-In/Check-Out</h4>
+                            <p class="card-description mb-0">
+                                Danh sách các order đang check-in và thao tác check-in/check-out
+                            </p>
+                        </div>
+                        <a href="/hotel-management/checkin" class="btn btn-primary">
+                            <i class="mdi mdi-plus"></i> Check-In Mới
+                        </a>
+                    </div>
+                    
+                    <!-- Success/Error Messages -->
+                    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="mdi mdi-check-circle"></i>
+                        <span th:text="${successMessage}"></span>
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    
+                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="mdi mdi-alert-circle"></i>
+                        <span th:text="${errorMessage}"></span>
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th> # </th>
+                                <th> Order ID </th>
+                                <th> Phòng </th>
+                                <th> Khách Hàng </th>
+                                <th> Check-In </th>
+                                <th> Trạng Thái </th>
+                                <th> Thao Tác </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="order, iterStat : ${activeOrders}">
+                                <td th:text="${iterStat.index + 1}">1</td>
+                                <td th:text="${order.orderId}">1</td>
+                                <td th:text="${order.floorId}">101</td>
+                                <td th:text="${order.userId}">Khách hàng 1</td>
+                                <td th:text="${#temporals.format(order.checkIn, 'dd/MM/yyyy HH:mm')}">01/01/2024 14:00</td>
+                                <td>
+                                    <span th:class="'status-badge status-' + ${#strings.toLowerCase(order.status)}" 
+                                          th:text="${order.status}">CHECKED_IN</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a th:href="@{/hotel-management/checkout/{id}(id=${order.orderId})}" 
+                                           class="btn btn-sm btn-outline-warning" 
+                                           title="Check-Out">
+                                            <i class="mdi mdi-logout"></i>
+                                        </a>
+                                        <a th:href="@{/hotel-management/order-details/{id}(id=${order.orderId})}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Xem chi tiết">
+                                            <i class="mdi mdi-eye"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${activeOrders == null or activeOrders.isEmpty()}">
+                                <td colspan="7" class="text-center text-muted">
+                                    <i class="mdi mdi-bed-empty" style="font-size: 48px;"></i>
+                                    <br>
+                                    Không có order nào đang check-in
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+<script src="/assets/js/off-canvas.js"></script>
+<script src="/assets/js/hoverable-collapse.js"></script>
+<script src="/assets/js/misc.js"></script>
+<script src="/assets/js/settings.js"></script>
+<script src="/assets/js/todolist.js"></script>
+
+<script>
+    // Toast notification functions
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        const icon = type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle';
+        
+        toast.innerHTML = `
+            <i class="mdi ${icon} toast-icon"></i>
+            <div class="toast-content">
+                <div class="toast-title">${type === 'success' ? 'Thành công' : 'Lỗi'}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+            <button class="toast-close" onclick="closeToast(this)">&times;</button>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                closeToast(toast.querySelector('.toast-close'));
+            }
+        }, 5000);
+    }
+    
+    function closeToast(closeBtn) {
+        const toast = closeBtn.closest('.toast');
+        toast.classList.add('fade-out');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+    
+    // Show toast if there are flash messages
+    const successMessage = /*[[${successMessage}]]*/ null;
+    const errorMessage = /*[[${errorMessage}]]*/ null;
+    
+    if (successMessage) {
+        showToast(successMessage, 'success');
+    }
+    if (errorMessage) {
+        showToast(errorMessage, 'error');
+    }
+</script>
+
+</body>
+</html>
