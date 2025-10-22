@@ -126,8 +126,8 @@ public class RoomServiceImpl implements RoomService {
             return "Chữ số đầu tiên phải trùng với số tầng. Vui lòng nhập lại!";
         }
 
-        // Validate: 2 số cuối hardocde 11/tầng phòng 0,1,2,3,4,5,6,7,8,9,10.
-        if (roomNumberInFloor < 0 || roomNumberInFloor > 10) {
+        // Validate: 2 số cuối hardocde 11/tầng phòng 1,2,3,4,5,6,7,8,9,10,11.
+        if (roomNumberInFloor < 1 || roomNumberInFloor > 11) {
             return "Vui lòng nhập số phòng từ 0-10!";
         }
 
