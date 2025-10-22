@@ -2,8 +2,10 @@ package hotel.rest.room;
 
 import hotel.db.dto.room.ListRoomResponse;
 import hotel.db.dto.room.SearchRoomRequest;
-import hotel.db.entity.Discount;
 import hotel.db.entity.Room;
+import hotel.db.enums.BedType;
+import hotel.db.enums.RoomStatus;
+import hotel.db.enums.RoomType;
 import hotel.service.booking.BookingService;
 import hotel.service.room.RoomService;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +32,9 @@ public class RoomController {
     // Tự động load data cho dropdown trong mọi request
     @ModelAttribute
     public void loadDropdownData(Model model) {
-        model.addAttribute("roomTypes", roomService.getAllRoomTypes());
-        model.addAttribute("bedTypes", roomService.getAllBedTypes());
-        model.addAttribute("statuses", roomService.getAllStatus());
+        model.addAttribute("roomTypes", RoomType.ALL);
+        model.addAttribute("bedTypes", BedType.ALL);
+        model.addAttribute("statuses", RoomStatus.ALL);
         model.addAttribute("floors", floorRepository.findAll());
         model.addAttribute("sizes", sizeRepository.findAll());
     }
