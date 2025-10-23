@@ -29,11 +29,11 @@ public class AccountController extends BaseController {
     private final AccountService accountService;
 
     /**
-     * Hiển thị danh sách tất cả accounts
+     * Hiển thị danh sách tất cả accounts (trừ ADMIN)
      */
     @GetMapping
     public String listAccounts(HttpSession session, Model model) {
-        List<AccountResponseDto> accounts = accountService.getAllAccounts();
+        List<AccountResponseDto> accounts = accountService.getAllAccountsExceptAdmin();
         model.addAttribute("accounts", accounts);
         return "management/account/account-list";
     }
@@ -163,7 +163,7 @@ public class AccountController extends BaseController {
 
 
     /**
-     * Xóa tài khoản - SOFT DELETE ĐƠN GIẢN
+     * Xóa tài khoản - SOFT DELETE (ẩn khỏi giao diện)
      */
     @PostMapping("/delete/{id}")
     @ResponseBody
@@ -173,12 +173,12 @@ public class AccountController extends BaseController {
         try {
             log.info("=== BẮT ĐẦU SOFT DELETE TÀI KHOẢN ID: {} ===", id);
             
-            // Gọi service xóa
+            // Gọi service soft delete
             accountService.deleteAccount(id);
             
             response.put("success", true);
-            response.put("message", "Xóa tài khoản thành công!");
-            log.info("=== SOFT DELETE THÀNH CÔNG ID: {} ===", id);
+            response.put("message", "Đã xóa tài khoản khỏi hệ thống!");
+            log.info("=== SOFT DELETE THÀNH CÔNG ID: {} - ĐÃ ẨN KHỎI GIAO DIỆN ===", id);
             
         } catch (Exception e) {
             log.error("=== LỖI SOFT DELETE ID: {} - {} ===", id, e.getMessage());

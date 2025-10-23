@@ -13,6 +13,11 @@ public interface AccountService {
     List<AccountResponseDto> getAllAccounts();
     
     /**
+     * Lấy danh sách tất cả accounts (trừ ADMIN)
+     */
+    List<AccountResponseDto> getAllAccountsExceptAdmin();
+    
+    /**
      * Lấy danh sách accounts theo role
      */
     List<AccountResponseDto> getAccountsByRole(String role);
@@ -38,7 +43,7 @@ public interface AccountService {
     AccountResponseDto toggleAccountStatus(Integer userId);
     
     /**
-     * Xóa account (hard delete)
+     * Xóa account (soft delete - set isDeleted = true và status = INACTIVE)
      */
     void deleteAccount(Integer userId);
     

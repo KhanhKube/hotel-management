@@ -26,10 +26,20 @@ public class AccountServiceImpl implements AccountService {
     @Transactional(readOnly = true)
     public List<AccountResponseDto> getAllAccounts() {
         log.info("Getting all accounts");
-        List<User> users = userRepository.findAll().stream()
-                .filter(user -> !user.getIsDeleted())
-                .collect(Collectors.toList());
+        List<User> users = userRepository.findAll();
         return users.stream()
+                .filter(user -> !user.getIsDeleted()) // Filter out soft deleted accounts
+                .map(AccountResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AccountResponseDto> getAllAccountsExceptAdmin() {
+        log.info("Getting all accounts except ADMIN");
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .filter(user -> !"ADMIN".equals(user.getRole()) && !user.getIsDeleted()) // Filter out ADMIN and soft deleted accounts
                 .map(AccountResponseDto::new)
                 .collect(Collectors.toList());
     }
@@ -38,10 +48,9 @@ public class AccountServiceImpl implements AccountService {
     @Transactional(readOnly = true)
     public List<AccountResponseDto> getAccountsByRole(String role) {
         log.info("Getting accounts by role: {}", role);
-        List<User> users = userRepository.findByRole(role).stream()
-                .filter(user -> !user.getIsDeleted())
-                .collect(Collectors.toList());
+        List<User> users = userRepository.findByRole(role);
         return users.stream()
+                .filter(user -> !user.getIsDeleted()) // Filter out soft deleted accounts
                 .map(AccountResponseDto::new)
                 .collect(Collectors.toList());
     }
@@ -150,7 +159,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void deleteAccount(Integer userId) {
-        log.info("=== BẮT ĐẦU XÓA TÀI KHOẢN ID: {} ===", userId);
+        log.info("=== BẮT ĐẦU SOFT DELETE TÀI KHOẢN ID: {} ===", userId);
         
         // Kiểm tra user có tồn tại không
         User user = userRepository.findById(userId)
@@ -158,12 +167,12 @@ public class AccountServiceImpl implements AccountService {
         
         log.info("Tìm thấy user: {} - {}", user.getUsername(), user.getEmail());
         
-        // SOFT DELETE - Đơn giản và an toàn
-        user.setStatus(User.Status.INACTIVE);
+        // SOFT DELETE - Set isDeleted = true và status = INACTIVE
         user.setIsDeleted(true);
+        user.setStatus(User.Status.INACTIVE);
         userRepository.save(user);
         
-        log.info("=== SOFT DELETE THÀNH CÔNG ID: {} ===", userId);
+        log.info("=== SOFT DELETE THÀNH CÔNG ID: {} - ĐÃ ẨN KHỎI GIAO DIỆN ===", userId);
     }
 
     @Override
