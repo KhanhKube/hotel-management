@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Check-Out Hoàn Thành - Hotel Management</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .success-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .success-icon {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+        .info-card {
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+        }
+        .detail-row {
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+            display: inline-block;
+            min-width: 150px;
+        }
+        .detail-value {
+            color: #495057;
+        }
+        .amount-highlight {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-scroller">
+
+    <!-- import sidebar -->
+    <div th:replace="common/sidebar"></div>
+
+    <div class="main-panel">
+
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    
+                    <!-- Success Banner -->
+                    <div class="success-banner">
+                        <div class="success-icon">
+                            <i class="mdi mdi-check-circle"></i>
+                        </div>
+                        <h2>Check-Out Hoàn Thành!</h2>
+                        <p class="mb-0">Khách hàng đã được check-out thành công</p>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="card-title mb-0">Chi Tiết Check-Out</h4>
+                        <div>
+                            <a th:href="@{/hotel-management/checkout-list}" class="btn btn-primary mr-2">
+                                <i class="mdi mdi-history"></i> Lịch Sử Check-Out
+                            </a>
+                            <a th:href="@{/hotel-management/checkout}" class="btn btn-success">
+                                <i class="mdi mdi-plus"></i> Check-Out Tiếp
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin Check-Out -->
+                    <div th:if="${completedCheckOut}" class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="mb-3">
+                                    <i class="mdi mdi-information text-primary"></i>
+                                    Thông Tin Booking
+                                </h5>
+                                <div class="detail-row">
+                                    <span class="detail-label">Booking ID:</span>
+                                    <span class="detail-value" th:text="'#' + ${completedCheckOut.bookingId}">#1</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Trạng thái:</span>
+                                    <span class="badge badge-success" th:text="${completedCheckOut.status}">CHECKED_OUT</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Ngày check-in:</span>
+                                    <span class="detail-value" th:text="${completedCheckOut.checkInDate}">01/01/2024</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Ngày check-out:</span>
+                                    <span class="detail-value" th:text="${completedCheckOut.expectedCheckOutDate}">03/01/2024</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="mb-3">
+                                    <i class="mdi mdi-office-building text-primary"></i>
+                                    Thông Tin Phòng
+                                </h5>
+                                <div class="detail-row">
+                                    <span class="detail-label">Số phòng:</span>
+                                    <span class="detail-value" th:text="${completedCheckOut.roomNumber}">101</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Loại phòng:</span>
+                                    <span class="detail-value" th:text="${completedCheckOut.roomType}">Deluxe</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="mb-3">
+                                    <i class="mdi mdi-account text-primary"></i>
+                                    Thông Tin Khách Hàng
+                                </h5>
+                                <div class="detail-row">
+                                    <span class="detail-label">Tên khách:</span>
+                                    <span class="detail-value" th:text="${completedCheckOut.customerName}">Nguyễn Văn A</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Số điện thoại:</span>
+                                    <span class="detail-value" th:text="${completedCheckOut.customerPhone}">0123456789</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Email:</span>
+                                    <span class="detail-value" th:text="${completedCheckOut.customerEmail}">customer@email.com</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Số người:</span>
+                                    <span class="detail-value" th:text="${completedCheckOut.numberOfGuests}">2</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h5 class="mb-3">
+                                    <i class="mdi mdi-cash-multiple text-primary"></i>
+                                    Thông Tin Thanh Toán
+                                </h5>
+                                <div class="detail-row">
+                                    <span class="detail-label">Tổng tiền:</span>
+                                    <span class="detail-value amount-highlight" 
+                                          th:text="${completedCheckOut.totalAmount != null ? completedCheckOut.totalAmount + ' VNĐ' : '0 VNĐ'}">
+                                        1,500,000 VNĐ
+                                    </span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Tiền phạt:</span>
+                                    <span class="detail-value" 
+                                          th:text="${completedCheckOut.penaltyAmount != null and completedCheckOut.penaltyAmount > 0 ? completedCheckOut.penaltyAmount + ' VNĐ' : '0 VNĐ'}">
+                                        0 VNĐ
+                                    </span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Phương thức:</span>
+                                    <span class="detail-value" th:text="${completedCheckOut.paymentMethod}">Tiền mặt</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="info-card">
+                                <h5 class="mb-3">
+                                    <i class="mdi mdi-note-text text-primary"></i>
+                                    Ghi Chú
+                                </h5>
+                                <p class="mb-0" th:text="${completedCheckOut.notes != null ? completedCheckOut.notes : 'Không có ghi chú'}">
+                                    Khách hàng đã check-out thành công, phòng sẵn sàng để dọn dẹp.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Data Message -->
+                    <div th:if="${completedCheckOut == null}" class="text-center p-5">
+                        <i class="mdi mdi-information" style="font-size: 64px; color: #dee2e6;"></i>
+                        <h5>Không tìm thấy thông tin</h5>
+                        <p class="text-muted">Không tìm thấy thông tin check-out này.</p>
+                        <a href="/hotel-management/checkout-list" class="btn btn-primary mt-3">
+                            <i class="mdi mdi-arrow-left"></i> Quay lại Lịch Sử
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+<script src="/assets/vendors/chart.js/Chart.min.js"></script>
+<script src="/assets/js/off-canvas.js"></script>
+<script src="/assets/js/hoverable-collapse.js"></script>
+<script src="/assets/js/misc.js"></script>
+<script src="/assets/js/settings.js"></script>
+<script src="/assets/js/todolist.js"></script>
+<script src="/assets/js/chart.js"></script>
+</body>
+</html>
+
