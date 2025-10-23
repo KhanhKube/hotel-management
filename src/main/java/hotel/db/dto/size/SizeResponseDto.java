@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class SizeResponseDto {
 
 	private Integer sizeId;
-	private BigDecimal size;
+	private Double size;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 }

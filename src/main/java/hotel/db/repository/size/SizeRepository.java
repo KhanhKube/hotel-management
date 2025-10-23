@@ -15,7 +15,7 @@ public interface SizeRepository extends JpaRepository<Size, Integer> {
 
 	Size findBySizeIdAndIsDeletedIsFalse(Integer sizeId);
 
-	Boolean existsBySizeAndIsDeletedIsFalse(BigDecimal sizeId);
+	Boolean existsBySizeAndIsDeletedIsFalse(Double size);
 
 
 	@Query(
@@ -24,7 +24,7 @@ public interface SizeRepository extends JpaRepository<Size, Integer> {
 					"AND s.is_deleted = FALSE",
 			nativeQuery = true
 	)
-	List<Size> findBySizeRangeAndIsDeletedIsFalse(@Param("min") BigDecimal min,
-	                                              @Param("max") BigDecimal max);
+	List<Size> findBySizeRangeAndIsDeletedIsFalse(@Param("min") Double min,
+	                                              @Param("max") Double max);
 
 }

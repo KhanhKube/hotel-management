@@ -19,5 +19,5 @@ public class SizeRequestDto {
     @NotNull(message = "Kích thước không được để trống")
     @DecimalMin(value = "0.01", message = "Kích thước phải lớn hơn 0")
     @DecimalMax(value = "999.99", message = "Kích thước không được vượt quá 999.99")
-    private BigDecimal size;
+    private Double size;
 }
