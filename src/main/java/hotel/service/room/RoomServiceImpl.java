@@ -84,7 +84,7 @@ public class RoomServiceImpl implements RoomService {
         try {
             // Validate
             String validationError = validateRoomNumber(room.getRoomNumber(), room.getFloorId(), room.getSizeId(), room.getRoomType(), room.getBedType());
-            if (validationError != null) {
+            if (validationError != "") {
                 result.put("error", validationError);
                 return result;
             }

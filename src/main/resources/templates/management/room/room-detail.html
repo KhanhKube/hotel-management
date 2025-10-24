@@ -141,6 +141,41 @@
                                     </div>
                                 </div>
 
+                                <!-- Room Images -->
+                                <div class="card mb-3" style="border-left: 4px solid #fa709a;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="mdi mdi-image-multiple"></i> Ảnh Phòng
+                                            <span class="badge badge-primary ml-2" th:text="${images != null ? images.size() : 0}"></span>
+                                        </h5>
+                                        
+                                        <!-- Nếu có ảnh -->
+                                        <div th:if="${images != null and !images.empty}" class="row">
+                                            <div th:each="image : ${images}" class="col-md-3 col-sm-6 mb-3">
+                                                <div class="card">
+                                                    <img th:src="@{${image.roomImageUrl}}" 
+                                                         class="card-img-top" 
+                                                         style="height: 200px; object-fit: cover; cursor: pointer;"
+                                                         th:alt="'Ảnh phòng ' + ${room.roomNumber}"
+                                                         onclick="openImageModal(this.src)">
+                                                    <div class="card-body p-2 text-center">
+                                                        <small class="text-muted">ID: <span th:text="${image.roomImageId}"></span></small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Nếu không có ảnh -->
+                                        <div th:if="${images == null or images.empty}" class="text-center text-muted py-4">
+                                            <i class="mdi mdi-image-off" style="font-size: 48px;"></i>
+                                            <p class="mt-2">Chưa có ảnh cho phòng này</p>
+                                            <a th:href="@{/hotel-management/room/edit/{id}(id=${room.roomId})}" class="btn btn-primary btn-sm">
+                                                <i class="mdi mdi-upload"></i> Thêm ảnh
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- System Info -->
                                 <div class="card" style="border-left: 4px solid #43e97b;">
                                     <div class="card-body">
@@ -184,10 +219,38 @@
 
 
 
+<!-- Modal xem ảnh phóng to -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="mdi mdi-image"></i> Xem Ảnh
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" style="max-width: 100%; height: auto;">
+            </div>
+        </div>
+    </div>
+</div>
+
 <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
 <script th:src="@{/assets/js/off-canvas.js}"></script>
 <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
 <script th:src="@{/assets/js/misc.js}"></script>
+
+<script>
+// Function mở modal xem ảnh phóng to
+function openImageModal(imageSrc) {
+    document.getElementById('modalImage').src = imageSrc;
+    $('#imageModal').modal('show');
+}
+</script>
+
 </body>
 
 </html>

@@ -38,7 +38,7 @@
                                     <span th:text="${room.roomId != null ? 'Cập Nhật Phòng' : 'Tạo Phòng Mới'}"></span>
                                 </h4>
 
-                                <form th:action="@{/hotel-management/room/create}" th:object="${room}" method="post">
+                                <form th:action="@{/hotel-management/room/create}" th:object="${room}" method="post" enctype="multipart/form-data">
                                     <input type="hidden" th:field="*{roomId}" />
 
                                     <!-- Error Message -->

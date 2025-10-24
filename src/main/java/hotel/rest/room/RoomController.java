@@ -191,9 +191,12 @@ public class RoomController {
     }
 
     @GetMapping("/detail/{id}")
-    public String detailRoom(@PathVariable Integer id,Model model) {
+    public String detailRoom(@PathVariable Integer id, Model model) {
         Room room = roomService.getRoomById(id);
+        List<RoomImage> images = roomImageService.getImagesByRoomId(id);
+        
         model.addAttribute("room", room);
+        model.addAttribute("images", images);
         return "management/room/room-detail";
     }
 
