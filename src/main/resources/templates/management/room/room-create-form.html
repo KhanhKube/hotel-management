@@ -38,7 +38,7 @@
                                     <span th:text="${room.roomId != null ? 'Cập Nhật Phòng' : 'Tạo Phòng Mới'}"></span>
                                 </h4>
 
-                                <form th:action="@{/hotel-management/room/create}" th:object="${room}" method="post">
+                                <form th:action="@{/hotel-management/room/create}" th:object="${room}" method="post" enctype="multipart/form-data">
                                     <input type="hidden" th:field="*{roomId}" />
 
                                     <!-- Error Message -->
@@ -147,7 +147,36 @@
                                         <textarea id="roomDescription" class="form-control" th:field="*{roomDescription}" 
                                                   rows="4" placeholder="Nhập mô tả chi tiết về phòng..."></textarea>
                                     </div>
+                                    <!-- Upload ảnh -->
+                                    <div class="form-group">
+                                        <label for="imageFiles">
+                                            <i class="mdi mdi-image-multiple"></i> Ảnh phòng:
+                                        </label>
+                                        <input type="file"
+                                               id="imageFiles"
+                                               name="imageFiles"
+                                               class="form-control-file"
+                                               accept="image/*"
+                                               multiple>
+                                        <small class="form-text text-muted">
+                                            <i class="mdi mdi-information"></i>
+                                            Chọn nhiều ảnh (tối đa 10MB/ảnh). Định dạng: JPG, PNG, GIF
+                                        </small>
+                                    </div>
 
+                                    <!-- Preview ảnh mới chọn -->
+                                    <div class="form-group" id="imagePreviewContainer" style="display: none;">
+                                        <label>Xem trước:</label>
+                                        <div class="row" id="imagePreview"></div>
+                                    </div>
+
+                                    <!-- Ảnh hiện tại (nếu edit) -->
+                                    <div th:if="${room.roomId != null}" class="form-group">
+                                        <label>Ảnh hiện tại:</label>
+                                        <div class="row" id="currentImages">
+                                            <!-- Load ảnh hiện tại ở đây -->
+                                        </div>
+                                    </div>
                                     <!-- Buttons -->
                                     <div class="form-group mt-4">
                                         <button type="submit" class="btn btn-primary btn-lg">
@@ -167,6 +196,59 @@
         </div>
     </div>
 </div>
+<script>
+    // Preview ảnh khi chọn file
+    document.getElementById('imageFiles').addEventListener('change', function(e) {
+        const preview = document.getElementById('imagePreview');
+        const container = document.getElementById('imagePreviewContainer');
+        preview.innerHTML = '';
+
+        const files = e.target.files;
+
+        if (files.length > 0) {
+            container.style.display = 'block';
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('File ' + file.name + ' không phải là ảnh!');
+                    continue;
+                }
+
+                // Validate file size (10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File ' + file.name + ' quá lớn (>10MB)!');
+                    continue;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-3 mb-3';
+                    col.innerHTML = `
+                        <div class="card">
+                            <img src="${e.target.result}"
+                                 class="card-img-top"
+                                 style="height: 150px; object-fit: cover;">
+                            <div class="card-body p-2 text-center">
+                                <small class="text-muted">${file.name}</small><br>
+                                <small class="text-info">${(file.size / 1024).toFixed(2)} KB</small>
+                            </div>
+                        </div>
+                    `;
+                    preview.appendChild(col);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        } else {
+            container.style.display = 'none';
+        }
+    });
+</script>
 <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
 <script th:src="@{/assets/js/off-canvas.js}"></script>
 <script th:src="@{/assets/js/hoverable-collapse.js}"></script>

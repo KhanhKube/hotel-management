@@ -22,7 +22,7 @@ public class Size extends AbstractVersion {
 	@Column(name = "size_id")
 	private Integer sizeId;
 
-	@Column(name = "size", precision = 5, scale = 2)
-	private BigDecimal size;
+	@Column(name = "size")
+	private Double size;
 
 }

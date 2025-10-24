@@ -181,7 +181,7 @@ public class SizeController {
 	 * Kiểm tra giá trị size đã tồn tại chưa
 	 */
 	@GetMapping("/check-size/{size}")
-	public ResponseEntity<Map<String, Object>> checkSizeValueExists(@PathVariable BigDecimal size) {
+	public ResponseEntity<Map<String, Object>> checkSizeValueExists(@PathVariable Double size) {
 		try {
 			boolean exists = sizeService.existsBySize(size);
 			Map<String, Object> response = new HashMap<>();
@@ -203,8 +203,8 @@ public class SizeController {
 	 */
 	@GetMapping("/range")
 	public ResponseEntity<Map<String, Object>> getSizesByRange(
-			@RequestParam BigDecimal minSize,
-			@RequestParam BigDecimal maxSize) {
+			@RequestParam Double minSize,
+			@RequestParam Double maxSize) {
 		try {
 			List<SizeResponseDto> sizes = sizeService.getSizesByRange(minSize, maxSize);
 			Map<String, Object> response = new HashMap<>();

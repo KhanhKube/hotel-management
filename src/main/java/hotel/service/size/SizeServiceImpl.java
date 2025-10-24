@@ -115,13 +115,13 @@ public class SizeServiceImpl implements SizeService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public boolean existsBySize(BigDecimal size) {
+	public boolean existsBySize(Double size) {
 		return sizeRepository.existsBySizeAndIsDeletedIsFalse(size);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<SizeResponseDto> getSizesByRange(BigDecimal minSize, BigDecimal maxSize) {
+	public List<SizeResponseDto> getSizesByRange(Double minSize, Double maxSize) {
 		log.info("Getting sizes in range: {} - {}", minSize, maxSize);
 		List<Size> sizes = sizeRepository.findBySizeRangeAndIsDeletedIsFalse(minSize, maxSize);
 		return sizes.stream()

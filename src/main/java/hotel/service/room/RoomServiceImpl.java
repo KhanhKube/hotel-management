@@ -83,8 +83,8 @@ public class RoomServiceImpl implements RoomService {
 
         try {
             // Validate
-            String validationError = validateRoomNumber(room.getRoomNumber(), room.getFloorId());
-            if (validationError != null) {
+            String validationError = validateRoomNumber(room.getRoomNumber(), room.getFloorId(), room.getSizeId(), room.getRoomType(), room.getBedType());
+            if (validationError != "") {
                 result.put("error", validationError);
                 return result;
             }
@@ -104,11 +104,41 @@ public class RoomServiceImpl implements RoomService {
         roomRepository.softDeleteById(id);
     }
 
-    private String validateRoomNumber(String roomNumber, Integer floorId) {
-        //lấy floor number từ floorId
+    private String validateRoomNumber(String roomNumber, Integer floorId, Integer sizeId, String roomType, String bedType) {
+        //lấy số tầng và số size.
         Integer floorNumber = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))
                 .getFloorNumber();
+
+        Double sizeNumber = sizeRepository.findById(sizeId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))
+                .getSize();
+
+        if (roomType.equals("Tiêu chuẩn")) {
+            if (sizeNumber > 40) {
+                return "Phòng Tiêu chuẩn diện tích vui lòng nhỏ hơn hoặc bằng 40 mét vuông!";
+            }
+            if (bedType.equals("Giường King") || bedType.equals("Giường Queen")) {
+                return "Phong tiêu chuẩn chỉ được chọn giường Đơn hoặc Đôi!";
+            }
+        } else if (roomType.equals("Cao cấp") || roomType.equals("Hạng sang")) {
+            if (sizeNumber > 50 || sizeNumber <= 40) {
+                return "Phòng "+roomType+" diện tích vui lòng nhỏ hơn hoặc bằng " +
+                        "50 và lớn hơn 40 mét vuông!";
+            }
+        } else if (roomType.equals("VIP")) {
+            if (sizeNumber > 70 || sizeNumber <= 50) {
+                return "Phòng "+roomType+" diện tích vui lòng nhỏ hơn hoặc bằng " +
+                        "70 và lớn hơn 50 mét vuông!";
+            }
+        } else {
+            if (sizeNumber < 80) {
+                return "Phòng "+roomType+" diện tích vui lòng lớn hơn hoặc bằng 80 mét vuông!";
+            }
+            if (!bedType.equals("Giường King") || !bedType.equals("Giường Queen")) {
+                return "Phòng Tổng thống vui lòng chọn giường King hoặc Queen!";
+            }
+        }
 
         // kiểm tra format số phòng
         if (!roomNumber.matches("\\d{3}")) {
@@ -121,26 +151,26 @@ public class RoomServiceImpl implements RoomService {
         //lấy các số còn lại
         int roomNumberInFloor = Integer.parseInt(roomNumber.substring(1));
 
-        // Validate: Số đầu là số tầng
+        // Số đâù tiên phải là số tầng
         if (roomFloorNumber != floorNumber) {
             return "Chữ số đầu tiên phải trùng với số tầng. Vui lòng nhập lại!";
         }
 
-        // Validate: 2 số cuối hardocde 11/tầng phòng 1,2,3,4,5,6,7,8,9,10,11.
+        // 2 số cuối từ 1-11
         if (roomNumberInFloor < 1 || roomNumberInFloor > 11) {
             return "Vui lòng nhập số phòng từ 0-10!";
         }
 
-        // Validate: Kiểm tra số lượng phòng trên tầng (không quá 11)
+        // Đếm các phòng chưa bị xóa theo tầng
         long roomCountOnFloor = roomRepository.findAllByIsDeletedFalse().stream()
                 .filter(r -> r.getFloorId().equals(floorId))
                 .count();
-
+        // Lớn hơn 11 trả về message error
         if (roomCountOnFloor >= 11) {
             return "Số lượng phòng trên tầng "
                     + floorNumber + " đã đầy!";
         }
-        return null;
+        return "";
     }
 
 	@Override
@@ -179,7 +209,7 @@ public class RoomServiceImpl implements RoomService {
 					.orElse(null);
 		}
 
-		BigDecimal size = null;
+		Double size = null;
 		if (room.getSizeId() != null) {
 			size = sizeRepository.findById(room.getSizeId())
 					.map(s -> s.getSize())

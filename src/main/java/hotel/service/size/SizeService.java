@@ -20,7 +20,7 @@ public interface SizeService {
 
 	boolean existsById(Integer sizeId);
 
-	boolean existsBySize(BigDecimal size);
+	boolean existsBySize(Double size);
 
-	List<SizeResponseDto> getSizesByRange(BigDecimal minSize, BigDecimal maxSize);
+	List<SizeResponseDto> getSizesByRange(Double minSize, Double maxSize);
 }
