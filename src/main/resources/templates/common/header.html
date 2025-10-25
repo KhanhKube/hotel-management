@@ -59,7 +59,8 @@
                         <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">TRANG CHỦ</a></li>
                         <li class="nav-item"><a class="nav-link" th:href="@{/rooms}">PHÒNG</a></li>
                         <li class="nav-item"><a class="nav-link" th:href="@{/news}">TIN TỨC</a></li>
-                        <li class="nav-item"><a class="nav-link" th:href="@{/sale}">SALE</a></li>
+                        <li class="nav-item"th:if="${user != null and user.role == 'CUSTOMER'}"><a class="nav-link" th:href="@{/sale}">SALE</a></li>
+                        <li class="nav-item"th:if="${user != null and (user.role == 'RECEPTIONIST' || user.role == 'STAFF')}"><a class="nav-link" th:href="@{/order}">ĐƠN ĐẶT PHÒNG</a></li>
                         <li class="nav-item submenu dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button"
                                aria-haspopup="true" aria-expanded="false">AI</a>
