@@ -2,6 +2,7 @@ package hotel.service.common;
 
 import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.dto.user.UserProfileDto;
+import hotel.db.dto.user.VerifyOtpDto;
 import hotel.db.entity.User;
 
 import hotel.util.MessageResponse;
@@ -25,4 +26,8 @@ public interface CommonService {
     UserProfileDto userToUserProfile(User user);
 
     MessageResponse updateAvatar(String userName, MultipartFile file) throws IOException;
+
+    MessageResponse verifyOtp(VerifyOtpDto dto);
+
+    MessageResponse resendOtp(String username);
 }
