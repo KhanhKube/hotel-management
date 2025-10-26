@@ -2,6 +2,7 @@ package hotel.service.common;
 
 import hotel.db.dto.user.UserProfileDto;
 import hotel.db.dto.user.UserRegisterDto;
+import hotel.db.dto.user.VerifyOtpDto;
 import hotel.db.entity.User;
 import hotel.db.repository.user.UserRepository;
 import hotel.util.MessageResponse;
@@ -9,13 +10,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -32,6 +37,7 @@ public class CommonServiceImpl implements CommonService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JavaMailSender mailSender;
 
     @Override
     public User getUserByUsername(String username) {
@@ -98,8 +104,46 @@ public class CommonServiceImpl implements CommonService {
         user.setGender(gender);
         user.setDob(dto.getDob());
         user.setAddress(dto.getAddress());
+        String otp = generateOtp();
+        user.setOtp(otp);
         userRepository.save(user);
+        sendOtpEmail(user.getEmail(), user.getFirstName() + " " + user.getLastName(), otp);
         return new MessageResponse(true, REGISTERSUCCESS);
+    }
+
+    @Override
+    public MessageResponse verifyOtp(VerifyOtpDto dto) {
+        User user = userRepository.findByUsername(dto.getUsername()).orElse(null);
+        if (user == null) {
+            return new MessageResponse(false, "Email không tồn tại.");
+        }
+
+        if (!user.getUsername().equals(dto.getUsername())) {
+            return new MessageResponse(false, "Tên đăng nhập không khớp với email.");
+        }
+
+        if (!user.getOtp().equals(dto.getOtp())) {
+            return new MessageResponse(false, "Mã OTP không đúng.");
+        }
+
+        user.setOtpVerified(true);
+        userRepository.save(user);
+        return new MessageResponse(true, "Xác thực thành công!");
+    }
+
+    @Override
+    public MessageResponse resendOtp(String username) {
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            return new MessageResponse(false, "Không tìm thấy người dùng với email này.");
+        }
+
+        String otp = generateOtp();
+        user.setOtp(otp);
+        user.setOtpVerified(false);
+        userRepository.save(user);
+        sendOtpEmail(user.getEmail(), user.getFirstName() + " " + user.getLastName(), otp);
+        return new MessageResponse(true, "Mã OTP mới đã được gửi đến email của bạn.");
     }
 
     @Override
@@ -227,5 +271,32 @@ public class CommonServiceImpl implements CommonService {
         return new MessageResponse(true, UPDATESUCCESS);
     }
 
+    public void sendOtpEmail(String toEmail, String fullName, String otpCode) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("🔐 Your OTP Verification Code");
+            helper.setText(
+                    "<h2>Hello " + fullName + "!</h2>" +
+                            "<p>Thank you for registering. Please use the OTP below to verify your email:</p>" +
+                            "<h1 style='color:#007bff;'>" + otpCode + "</h1>" +
+                            "<p>This code will expire in 5 minutes.</p>" +
+                            "<p>Best regards,<br><b>Hotel Booking Team</b></p>",
+                    true
+            );
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String generateOtp() {
+        SecureRandom random = new SecureRandom();
+        int number = 100000 + random.nextInt(900000);
+        return String.valueOf(number);
+    }
 }
 

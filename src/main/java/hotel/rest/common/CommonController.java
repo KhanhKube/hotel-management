@@ -3,6 +3,7 @@ package hotel.rest.common;
 import hotel.db.dto.user.UserLoginDto;
 import hotel.db.dto.user.UserProfileDto;
 import hotel.db.dto.user.UserRegisterDto;
+import hotel.db.dto.user.VerifyOtpDto;
 import hotel.db.entity.User;
 import hotel.service.common.CommonService;
 import hotel.util.MessageResponse;
@@ -104,15 +105,45 @@ public class CommonController {
 
     // Submit form register
     @PostMapping("/register")
-    public String register(@ModelAttribute("userRegister") UserRegisterDto dto, Model model) {
+    public String register(@ModelAttribute("userRegister") UserRegisterDto dto,
+                           Model model,
+                           RedirectAttributes redirectAttrs) {
         MessageResponse response = commonService.registerUser(dto);
         if (response.isSuccess()) {
             model.addAttribute("message", response.getMessage());
-            return "redirect:/hotel/login";
+            VerifyOtpDto verifyOtpDto = new VerifyOtpDto(dto.getUsername(), dto.getEmail(), null);
+            redirectAttrs.addFlashAttribute("verifyDto", verifyOtpDto);
+            return "redirect:/hotel/verify";
         } else {
             model.addAttribute("error", response.getMessage());
             return "common/register";
         }
+    }
+
+    @GetMapping("/verify")
+    public String showOtpForm(Model model) {
+        VerifyOtpDto verifyOtpDto = (VerifyOtpDto) model.getAttribute("verifyDto");
+        model.addAttribute("verifyDto", verifyOtpDto);
+        return "common/verify-otp";
+    }
+
+    @PostMapping("/verify")
+    public String verifyOtp(@ModelAttribute("verifyDto") VerifyOtpDto dto, Model model) {
+        MessageResponse response = commonService.verifyOtp(dto);
+        if (response.isSuccess()) {
+            model.addAttribute("message", "Xác thực thành công! Hãy đăng nhập.");
+            return "redirect:/hotel/login";
+        } else {
+            model.addAttribute("error", response.getMessage());
+            return "common/verify-otp";
+        }
+    }
+
+    @GetMapping("/resend-otp")
+    public String resendOtp(@RequestParam String email, Model model) {
+        MessageResponse response = commonService.resendOtp(email);
+        model.addAttribute(response.isSuccess() ? "message" : "error", response.getMessage());
+        return "common/verify";
     }
 
     // Show profile
