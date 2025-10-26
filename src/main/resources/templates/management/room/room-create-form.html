@@ -172,9 +172,15 @@
 
                                     <!-- Ảnh hiện tại (nếu edit) -->
                                     <div th:if="${room.roomId != null}" class="form-group">
-                                        <label>Ảnh hiện tại:</label>
+                                        <label>
+                                            <i class="mdi mdi-image-album"></i> Ảnh hiện tại:
+                                        </label>
                                         <div class="row" id="currentImages">
-                                            <!-- Load ảnh hiện tại ở đây -->
+                                            <div class="col-12 text-center">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="sr-only">Đang tải...</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- Buttons -->
@@ -248,6 +254,119 @@
             container.style.display = 'none';
         }
     });
+
+    // Load ảnh hiện tại khi edit
+    document.addEventListener('DOMContentLoaded', function() {
+        const roomId = document.querySelector('input[name="roomId"]')?.value;
+        
+        if (roomId) {
+            loadCurrentImages(roomId);
+        }
+    });
+
+    function loadCurrentImages(roomId) {
+        console.log('Loading images for room:', roomId);
+        const url = `/hotel-management/room/api/images/${roomId}`;
+        console.log('Fetching URL:', url);
+        fetch(url)
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(images => {
+                console.log('Received images:', images);
+                const container = document.getElementById('currentImages');
+                container.innerHTML = '';
+
+                if (images.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-12 text-center text-muted">
+                            <i class="mdi mdi-image-off" style="font-size: 48px;"></i>
+                            <p>Chưa có ảnh</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                images.forEach(image => {
+                    console.log('Processing image:', image);
+                    const col = document.createElement('div');
+                    col.className = 'col-md-3 mb-3';
+                    col.id = `image-${image.roomImageId}`;
+                    col.innerHTML = `
+                        <div class="card">
+                            <img src="${image.roomImageUrl}"
+                                 class="card-img-top"
+                                 style="height: 150px; object-fit: cover;"
+                                 alt="Room image">
+                            <div class="card-body p-2 text-center">
+                                <small class="text-muted">ID: ${image.roomImageId}</small><br>
+                                <button type="button" 
+                                        class="btn btn-danger btn-sm mt-2" 
+                                        onclick="deleteImage(${image.roomImageId})">
+                                    <i class="mdi mdi-delete"></i> Xóa
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(col);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading images:', error);
+                document.getElementById('currentImages').innerHTML = `
+                    <div class="col-12 text-center text-danger">
+                        <i class="mdi mdi-alert-circle"></i>
+                        <p>Lỗi tải ảnh</p>
+                    </div>
+                `;
+            });
+    }
+
+    function deleteImage(imageId) {
+        if (!confirm('Bạn có chắc muốn xóa ảnh này?')) {
+            return;
+        }
+
+        fetch(`/hotel-management/room/api/image/delete/${imageId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Xóa element khỏi DOM
+                const imageElement = document.getElementById(`image-${imageId}`);
+                if (imageElement) {
+                    imageElement.remove();
+                }
+                
+                // Kiểm tra nếu không còn ảnh nào
+                const container = document.getElementById('currentImages');
+                if (container.children.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-12 text-center text-muted">
+                            <i class="mdi mdi-image-off" style="font-size: 48px;"></i>
+                            <p>Chưa có ảnh</p>
+                        </div>
+                    `;
+                }
+                
+                alert('Xóa ảnh thành công!');
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xóa ảnh!');
+        });
+    }
 </script>
 <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
 <script th:src="@{/assets/js/off-canvas.js}"></script>

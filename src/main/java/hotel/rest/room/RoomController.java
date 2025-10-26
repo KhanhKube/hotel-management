@@ -218,4 +218,32 @@ public class RoomController {
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(response);
 	}
+
+	@PostMapping("/api/image/delete/{imageId}")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> deleteImage(@PathVariable Integer imageId) {
+		Map<String, Object> response = new HashMap<>();
+		try {
+			roomImageService.deleteRoomImage(imageId);
+			response.put("success", true);
+			response.put("message", "Xóa ảnh thành công");
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "Lỗi: " + e.getMessage());
+			return ResponseEntity.badRequest().body(response);
+		}
+	}
+
+	@GetMapping("/api/images/{roomId}")
+	@ResponseBody
+	public ResponseEntity<List<RoomImage>> getRoomImages(@PathVariable Integer roomId) {
+		List<RoomImage> images = roomImageService.getImagesByRoomId(roomId);
+		System.out.println("=== GET IMAGES FOR ROOM " + roomId + " ===");
+		System.out.println("Found " + images.size() + " images");
+		images.forEach(img -> {
+			System.out.println("Image ID: " + img.getRoomImageId() + ", URL: " + img.getRoomImageUrl());
+		});
+		return ResponseEntity.ok(images);
+	}
 }

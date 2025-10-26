@@ -21,7 +21,7 @@ public class ImageServiceImpl implements  ImageService {
 
     @Override
     public List<RoomImage> getImagesByRoomId(Integer roomId) {
-        return roomImageRepository.findByRoomId(roomId);
+        return roomImageRepository.findByRoomIdAndIsDeletedFalse(roomId);
     }
 
     @Override
@@ -37,15 +37,11 @@ public class ImageServiceImpl implements  ImageService {
         RoomImage roomImage = roomImageRepository.findById(roomImageId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy ảnh"));
 
-        // Xóa file vật lý
-        try {
-            fileUploadService.deleteRoomImage(roomImage.getRoomImageUrl());
-        } catch (IOException e) {
-            log.error("Error deleting image file: {}", e.getMessage());
-        }
-
-        // Xóa record trong DB
-        roomImageRepository.delete(roomImage);
+        // Soft delete: chỉ đánh dấu là deleted
+        roomImage.setIsDeleted(true);
+        roomImageRepository.save(roomImage);
+        
+        log.info("Soft deleted image ID: {}", roomImageId);
     }
 
 }

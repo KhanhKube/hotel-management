@@ -11,4 +11,6 @@ public interface RoomImageRepository extends JpaRepository<RoomImage, Integer> {
 
     List<RoomImage> findByRoomId(Integer roomId);
 
+    List<RoomImage> findByRoomIdAndIsDeletedFalse(Integer roomId);
+
 }
