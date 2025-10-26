@@ -2,8 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>News Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .news-header {
@@ -94,138 +98,150 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-color: #667eea;
         }
+        .main-panel {
+            background: #f5f7ff;
+        }
+        .content-wrapper {
+            padding: 2rem;
+        }
     </style>
 </head>
 <body>
-<div class="container mt-4">
-    <!-- Header -->
-    <div class="news-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h2><i class="fas fa-newspaper me-2"></i>News Management</h2>
-                <p class="mb-0">Total News: <strong th:text="${newsPage.totalElements}">0</strong></p>
-            </div>
-            <a th:href="@{/management/news/add}" class="btn btn-light btn-lg">
-                <i class="fas fa-plus-circle me-2"></i>Create News
-            </a>
-        </div>
-    </div>
+<div class="container-scroller">
+    <!-- Sidebar -->
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
 
-    <!-- Search and Filter Form -->
-    <div class="search-filter-card">
-        <form method="get" th:action="@{/management/news}">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label"><i class="fas fa-search me-2"></i>Search by Title</label>
-                    <input type="text" name="search" th:value="${search}" class="form-control" placeholder="Enter news title..." />
+    <div class="container-fluid page-body-wrapper">
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <!-- Header -->
+                <div class="news-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2><i class="fas fa-newspaper me-2"></i>News Management</h2>
+                            <p class="mb-0">Total News: <strong th:text="${newsPage.totalElements}">0</strong></p>
+                        </div>
+                        <a th:href="@{/management/news/add}" class="btn btn-light btn-lg">
+                            <i class="fas fa-plus-circle me-2"></i>Create News
+                        </a>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label"><i class="fas fa-filter me-2"></i>Status</label>
-                    <select name="status" class="form-control">
-                        <option th:selected="${status} == null" value="">All Status</option>
-                        <option th:selected="${status} == 'DRAFT'" value="DRAFT">Draft</option>
-                        <option th:selected="${status} == 'PUBLISHED'" value="PUBLISHED">Published</option>
-                        <option th:selected="${status} == 'ARCHIVED'" value="ARCHIVED">Archived</option>
-                    </select>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-filter me-2"></i>Filter
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
 
-    <!-- News Table -->
-    <div class="table-container">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th>Views</th>
-                    <th class="text-center">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="n : ${newsPage}">
-                    <td><strong th:text="${n.newsId}"></strong></td>
-                    <td>
-                        <i class="fas fa-newspaper text-primary me-2"></i>
-                        <strong th:text="${n.title}"></strong>
-                    </td>
-                    <td>
+                <!-- Search and Filter Form -->
+                <div class="search-filter-card">
+                    <form method="get" th:action="@{/management/news}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-search me-2"></i>Search by Title</label>
+                                <input type="text" name="search" th:value="${search}" class="form-control" placeholder="Enter news title..." />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><i class="fas fa-filter me-2"></i>Status</label>
+                                <select name="status" class="form-control">
+                                    <option th:selected="${status} == null" value="">All Status</option>
+                                    <option th:selected="${status} == 'DRAFT'" value="DRAFT">Draft</option>
+                                    <option th:selected="${status} == 'PUBLISHED'" value="PUBLISHED">Published</option>
+                                    <option th:selected="${status} == 'ARCHIVED'" value="ARCHIVED">Archived</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-filter me-2"></i>Filter
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- News Table -->
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Views</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="n : ${newsPage}">
+                                <td><strong th:text="${n.newsId}"></strong></td>
+                                <td>
+                                    <i class="fas fa-newspaper text-primary me-2"></i>
+                                    <strong th:text="${n.title}"></strong>
+                                </td>
+                                <td>
                             <span th:class="'status-badge status-' + ${#strings.toLowerCase(n.status)}"
                                   th:text="${n.status}"></span>
-                    </td>
-                    <td>
+                                </td>
+                                <td>
                             <span class="view-badge">
                                 <i class="fas fa-eye me-1"></i>
                                 <span th:text="${n.view}">0</span>
                             </span>
-                    </td>
-                    <td class="text-center">
-                        <a th:href="@{'/management/news/view/' + ${n.newsId}}"
-                           class="btn btn-info btn-sm btn-action" title="View Details">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a th:href="@{'/management/news/edit/' + ${n.newsId}}"
-                           class="btn btn-warning btn-sm btn-action" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <form th:action="@{'/management/news/delete/' + ${n.newsId}}" method="post" style="display:inline">
-                            <button type="submit" class="btn btn-danger btn-sm btn-action"
-                                    onclick="return confirm('Are you sure you want to delete this news?')"
-                                    title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(newsPage.content)}">
-                    <td colspan="5" class="text-center py-5">
-                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No news found. Click "Create News" to add one.</p>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{'/management/news/view/' + ${n.newsId}}"
+                                       class="btn btn-info btn-sm btn-action" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a th:href="@{'/management/news/edit/' + ${n.newsId}}"
+                                       class="btn btn-warning btn-sm btn-action" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form th:action="@{'/management/news/delete/' + ${n.newsId}}" method="post" style="display:inline">
+                                        <button type="submit" class="btn btn-danger btn-sm btn-action"
+                                                onclick="return confirm('Are you sure you want to delete this news?')"
+                                                title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(newsPage.content)}">
+                                <td colspan="5" class="text-center py-5">
+                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">No news found. Click "Create News" to add one.</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav th:if="${totalPages > 1}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" th:href="@{/management/news(page=${currentPage - 1}, search=${search}, status=${status})}">
+                                    <i class="fas fa-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link" th:href="@{/management/news(page=${i}, search=${search}, status=${status})}"
+                                   th:text="${i + 1}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a class="page-link" th:href="@{/management/news(page=${currentPage + 1}, search=${search}, status=${status})}">
+                                    Next <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+            </div>
         </div>
-
-        <!-- Pagination -->
-        <nav th:if="${totalPages > 1}">
-            <ul class="pagination justify-content-center">
-                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                    <a class="page-link" th:href="@{/management/news(page=${currentPage - 1}, search=${search}, status=${status})}">
-                        <i class="fas fa-chevron-left"></i> Previous
-                    </a>
-                </li>
-                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                    th:classappend="${i == currentPage} ? 'active'">
-                    <a class="page-link" th:href="@{/management/news(page=${i}, search=${search}, status=${status})}"
-                       th:text="${i + 1}"></a>
-                </li>
-                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                    <a class="page-link" th:href="@{/management/news(page=${currentPage + 1}, search=${search}, status=${status})}">
-                        Next <i class="fas fa-chevron-right"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-
-    <!-- Back Button -->
-    <div class="mt-3">
-        <a th:href="@{/management/hotels}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Management
-        </a>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+<script src="/assets/js/off-canvas.js"></script>
+<script src="/assets/js/hoverable-collapse.js"></script>
+<script src="/assets/js/misc.js"></script>
 </body>
 </html>
 
