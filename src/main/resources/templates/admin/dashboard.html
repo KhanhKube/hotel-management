@@ -100,6 +100,8 @@
         .stat-icon.bookings { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
         .stat-icon.users { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
         .stat-icon.available { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .stat-icon.hotels { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .stat-icon.news { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
 
         .stat-number {
             font-size: 2.5rem;
@@ -165,16 +167,16 @@
             .dashboard-container {
                 padding: 1rem;
             }
-            
+
             .dashboard-title {
                 font-size: 2rem;
             }
-            
+
             .stats-grid {
                 grid-template-columns: 1fr;
                 gap: 1rem;
             }
-            
+
             .actions-grid {
                 grid-template-columns: 1fr;
             }
@@ -182,77 +184,105 @@
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Dashboard Header -->
-        <div class="dashboard-header">
-            <h1 class="dashboard-title">
-                <i class="fas fa-tachometer-alt"></i>
-                Admin Dashboard
-            </h1>
-            <p class="dashboard-subtitle">
-                Tổng quan hệ thống quản lý khách sạn
-            </p>
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">
+            <i class="fas fa-tachometer-alt"></i>
+            Admin Dashboard
+        </h1>
+        <p class="dashboard-subtitle">
+            Tổng quan hệ thống quản lý khách sạn
+        </p>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon rooms">
+                <i class="fas fa-bed"></i>
+            </div>
+            <div class="stat-number" th:text="${totalRooms}">0</div>
+            <div class="stat-label">Tổng số phòng</div>
         </div>
 
-        <!-- Statistics Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon rooms">
-                    <i class="fas fa-bed"></i>
-                </div>
-                <div class="stat-number" th:text="${totalRooms}">0</div>
-                <div class="stat-label">Tổng số phòng</div>
+        <div class="stat-card">
+            <div class="stat-icon available">
+                <i class="fas fa-check-circle"></i>
             </div>
-
-            <div class="stat-card">
-                <div class="stat-icon available">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-number" th:text="${availableRooms}">0</div>
-                <div class="stat-label">Phòng trống</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon bookings">
-                    <i class="fas fa-calendar-check"></i>
-                </div>
-                <div class="stat-number" th:text="${activeBookings}">0</div>
-                <div class="stat-label">Đặt phòng đang hoạt động</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon users">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-number" th:text="${totalUsers}">0</div>
-                <div class="stat-label">Tổng số người dùng</div>
-            </div>
+            <div class="stat-number" th:text="${availableRooms}">0</div>
+            <div class="stat-label">Phòng trống</div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <h2 class="quick-actions-title">Thao tác nhanh</h2>
-            <div class="actions-grid">
-                <a href="/admin/rooms" class="action-btn">
-                    <i class="fas fa-bed"></i>
-                    Quản lý phòng
-                </a>
-                <a href="/admin/bookings" class="action-btn">
-                    <i class="fas fa-calendar-alt"></i>
-                    Quản lý đặt phòng
-                </a>
-                <a href="/admin/users" class="action-btn">
-                    <i class="fas fa-user-cog"></i>
-                    Quản lý người dùng
-                </a>
-                <a href="/hotel-management/view" class="action-btn">
-                    <i class="fas fa-eye"></i>
-                    Quản lý view
-                </a>
+        <div class="stat-card">
+            <div class="stat-icon bookings">
+                <i class="fas fa-calendar-check"></i>
             </div>
+            <div class="stat-number" th:text="${activeBookings}">0</div>
+            <div class="stat-label">Đặt phòng đang hoạt động</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon users">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-number" th:text="${totalUsers}">0</div>
+            <div class="stat-label">Tổng số người dùng</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon hotels">
+                <i class="fas fa-hotel"></i>
+            </div>
+            <div class="stat-number" th:text="${totalHotels != null ? totalHotels : 0}">0</div>
+            <div class="stat-label">Tổng số khách sạn</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon news">
+                <i class="fas fa-newspaper"></i>
+            </div>
+            <div class="stat-number" th:text="${totalNews != null ? totalNews : 0}">0</div>
+            <div class="stat-label">Tổng số tin tức</div>
         </div>
     </div>
 
-    <script src="/vendors/bootstrap/bootstrap.min.js"></script>
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2 class="quick-actions-title">Thao tác nhanh</h2>
+        <div class="actions-grid">
+            <a href="/admin/rooms" class="action-btn">
+                <i class="fas fa-bed"></i>
+                Quản lý phòng
+            </a>
+            <a href="/admin/bookings" class="action-btn">
+                <i class="fas fa-calendar-alt"></i>
+                Quản lý đặt phòng
+            </a>
+            <a href="/admin/users" class="action-btn">
+                <i class="fas fa-user-cog"></i>
+                Quản lý người dùng
+            </a>
+            <a href="/hotel-management/view" class="action-btn">
+                <i class="fas fa-eye"></i>
+                Quản lý view
+            </a>
+            <a href="/management/hotels" class="action-btn">
+                <i class="fas fa-hotel"></i>
+                Quản lý khách sạn
+            </a>
+            <a href="/management/news" class="action-btn">
+                <i class="fas fa-newspaper"></i>
+                Quản lý tin tức
+            </a>
+            <a href="/management/news/groups" class="action-btn">
+                <i class="fas fa-layer-group"></i>
+                Nhóm tin tức
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="/vendors/bootstrap/bootstrap.min.js"></script>
 </body>
 </html>

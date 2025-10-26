@@ -96,7 +96,7 @@
 
         <!-- Dashboard - only ADMIN -->
         <li class="nav-item menu-items" th:if="${user != null and user.role == 'ADMIN'}">
-            <a class="nav-link" th:href="@{/hotel/dashboard}">
+            <a class="nav-link" th:href="@{/admin/dashboard}">
                 <span class="menu-icon"><i class="mdi mdi-speedometer"></i></span>
                 <span class="menu-title">Dashboard</span>
             </a>
@@ -124,7 +124,11 @@
                         <a class="nav-link" th:href="@{/hotel-management/room}">Phòng</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/hotel-management/furnishing}">Dụng cụ</a>
+                        <a class="nav-link" th:href="@{/management/services}">Dịch vụ</a>
+                    </li>
+                    <li class="nav-item">
+                        <!--                        <a class="nav-link" th:href="@{/hotel-management/furnishing}">Dụng cụ</a>-->
+                        <a class="nav-link" href="#">Dụng cụ</a>
                     </li>
 
                     <!-- Only MANAGER can see -->
@@ -132,14 +136,18 @@
                         <a class="nav-link" th:href="@{/hotel-management/receptionist}">Lễ tân</a>
                     </li>
                     <li class="nav-item" th:if="${user != null and user.role == 'MANAGER'}">
-                        <a class="nav-link" th:href="@{/hotel-management/staff}">Nhân viên</a>
+                        <!--                        <a class="nav-link" th:href="@{/hotel-management/staff}">Nhân viên</a>-->
+                        <a class="nav-link"  href="#">Nhân viên</a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/hotel-management/discount}">Mã giảm giá</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/hotel-management/news}">Tin tức</a>
+                        <a class="nav-link" th:href="@{/management/news}">Tin tức</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/management/hotels}">Khách sạn</a>
                     </li>
                 </ul>
             </div>
@@ -156,16 +164,20 @@
             <div class="collapse" id="auth">
                 <ul class="nav flex-column sub-menu">
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/hotel-management/customer}">Khách hàng</a>
+                        <!--                        <a class="nav-link" th:href="@{/hotel-management/customer}">Khách hàng</a>-->
+                        <a class="nav-link"  href="#">Khách hàng</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/hotel-management/order}">Lịch đặt phòng</a>
+                        <!--                        <a class="nav-link" th:href="@{/hotel-management/order}">Lịch đặt phòng</a>-->
+                        <a class="nav-link"  href="#">Lịch đặt phòng</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/hotel-management/checkin}">Check-in</a>
+                        <!--                        <a class="nav-link" th:href="@{/hotel-management/checkin}">Check-in</a>-->
+                        <a class="nav-link"  href="#">Check-in</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/hotel-management/clean}">Dọn phòng</a>
+                        <!--                        <a class="nav-link" th:href="@{/hotel-management/clean}">Dọn phòng</a>-->
+                        <a class="nav-link"  href="#">Dọn phòng</a>
                     </li>
                 </ul>
             </div>

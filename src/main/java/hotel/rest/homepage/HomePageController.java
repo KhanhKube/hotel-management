@@ -2,7 +2,9 @@ package hotel.rest.homepage;
 
 import hotel.db.dto.room.RoomDetailResponseDto;
 import hotel.db.dto.room.RoomHomepageResponseDto;
+import hotel.db.entity.News;
 import hotel.service.room.RoomService;
+import hotel.service.news.NewsService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -23,11 +25,21 @@ import static hotel.db.enums.Constants.ROOMNOTEXIST;
 public class HomePageController {
 
     private final RoomService roomService;
+    private final NewsService newsService;
 
     @GetMapping({"/", "", "/home"})
     public String home(HttpSession session, Model model) {
         List<RoomHomepageResponseDto> rooms = roomService.getTop3Rooms();
         model.addAttribute("rooms", rooms);
+
+        // Get latest 3 published news for home page
+        List<News> allPublishedNews = newsService.findByStatus("PUBLISHED");
+        List<News> latestNews = allPublishedNews.stream()
+                .filter(news -> news.getCreatedAt() != null) // Null safety
+                .sorted((n1, n2) -> n2.getCreatedAt().compareTo(n1.getCreatedAt()))
+                .limit(3)
+                .toList();
+        model.addAttribute("latestNews", latestNews);
 
         return "common/home";
     }
