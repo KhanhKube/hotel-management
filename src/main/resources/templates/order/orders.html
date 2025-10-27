@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Đơn Hàng - Hotel</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/vendors/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="/vendors/linericon/style.css">
+    <link rel="stylesheet" href="/vendors/magnefic-popup/magnific-popup.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.theme.default.min.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.carousel.min.css">
+    <link rel="stylesheet" href="/vendors/nice-select/nice-select.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .order-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .order-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .order-id {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-confirmed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .order-detail-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .room-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .room-name {
+            font-weight: 600;
+            color: #495057;
+            font-size: 1.1rem;
+        }
+
+        .room-price {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .date-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state i {
+            font-size: 80px;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+<!-- import header -->
+<div th:replace="~{common/header :: header}"></div>
+
+<!-- ================ start banner area ================= -->
+<section class="home-banner-area" id="home">
+    <div class="container h-100">
+        <div class="home-banner">
+            <div class="text-center">
+                <h4>Quản lý đặt phòng của bạn</h4>
+                <h1>Đơn Hàng <em>Của Tôi</em></h1>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ================ end banner area ================= -->
+
+<section class="section-margin">
+    <div class="container">
+        <h2 class="mb-4">Danh Sách Đơn Hàng</h2>
+
+        <!-- Empty state -->
+        <div th:if="${#lists.isEmpty(orders)}" class="empty-state">
+            <i class="fas fa-receipt"></i>
+            <h3>Chưa có đơn hàng nào</h3>
+            <p class="text-muted">Bạn chưa đặt phòng nào. Hãy khám phá các phòng của chúng tôi!</p>
+            <a th:href="@{/rooms}" class="button button--active mt-3">
+                <i class="fas fa-search"></i> Tìm phòng
+            </a>
+        </div>
+
+        <!-- Orders list -->
+        <div th:each="order : ${orders}" class="order-card">
+            <div class="order-header">
+                <div>
+                    <div class="order-id">
+                        <i class="fas fa-file-invoice"></i> Đơn hàng #<span th:text="${order.orderId}">001</span>
+                    </div>
+                    <small class="text-muted">
+                        Ngày đặt: <span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</span>
+                    </small>
+                </div>
+                <div>
+                    <span class="status-badge" 
+                          th:classappend="${order.status == 'PENDING' ? 'status-pending' : 
+                                          order.status == 'CONFIRMED' ? 'status-confirmed' : 
+                                          order.status == 'COMPLETED' ? 'status-completed' : 'status-cancelled'}"
+                          th:text="${order.status == 'PENDING' ? 'Chờ xử lý' : 
+                                   order.status == 'CONFIRMED' ? 'Đã xác nhận' : 
+                                   order.status == 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy'}">
+                        Chờ xử lý
+                    </span>
+                </div>
+            </div>
+
+            <!-- Order details -->
+            <div th:each="detail : ${order.orderDetails}" class="order-detail-item">
+                <div class="room-info">
+                    <div>
+                        <div class="room-name">
+                            <i class="fas fa-door-open"></i> 
+                            <span th:text="${detail.roomType}">Deluxe Room</span> - 
+                            Phòng <span th:text="${detail.roomNumber}">101</span>
+                        </div>
+                        <div class="date-info">
+                            <i class="fas fa-calendar-check"></i> 
+                            Check-in: <span th:text="${#temporals.format(detail.checkIn, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
+                            <br>
+                            <i class="fas fa-calendar-times"></i> 
+                            Check-out: <span th:text="${#temporals.format(detail.checkOut, 'dd/MM/yyyy HH:mm')}">05/01/2024</span>
+                        </div>
+                    </div>
+                    <div class="room-price">
+                        <span th:text="${#numbers.formatDecimal(detail.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/đêm'">
+                            350,000 VNĐ/đêm
+                        </span>
+                    </div>
+                </div>
+                <div class="mt-2" th:if="${detail.orderDescription}">
+                    <small class="text-muted" th:text="${detail.orderDescription}">Mô tả đơn hàng</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- import footer -->
+<div th:replace="~{common/footer :: footer}"></div>
+
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
+<script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
+<script src="/vendors/easing.min.js"></script>
+<script src="/vendors/superfish.min.js"></script>
+<script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
+<script src="/vendors/jquery.ajaxchimp.min.js"></script>
+<script src="/vendors/mail-script.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>
