@@ -171,9 +171,6 @@ public class CommonServiceImpl implements CommonService {
         if (userRepository.existsByPhoneAndUsernameNot(dto.getPhone(), dto.getUsername())) {
             return new MessageResponse(false, PHONEEXIST);
         }
-        if (userRepository.existsByPhone(dto.getPhone())) {
-            return new MessageResponse(false, PHONEDUPLICATE);
-        }
         LocalDate today = LocalDate.now();
         if (Period.between(dto.getDob(), today).getYears() < 12) {
             return new MessageResponse(false, DOBINVALID);
