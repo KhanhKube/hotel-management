@@ -74,8 +74,31 @@
                 </div>
 
                 <ul class="social-icons ml-auto">
-                    <!-- Cart -->
-                    <li><a href="#"><i class="fas fa-shopping-cart"></i></a></li>
+                    <!-- Cart with dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle position-relative" href="#" id="cartDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="badge badge-danger position-absolute" id="cart-badge" 
+                                  style="top: -5px; right: -10px; font-size: 10px; display: none;">0</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right cart-dropdown" aria-labelledby="cartDropdown" 
+                             style="min-width: 350px; max-height: 400px; overflow-y: auto;">
+                            <h6 class="dropdown-header">Giỏ Hàng</h6>
+                            <div class="dropdown-divider"></div>
+                            <div id="cart-items-preview">
+                                <p class="dropdown-item text-muted">Giỏ hàng trống</p>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="px-3 py-2">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong>Tổng:</strong>
+                                    <strong class="text-primary" id="cart-total-preview">0 VNĐ</strong>
+                                </div>
+                                <a th:href="@{/cart}" class="btn btn-primary btn-sm btn-block">Xem Giỏ Hàng</a>
+                            </div>
+                        </div>
+                    </li>
 
                     <!-- If user is logged in -->
                     <li th:if="${user != null}" class="nav-item dropdown">
@@ -143,5 +166,58 @@
 <script src="/vendors/jquery.ajaxchimp.min.js"></script>
 <script src="/vendors/mail-script.js"></script>
 <script src="/js/main.js"></script>
+
+<script>
+    // Load cart preview
+    function loadCartPreview() {
+        fetch('/cart/items')
+            .then(res => res.json())
+            .then(data => {
+                const badge = document.getElementById('cart-badge');
+                const itemsContainer = document.getElementById('cart-items-preview');
+                const totalElement = document.getElementById('cart-total-preview');
+                
+                if (data.length === 0) {
+                    badge.style.display = 'none';
+                    itemsContainer.innerHTML = '<p class="dropdown-item text-muted">Giỏ hàng trống</p>';
+                    totalElement.textContent = '0 VNĐ';
+                } else {
+                    badge.style.display = 'inline';
+                    badge.textContent = data.length;
+                    
+                    let total = 0;
+                    let html = '';
+                    
+                    data.forEach(item => {
+                        total += item.totalPrice;
+                        html += `
+                            <div class="dropdown-item" style="white-space: normal;">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>${item.roomType}</strong>
+                                        <br><small class="text-muted">Phòng ${item.roomNumber}</small>
+                                        <br><small class="text-muted">${item.numberOfDays} đêm</small>
+                                    </div>
+                                    <div class="text-right">
+                                        <strong class="text-primary">${item.totalPrice.toLocaleString('vi-VN')} VNĐ</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    itemsContainer.innerHTML = html;
+                    totalElement.textContent = total.toLocaleString('vi-VN') + ' VNĐ';
+                }
+            })
+            .catch(err => console.error('Error loading cart:', err));
+    }
+    
+    // Load on page load
+    document.addEventListener('DOMContentLoaded', loadCartPreview);
+    
+    // Reload cart when dropdown is opened
+    document.getElementById('cartDropdown')?.addEventListener('click', loadCartPreview);
+</script>
 </body>
 </html>
