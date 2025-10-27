@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Map;
@@ -29,12 +30,23 @@ public class AccountController extends BaseController {
     private final AccountService accountService;
 
     /**
-     * Hiển thị danh sách tất cả accounts (trừ ADMIN)
+     * Hiển thị danh sách tất cả accounts (trừ ADMIN) với pagination và search
      */
     @GetMapping
-    public String listAccounts(HttpSession session, Model model) {
-        List<AccountResponseDto> accounts = accountService.getAllAccountsExceptAdmin();
-        model.addAttribute("accounts", accounts);
+    public String listAccounts(
+            @RequestParam(value = "search", required = false, defaultValue = "") String searchTerm,
+            @RequestParam(value = "status", required = false, defaultValue = "ALL") String status,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            HttpSession session, Model model) {
+        Page<AccountResponseDto> accountsPage = accountService.getAccountsWithPagination(searchTerm, status, page, size);
+        model.addAttribute("accounts", accountsPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", accountsPage.getTotalPages());
+        model.addAttribute("totalElements", accountsPage.getTotalElements());
+        model.addAttribute("searchTerm", searchTerm);
+        model.addAttribute("status", status);
+        model.addAttribute("size", size);
         return "management/account/account-list";
     }
 

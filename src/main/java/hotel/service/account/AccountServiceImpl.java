@@ -6,12 +6,17 @@ import hotel.db.entity.User;
 import hotel.db.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import jakarta.persistence.criteria.Predicate;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +47,54 @@ public class AccountServiceImpl implements AccountService {
                 .filter(user -> !"ADMIN".equals(user.getRole()) && !user.getIsDeleted()) // Filter out ADMIN and soft deleted accounts
                 .map(AccountResponseDto::new)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AccountResponseDto> getAccountsWithPagination(String searchTerm, String status, int page, int size) {
+        log.info("Getting accounts with pagination - page: {}, size: {}, search: {}, status: {}", page, size, searchTerm, status);
+        
+        // Build specification for filtering
+        Specification<User> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new java.util.ArrayList<>();
+            
+            // Exclude ADMIN role
+            predicates.add(cb.notEqual(root.get("role"), "ADMIN"));
+            
+            // Exclude soft deleted accounts
+            predicates.add(cb.equal(root.get("isDeleted"), false));
+            
+            // Search by full name (firstName + lastName), username, email, or phone
+            if (searchTerm != null && !searchTerm.isEmpty()) {
+                String pattern = "%" + searchTerm.toLowerCase() + "%";
+                // Search in firstName, lastName, username, email, or phone
+                Predicate firstNamePredicate = cb.like(cb.lower(root.get("firstName")), pattern);
+                Predicate lastNamePredicate = cb.like(cb.lower(root.get("lastName")), pattern);
+                Predicate usernamePredicate = cb.like(cb.lower(root.get("username")), pattern);
+                Predicate emailPredicate = cb.like(cb.lower(root.get("email")), pattern);
+                Predicate phonePredicate = cb.like(root.get("phone"), pattern);
+                Predicate searchOr = cb.or(firstNamePredicate, lastNamePredicate, usernamePredicate, emailPredicate, phonePredicate);
+                predicates.add(searchOr);
+            }
+            
+            // Filter by status
+            if (status != null && !status.isEmpty() && !"ALL".equals(status.toUpperCase())) {
+                predicates.add(cb.equal(root.get("status"), status.toUpperCase()));
+            }
+            
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        
+        // Pagination
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findAll(spec, pageable);
+        
+        // Convert to DTO
+        List<AccountResponseDto> dtos = userPage.getContent().stream()
+                .map(AccountResponseDto::new)
+                .collect(Collectors.toList());
+        
+        return new PageImpl<>(dtos, pageable, userPage.getTotalElements());
     }
 
     @Override

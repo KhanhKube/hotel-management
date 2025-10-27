@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách phòng</title>
+
+    <!-- CSS của template khách hàng -->
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/vendors/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="/vendors/linericon/style.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body, html {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Override margin-top của section sau header */
+        .header_area + section {
+            margin-top: 0 !important;
+        }
+        
+        /* Đổ bóng đậm hơn cho card */
+        .card-explore {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            border: 1px solid #ffffff;
+        }
+        
+        /* Hiệu ứng hover - nâng card lên và đổ bóng đậm hơn */
+        .card-explore:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+<!-- Include header -->
+<div th:replace="~{common/header :: header}"></div>
+
+<!-- Nội dung trang của bạn -->
+<section class="section-margin">
+    <div class="container">
+        <div class="section-intro text-center pb-80px">
+            <div class="section-intro__style">
+                <img src="/img/home/bed-icon.png" alt="">
+            </div>
+            <h2>Danh sách phòng của chúng tôi</h2>
+        </div>
+
+        <div class="row">
+            <!-- 4 cards per row: col-lg-3 -->
+            <div class="col-md-6 col-lg-4 mb-4" th:each="r : ${rooms}">
+                <div class="card card-explore">
+                    <div class="card-explore__img">
+                        <img class="card-img" th:src="${r.imageRoom != null ? r.imageRoom : '/images/room/room-01.png'}"
+                             alt="">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-explore__price"
+                            th:text="${#numbers.formatInteger(r.price.intValue(), 3, 'POINT')} + ' VNĐ'">350.000 <sub>/
+                            Ngày</sub></h3>
+                        <h4 class="card-explore__title">
+                            <a th:text="${r.roomType}" th:href="@{/hotel/room/{id}(id=${r.roomId})}">Classic Bed
+                                Room</a>
+                        </h4>
+                        <p th:text="${r.roomDescription}">Room description</p>
+                        <a class="card-explore__link" th:href="@{/hotel/room/{id}(id=${r.roomId})}">
+                            Đặt ngay <i class="ti-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- If list empty -->
+            <div class="col-12 text-center" th:if="${#lists.isEmpty(rooms)}">
+                <p class="text-muted">Hiện không có phòng nào.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Include footer nếu có -->
+<div th:replace="~{common/footer :: footer}"></div>
+
+<!-- JS của template khách hàng -->
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="/js/main.js"></script>
+
+<!-- Sticky Header Script -->
+<script>
+    $(window).on('scroll', function () {
+        var scroll = $(window).scrollTop();
+        if (scroll >= 50) {
+            $(".header_area").addClass("navbar_fixed");
+        } else {
+            $(".header_area").removeClass("navbar_fixed");
+        }
+    });
+</script>
+</body>
+</html>
