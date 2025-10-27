@@ -90,5 +90,17 @@
 <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
 <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
 <script src="/js/main.js"></script>
+
+<!-- Sticky Header Script -->
+<script>
+    $(window).on('scroll', function () {
+        var scroll = $(window).scrollTop();
+        if (scroll >= 50) {
+            $(".header_area").addClass("navbar_fixed");
+        } else {
+            $(".header_area").removeClass("navbar_fixed");
+        }
+    });
+</script>
 </body>
 </html>
