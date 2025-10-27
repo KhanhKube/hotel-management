@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Giỏ Hàng - Hotel</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/vendors/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="/vendors/linericon/style.css">
+    <link rel="stylesheet" href="/vendors/magnefic-popup/magnific-popup.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.theme.default.min.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.carousel.min.css">
+    <link rel="stylesheet" href="/vendors/nice-select/nice-select.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .cart-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: white;
+        }
+
+        .cart-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .remove-btn {
+            color: #dc3545;
+            cursor: pointer;
+        }
+
+        .remove-btn:hover {
+            color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- import header -->
+    <div th:replace="~{common/header :: header}"></div>
+
+    <!-- ================ start banner area ================= -->
+    <section class="home-banner-area" id="home">
+        <div class="container h-100">
+            <div class="home-banner">
+                <div class="text-center">
+                    <h4>Xem sự khác biệt mà một kỳ nghỉ mang lại!</h4>
+                    <h1>Giỏ Hàng <em>Của Bạn</em></h1>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- ================ end banner area ================= -->
+
+    <section class="section-margin">
+        <div class="container">
+            <h2 class="mb-4">Giỏ Hàng Của Bạn</h2>
+
+            <div class="row">
+                <!-- Cart Items -->
+                <div class="col-lg-8">
+                    <div th:if="${#lists.isEmpty(cartItems)}" class="alert alert-info">
+                        Giỏ hàng của bạn đang trống. <a th:href="@{/rooms}">Tiếp tục mua sắm</a>
+                    </div>
+
+                    <div th:each="item : ${cartItems}" class="cart-item">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 th:text="${item.roomType}">Room Type</h5>
+                                <p class="text-muted mb-1">Phòng số: <span th:text="${item.roomNumber}">101</span></p>
+                                <p class="text-muted mb-1">
+                                    Check-in: <span
+                                        th:text="${#temporals.format(item.checkIn, 'dd/MM/yyyy')}">01/01/2024</span>
+                                </p>
+                                <p class="text-muted mb-1">
+                                    Check-out: <span
+                                        th:text="${#temporals.format(item.checkOut, 'dd/MM/yyyy')}">05/01/2024</span>
+                                </p>
+                                <p class="text-muted">
+                                    Số đêm: <span th:text="${item.numberOfDays}">4</span> đêm
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <h5 class="text-primary"
+                                    th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                    1,400,000 VNĐ
+                                </h5>
+                                <p class="text-muted small"
+                                    th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/đêm'">
+                                    350,000 VNĐ/đêm
+                                </p>
+                                <button class="btn btn-sm btn-outline-danger remove-btn"
+                                    th:onclick="'removeFromCart(' + ${item.roomId} + ')'">
+                                    <i class="fas fa-trash"></i> Xóa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Summary -->
+                <div class="col-lg-4">
+                    <div class="cart-summary">
+                        <h4 class="mb-3">Tổng Quan Đơn Hàng</h4>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Số phòng:</span>
+                            <span th:text="${cartItems.size()}">0</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Tổng cộng:</strong>
+                            <strong class="text-primary" id="totalAmount">
+                                <span
+                                    th:text="${#numbers.formatDecimal(#aggregates.sum(cartItems.![totalPrice]), 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                    0 VNĐ
+                                </span>
+                            </strong>
+                        </div>
+                        <button class="btn btn-primary w-100 mb-2" onclick="checkout()"
+                            th:disabled="${#lists.isEmpty(cartItems)}">
+                            <i class="fas fa-check-circle"></i> Tiến Hành Đặt Phòng
+                        </button>
+                        <button class="btn btn-outline-secondary w-100" onclick="clearCart()"
+                            th:disabled="${#lists.isEmpty(cartItems)}">
+                            Xóa Tất Cả
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- import footer -->
+    <div th:replace="~{common/footer :: footer}"></div>
+
+    <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+    <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
+    <script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
+    <script src="/vendors/easing.min.js"></script>
+    <script src="/vendors/superfish.min.js"></script>
+    <script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
+    <script src="/vendors/jquery.ajaxchimp.min.js"></script>
+    <script src="/vendors/mail-script.js"></script>
+    <script src="/js/main.js"></script>
+
+    <script>
+        function removeFromCart(roomId) {
+            if (!confirm('Bạn có chắc muốn xóa phòng này khỏi giỏ hàng?')) {
+                return;
+            }
+
+            fetch('/cart/remove/' + roomId, {
+                method: 'DELETE'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Có lỗi xảy ra!');
+                });
+        }
+
+        function clearCart() {
+            if (!confirm('Bạn có chắc muốn xóa tất cả phòng khỏi giỏ hàng?')) {
+                return;
+            }
+
+            fetch('/cart/clear', {
+                method: 'POST'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Có lỗi xảy ra!');
+                });
+        }
+
+        function checkout() {
+            if (!confirm('Xác nhận đặt phòng? Đơn hàng sẽ được tạo với trạng thái chờ xử lý.')) {
+                return;
+            }
+
+            // Show loading
+            const checkoutBtn = document.querySelector('.btn-primary');
+            const originalText = checkoutBtn.innerHTML;
+            checkoutBtn.disabled = true;
+            checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+            fetch('/cart/checkout', {
+                method: 'POST'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.innerHTML = originalText;
+
+                    if (data.success) {
+                        alert(data.message);
+                        // Redirect to orders page or reload
+                        window.location.href = '/hotel/order';
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra!');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.innerHTML = originalText;
+                    alert('Có lỗi xảy ra khi đặt phòng!');
+                });
+        }
+    </script>
+
+</body>
+
+</html>

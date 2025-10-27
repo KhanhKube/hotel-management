@@ -6,10 +6,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
+import java.util.List;
+
 import java.time.LocalDate;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Integer> {
+    List<OrderDetail> findByOrderId(Integer orderId);
 
     // Dùng cho phần check validate để người dùng có thể book phòng.
     // Lấy end_date gần nhất của phòng (booking đang active hoặc sắp tới)
@@ -18,4 +23,5 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
             "AND od.endDate >= CURRENT_TIMESTAMP " +
             "AND od.status NOT IN ('CANCELLED', 'COMPLETED')")
     LocalDate findNextAvailableDateByRoomId(@Param("roomId") Integer roomId);
+    List<OrderDetail> findByOrderId(Integer orderId);
 }

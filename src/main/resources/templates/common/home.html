@@ -15,6 +15,148 @@
     <link rel="stylesheet" href="/vendors/owl-carousel/owl.carousel.min.css">
     <link rel="stylesheet" href="/vendors/nice-select/nice-select.css">
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Banner buttons styling */
+        .button-outline {
+            background: transparent !important;
+            border: 2px solid white !important;
+            color: white !important;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .button-outline:hover {
+            background: white !important;
+            color: #333 !important;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+        }
+
+        /* News cards styling */
+        .card-news {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-news:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .card-news__img {
+            position: relative;
+            overflow: hidden;
+            height: 250px;
+        }
+
+        .card-news__img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .card-news:hover .card-news__img img {
+            transform: scale(1.1);
+        }
+
+        .card-news .card-body {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-news__title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+
+        .card-news__title a {
+            color: #2c3e50;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .card-news__title a:hover {
+            color: #667eea;
+        }
+
+        .card-news__info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .card-news__info li {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .news-icon {
+            color: #667eea;
+        }
+
+        .card-news p {
+            color: #6c757d;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .card-news__link {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            margin-top: auto;
+        }
+
+        .card-news__link:hover {
+            color: #764ba2;
+            gap: 12px;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Animation for news cards */
+        .news-card-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .news-card-animate.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 <body>
 <!-- import header -->
@@ -27,7 +169,12 @@
             <div class="text-center">
                 <h4>Xem sự khác biệt mà một kỳ nghỉ mang lại!</h4>
                 <h1>Sang trọng <em>và</em> Riêng Tư</h1>
-                <a class="button home-banner-btn" href="#">Đặt ngay</a>
+                <div class="banner-buttons d-flex justify-content-center gap-3 flex-wrap mt-4">
+                    <a class="button home-banner-btn" href="#">Đặt ngay</a>
+                    <a class="button button-outline" href="#news-section" onclick="scrollToNews(); return false;">
+                        <i class="fas fa-newspaper me-2"></i>Xem tin tức
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -365,84 +512,70 @@
 
 
 <!-- ================ news section start ================= -->
-<section class="section-margin">
+<section class="section-margin" id="news-section">
     <div class="container">
         <div class="section-intro text-center pb-80px">
             <div class="section-intro__style">
                 <img src="img/home/bed-icon.png" alt="">
             </div>
             <h2>Tin tức & Sự kiện</h2>
+            <p class="mt-3 text-muted">Cập nhật những tin tức mới nhất và các sự kiện đặc biệt tại khách sạn</p>
         </div>
 
         <div class="row">
-            <div class="col-md-6 col-lg-4 mb-4 mb-md-0">
-                <div class="card card-news">
+            <!-- Dynamic News from Database -->
+            <div class="col-md-6 col-lg-4 mb-4 mb-md-0" th:each="news : ${latestNews}">
+                <div class="card card-news news-card-animate">
                     <div class="card-news__img">
-                        <img class="card-img" src="img/home/explore1.png" alt="">
+                        <img class="card-img"
+                             th:src="${news.image != null ? news.image : '/img/home/explore1.png'}"
+                             th:alt="${news.title}">
                     </div>
                     <div class="card-body">
-                        <h4 class="card-news__title"><a href="#">Các công ty khách sạn đã thay đổi cán cân</a></h4>
+                        <h4 class="card-news__title">
+                            <a th:href="@{/news/{id}(id=${news.newsId})}" th:text="${news.title}">Tiêu đề tin tức</a>
+                        </h4>
                         <ul class="card-news__info">
-                            <li><a href="#"><span class="news-icon"><i class="ti-notepad"></i></span> 20th Nov, 2018</a>
+                            <li>
+                                <a href="#"><span class="news-icon"><i class="ti-notepad"></i></span>
+                                    <span th:text="${#temporals.format(news.createdAt, 'dd/MM/yyyy')}">20th Nov, 2024</span>
+                                </a>
                             </li>
-                            <li><a href="#"><span class="news-icon"><i class="ti-comment"></i></span> 03 Comments</a>
+                            <li>
+                                <a href="#"><span class="news-icon"><i class="ti-eye"></i></span>
+                                    <span th:text="${news.view != null ? news.view : 0} + ' lượt xem'">0 lượt xem</span>
+                                </a>
                             </li>
                         </ul>
-                        <p>Not thoughts all exercise blessing Indulgence way everything joy alteration boisterous the
-                            attachment party we years to order</p>
-                        <a class="card-news__link" href="#">Read More <i class="ti-arrow-right"></i></a>
+                        <p th:text="${news.heading != null ? news.heading : #strings.abbreviate(news.content, 100)}">
+                            Mô tả ngắn về tin tức...
+                        </p>
+                        <a class="card-news__link" th:href="@{/news/{id}(id=${news.newsId})}">
+                            Đọc thêm <i class="ti-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-4 mb-4 mb-md-0">
-                <div class="card card-news">
-                    <div class="card-news__img">
-                        <img class="card-img" src="img/home/explore2.png" alt="">
-                    </div>
-                    <div class="card-body">
-                        <h4 class="card-news__title"><a href="#">Hãy thử sức với trò chơi ô chữ khai mạc ngành công nghiệp</a></h4>
-                        <ul class="card-news__info">
-                            <li><a href="#"><span class="news-icon"><i class="ti-notepad"></i></span> 20th Nov, 2018</a>
-                            </li>
-                            <li><a href="#"><span class="news-icon"><i class="ti-comment"></i></span> 03 Comments</a>
-                            </li>
-                        </ul>
-                        <p>Not thoughts all exercise blessing Indulgence way everything joy alteration boisterous the
-                            attachment party we years to order</p>
-                        <a class="card-news__link" href="#">Read More <i class="ti-arrow-right"></i></a>
-                    </div>
-                </div>
+            <!-- Fallback if no news -->
+            <div class="col-12 text-center" th:if="${latestNews == null or #lists.isEmpty(latestNews)}">
+                <p class="text-muted">Hiện chưa có tin tức nào.</p>
             </div>
+        </div>
 
-            <div class="col-md-6 col-lg-4 mb-4 mb-md-0">
-                <div class="card card-news">
-                    <div class="card-news__img">
-                        <img class="card-img" src="img/home/explore3.png" alt="">
-                    </div>
-                    <div class="card-body">
-                        <h4 class="card-news__title"><a href="#">Các chủ khách sạn quyết tâm đầu tư vào khách hàng</a></h4>
-                        <ul class="card-news__info">
-                            <li><a href="#"><span class="news-icon"><i class="ti-notepad"></i></span> 20th Nov, 2018</a>
-                            </li>
-                            <li><a href="#"><span class="news-icon"><i class="ti-comment"></i></span> 03 Comments</a>
-                            </li>
-                        </ul>
-                        <p>Not thoughts all exercise blessing Indulgence way everything joy alteration boisterous the
-                            attachment party we years to order</p>
-                        <a class="card-news__link" href="#">Read More <i class="ti-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
+        <!-- View All News Button -->
+        <div class="text-center mt-5" th:if="${latestNews != null and !#lists.isEmpty(latestNews)}">
+            <a th:href="@{/news}" class="button button--active">
+                Xem tất cả tin tức <i class="ti-arrow-right ms-2"></i>
+            </a>
         </div>
     </div>
 </section>
 <!-- ================ news section end ================= -->
 
 </main>
-<!-- import footer -->
+<!-- import header -->
 <div th:replace="~{common/footer :: footer}"></div>
-
 <!-- import AI Chat Widget -->
 <div th:replace="~{ai/ai-chat-widget :: aiChatWidget}"></div>
 <button id="aiChatButton" onclick="toggleAIChat()">
@@ -463,7 +596,7 @@
         </div>
         <button class="chat-close-btn" onclick="toggleAIChat()">×</button>
     </div>
-    
+
     <!-- Chat Messages Area -->
     <div id="chatArea" class="chat-messages">
         <div id="welcomeMsg" class="welcome-message">
@@ -477,7 +610,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Input Area -->
     <div class="chat-input-area">
         <input type="text" id="chatInput" placeholder="Nhập yêu cầu của bạn..." onkeypress="handleKeyPress(event)">
@@ -511,16 +644,16 @@
         position: relative;
         animation: pulse 2s infinite;
     }
-    
+
     #aiChatButton:hover {
         transform: scale(1.1);
         box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
     }
-    
+
     .chat-icon {
         font-size: 28px;
     }
-    
+
     .ai-badge {
         position: absolute;
         top: -5px;
@@ -533,7 +666,7 @@
         border-radius: 10px;
         box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
     }
-    
+
     @keyframes pulse {
         0%, 100% {
             box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
@@ -542,7 +675,7 @@
             box-shadow: 0 4px 30px rgba(102, 126, 234, 0.7);
         }
     }
-    
+
     /* Chat Widget */
     #aiChatWidget {
         display: none;
@@ -559,7 +692,7 @@
         overflow: hidden;
         animation: slideUp 0.3s ease-out;
     }
-    
+
     @keyframes slideUp {
         from {
             opacity: 0;
@@ -570,7 +703,7 @@
             transform: translateY(0);
         }
     }
-    
+
     /* Chat Header */
     .chat-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -580,13 +713,13 @@
         justify-content: space-between;
         align-items: center;
     }
-    
+
     .chat-header-content {
         display: flex;
         align-items: center;
         gap: 12px;
     }
-    
+
     .chat-avatar {
         width: 40px;
         height: 40px;
@@ -597,18 +730,18 @@
         justify-content: center;
         font-size: 22px;
     }
-    
+
     .chat-title {
         font-size: 16px;
         font-weight: 600;
         margin-bottom: 2px;
     }
-    
+
     .chat-subtitle {
         font-size: 12px;
         opacity: 0.9;
     }
-    
+
     .chat-close-btn {
         background: rgba(255, 255, 255, 0.2);
         border: none;
@@ -621,12 +754,12 @@
         line-height: 1;
         transition: all 0.2s;
     }
-    
+
     .chat-close-btn:hover {
         background: rgba(255, 255, 255, 0.3);
         transform: rotate(90deg);
     }
-    
+
     /* Chat Messages */
     .chat-messages {
         flex: 1;
@@ -634,41 +767,41 @@
         padding: 20px;
         background: #f8f9fa;
     }
-    
+
     .chat-messages::-webkit-scrollbar {
         width: 6px;
     }
-    
+
     .chat-messages::-webkit-scrollbar-thumb {
         background: #cbd5e0;
         border-radius: 3px;
     }
-    
+
     /* Welcome Message */
     .welcome-message {
         text-align: center;
         padding: 20px;
     }
-    
+
     .welcome-icon {
         font-size: 48px;
         margin-bottom: 12px;
     }
-    
+
     .welcome-title {
         font-size: 20px;
         font-weight: 600;
         color: #2d3748;
         margin-bottom: 8px;
     }
-    
+
     .welcome-text {
         font-size: 14px;
         color: #718096;
         line-height: 1.5;
         margin-bottom: 16px;
     }
-    
+
     .welcome-examples {
         display: flex;
         flex-wrap: wrap;
@@ -676,7 +809,7 @@
         justify-content: center;
         margin-top: 16px;
     }
-    
+
     .example-chip {
         background: white;
         border: 1px solid #e2e8f0;
@@ -687,14 +820,14 @@
         cursor: pointer;
         transition: all 0.2s;
     }
-    
+
     .example-chip:hover {
         background: #667eea;
         color: white;
         border-color: #667eea;
         transform: translateY(-2px);
     }
-    
+
     /* Chat Message Bubbles */
     .chat-message {
         margin-bottom: 16px;
@@ -702,7 +835,7 @@
         gap: 8px;
         animation: fadeIn 0.3s ease-out;
     }
-    
+
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -713,11 +846,11 @@
             transform: translateY(0);
         }
     }
-    
+
     .chat-message.user {
         justify-content: flex-end;
     }
-    
+
     .message-bubble {
         max-width: 75%;
         padding: 12px 16px;
@@ -726,25 +859,25 @@
         line-height: 1.5;
         word-wrap: break-word;
     }
-    
+
     .chat-message.bot .message-bubble {
         background: white;
         color: #2d3748;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         border-bottom-left-radius: 4px;
     }
-    
+
     .chat-message.user .message-bubble {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border-bottom-right-radius: 4px;
     }
-    
+
     .message-bubble strong {
         display: block;
         margin-bottom: 4px;
     }
-    
+
     .message-bubble a {
         color: #667eea;
         text-decoration: none;
@@ -755,16 +888,16 @@
         margin-top: 8px;
         transition: all 0.2s;
     }
-    
+
     .chat-message.user .message-bubble a {
         color: white;
         text-decoration: underline;
     }
-    
+
     .message-bubble a:hover {
         opacity: 0.8;
     }
-    
+
     /* Chat Input */
     .chat-input-area {
         padding: 16px;
@@ -773,7 +906,7 @@
         display: flex;
         gap: 8px;
     }
-    
+
     #chatInput {
         flex: 1;
         padding: 12px 16px;
@@ -783,12 +916,12 @@
         outline: none;
         transition: all 0.2s;
     }
-    
+
     #chatInput:focus {
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
-    
+
     .chat-send-btn {
         width: 44px;
         height: 44px;
@@ -803,16 +936,16 @@
         transition: all 0.2s;
         flex-shrink: 0;
     }
-    
+
     .chat-send-btn:hover {
         transform: scale(1.1);
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
-    
+
     .chat-send-btn:active {
         transform: scale(0.95);
     }
-    
+
     /* Responsive */
     @media (max-width: 768px) {
         #aiChatWidget {
@@ -821,7 +954,7 @@
             right: 20px;
             bottom: 100px;
         }
-        
+
         #aiChatButton {
             right: 20px;
             bottom: 20px;
@@ -831,51 +964,51 @@
 
 <script>
     let isChatOpen = false;
-    
+
     function toggleAIChat() {
         const widget = document.getElementById('aiChatWidget');
         isChatOpen = !isChatOpen;
         widget.style.display = isChatOpen ? 'flex' : 'none';
-        
+
         if (isChatOpen) {
             document.getElementById('chatInput').focus();
         }
     }
-    
+
     function addMessage(text, isUser) {
         const chatArea = document.getElementById('chatArea');
         const welcome = document.getElementById('welcomeMsg');
         if (welcome) welcome.remove();
-        
+
         const msg = document.createElement('div');
         msg.className = 'chat-message ' + (isUser ? 'user' : 'bot');
         msg.innerHTML = '<div class="message-bubble">' + text + '</div>';
         chatArea.appendChild(msg);
         chatArea.scrollTop = chatArea.scrollHeight;
     }
-    
+
     function sendMessage() {
         const input = document.getElementById('chatInput');
         const text = input.value.trim();
         if (!text) return;
-        
+
         addMessage(text, true);
         input.value = '';
-        
+
         setTimeout(() => processMessage(text), 500);
     }
-    
+
     function sendExampleMessage(text) {
         document.getElementById('chatInput').value = text;
         sendMessage();
     }
-    
+
     function handleKeyPress(event) {
         if (event.key === 'Enter') {
             sendMessage();
         }
     }
-    
+
     function processMessage(text) {
         fetch('/hotel-management/room/search', {
             method: 'POST',
@@ -887,19 +1020,19 @@
             .then(res => res.json())
             .then(data => {
                 const roomIds = data.data || [];
-                
+
                 if (roomIds.length === 0) {
                     addMessage('Xin lỗi, không tìm thấy phòng phù hợp với yêu cầu "' + text + '". Bạn có thể thử tìm kiếm khác!', false);
                     return;
                 }
-                
+
                 addMessage('Tôi đã tìm thấy ' + roomIds.length + ' phòng phù hợp với yêu cầu của bạn:', false);
-                
+
                 roomIds.forEach((roomId, i) => {
                     setTimeout(() => {
                         const link = '/hotel/room/' + roomId;
                         const html = '<strong>Phòng #' + roomId + '</strong><br>' +
-                                    '<a href="' + link + '" target="_blank">👉 Xem chi tiết và đặt phòng</a>';
+                            '<a href="' + link + '" target="_blank">👉 Xem chi tiết và đặt phòng</a>';
                         addMessage(html, false);
                     }, i * 300);
                 });
@@ -909,7 +1042,7 @@
                 addMessage('Xin lỗi, có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại!', false);
             });
     }
-    
+
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && isChatOpen) {
             toggleAIChat();
@@ -927,5 +1060,66 @@
 <script src="/vendors/jquery.ajaxchimp.min.js"></script>
 <script src="/vendors/mail-script.js"></script>
 <script src="/js/main.js"></script>
+
+<script>
+    // Smooth scroll to news section
+    function scrollToNews() {
+        const newsSection = document.getElementById('news-section');
+        if (newsSection) {
+            const offsetTop = newsSection.offsetTop - 80; // Account for header height
+            window.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
+            });
+        }
+    }
+
+    // Initialize animations when document is ready
+    $(document).ready(function() {
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all news cards with staggered animation
+        $('.news-card-animate').each(function(index) {
+            const delay = index * 0.1; // Stagger animation by 0.1s
+            $(this).css('transition-delay', delay + 's');
+            observer.observe(this);
+        });
+
+        // Add click handlers for news cards (only on card body, not on links)
+        $('.card-news .card-body').on('click', function(e) {
+            // Prevent if clicking on actual links
+            if (!$(e.target).closest('a').length) {
+                const link = $(this).find('.card-news__title a').attr('href');
+                if (link) {
+                    window.location.href = link;
+                }
+            }
+        });
+
+        // Add hover effect for better UX (only on card body)
+        $('.card-news .card-body').hover(
+            function() {
+                $(this).css('cursor', 'pointer');
+                $(this).closest('.card-news').addClass('hover-effect');
+            },
+            function() {
+                $(this).css('cursor', 'default');
+                $(this).closest('.card-news').removeClass('hover-effect');
+            }
+        );
+    });
+</script>
 </body>
 </html>

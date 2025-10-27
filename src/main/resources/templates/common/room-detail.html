@@ -55,6 +55,116 @@
         .add-cart-btn:hover {
             background-color: #e65c00;
         }
+
+        /* Toast Notification Styles */
+        .custom-toast {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            min-width: 300px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            animation: slideInRight 0.4s ease-out;
+            border-left: 4px solid;
+        }
+
+        .custom-toast.success {
+            border-left-color: #10b981;
+        }
+
+        .custom-toast.error {
+            border-left-color: #ef4444;
+        }
+
+        .custom-toast-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .custom-toast.success .custom-toast-icon {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .custom-toast.error .custom-toast-icon {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .custom-toast-content {
+            flex: 1;
+        }
+
+        .custom-toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #1f2937;
+        }
+
+        .custom-toast-message {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .custom-toast-close {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .custom-toast-close:hover {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+
+        .custom-toast.hiding {
+            animation: slideOutRight 0.3s ease-in forwards;
+        }
     </style>
 </head>
 <body>
@@ -111,21 +221,23 @@
         </div>
 
         <!-- Form chọn ngày -->
-        <form th:action="@{/cart/add}" method="post" class="p-3 border rounded bg-white shadow-sm">
-            <input type="hidden" name="roomId" th:value="${room.roomId}">
+        <form id="addToCartForm" class="p-3 border rounded bg-white shadow-sm">
+            <input type="hidden" id="roomId" th:value="${room.roomId}">
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Ngày nhận phòng:</label>
-                    <input type="date" name="checkIn" class="form-control" required>
+                    <input type="datetime-local" id="checkIn" class="form-control" required>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Ngày trả phòng:</label>
-                    <input type="date" name="checkOut" class="form-control" required>
+                    <input type="datetime-local" id="checkOut" class="form-control" required>
                 </div>
             </div>
 
             <div class="text-end">
-                <button type="submit" class="btn add-cart-btn px-4 py-2">Thêm vào giỏ</button>
+                <button type="submit" class="btn add-cart-btn px-4 py-2">
+                    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                </button>
             </div>
         </form>
 
@@ -146,5 +258,126 @@
 <script src="/vendors/jquery.ajaxchimp.min.js"></script>
 <script src="/vendors/mail-script.js"></script>
 <script src="/js/main.js"></script>
+
+<script>
+    // Toast notification functions
+    function showSuccessToast(message) {
+        showToast('success', 'Thành công!', message);
+    }
+
+    function showErrorToast(message) {
+        showToast('error', 'Lỗi!', message);
+    }
+
+    function showToast(type, title, message) {
+        const toast = document.createElement('div');
+        toast.className = `custom-toast ${type}`;
+        
+        const icon = type === 'success' ? '✓' : '✕';
+        
+        toast.innerHTML = `
+            <div class="custom-toast-icon">${icon}</div>
+            <div class="custom-toast-content">
+                <div class="custom-toast-title">${title}</div>
+                <div class="custom-toast-message">${message}</div>
+            </div>
+            <button class="custom-toast-close" onclick="this.parentElement.remove()">×</button>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            toast.classList.add('hiding');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // Set minimum date to today
+    const today = new Date().toISOString().slice(0, 16);
+    document.getElementById('checkIn').min = today;
+    document.getElementById('checkOut').min = today;
+    
+    // Handle form submission
+    document.getElementById('addToCartForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const roomId = parseInt(document.getElementById('roomId').value);
+        const checkInValue = document.getElementById('checkIn').value;
+        const checkOutValue = document.getElementById('checkOut').value;
+        
+        if (!checkInValue || !checkOutValue) {
+            alert('Vui lòng chọn ngày nhận và trả phòng');
+            return;
+        }
+        
+        if (new Date(checkOutValue) <= new Date(checkInValue)) {
+            alert('Ngày trả phòng phải sau ngày nhận phòng');
+            return;
+        }
+        
+        // Format datetime for backend (ISO 8601 format)
+        const checkIn = checkInValue + ':00'; // Add seconds
+        const checkOut = checkOutValue + ':00';
+        
+        const data = {
+            roomId: roomId,
+            checkIn: checkIn,
+            checkOut: checkOut
+        };
+        
+        console.log('Sending data:', data);
+        
+        // Show loading
+        const submitBtn = document.querySelector('#addToCartForm button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+        
+        fetch('/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(res => {
+            console.log('Response status:', res.status);
+            return res.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            
+            if (data.success) {
+                // Update cart badge
+                if (typeof loadCartPreview === 'function') {
+                    loadCartPreview();
+                }
+                
+                // Show success toast
+                showSuccessToast(data.message || 'Đã thêm vào giỏ hàng thành công!');
+                
+                // Reset form
+                document.getElementById('checkIn').value = '';
+                document.getElementById('checkOut').value = '';
+            } else {
+                showErrorToast(data.message || 'Có lỗi xảy ra!');
+                if (data.message && data.message.includes('đăng nhập')) {
+                    setTimeout(() => {
+                        window.location.href = '/hotel/login';
+                    }, 2000);
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            alert('Có lỗi xảy ra! Vui lòng kiểm tra console để biết thêm chi tiết.');
+        });
+    });
+</script>
 </body>
 </html>
