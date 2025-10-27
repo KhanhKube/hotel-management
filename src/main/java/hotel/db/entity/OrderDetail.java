@@ -45,5 +45,6 @@ public class OrderDetail extends AbstractVersion{
     private LocalDateTime checkOut;
 
     @Column(name = "status")
-    private String status = "PENDING";
+    private String status = "PENDING"; // Trường hợp mà khách hàng hủy đặt phòng, thì status anh nào co
+                                       // de phần này thì để là CANCELLED nhé, hoặc check out xong thì để là COMPLETED nhé.
 }

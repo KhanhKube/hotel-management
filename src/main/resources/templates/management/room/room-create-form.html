@@ -13,187 +13,227 @@
 </head>
 
 <body>
-<div class="container-scroller">
-    <!-- Include sidebar -->
-    <div th:replace="~{common/sidebar :: sidebar}"></div>
+    <div class="container-scroller">
+        <!-- Include sidebar -->
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
 
-    <div class="container-fluid page-body-wrapper">
-        <nav class="navbar p-0 fixed-top d-flex flex-row">
-            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
-                <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
-                                                                               alt="logo" /></a>
-            </div>
-            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
-            </div>
-        </nav>
+        <div class="container-fluid page-body-wrapper">
+            <nav class="navbar p-0 fixed-top d-flex flex-row">
+                <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                    <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                            alt="logo" /></a>
+                </div>
+                <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+                </div>
+            </nav>
 
-        <div class="main-panel">
-            <div class="content-wrapper">
-                <div class="row">
-                    <div class="col-12 grid-margin">
-                        <div class="card">
-                            <div class="card-body">
-                                <h4 class="card-title mb-4">
-                                    <i class="mdi mdi-home-plus"></i>
-                                    <span th:text="${room.roomId != null ? 'Cập Nhật Phòng' : 'Tạo Phòng Mới'}"></span>
-                                </h4>
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="row">
+                        <div class="col-12 grid-margin">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title mb-4">
+                                        <i class="mdi mdi-home-plus"></i>
+                                        <span
+                                            th:text="${room.roomId != null ? 'Cập Nhật Phòng' : 'Tạo Phòng Mới'}"></span>
+                                    </h4>
 
-                                <form th:action="@{/hotel-management/room/create}" th:object="${room}" method="post" enctype="multipart/form-data">
-                                    <input type="hidden" th:field="*{roomId}" />
+                                    <form th:action="@{/hotel-management/room/create}" th:object="${room}" method="post"
+                                        enctype="multipart/form-data">
+                                        <input type="hidden" th:field="*{roomId}" />
 
-                                    <!-- Error Message -->
-                                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        <i class="mdi mdi-alert-circle"></i>
-                                        <span th:text="${errorMessage}"></span>
-                                        <button type="button" class="close" data-dismiss="alert">
-                                            <span>&times;</span>
-                                        </button>
-                                    </div>
-
-                                    <!-- Số phòng -->
-                                    <div class="form-group">
-                                        <label for="roomNumber">
-                                            <i class="mdi mdi-door"></i> Số phòng: <span class="text-danger">*</span>
-                                        </label>
-                                        <input id="roomNumber" type="text" class="form-control" th:field="*{roomNumber}" 
-                                               placeholder="VD: 101, 102..." required>
-                                    </div>
-
-                                    <!-- Row 1: Loại phòng & Loại giường -->
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="roomType">
-                                                    <i class="mdi mdi-home-variant"></i> Loại phòng: <span class="text-danger">*</span>
-                                                </label>
-                                                <select id="roomType" class="form-control" th:field="*{roomType}" required>
-                                                    <option value="">-- Chọn loại phòng --</option>
-                                                    <option th:each="type : ${roomTypes}" th:value="${type}" th:text="${type}"></option>
-                                                </select>
-                                            </div>
+                                        <!-- Error Message -->
+                                        <div th:if="${errorMessage}"
+                                            class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            <i class="mdi mdi-alert-circle"></i>
+                                            <span th:text="${errorMessage}"></span>
+                                            <button type="button" class="close" data-dismiss="alert">
+                                                <span>&times;</span>
+                                            </button>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="bedType">
-                                                    <i class="mdi mdi-bed"></i> Loại giường: <span class="text-danger">*</span>
-                                                </label>
-                                                <select id="bedType" class="form-control" th:field="*{bedType}" required>
-                                                    <option value="">-- Chọn loại giường --</option>
-                                                    <option th:each="bed : ${bedTypes}" th:value="${bed}" th:text="${bed}"></option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <!-- Row 2: Tầng & Diện tích -->
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="floorId">
-                                                    <i class="mdi mdi-stairs"></i> Tầng: <span class="text-danger">*</span>
-                                                </label>
-                                                <select id="floorId" class="form-control" th:field="*{floorId}" required>
-                                                    <option value="">-- Chọn tầng --</option>
-                                                    <option th:each="floor : ${floors}" 
-                                                            th:value="${floor.floorId}"
-                                                            th:text="'Tầng ' + ${floor.floorNumber}"></option>
-                                                </select>
-                                            </div>
+                                        <!-- Số phòng -->
+                                        <div class="form-group">
+                                            <label for="roomNumber">
+                                                <i class="mdi mdi-door"></i> Số phòng: <span
+                                                    class="text-danger">*</span>
+                                            </label>
+                                            <input id="roomNumber" type="text" class="form-control"
+                                                th:field="*{roomNumber}" placeholder="VD: 101, 102..." required>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="sizeId">
-                                                    <i class="mdi mdi-ruler-square"></i> Diện tích: <span class="text-danger">*</span>
-                                                </label>
-                                                <select id="sizeId" class="form-control" th:field="*{sizeId}" required>
-                                                    <option value="">-- Chọn diện tích --</option>
-                                                    <option th:each="size : ${sizes}"
-                                                            th:value="${size.sizeId}"
-                                                            th:text="${size.size} + ' m²'"></option>
-                                                </select>
+
+                                        <!-- Row 1: Loại phòng & Loại giường -->
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="roomType">
+                                                        <i class="mdi mdi-home-variant"></i> Loại phòng: <span
+                                                            class="text-danger">*</span>
+                                                    </label>
+                                                    <select id="roomType" class="form-control" th:field="*{roomType}"
+                                                        required>
+                                                        <option value="">-- Chọn loại phòng --</option>
+                                                        <option th:each="type : ${roomTypes}" th:value="${type}"
+                                                            th:text="${type}"></option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Row 3: Giá & Trạng thái -->
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="price">
-                                                    <i class="mdi mdi-currency-usd"></i> Giá/đêm (VNĐ): <span class="text-danger">*</span>
-                                                </label>
-                                                <input id="price" type="number" class="form-control" th:field="*{price}" 
-                                                       placeholder="VD: 500000" min="0" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="status">
-                                                    <i class="mdi mdi-information"></i> Trạng thái: <span class="text-danger">*</span>
-                                                </label>
-                                                <select id="status" class="form-control" th:field="*{status}" required>
-                                                    <option value="">-- Chọn trạng thái --</option>
-                                                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"></option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Mô tả -->
-                                    <div class="form-group">
-                                        <label for="roomDescription">
-                                            <i class="mdi mdi-text"></i> Mô tả phòng:
-                                        </label>
-                                        <textarea id="roomDescription" class="form-control" th:field="*{roomDescription}" 
-                                                  rows="4" placeholder="Nhập mô tả chi tiết về phòng..."></textarea>
-                                    </div>
-                                    <!-- Upload ảnh -->
-                                    <div class="form-group">
-                                        <label for="imageFiles">
-                                            <i class="mdi mdi-image-multiple"></i> Ảnh phòng:
-                                        </label>
-                                        <input type="file"
-                                               id="imageFiles"
-                                               name="imageFiles"
-                                               class="form-control-file"
-                                               accept="image/*"
-                                               multiple>
-                                        <small class="form-text text-muted">
-                                            <i class="mdi mdi-information"></i>
-                                            Chọn nhiều ảnh (tối đa 10MB/ảnh). Định dạng: JPG, PNG, GIF
-                                        </small>
-                                    </div>
-
-                                    <!-- Preview ảnh mới chọn -->
-                                    <div class="form-group" id="imagePreviewContainer" style="display: none;">
-                                        <label>Xem trước:</label>
-                                        <div class="row" id="imagePreview"></div>
-                                    </div>
-
-                                    <!-- Ảnh hiện tại (nếu edit) -->
-                                    <div th:if="${room.roomId != null}" class="form-group">
-                                        <label>
-                                            <i class="mdi mdi-image-album"></i> Ảnh hiện tại:
-                                        </label>
-                                        <div class="row" id="currentImages">
-                                            <div class="col-12 text-center">
-                                                <div class="spinner-border text-primary" role="status">
-                                                    <span class="sr-only">Đang tải...</span>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="bedType">
+                                                        <i class="mdi mdi-bed"></i> Loại giường: <span
+                                                            class="text-danger">*</span>
+                                                    </label>
+                                                    <select id="bedType" class="form-control" th:field="*{bedType}"
+                                                        required>
+                                                        <option value="">-- Chọn loại giường --</option>
+                                                        <option th:each="bed : ${bedTypes}" th:value="${bed}"
+                                                            th:text="${bed}"></option>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <!-- Buttons -->
-                                    <div class="form-group mt-4">
-                                        <button type="submit" class="btn btn-primary btn-lg">
-                                            <i class="mdi mdi-content-save"></i> Lưu phòng
-                                        </button>
-                                        <a th:href="@{/hotel-management/room}" class="btn btn-secondary btn-lg">
-                                            <i class="mdi mdi-close"></i> Hủy
-                                        </a>
-                                    </div>
-                                </form>
 
+                                        <!-- Row 2: Tầng & Diện tích -->
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="floorId">
+                                                        <i class="mdi mdi-stairs"></i> Tầng: <span
+                                                            class="text-danger">*</span>
+                                                    </label>
+                                                    <select id="floorId" class="form-control" th:field="*{floorId}"
+                                                        required>
+                                                        <option value="">-- Chọn tầng --</option>
+                                                        <option th:each="floor : ${floors}" th:value="${floor.floorId}"
+                                                            th:text="'Tầng ' + ${floor.floorNumber}"></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="sizeId">
+                                                        <i class="mdi mdi-ruler-square"></i> Diện tích: <span
+                                                            class="text-danger">*</span>
+                                                    </label>
+                                                    <select id="sizeId" class="form-control" th:field="*{sizeId}"
+                                                        required>
+                                                        <option value="">-- Chọn diện tích --</option>
+                                                        <option th:each="size : ${sizes}" th:value="${size.sizeId}"
+                                                            th:text="${size.size} + ' m²'"></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 3: Giá & Trạng thái -->
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="price">
+                                                        <i class="mdi mdi-currency-usd"></i> Giá/đêm (VNĐ): <span
+                                                            class="text-danger">*</span>
+                                                    </label>
+                                                    <input id="price" type="number" class="form-control"
+                                                        th:field="*{price}" placeholder="VD: 500000" min="0" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="status">
+                                                        <i class="mdi mdi-information"></i> Trạng thái: <span
+                                                            class="text-danger">*</span>
+                                                    </label>
+                                                    <select id="status" class="form-control" th:field="*{status}"
+                                                        required>
+                                                        <option value="">-- Chọn trạng thái --</option>
+                                                        <option th:each="s : ${statuses}" th:value="${s}"
+                                                            th:text="${s}"></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Mô tả -->
+                                        <div class="form-group">
+                                            <label for="roomDescription">
+                                                <i class="mdi mdi-text"></i> Mô tả phòng:
+                                            </label>
+                                            <textarea id="roomDescription" class="form-control"
+                                                th:field="*{roomDescription}" rows="4"
+                                                placeholder="Nhập mô tả chi tiết về phòng..."></textarea>
+                                        </div>
+                                        <!-- Upload ảnh -->
+                                        <div class="form-group">
+                                            <label for="imageFiles">
+                                                <i class="mdi mdi-image-multiple"></i> Ảnh phòng:
+                                            </label>
+                                            <input type="file" id="imageFiles" name="imageFiles"
+                                                class="form-control-file" accept="image/*" multiple>
+                                            <small class="form-text text-muted">
+                                                <i class="mdi mdi-information"></i>
+                                                Chọn nhiều ảnh (tối đa 10MB/ảnh). Định dạng: JPG, PNG, GIF
+                                            </small>
+                                        </div>
+
+                                        <!-- Preview ảnh mới chọn -->
+                                        <div class="form-group" id="imagePreviewContainer" style="display: none;">
+                                            <label>Xem trước:</label>
+                                            <div class="row" id="imagePreview"></div>
+                                        </div>
+
+                                        <!-- Ảnh hiện tại (nếu edit) -->
+                                        <div th:if="${room.roomId != null}" class="form-group">
+                                            <label>
+                                                <i class="mdi mdi-image-album"></i> Ảnh hiện tại:
+                                            </label>
+
+                                            <!-- Nếu có ảnh -->
+                                            <div th:if="${images != null and !images.empty}" class="row">
+                                                <div th:each="image : ${images}" class="col-md-3 mb-3">
+                                                    <div class="card">
+                                                        <img th:src="@{${image.roomImageUrl}}" class="card-img-top"
+                                                            style="height: 150px; object-fit: cover;" alt="Room image">
+                                                        <div class="card-body p-2 text-center">
+                                                            <small class="text-muted">ID: <span
+                                                                    th:text="${image.roomImageId}"></span></small><br>
+                                                            <form
+                                                                th:action="@{/hotel-management/room/image/delete/{id}(id=${image.roomImageId})}"
+                                                                method="post" style="display: inline;"
+                                                                onsubmit="return confirm('Bạn có chắc muốn xóa ảnh này?');">
+                                                                <input type="hidden" name="roomId"
+                                                                    th:value="${room.roomId}">
+                                                                <button type="submit"
+                                                                    class="btn btn-danger btn-sm mt-2">
+                                                                    <i class="mdi mdi-delete"></i> Xóa
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Nếu không có ảnh -->
+                                            <div th:if="${images == null or images.empty}" class="row">
+                                                <div class="col-12 text-center text-muted py-4">
+                                                    <i class="mdi mdi-image-off" style="font-size: 48px;"></i>
+                                                    <p>Chưa có ảnh</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Buttons -->
+                                        <div class="form-group mt-4">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="mdi mdi-content-save"></i> Lưu phòng
+                                            </button>
+                                            <a th:href="@{/hotel-management/room}" class="btn btn-secondary btn-lg">
+                                                <i class="mdi mdi-close"></i> Hủy
+                                            </a>
+                                        </div>
+                                    </form>
+
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -201,40 +241,39 @@
             </div>
         </div>
     </div>
-</div>
-<script>
-    // Preview ảnh khi chọn file
-    document.getElementById('imageFiles').addEventListener('change', function(e) {
-        const preview = document.getElementById('imagePreview');
-        const container = document.getElementById('imagePreviewContainer');
-        preview.innerHTML = '';
+    <script>
+        // Preview ảnh khi chọn file
+        document.getElementById('imageFiles').addEventListener('change', function (e) {
+            const preview = document.getElementById('imagePreview');
+            const container = document.getElementById('imagePreviewContainer');
+            preview.innerHTML = '';
 
-        const files = e.target.files;
+            const files = e.target.files;
 
-        if (files.length > 0) {
-            container.style.display = 'block';
+            if (files.length > 0) {
+                container.style.display = 'block';
 
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
 
-                // Validate file type
-                if (!file.type.startsWith('image/')) {
-                    alert('File ' + file.name + ' không phải là ảnh!');
-                    continue;
-                }
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        alert('File ' + file.name + ' không phải là ảnh!');
+                        continue;
+                    }
 
-                // Validate file size (10MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    alert('File ' + file.name + ' quá lớn (>10MB)!');
-                    continue;
-                }
+                    // Validate file size (10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('File ' + file.name + ' quá lớn (>10MB)!');
+                        continue;
+                    }
 
-                const reader = new FileReader();
+                    const reader = new FileReader();
 
-                reader.onload = function(e) {
-                    const col = document.createElement('div');
-                    col.className = 'col-md-3 mb-3';
-                    col.innerHTML = `
+                    reader.onload = function (e) {
+                        const col = document.createElement('div');
+                        col.className = 'col-md-3 mb-3';
+                        col.innerHTML = `
                         <div class="card">
                             <img src="${e.target.result}"
                                  class="card-img-top"
@@ -245,133 +284,22 @@
                             </div>
                         </div>
                     `;
-                    preview.appendChild(col);
-                };
+                        preview.appendChild(col);
+                    };
 
-                reader.readAsDataURL(file);
-            }
-        } else {
-            container.style.display = 'none';
-        }
-    });
-
-    // Load ảnh hiện tại khi edit
-    document.addEventListener('DOMContentLoaded', function() {
-        const roomId = document.querySelector('input[name="roomId"]')?.value;
-        
-        if (roomId) {
-            loadCurrentImages(roomId);
-        }
-    });
-
-    function loadCurrentImages(roomId) {
-        console.log('Loading images for room:', roomId);
-        const url = `/hotel-management/room/api/images/${roomId}`;
-        console.log('Fetching URL:', url);
-        fetch(url)
-            .then(response => {
-                console.log('Response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    reader.readAsDataURL(file);
                 }
-                return response.json();
-            })
-            .then(images => {
-                console.log('Received images:', images);
-                const container = document.getElementById('currentImages');
-                container.innerHTML = '';
-
-                if (images.length === 0) {
-                    container.innerHTML = `
-                        <div class="col-12 text-center text-muted">
-                            <i class="mdi mdi-image-off" style="font-size: 48px;"></i>
-                            <p>Chưa có ảnh</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                images.forEach(image => {
-                    console.log('Processing image:', image);
-                    const col = document.createElement('div');
-                    col.className = 'col-md-3 mb-3';
-                    col.id = `image-${image.roomImageId}`;
-                    col.innerHTML = `
-                        <div class="card">
-                            <img src="${image.roomImageUrl}"
-                                 class="card-img-top"
-                                 style="height: 150px; object-fit: cover;"
-                                 alt="Room image">
-                            <div class="card-body p-2 text-center">
-                                <small class="text-muted">ID: ${image.roomImageId}</small><br>
-                                <button type="button" 
-                                        class="btn btn-danger btn-sm mt-2" 
-                                        onclick="deleteImage(${image.roomImageId})">
-                                    <i class="mdi mdi-delete"></i> Xóa
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(col);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading images:', error);
-                document.getElementById('currentImages').innerHTML = `
-                    <div class="col-12 text-center text-danger">
-                        <i class="mdi mdi-alert-circle"></i>
-                        <p>Lỗi tải ảnh</p>
-                    </div>
-                `;
-            });
-    }
-
-    function deleteImage(imageId) {
-        if (!confirm('Bạn có chắc muốn xóa ảnh này?')) {
-            return;
-        }
-
-        fetch(`/hotel-management/room/api/image/delete/${imageId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Xóa element khỏi DOM
-                const imageElement = document.getElementById(`image-${imageId}`);
-                if (imageElement) {
-                    imageElement.remove();
-                }
-                
-                // Kiểm tra nếu không còn ảnh nào
-                const container = document.getElementById('currentImages');
-                if (container.children.length === 0) {
-                    container.innerHTML = `
-                        <div class="col-12 text-center text-muted">
-                            <i class="mdi mdi-image-off" style="font-size: 48px;"></i>
-                            <p>Chưa có ảnh</p>
-                        </div>
-                    `;
-                }
-                
-                alert('Xóa ảnh thành công!');
             } else {
-                alert('Lỗi: ' + data.message);
+                container.style.display = 'none';
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Có lỗi xảy ra khi xóa ảnh!');
         });
-    }
-</script>
-<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
-<script th:src="@{/assets/js/off-canvas.js}"></script>
-<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
-<script th:src="@{/assets/js/misc.js}"></script>
+
+
+    </script>
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/assets/js/misc.js}"></script>
 </body>
 
 </html>

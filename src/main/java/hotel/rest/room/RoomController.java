@@ -163,7 +163,11 @@ public class RoomController {
         if  (room == null) {
             return "redirect:/hotel-management/room";
         }
+        // Load ảnh hiện có
+        List<RoomImage> images = roomImageService.getImagesByRoomId(id);
+        
         model.addAttribute("room", room);
+        model.addAttribute("images", images);
         return "management/room/room-create-form";
     }
 
@@ -219,31 +223,14 @@ public class RoomController {
 				.body(response);
 	}
 
-	@PostMapping("/api/image/delete/{imageId}")
-	@ResponseBody
-	public ResponseEntity<Map<String, Object>> deleteImage(@PathVariable Integer imageId) {
-		Map<String, Object> response = new HashMap<>();
+	@PostMapping("/image/delete/{imageId}")
+	public String deleteImage(@PathVariable Integer imageId, @RequestParam Integer roomId, Model model) {
 		try {
 			roomImageService.deleteRoomImage(imageId);
-			response.put("success", true);
-			response.put("message", "Xóa ảnh thành công");
-			return ResponseEntity.ok(response);
+			model.addAttribute("successMessage", "Xóa ảnh thành công!");
 		} catch (Exception e) {
-			response.put("success", false);
-			response.put("message", "Lỗi: " + e.getMessage());
-			return ResponseEntity.badRequest().body(response);
+			model.addAttribute("errorMessage", "Lỗi xóa ảnh: " + e.getMessage());
 		}
-	}
-
-	@GetMapping("/api/images/{roomId}")
-	@ResponseBody
-	public ResponseEntity<List<RoomImage>> getRoomImages(@PathVariable Integer roomId) {
-		List<RoomImage> images = roomImageService.getImagesByRoomId(roomId);
-		System.out.println("=== GET IMAGES FOR ROOM " + roomId + " ===");
-		System.out.println("Found " + images.size() + " images");
-		images.forEach(img -> {
-			System.out.println("Image ID: " + img.getRoomImageId() + ", URL: " + img.getRoomImageUrl());
-		});
-		return ResponseEntity.ok(images);
+		return "redirect:/hotel-management/room/edit/" + roomId;
 	}
 }
