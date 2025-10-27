@@ -23,5 +23,4 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
             "AND od.endDate >= CURRENT_TIMESTAMP " +
             "AND od.status NOT IN ('CANCELLED', 'COMPLETED')")
     LocalDate findNextAvailableDateByRoomId(@Param("roomId") Integer roomId);
-    List<OrderDetail> findByOrderId(Integer orderId);
 }
