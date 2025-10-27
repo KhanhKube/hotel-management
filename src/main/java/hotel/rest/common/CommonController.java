@@ -84,7 +84,11 @@ public class CommonController {
                 .map(user -> {
                     // Lưu user vào session
                     session.setAttribute("user", user);
-
+                    if(!user.getOtpVerified()){
+                        VerifyOtpDto verifyOtpDto = new VerifyOtpDto(user.getUsername(), user.getEmail(), null);
+                        redirectAttrs.addFlashAttribute("verifyDto", verifyOtpDto);
+                        return "redirect:/hotel/verify";
+                    }
                     model.addAttribute("message", "Welcome " + user.getFirstName());
                     redirectAttrs.addFlashAttribute("message", "Welcome " + user.getFirstName());
                     return "redirect:/hotel";
