@@ -2,6 +2,7 @@ package hotel.service.account;
 
 import hotel.db.dto.user.AccountRequestDto;
 import hotel.db.dto.user.AccountResponseDto;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -16,6 +17,11 @@ public interface AccountService {
      * Lấy danh sách tất cả accounts (trừ ADMIN)
      */
     List<AccountResponseDto> getAllAccountsExceptAdmin();
+    
+    /**
+     * Lấy danh sách accounts với pagination và search
+     */
+    Page<AccountResponseDto> getAccountsWithPagination(String searchTerm, String status, int page, int size);
     
     /**
      * Lấy danh sách accounts theo role

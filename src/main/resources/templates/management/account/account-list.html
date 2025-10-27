@@ -254,6 +254,43 @@
                             <i class="mdi mdi-plus"></i> Thêm Tài khoản Mới
                         </a>
                     </div>
+
+                    <!-- Search and Filter Form -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <form th:action="@{/hotel-management/accounts}" method="get" class="d-flex gap-2">
+                                <input type="hidden" name="page" value="0">
+                                <input type="hidden" name="size" th:value="${size}">
+                                
+                                <select name="status" class="form-control" style="width: 180px;">
+                                    <option value="ALL" th:selected="${status == 'ALL'}">Tất cả trạng thái</option>
+                                    <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">Active</option>
+                                    <option value="INACTIVE" th:selected="${status == 'INACTIVE'}">Inactive</option>
+                                </select>
+                                
+                                <input type="text" 
+                                       name="search" 
+                                       class="form-control" 
+                                       th:value="${searchTerm}"
+                                       placeholder="Tìm họ tên, username, email, số điện thoại..." 
+                                       style="flex: 1;">
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                </button>
+                                
+                                <a th:href="@{/hotel-management/accounts}" class="btn btn-secondary">
+                                    <i class="mdi mdi-refresh"></i> Làm mới
+                                </a>
+                            </form>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <p class="mb-0 text-muted" style="padding-top: 8px;">
+                                Tổng số: <strong th:text="${totalElements}">0</strong> tài khoản
+                            </p>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead>
@@ -270,7 +307,7 @@
                             </thead>
                             <tbody>
                             <tr th:each="account, iterStat : ${accounts}">
-                                <td th:text="${iterStat.index + 1}">1</td>
+                                <td th:text="${currentPage * size + iterStat.index + 1}">1</td>
                                 <td th:text="${account.username}">admin</td>
                                 <td th:text="${account.firstName + ' ' + account.lastName}">Nguyễn Văn A</td>
                                 <td th:text="${account.email}">admin@hotel.com</td>
@@ -312,6 +349,58 @@
                             </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="row mt-3" th:if="${totalPages > 1}">
+                        <div class="col-md-12">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    <!-- First Page -->
+                                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/hotel-management/accounts(search=${searchTerm}, status=${status}, page=0, size=${size})}">
+                                            <i class="mdi mdi-page-first"></i>
+                                        </a>
+                                    </li>
+                                    
+                                    <!-- Previous Page -->
+                                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/hotel-management/accounts(search=${searchTerm}, status=${status}, page=${currentPage - 1}, size=${size})}">
+                                            <i class="mdi mdi-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    
+                                    <!-- Page Numbers -->
+                                    <li class="page-item" th:classappend="${currentPage == pageNum} ? 'active'" 
+                                        th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
+                                        <a class="page-link" th:href="@{/hotel-management/accounts(search=${searchTerm}, status=${status}, page=${pageNum}, size=${size})}"
+                                           th:text="${pageNum + 1}">1</a>
+                                    </li>
+                                    
+                                    <!-- Next Page -->
+                                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/hotel-management/accounts(search=${searchTerm}, status=${status}, page=${currentPage + 1}, size=${size})}">
+                                            <i class="mdi mdi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    
+                                    <!-- Last Page -->
+                                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/hotel-management/accounts(search=${searchTerm}, status=${status}, page=${totalPages - 1}, size=${size})}">
+                                            <i class="mdi mdi-page-last"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <!-- No results message -->
+                    <div class="text-center mt-3" th:if="${totalElements == 0}">
+                        <p class="text-muted">
+                            <i class="mdi mdi-information-outline"></i>
+                            Không tìm thấy tài khoản nào.
+                        </p>
                     </div>
                 </div>
             </div>

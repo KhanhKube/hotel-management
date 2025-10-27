@@ -5,6 +5,7 @@ import hotel.db.entity.Room;
 import hotel.db.entity.RoomImage;
 import hotel.db.entity.Size;
 import hotel.db.repository.floor.FloorRepository;
+import hotel.db.repository.orderdetail.OrderDetailRepository;
 import hotel.db.repository.room.RoomRepository;
 import hotel.db.repository.roomimage.RoomImageRepository;
 import hotel.db.repository.size.SizeRepository;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,10 +29,52 @@ public class RoomServiceImpl implements RoomService {
 
 	private final RoomRepository roomRepository;
 	private final FloorRepository floorRepository;
-
+    private final OrderDetailRepository orderDetailRepository;
 	private final RoomImageRepository roomImageRepository;
 
 	private final SizeRepository sizeRepository;
+
+
+    public List<RoomBookListDto> getRoomListForBooking() {
+        List<Room> rooms = roomRepository.findAll();
+        return rooms.stream()
+                .filter(x -> !"Bảo trì".equals(x.getStatus()))
+                .map(x -> {
+                    RoomBookListDto dto = new RoomBookListDto();
+                    dto.setRoomId(x.getRoomId());
+                    dto.setRoomType(x.getRoomType());
+                    dto.setPrice(x.getPrice());
+                    dto.setRoomDescription(x.getRoomDescription());
+
+                    //Lấy ảnh đầu tiên của phòng theo id
+                    List<RoomImage> roomImages = roomImageRepository.findByRoomId(x.getRoomId());
+                    if (!roomImages.isEmpty()) {
+                        dto.setImageRoom(roomImages.get(0).getRoomImageUrl()); //Lấy url của ảnh đầu tiên (index 0)
+                    } else {
+                        dto.setImageRoom("https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg"); //lấy ảnh mạng
+                    }
+
+                    //Logic nghiệp vụ cho Status phòng VIPVIPVIPV
+                    if ("Trống".equals(x.getStatus())) {
+                        dto.setStatusDisplay("Trống");;
+                        dto.setAvailableFrom(null);
+                    } else {
+                        LocalDate nextAvailable = orderDetailRepository.findNextAvailableDateByRoomId(x.getRoomId());
+                        if (nextAvailable != null) {
+                            dto.setStatusDisplay("Có thể đặt từ " +
+                                    nextAvailable.plusDays(1/12)
+                                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))); // có thể đặt tiếp phòng sau 2 tiếng enddate của phòng cũ
+                            dto.setAvailableFrom(nextAvailable.plusDays(1/12)); // tăng thêm 2 tiếng.
+                        } else {
+                            //TH query trả về null.
+                            dto.setStatusDisplay("Trống");
+                            dto.setAvailableFrom(null);
+                        }
+                    }
+
+                    return dto;
+                }).collect(Collectors.toList());
+    }
 
     /*
     Trả về về List chứa các field cần thiết.
