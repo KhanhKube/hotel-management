@@ -1,5 +1,7 @@
 package hotel.rest.cart;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import hotel.db.dto.cart.AddToCartRequest;
 import hotel.db.dto.cart.CartItemDto;
 import hotel.service.cart.CartService;
@@ -19,210 +21,213 @@ import java.util.Map;
 @RequestMapping("/cart")
 public class CartController {
 
-    private final CartService cartService;
+	private final CartService cartService;
 
-    @GetMapping
-    public String viewCart(Model model, HttpSession session) {
-        Integer userId = getUserIdFromSession(session);
-        if (userId == null) {
-            return "redirect:/login";
-        }
+	@GetMapping
+	public String viewCart(Model model, HttpSession session) {
+		Integer userId = getUserIdFromSession(session);
+		if (userId == null) {
+			model.addAttribute("error", "Vui lòng đăng nhập để xem giỏ hàng");
+			return "redirect:/hotel/login";
+		}
 
-        List<CartItemDto> cartItems = cartService.getCartItems(userId);
+		List<CartItemDto> cartItems = cartService.getCartItems(userId);
 
-        model.addAttribute("cartItems", cartItems);
-        model.addAttribute("cartCount", cartItems.size());
+		model.addAttribute("cartItems", cartItems);
+		model.addAttribute("cartCount", cartItems.size());
 
-        return "cart/cart";
-    }
+		return "cart/cart";
+	}
 
-    @PostMapping("/add")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> addToCart(
-            @RequestBody(required = false) String rawBody,
-            HttpSession session) {
+	@PostMapping("/add")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> addToCart(
+			@RequestBody(required = false) String requestBody,
+			HttpSession session) {
 
-        Map<String, Object> response = new HashMap<>();
+		Map<String, Object> response = new HashMap<>();
 
-        // Log raw request body
-        System.out.println("=== Raw Request Body ===");
-        System.out.println(rawBody);
-        
-        // Parse request manually
-        AddToCartRequest request = null;
-        try {
-            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-            request = mapper.readValue(rawBody, AddToCartRequest.class);
-            
-            System.out.println("=== Parsed Request ===");
-            System.out.println("Room ID: " + request.getRoomId());
-            System.out.println("Check-in: " + request.getCheckIn());
-            System.out.println("Check-out: " + request.getCheckOut());
-        } catch (Exception e) {
-            System.err.println("Error parsing request: " + e.getMessage());
-            e.printStackTrace();
-            response.put("success", false);
-            response.put("message", "Invalid request format: " + e.getMessage());
-            return ResponseEntity.ok(response);
-        }
+		// Log raw request body
+		System.out.println("=== Raw Request Body ===");
+		System.out.println(requestBody);
 
-        Integer userId = getUserIdFromSession(session);
-        System.out.println("User ID: " + userId);
-        
-        if (userId == null) {
-            response.put("success", false);
-            response.put("message", "Vui lòng đăng nhập để thêm vào giỏ hàng");
-            return ResponseEntity.ok(response);
-        }
+		// Parse request manually
+		AddToCartRequest request = null;
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.registerModule(new JavaTimeModule());
+			request = mapper.readValue(requestBody, AddToCartRequest.class);
 
-        try {
-            cartService.addToCart(userId, request);
+			System.out.println("=== Parsed Request ===");
+			System.out.println("Room ID: " + request.getRoomId());
+			System.out.println("Check-in: " + request.getCheckIn());
+			System.out.println("Check-out: " + request.getCheckOut());
+		} catch (Exception e) {
+			System.err.println("Error parsing request: " + e.getMessage());
+			e.printStackTrace();
+			response.put("success", false);
+			response.put("message", "Invalid request format: " + e.getMessage());
+			return ResponseEntity.ok(response);
+		}
 
-            int cartCount = cartService.getCartItemCount(userId);
+		Integer userId = getUserIdFromSession(session);
+		System.out.println("User ID: " + userId);
 
-            response.put("success", true);
-            response.put("message", "Đã thêm phòng vào giỏ hàng");
-            response.put("cartCount", cartCount);
+		if (userId == null) {
+			response.put("success", false);
+			response.put("message", "Vui lòng đăng nhập để thêm vào giỏ hàng");
+			return ResponseEntity.ok(response);
+		}
 
-            System.out.println("Success! Cart count: " + cartCount);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            System.err.println("Error adding to cart: " + e.getMessage());
-            e.printStackTrace();
-            
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.ok(response);
-        }
-    }
+		try {
+			cartService.addToCart(userId, request);
 
-    @DeleteMapping("/remove/{roomId}")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> removeFromCart(
-            @PathVariable Integer roomId,
-            HttpSession session) {
+			int cartCount = cartService.getCartItemCount(userId);
 
-        Map<String, Object> response = new HashMap<>();
+			response.put("success", true);
+			response.put("message", "Đã thêm phòng vào giỏ hàng");
+			response.put("cartCount", cartCount);
 
-        Integer userId = getUserIdFromSession(session);
-        if (userId == null) {
-            response.put("success", false);
-            response.put("message", "Unauthorized");
-            return ResponseEntity.ok(response);
-        }
+			System.out.println("Success! Cart count: " + cartCount);
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			System.err.println("Error adding to cart: " + e.getMessage());
+			e.printStackTrace();
 
-        cartService.removeFromCart(userId, roomId);
+			response.put("success", false);
+			response.put("message", e.getMessage());
+			return ResponseEntity.ok(response);
+		}
+	}
 
-        int cartCount = cartService.getCartItemCount(userId);
+	@DeleteMapping("/remove/{roomId}")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> removeFromCart(
+			@PathVariable Integer roomId,
+			HttpSession session) {
 
-        response.put("success", true);
-        response.put("message", "Đã xóa khỏi giỏ hàng");
-        response.put("cartCount", cartCount);
+		Map<String, Object> response = new HashMap<>();
 
-        return ResponseEntity.ok(response);
-    }
+		Integer userId = getUserIdFromSession(session);
+		if (userId == null) {
+			response.put("success", false);
+			response.put("message", "Unauthorized");
+			return ResponseEntity.ok(response);
+		}
 
-    @PostMapping("/clear")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> clearCart(HttpSession session) {
-        Map<String, Object> response = new HashMap<>();
+		cartService.removeFromCart(userId, roomId);
 
-        Integer userId = getUserIdFromSession(session);
-        if (userId == null) {
-            response.put("success", false);
-            return ResponseEntity.ok(response);
-        }
+		int cartCount = cartService.getCartItemCount(userId);
 
-        cartService.clearCart(userId);
+		response.put("success", true);
+		response.put("message", "Đã xóa khỏi giỏ hàng");
+		response.put("cartCount", cartCount);
 
-        response.put("success", true);
-        response.put("cartCount", 0);
+		return ResponseEntity.ok(response);
+	}
 
-        return ResponseEntity.ok(response);
-    }
+	@PostMapping("/clear")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> clearCart(HttpSession session) {
+		Map<String, Object> response = new HashMap<>();
 
-    @GetMapping("/count")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> getCartCount(HttpSession session) {
-        Map<String, Object> response = new HashMap<>();
+		Integer userId = getUserIdFromSession(session);
+		if (userId == null) {
+			response.put("success", false);
+			return ResponseEntity.ok(response);
+		}
 
-        Integer userId = getUserIdFromSession(session);
-        if (userId == null) {
-            response.put("cartCount", 0);
-            return ResponseEntity.ok(response);
-        }
+		cartService.clearCart(userId);
 
-        int count = cartService.getCartItemCount(userId);
+		response.put("success", true);
+		response.put("cartCount", 0);
 
-        response.put("cartCount", count);
-        return ResponseEntity.ok(response);
-    }
+		return ResponseEntity.ok(response);
+	}
 
-    @PostMapping("/checkout")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkout(HttpSession session) {
-        Map<String, Object> response = new HashMap<>();
+	@GetMapping("/count")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> getCartCount(HttpSession session) {
+		Map<String, Object> response = new HashMap<>();
 
-        Integer userId = getUserIdFromSession(session);
-        if (userId == null) {
-            response.put("success", false);
-            response.put("message", "Vui lòng đăng nhập");
-            return ResponseEntity.ok(response);
-        }
+		Integer userId = getUserIdFromSession(session);
+		if (userId == null) {
+			response.put("cartCount", 0);
+			return ResponseEntity.ok(response);
+		}
 
-        try {
-            List<Integer> orderIds = cartService.checkout(userId);
-            
-            response.put("success", true);
-            response.put("message", "Đặt phòng thành công! Đã tạo " + orderIds.size() + " đơn hàng.");
-            response.put("orderIds", orderIds);
-            response.put("orderCount", orderIds.size());
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Lỗi: " + e.getMessage());
-            return ResponseEntity.ok(response);
-        }
-    }
+		int count = cartService.getCartItemCount(userId);
 
-    @GetMapping("/items")
-    @ResponseBody
-    public ResponseEntity<List<CartItemDto>> getCartItems(HttpSession session) {
-        Integer userId = getUserIdFromSession(session);
-        if (userId == null) {
-            return ResponseEntity.ok(List.of());
-        }
-        
-        List<CartItemDto> items = cartService.getCartItems(userId);
-        return ResponseEntity.ok(items);
-    }
+		response.put("cartCount", count);
+		return ResponseEntity.ok(response);
+	}
 
-    /**
-     * Get user ID from session
-     * @param session HttpSession
-     * @return userId or null if not logged in
-     */
-    private Integer getUserIdFromSession(HttpSession session) {
-        Object userIdObj = session.getAttribute("userId");
-        if (userIdObj != null) {
-            return (Integer) userIdObj;
-        }
+	@PostMapping("/checkout")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> checkout(HttpSession session) {
+		Map<String, Object> response = new HashMap<>();
 
-        // Fallback: check if user object exists in session
-        Object user = session.getAttribute("user");
-        if (user != null) {
-            // Try to get userId from user object
-            try {
-                return (Integer) user.getClass().getMethod("getUserId").invoke(user);
-            } catch (Exception e) {
-                // If failed, return null
-            }
-        }
+		Integer userId = getUserIdFromSession(session);
+		if (userId == null) {
+			response.put("success", false);
+			response.put("message", "Vui lòng đăng nhập");
+			return ResponseEntity.ok(response);
+		}
 
-        // For testing: return dummy user ID if no session
-        // TODO: Remove this in production
-        return 1; // Temporary for testing
-    }
+		try {
+			List<Integer> orderIds = cartService.checkout(userId);
+
+			response.put("success", true);
+			response.put("message", "Đặt phòng thành công! Đã tạo " + orderIds.size() + " đơn hàng.");
+			response.put("orderIds", orderIds);
+			response.put("orderCount", orderIds.size());
+
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", "Lỗi: " + e.getMessage());
+			return ResponseEntity.ok(response);
+		}
+	}
+
+	@GetMapping("/items")
+	@ResponseBody
+	public ResponseEntity<List<CartItemDto>> getCartItems(HttpSession session) {
+		Integer userId = getUserIdFromSession(session);
+		if (userId == null) {
+			return ResponseEntity.ok(List.of());
+		}
+
+		List<CartItemDto> items = cartService.getCartItems(userId);
+		return ResponseEntity.ok(items);
+	}
+
+	/**
+	 * Get user ID from session
+	 *
+	 * @param session HttpSession
+	 * @return userId or null if not logged in
+	 */
+	private Integer getUserIdFromSession(HttpSession session) {
+		// Check userId attribute first
+		Object userIdObj = session.getAttribute("userId");
+		if (userIdObj != null) {
+			return (Integer) userIdObj;
+		}
+
+		// Fallback: check if user object exists in session
+		Object user = session.getAttribute("user");
+		if (user != null) {
+			// Try to get userId from user object
+			try {
+				return (Integer) user.getClass().getMethod("getUserId").invoke(user);
+			} catch (Exception e) {
+				// If failed, return null
+				System.err.println("Failed to get userId from user object: " + e.getMessage());
+			}
+		}
+
+		// Return null if not logged in - require authentication
+		return null;
+	}
 }
