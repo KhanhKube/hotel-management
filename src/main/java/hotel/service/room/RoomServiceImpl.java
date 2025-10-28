@@ -158,7 +158,7 @@ public class RoomServiceImpl implements RoomService {
                 .map(this::toListDto)
                 .collect(Collectors.toList());
     }
-    
+
     /*
     Method filter và pagination cho trang quản lý phòng (admin)
     */
@@ -167,7 +167,7 @@ public class RoomServiceImpl implements RoomService {
                                                       Integer floor, Double size, BigDecimal minPrice,
                                                       BigDecimal maxPrice, String sortBy, int page, int pageSize) {
         List<Room> rooms = roomRepository.findAllByIsDeletedFalse();
-        
+
         // Filter theo search (số phòng)
         if (search != null && !search.trim().isEmpty()) {
             String searchLower = search.trim().toLowerCase();
@@ -175,21 +175,21 @@ public class RoomServiceImpl implements RoomService {
                     .filter(x -> x.getRoomNumber().toLowerCase().contains(searchLower))
                     .collect(Collectors.toList());
         }
-        
+
         // Filter theo loại phòng
         if (roomType != null && !roomType.isEmpty()) {
             rooms = rooms.stream()
                     .filter(x -> x.getRoomType().equals(roomType))
                     .collect(Collectors.toList());
         }
-        
+
         // Filter theo trạng thái
         if (status != null && !status.isEmpty()) {
             rooms = rooms.stream()
                     .filter(x -> x.getStatus().equals(status))
                     .collect(Collectors.toList());
         }
-        
+
         // Filter theo tầng
         if (floor != null) {
             rooms = rooms.stream()
@@ -202,7 +202,7 @@ public class RoomServiceImpl implements RoomService {
                     })
                     .collect(Collectors.toList());
         }
-        
+
         // Filter theo diện tích
         if (size != null) {
             rooms = rooms.stream()
@@ -215,35 +215,35 @@ public class RoomServiceImpl implements RoomService {
                     })
                     .collect(Collectors.toList());
         }
-        
+
         // Filter theo giá min
         if (minPrice != null) {
             rooms = rooms.stream()
                     .filter(x -> x.getPrice().compareTo(minPrice) >= 0)
                     .collect(Collectors.toList());
         }
-        
+
         // Filter theo giá max
         if (maxPrice != null) {
             rooms = rooms.stream()
                     .filter(x -> x.getPrice().compareTo(maxPrice) <= 0)
                     .collect(Collectors.toList());
         }
-        
+
         // Sort
         if (sortBy != null && !sortBy.isEmpty()) {
             String[] sortParams = sortBy.split(",");
             String field = sortParams[0];
             String direction = sortParams.length > 1 ? sortParams[1] : "asc";
-            
+
             Comparator<Room> comparator = null;
-            
+
             if ("roomNumber".equals(field)) {
                 comparator = Comparator.comparing(Room::getRoomNumber);
             } else if ("price".equals(field)) {
                 comparator = Comparator.comparing(Room::getPrice);
             }
-            
+
             if (comparator != null) {
                 if ("desc".equals(direction)) {
                     comparator = comparator.reversed();
@@ -251,18 +251,18 @@ public class RoomServiceImpl implements RoomService {
                 rooms.sort(comparator);
             }
         }
-        
+
         // Convert to DTO
         List<RoomListDto> roomDtos = rooms.stream()
                 .map(this::toListDto)
                 .collect(Collectors.toList());
-        
+
         // Pagination thủ công
         int startPage = page * pageSize;
         int endPage = Math.min(startPage + pageSize, roomDtos.size());
-        
+
         List<RoomListDto> pagedDtos = roomDtos.subList(startPage, endPage);
-        
+
         return new PageImpl<>(pagedDtos, PageRequest.of(page, pageSize), roomDtos.size());
     }
 
