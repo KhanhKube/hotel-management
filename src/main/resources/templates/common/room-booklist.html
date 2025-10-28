@@ -177,20 +177,20 @@
                 <h2>Danh sách phòng của chúng tôi</h2>
 
                 <!-- Search & Filter Bar -->
-                <form th:action="@{/rooms}" method="get">
+                <form th:action="@{/hotel/rooms}" method="get">
                     <div class="filter-bar">
                         <div class="filter-row">
                             <!-- Price From -->
                             <div class="filter-item">
                                 <label>Giá từ</label>
-                                <input type="number" name="minPrice" class="form-control" placeholder="500.000"
+                                <input type="number" name="minPrice" class="form-control" placeholder="Tối thiểu"
                                     th:value="${selectedMinPrice != null ? selectedMinPrice : ''}">
                             </div>
 
                             <!-- Price To -->
                             <div class="filter-item">
                                 <label>Giá đến</label>
-                                <input type="number" name="maxPrice" class="form-control" placeholder="3.000.000"
+                                <input type="number" name="maxPrice" class="form-control" placeholder="Tối đa"
                                     th:value="${selectedMaxPrice != null ? selectedMaxPrice : ''}">
                             </div>
 
@@ -244,7 +244,7 @@
                         <!-- Buttons -->
                         <div class="filter-buttons">
                             <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-                            <button type="button" class="btn btn-secondary" onclick="window.location.href='/rooms'">Đặt
+                            <button type="button" class="btn btn-secondary" onclick="window.location.href='hotel/rooms'">Đặt
                                 lại
                             </button>
                         </div>
@@ -296,7 +296,7 @@
                     <ul class="pagination justify-content-center">
                         <!-- Previous -->
                         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link" th:href="@{/rooms(page=${currentPage - 1}, size=9,
+                            <a class="page-link" th:href="@{/hotel/rooms(page=${currentPage - 1}, size=9,
                             minPrice=${param.minPrice}, maxPrice=${param.maxPrice},
                             roomType=${param.roomType}, floor=${param.floor},
                             bedType=${param.bedType}, sortBy=${param.sortBy})}">
@@ -307,7 +307,7 @@
                         <!-- Page numbers -->
                         <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                             th:classappend="${i == currentPage} ? 'active'">
-                            <a class="page-link" th:href="@{/rooms(page=${i}, size=9,
+                            <a class="page-link" th:href="@{/hotel/rooms(page=${i}, size=9,
                             minPrice=${param.minPrice}, maxPrice=${param.maxPrice},
                             roomType=${param.roomType}, floor=${param.floor},
                             bedType=${param.bedType}, sortBy=${param.sortBy})}" th:text="${i + 1}">1</a>
@@ -315,7 +315,7 @@
 
                         <!-- Next -->
                         <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                            <a class="page-link" th:href="@{/rooms(page=${currentPage + 1}, size=9,
+                            <a class="page-link" th:href="@{/hotel/rooms(page=${currentPage + 1}, size=9,
                             minPrice=${param.minPrice}, maxPrice=${param.maxPrice},
                             roomType=${param.roomType}, floor=${param.floor},
                             bedType=${param.bedType}, sortBy=${param.sortBy})}">

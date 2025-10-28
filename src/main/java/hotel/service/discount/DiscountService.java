@@ -16,4 +16,8 @@ public interface DiscountService {
     Discount getDiscountById(Long discountId);
     
     List<String> getRoomTypesForDiscount();
+    
+    // Method filter và pagination cho trang quản lý discount
+    Page<DiscountResponseDto> getDiscountListForManagement(String search, String discountType, String roomType,
+                                                           String status, String sortBy, int page, int pageSize);
 }

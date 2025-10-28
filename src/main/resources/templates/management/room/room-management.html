@@ -59,106 +59,112 @@
                                 </div>
 
                                 <!-- Search & Filter Bar -->
-                                <div class="filter-section mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px;">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
-                                        <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Phòng</h5>
-                                    </div>
+                                <form th:action="@{/hotel-management/room}" method="get">
+                                    <div class="filter-section mb-4" style="background: #4a90e2; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
+                                            <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Phòng</h5>
+                                        </div>
 
-                                    <!-- Row 1: Search -->
-                                    <div class="row mb-3">
-                                        <div class="col-md-12">
-                                            <div class="input-group">
+                                        <!-- Row 1: Search -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <div class="input-group">
                                                     <span class="input-group-text bg-white border-end-0">
                                                         <i class="mdi mdi-magnify text-primary"></i>
                                                     </span>
-                                                <input id="searchRoomNumber" type="text" class="form-control border-start-0"
-                                                       placeholder="Tìm kiếm số phòng...">
+                                                    <input name="search" type="text" class="form-control border-start-0"
+                                                           placeholder="Tìm kiếm số phòng..." th:value="${param.search}">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 2: Filters -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select name="roomType" class="form-select">
+                                                    <option value="">-- Tất cả loại phòng --</option>
+                                                    <option th:each="type : ${roomTypes}" th:value="${type}" th:text="${type}"
+                                                            th:selected="${param.roomType != null && param.roomType[0] == type}"></option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select name="status" class="form-select">
+                                                    <option value="">-- Tất cả trạng thái --</option>
+                                                    <option th:each="status : ${statuses}" th:value="${status}" th:text="${status}"
+                                                            th:selected="${param.status != null && param.status[0] == status}"></option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select name="floor" class="form-select">
+                                                    <option value="">-- Tất cả tầng --</option>
+                                                    <option th:each="floor : ${floors}" th:value="${floor.floorNumber}"
+                                                            th:text="'Tầng ' + ${floor.floorNumber}"
+                                                            th:selected="${param.floor != null && param.floor[0] == floor.floorNumber.toString()}"></option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select name="size" class="form-select">
+                                                    <option value="">-- Tất cả diện tích --</option>
+                                                    <option th:each="size : ${sizes}" th:value="${size.size}"
+                                                            th:text="${size.size} + 'm²'"
+                                                            th:selected="${param.size != null && param.size[0] == size.size.toString()}"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 3: Price Range + Sort + Buttons -->
+                                        <div class="row align-items-center">
+                                            <div class="col-md-2 col-sm-6 mb-2">
+                                                <input type="number" name="minPrice" class="form-control" placeholder="Giá từ..." th:value="${param.minPrice}">
+                                            </div>
+
+                                            <div class="col-md-2 col-sm-6 mb-2">
+                                                <input type="number" name="maxPrice" class="form-control" placeholder="Giá đến..." th:value="${param.maxPrice}">
+                                            </div>
+
+                                            <div class="col-md-2 col-sm-6 mb-2">
+                                                <select name="sortBy" class="form-select">
+                                                    <option value="">-- Sắp xếp --</option>
+                                                    <option value="roomNumber,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'roomNumber,asc'}">Số phòng tăng dần</option>
+                                                    <option value="roomNumber,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'roomNumber,desc'}">Số phòng giảm dần</option>
+                                                    <option value="price,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'price,asc'}">Giá tăng dần</option>
+                                                    <option value="price,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'price,desc'}">Giá giảm dần</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-12 mb-2">
+                                                <button type="submit" class="btn btn-info me-2">
+                                                    <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                                </button>
+                                                <a th:href="@{/hotel-management/room}" class="btn btn-light">
+                                                    <i class="mdi mdi-refresh"></i> Reset
+                                                </a>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-12 mb-2 text-end">
+                                                <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
+                                                    <i class="mdi mdi-home-group"></i>
+                                                    Tổng: <strong th:text="${totalElements != null ? totalElements : #lists.size(listRoom)}">0</strong> phòng
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Row 2: Filters -->
-                                    <div class="row mb-3">
-                                        <div class="col-md-3 col-sm-6 mb-2">
-                                            <select id="filterRoomType" class="form-select">
-                                                <option value="">-- Tất cả loại phòng --</option>
-                                                <option th:each="type : ${roomTypes}" th:value="${type}" th:text="${type}"></option>
-                                            </select>
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-6 mb-2">
-                                            <select id="filterStatus" class="form-select">
-                                                <option value="">-- Tất cả trạng thái --</option>
-                                                <option th:each="status : ${statuses}" th:value="${status}" th:text="${status}"></option>
-                                            </select>
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-6 mb-2">
-                                            <select id="filterFloor" class="form-select">
-                                                <option value="">-- Tất cả tầng --</option>
-                                                <option th:each="floor : ${floors}" th:value="${floor.floorNumber}"
-                                                        th:text="'Tầng ' + ${floor.floorNumber}"></option>
-                                            </select>
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-6 mb-2">
-                                            <select id="filterSize" class="form-select">
-                                                <option value="">-- Tất cả diện tích --</option>
-                                                <option th:each="size : ${sizes}" th:value="${size.size}"
-                                                        th:text="${size.size} + 'm²'"></option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <!-- Row 3: Price Range + Buttons -->
-                                    <div class="row align-items-center">
-                                        <div class="col-md-2 col-sm-6 mb-2">
-                                            <input type="number" id="filterPriceFrom" class="form-control" placeholder="Giá từ...">
-                                        </div>
-
-                                        <div class="col-md-2 col-sm-6 mb-2">
-                                            <input type="number" id="filterPriceTo" class="form-control" placeholder="Giá đến...">
-                                        </div>
-
-                                        <div class="col-md-5 col-sm-12 mb-2">
-                                            <button onclick="applyAllFilters()" class="btn btn-info me-2">
-                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
-                                            </button>
-                                            <button onclick="resetAllFilters()" class="btn btn-light">
-                                                <i class="mdi mdi-refresh"></i> Reset
-                                            </button>
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-12 mb-2 text-end">
-                                                <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
-                                                    <i class="mdi mdi-home-group"></i>
-                                                    Tổng: <strong id="resultCount" th:text="${#lists.size(listRoom)}">0</strong> phòng
-                                                </span>
-                                        </div>
-                                    </div>
-                                </div>
+                                </form>
 
                                 <div class="table-responsive">
                                     <table class="table" id="roomTable">
                                         <thead>
                                         <tr>
                                             <th> STT </th>
-                                            <th onclick="sortTable(1, this)" style="cursor: pointer;">
-                                                Số Phòng <i class="mdi mdi-sort"></i>
-                                            </th>
-                                            <th onclick="sortTable(2, this)" style="cursor: pointer;">
-                                                Loại phòng <i class="mdi mdi-sort"></i>
-                                            </th>
-                                            <th onclick="sortTable(3, this)" style="cursor: pointer;">
-                                                Tầng <i class="mdi mdi-sort"></i>
-                                            </th>
-                                            <th onclick="sortTable(4, this)" style="cursor: pointer;">
-                                                Diện tích <i class="mdi mdi-sort"></i>
-                                            </th>
-                                            <th onclick="sortTable(5, this)" style="cursor: pointer;">
-                                                Giá <i class="mdi mdi-sort"></i>
-                                            </th>
+                                            <th> Số Phòng </th>
+                                            <th> Loại phòng </th>
+                                            <th> Tầng </th>
+                                            <th> Diện tích </th>
+                                            <th> Giá </th>
                                             <th> Trạng thái </th>
                                             <th> Hành động </th>
                                         </tr>
@@ -196,11 +202,52 @@
                                         </tr>
 
                                         <tr th:if="${#lists.isEmpty(listRoom)}">
-                                            <td colspan="9" class="text-center text-muted">Không có phòng nào
+                                            <td colspan="8" class="text-center text-muted">Không có phòng nào
                                                 khả dụng.</td>
                                         </tr>
                                         </tbody>
                                     </table>
+                                </div>
+                                
+                                <!-- Pagination -->
+                                <div class="pagination-wrapper" th:if="${totalPages > 1}">
+                                    <nav>
+                                        <ul class="pagination justify-content-center">
+                                            <!-- Previous -->
+                                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                                <a class="page-link" th:href="@{/hotel-management/room(page=${currentPage - 1}, pageSize=${pageSize},
+                                                search=${param.search}, roomType=${param.roomType}, status=${param.status},
+                                                floor=${param.floor}, size=${param.size}, minPrice=${param.minPrice},
+                                                maxPrice=${param.maxPrice}, sortBy=${param.sortBy})}">
+                                                    Trước
+                                                </a>
+                                            </li>
+
+                                            <!-- Page numbers -->
+                                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                                th:classappend="${i == currentPage} ? 'active'">
+                                                <a class="page-link" th:href="@{/hotel-management/room(page=${i}, pageSize=${pageSize},
+                                                search=${param.search}, roomType=${param.roomType}, status=${param.status},
+                                                floor=${param.floor}, size=${param.size}, minPrice=${param.minPrice},
+                                                maxPrice=${param.maxPrice}, sortBy=${param.sortBy})}" th:text="${i + 1}">1</a>
+                                            </li>
+
+                                            <!-- Next -->
+                                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                                <a class="page-link" th:href="@{/hotel-management/room(page=${currentPage + 1}, pageSize=${pageSize},
+                                                search=${param.search}, roomType=${param.roomType}, status=${param.status},
+                                                floor=${param.floor}, size=${param.size}, minPrice=${param.minPrice},
+                                                maxPrice=${param.maxPrice}, sortBy=${param.sortBy})}">
+                                                    Sau
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+
+                                    <!-- Info -->
+                                    <div class="text-center mt-3">
+                                        <p>Trang [[${currentPage + 1}]] / [[${totalPages}]] - Tổng [[${totalElements}]] phòng</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -211,161 +258,9 @@
     </div>
 </div>
 
-<!-- Filter Script với AND logic -->
-<script>
-    // Lấy tất cả elements
-    const searchInput = document.getElementById('searchRoomNumber');
-    const filterRoomType = document.getElementById('filterRoomType');
-    const filterStatus = document.getElementById('filterStatus');
-    const filterFloor = document.getElementById('filterFloor');
-    const filterSize = document.getElementById('filterSize');
-    const filterPriceFrom = document.getElementById('filterPriceFrom');
-    const filterPriceTo = document.getElementById('filterPriceTo');
-    const roomTable = document.getElementById('roomTable');
-    const tableRows = Array.from(roomTable.getElementsByTagName('tr')).slice(1); // Bỏ header
-    const resultCount = document.getElementById('resultCount');
 
-    // Function apply tất cả filters (AND logic)
-    function applyAllFilters() {
-        const searchText = searchInput.value.toLowerCase().trim();
-        const selectedRoomType = filterRoomType.value.trim();
-        const selectedStatus = filterStatus.value.trim();
-        const selectedFloor = filterFloor.value.trim();
-        const selectedSize = filterSize.value.trim();
-        const priceFrom = parseFloat(filterPriceFrom.value) || 0;
-        const priceTo = parseFloat(filterPriceTo.value) || Infinity;
 
-        let visibleCount = 0;
 
-        tableRows.forEach(row => {
-            // Bỏ qua row empty message
-            if (row.querySelector('td[colspan]')) {
-                row.style.display = 'none';
-                return;
-            }
-
-            // Lấy giá trị từ các columns
-            const roomNumber = row.cells[1]?.textContent.toLowerCase().trim() || '';
-            const roomType = row.cells[2]?.textContent.trim() || '';
-            const floor = row.cells[3]?.textContent.trim() || '';
-            const sizeText = row.cells[4]?.textContent.trim() || '';
-            const priceText = row.cells[5]?.textContent.trim() || '';
-            const status = row.cells[6]?.textContent.trim() || '';
-
-            // Parse size (bỏ m²)
-            const size = sizeText.replace('m²', '').trim();
-
-            // Parse price (bỏ dấu phẩy và ký tự không phải số)
-            const price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
-
-            // Kiểm tra TẤT CẢ điều kiện (AND logic)
-            const matchSearch = searchText === '' || roomNumber.includes(searchText);
-            const matchRoomType = selectedRoomType === '' || roomType === selectedRoomType;
-            const matchStatus = selectedStatus === '' || status === selectedStatus;
-            const matchFloor = selectedFloor === '' || floor === selectedFloor;
-            const matchSize = selectedSize === '' || size === selectedSize;
-            const matchPrice = price >= priceFrom && price <= priceTo;
-
-            // Chỉ hiện row nếu TẤT CẢ điều kiện đều đúng
-            if (matchSearch && matchRoomType && matchStatus && matchFloor && matchSize && matchPrice) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Update count
-        resultCount.textContent = visibleCount;
-    }
-
-    // Function reset filters
-    function resetAllFilters() {
-        searchInput.value = '';
-        filterRoomType.value = '';
-        filterStatus.value = '';
-        filterFloor.value = '';
-        filterSize.value = '';
-        filterPriceFrom.value = '';
-        filterPriceTo.value = '';
-        applyAllFilters();
-    }
-
-    // Gắn event listeners
-    searchInput.addEventListener('keyup', applyAllFilters);
-    filterRoomType.addEventListener('change', applyAllFilters);
-    filterStatus.addEventListener('change', applyAllFilters);
-    filterFloor.addEventListener('change', applyAllFilters);
-    filterSize.addEventListener('change', applyAllFilters);
-</script>
-
-<!-- Sort Script với 3 trạng thái -->
-<script>
-    const sortStates = {};
-    let originalRowsOrder = [];
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const table = document.getElementById("roomTable");
-        originalRowsOrder = Array.from(table.tBodies[0].rows);
-    });
-
-    function sortTable(columnIndex, headerElement) {
-        const table = document.getElementById("roomTable");
-        const tbody = table.tBodies[0];
-
-        if (sortStates[columnIndex] === undefined) {
-            sortStates[columnIndex] = 0;
-        }
-
-        sortStates[columnIndex] = (sortStates[columnIndex] + 1) % 3;
-
-        // Reset icon của tất cả headers
-        const allHeaders = table.querySelectorAll('thead th');
-        allHeaders.forEach(th => {
-            const icon = th.querySelector('i');
-            if (icon) {
-                icon.className = 'mdi mdi-sort';
-                icon.style.color = '';
-            }
-        });
-
-        // Update icon của header hiện tại
-        const icon = headerElement.querySelector('i');
-        if (sortStates[columnIndex] === 0) {
-            icon.className = 'mdi mdi-sort';
-            icon.style.color = '';
-            tbody.innerHTML = "";
-            originalRowsOrder.forEach(row => tbody.appendChild(row.cloneNode(true)));
-            return;
-        } else if (sortStates[columnIndex] === 1) {
-            icon.className = 'mdi mdi-sort-ascending';
-            icon.style.color = '#667eea';
-        } else {
-            icon.className = 'mdi mdi-sort-descending';
-            icon.style.color = '#667eea';
-        }
-
-        const rows = Array.from(tbody.rows);
-        rows.sort((a, b) => {
-            let cellA = a.cells[columnIndex].textContent.trim();
-            let cellB = b.cells[columnIndex].textContent.trim();
-
-            // Xử lý số (bỏ m², dấu phẩy, etc)
-            cellA = cellA.replace(/[^\d.]/g, '');
-            cellB = cellB.replace(/[^\d.]/g, '');
-
-            const valA = isNaN(cellA) || cellA === '' ? a.cells[columnIndex].textContent.trim().toLowerCase() : Number(cellA);
-            const valB = isNaN(cellB) || cellB === '' ? b.cells[columnIndex].textContent.trim().toLowerCase() : Number(cellB);
-
-            if (valA < valB) return sortStates[columnIndex] === 1 ? -1 : 1;
-            if (valA > valB) return sortStates[columnIndex] === 1 ? 1 : -1;
-            return 0;
-        });
-
-        tbody.innerHTML = "";
-        rows.forEach(row => tbody.appendChild(row));
-    }
-</script>
 
 <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
 <script th:src="@{/assets/js/off-canvas.js}"></script>

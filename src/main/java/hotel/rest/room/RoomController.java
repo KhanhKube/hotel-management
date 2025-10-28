@@ -2,6 +2,7 @@ package hotel.rest.room;
 
 import hotel.db.dto.room.ListIdRoomResponse;
 import hotel.db.dto.room.ListRoomResponse;
+import hotel.db.dto.room.RoomListDto;
 import hotel.db.dto.room.SearchRoomRequest;
 import hotel.db.entity.Room;
 import hotel.db.entity.RoomImage;
@@ -16,6 +17,7 @@ import hotel.service.file.RoomImageUploadService;
 import hotel.service.image.ImageService;
 import hotel.service.room.RoomService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +39,6 @@ public class RoomController {
 
 	private final BookingService bookingService;
 	private final RoomService roomService;
-	private final FloorRepository floorRepository;
-	private final SizeRepository sizeRepository;
 	private final RoomImageUploadService fileUploadService;
 	private final ImageService roomImageService;
 	private final RoomImageRepository roomImageRepository;
@@ -48,13 +49,34 @@ public class RoomController {
         model.addAttribute("roomTypes", RoomType.ALL);
         model.addAttribute("bedTypes", BedType.ALL);
         model.addAttribute("statuses", RoomStatus.ALL);
-        model.addAttribute("floors", floorRepository.findAll());
-        model.addAttribute("sizes", sizeRepository.findAll());
+        model.addAttribute("floors", roomService.getAllFloors());
+        model.addAttribute("sizes", roomService.getAllSizes());
     }
 
     @GetMapping
-    public String view(Model model) {
-        model.addAttribute("listRoom", roomService.getRoomList());
+    public String view(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String roomType,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Integer floor,
+            @RequestParam(required = false) Double size,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            Model model) {
+        
+        Page<RoomListDto> roomPage = roomService.getRoomListForManagement(
+                search, roomType, status, floor, size, minPrice, maxPrice, sortBy, page, pageSize
+        );
+        
+        model.addAttribute("listRoom", roomPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", roomPage.getTotalPages());
+        model.addAttribute("totalElements", roomPage.getTotalElements());
+        model.addAttribute("pageSize", pageSize);
+        
         return "management/room/room-management";
     }
 
@@ -69,10 +91,36 @@ public class RoomController {
                          @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
                          BindingResult result, Model model) {
         try {
-            System.out.println("=== START CREATE/UPDATE ROOM ===");
-            System.out.println("Room ID: " + room.getRoomId());
-            System.out.println("Room Number: " + room.getRoomNumber());
-            System.out.println("Image Files: " + (imageFiles != null ? imageFiles.size() : 0));
+            // ========== VALIDATE STATUS ==========
+            
+            // 1. Validate khi TẠO MỚI
+            if (room.getRoomId() == null) {
+                // Chỉ cho phép Trống hoặc Bảo trì
+                if (!"Trống".equals(room.getStatus()) && !"Bảo trì".equals(room.getStatus())) {
+                    model.addAttribute("room", room);
+                    model.addAttribute("errorMessage", "Khi tạo phòng mới, chỉ được chọn trạng thái 'Trống' hoặc 'Bảo trì'!");
+                    return "management/room/room-create-form";
+                }
+            } else {
+                // 2. Validate khi UPDATE
+                Room existingRoom = roomService.getRoomById(room.getRoomId());
+                
+                // Chỉ cho phép update nếu phòng đang Trống hoặc Bảo trì
+                if (!"Trống".equals(existingRoom.getStatus()) && !"Bảo trì".equals(existingRoom.getStatus())) {
+                    model.addAttribute("room", room);
+                    model.addAttribute("errorMessage", "Không thể sửa phòng đang ở trạng thái: " + existingRoom.getStatus() + "! Chỉ được sửa phòng 'Trống' hoặc 'Bảo trì'.");
+                    return "management/room/room-create-form";
+                }
+                
+                // Không cho phép đổi status sang Đang thuê hoặc Đã đặt
+                if ("Đang thuê".equals(room.getStatus()) || "Đã đặt".equals(room.getStatus())) {
+                    model.addAttribute("room", room);
+                    model.addAttribute("errorMessage", "Không được phép đổi trạng thái sang 'Đang thuê' hoặc 'Đã đặt' thủ công!");
+                    return "management/room/room-create-form";
+                }
+            }
+            
+            // ========== VALIDATE ROOM NUMBER ==========
             
             // Lưu số phòng cũ (để đổi tên folder nếu update)
             String oldRoomNumber = null;
@@ -132,8 +180,6 @@ public class RoomController {
                     System.out.println("Saved image URL: " + imageUrl);
                 }
             }
-
-            System.out.println("=== SUCCESS - REDIRECTING ===");
             return "redirect:/hotel-management/room";
 
         } catch (IOException e) {

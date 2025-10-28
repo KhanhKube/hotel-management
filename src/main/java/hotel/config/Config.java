@@ -27,5 +27,21 @@ public class Config implements WebMvcConfigurer {
         // Serve static images từ resources (nếu cần)
         registry.addResourceHandler("/static/images/**")
                 .addResourceLocations("classpath:/static/images/");
+        
+        // Serve assets folder (admin template)
+        registry.addResourceHandler("/assets/**")
+                .addResourceLocations("classpath:/static/assets/");
+        
+        // Serve vendors folder (customer template)
+        registry.addResourceHandler("/vendors/**")
+                .addResourceLocations("classpath:/static/vendors/");
+        
+        // Serve css, js, img folders
+        registry.addResourceHandler("/css/**")
+                .addResourceLocations("classpath:/static/css/");
+        registry.addResourceHandler("/js/**")
+                .addResourceLocations("classpath:/static/js/");
+        registry.addResourceHandler("/img/**")
+                .addResourceLocations("classpath:/static/img/");
     }
 }

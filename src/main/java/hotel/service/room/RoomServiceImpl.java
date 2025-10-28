@@ -1,6 +1,7 @@
 package hotel.service.room;
 
 import hotel.db.dto.room.*;
+import hotel.db.entity.Floor;
 import hotel.db.entity.Room;
 import hotel.db.entity.RoomImage;
 import hotel.db.entity.Size;
@@ -157,6 +158,113 @@ public class RoomServiceImpl implements RoomService {
                 .map(this::toListDto)
                 .collect(Collectors.toList());
     }
+    
+    /*
+    Method filter và pagination cho trang quản lý phòng (admin)
+    */
+    @Override
+    public Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status,
+                                                      Integer floor, Double size, BigDecimal minPrice,
+                                                      BigDecimal maxPrice, String sortBy, int page, int pageSize) {
+        List<Room> rooms = roomRepository.findAllByIsDeletedFalse();
+        
+        // Filter theo search (số phòng)
+        if (search != null && !search.trim().isEmpty()) {
+            String searchLower = search.trim().toLowerCase();
+            rooms = rooms.stream()
+                    .filter(x -> x.getRoomNumber().toLowerCase().contains(searchLower))
+                    .collect(Collectors.toList());
+        }
+        
+        // Filter theo loại phòng
+        if (roomType != null && !roomType.isEmpty()) {
+            rooms = rooms.stream()
+                    .filter(x -> x.getRoomType().equals(roomType))
+                    .collect(Collectors.toList());
+        }
+        
+        // Filter theo trạng thái
+        if (status != null && !status.isEmpty()) {
+            rooms = rooms.stream()
+                    .filter(x -> x.getStatus().equals(status))
+                    .collect(Collectors.toList());
+        }
+        
+        // Filter theo tầng
+        if (floor != null) {
+            rooms = rooms.stream()
+                    .filter(x -> {
+                        Integer roomFloorId = x.getFloorId();
+                        if (roomFloorId == null) return false;
+                        return floorRepository.findById(roomFloorId)
+                                .map(f -> f.getFloorNumber().equals(floor))
+                                .orElse(false);
+                    })
+                    .collect(Collectors.toList());
+        }
+        
+        // Filter theo diện tích
+        if (size != null) {
+            rooms = rooms.stream()
+                    .filter(x -> {
+                        Integer roomSizeId = x.getSizeId();
+                        if (roomSizeId == null) return false;
+                        return sizeRepository.findById(roomSizeId)
+                                .map(s -> s.getSize().equals(size))
+                                .orElse(false);
+                    })
+                    .collect(Collectors.toList());
+        }
+        
+        // Filter theo giá min
+        if (minPrice != null) {
+            rooms = rooms.stream()
+                    .filter(x -> x.getPrice().compareTo(minPrice) >= 0)
+                    .collect(Collectors.toList());
+        }
+        
+        // Filter theo giá max
+        if (maxPrice != null) {
+            rooms = rooms.stream()
+                    .filter(x -> x.getPrice().compareTo(maxPrice) <= 0)
+                    .collect(Collectors.toList());
+        }
+        
+        // Sort
+        if (sortBy != null && !sortBy.isEmpty()) {
+            String[] sortParams = sortBy.split(",");
+            String field = sortParams[0];
+            String direction = sortParams.length > 1 ? sortParams[1] : "asc";
+            
+            Comparator<Room> comparator = null;
+            
+            if ("roomNumber".equals(field)) {
+                comparator = Comparator.comparing(Room::getRoomNumber);
+            } else if ("price".equals(field)) {
+                comparator = Comparator.comparing(Room::getPrice);
+            }
+            
+            if (comparator != null) {
+                if ("desc".equals(direction)) {
+                    comparator = comparator.reversed();
+                }
+                rooms.sort(comparator);
+            }
+        }
+        
+        // Convert to DTO
+        List<RoomListDto> roomDtos = rooms.stream()
+                .map(this::toListDto)
+                .collect(Collectors.toList());
+        
+        // Pagination thủ công
+        int startPage = page * pageSize;
+        int endPage = Math.min(startPage + pageSize, roomDtos.size());
+        
+        List<RoomListDto> pagedDtos = roomDtos.subList(startPage, endPage);
+        
+        return new PageImpl<>(pagedDtos, PageRequest.of(page, pageSize), roomDtos.size());
+    }
 
     private RoomListDto toListDto(Room room) {
         // Query floor number từ repository
@@ -199,8 +307,8 @@ public class RoomServiceImpl implements RoomService {
         HashMap<String, String> result = new HashMap<>();
 
         try {
-            // Validate
-            String validationError = validateRoomNumber(room.getRoomNumber(), room.getFloorId(), room.getSizeId(), room.getRoomType(), room.getBedType());
+            // Validate - truyền thêm roomId để phân biệt CREATE vs UPDATE
+            String validationError = validateRoomNumber(room.getRoomNumber(), room.getFloorId(), room.getSizeId(), room.getRoomType(), room.getBedType(), room.getRoomId());
             if (validationError != "") {
                 result.put("error", validationError);
                 return result;
@@ -221,7 +329,7 @@ public class RoomServiceImpl implements RoomService {
         roomRepository.softDeleteById(id);
     }
 
-    private String validateRoomNumber(String roomNumber, Integer floorId, Integer sizeId, String roomType, String bedType) {
+    private String validateRoomNumber(String roomNumber, Integer floorId, Integer sizeId, String roomType, String bedType, Integer roomId) {
         //lấy số tầng và số size.
         Integer floorNumber = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))
@@ -252,7 +360,7 @@ public class RoomServiceImpl implements RoomService {
             if (sizeNumber < 80) {
                 return "Phòng "+roomType+" diện tích vui lòng lớn hơn hoặc bằng 80 mét vuông!";
             }
-            if (!bedType.equals("Giường King") || !bedType.equals("Giường Queen")) {
+            if (!bedType.equals("Giường King") && !bedType.equals("Giường Queen")) {
                 return "Phòng Tổng thống vui lòng chọn giường King hoặc Queen!";
             }
         }
@@ -279,8 +387,10 @@ public class RoomServiceImpl implements RoomService {
         }
 
         // Đếm các phòng chưa bị xóa theo tầng
+        // Nếu là UPDATE (roomId != null), loại trừ phòng hiện tại khỏi count
         long roomCountOnFloor = roomRepository.findAllByIsDeletedFalse().stream()
                 .filter(r -> r.getFloorId().equals(floorId))
+                .filter(r -> roomId == null || !r.getRoomId().equals(roomId)) // Loại trừ phòng đang update
                 .count();
         // Lớn hơn 11 trả về message error
         if (roomCountOnFloor >= 11) {
@@ -289,15 +399,28 @@ public class RoomServiceImpl implements RoomService {
         }
         return "";
     }
-
-    @Modifying
-    @Transactional
-    @Query("UPDATE Room r SET r.view = r.view + 1 WHERE r.roomId = :roomId")
     @Override
-    public void incrementView(@Param("roomId") Integer roomId){}
+    public void incrementView(Integer roomId) {
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room != null) {
+            Integer currentView = room.getView() != null ? room.getView() : 0;
+            room.setView(currentView + 1);
+            roomRepository.save(room);
+        }
+    }
+
+    @Override
+    public List<Floor> getAllFloors() {
+        return floorRepository.findAll();
+    }
+
+    @Override
+    public List<Size> getAllSizes() {
+        return sizeRepository.findAll();
+    }
 
 
-	@Override
+    @Override
 	@NotNull
 	public List<Room> getAllRooms() {
 		log.info("Getting all rooms");

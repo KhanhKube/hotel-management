@@ -1,7 +1,9 @@
 package hotel.service.room;
 
 import hotel.db.dto.room.*;
+import hotel.db.entity.Floor;
 import hotel.db.entity.Room;
+import hotel.db.entity.Size;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
@@ -17,7 +19,16 @@ public interface RoomService {
     //Tăng view lên khi người dùng xem phòng.
     void incrementView(Integer roomId);
 
+    List<Floor> getAllFloors();
+
+    List<Size> getAllSizes();
+
     List<RoomListDto> getRoomList();
+    
+    // Method filter và pagination cho trang quản lý phòng (admin)
+    Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status, 
+                                               Integer floor, Double size, BigDecimal minPrice, 
+                                               BigDecimal maxPrice, String sortBy, int page, int pageSize);
 
 	List<Room> getAllRooms();
 
