@@ -15,145 +15,206 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
-    
-    private final RoomRepository roomRepository;
-    private final RoomImageRepository roomImageRepository;
-    private final OrderRepository orderRepository;
-    private final OrderDetailRepository orderDetailRepository;
-    
-    // Temporary storage for cart items (in production, use Redis or Database)
-    private final Map<Integer, List<CartItemDto>> cartStorage = new ConcurrentHashMap<>();
-    
-    @Override
-    public void addToCart(Integer userId, AddToCartRequest request) {
-        // Validate request
-        if (request.getRoomId() == null) {
-            throw new RuntimeException("Room ID is required");
-        }
-        if (request.getCheckIn() == null) {
-            throw new RuntimeException("Check-in date is required");
-        }
-        if (request.getCheckOut() == null) {
-            throw new RuntimeException("Check-out date is required");
-        }
-        
-        Room room = roomRepository.findById(request.getRoomId())
-                .orElseThrow(() -> new RuntimeException("Room not found with ID: " + request.getRoomId()));
-        
-        // Calculate number of days
-        long days = ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut());
-        if (days <= 0) {
-            throw new RuntimeException("Check-out date must be after check-in date");
-        }
-        
-        // Calculate total price
-        BigDecimal totalPrice = room.getPrice().multiply(BigDecimal.valueOf(days));
-        
-        // Get room image from room_images table
-        String imageUrl = null;
-        List<RoomImage> roomImages = roomImageRepository.findByRoomIdAndIsDeletedFalse(room.getRoomId());
-        if (!roomImages.isEmpty()) {
-            imageUrl = roomImages.get(0).getRoomImageUrl();
-        }
-        
-        // Create cart item
-        CartItemDto cartItem = new CartItemDto();
-        cartItem.setRoomId(room.getRoomId());
-        cartItem.setRoomType(room.getRoomType());
-        cartItem.setRoomNumber(room.getRoomNumber());
-        cartItem.setPrice(room.getPrice());
-        cartItem.setCheckIn(request.getCheckIn());
-        cartItem.setCheckOut(request.getCheckOut());
-        cartItem.setNumberOfDays((int) days);
-        cartItem.setTotalPrice(totalPrice);
-        cartItem.setImageRoom(imageUrl);
-        
-        // Add to cart
-        cartStorage.computeIfAbsent(userId, k -> new ArrayList<>()).add(cartItem);
-    }
-    
-    @Override
-    public List<CartItemDto> getCartItems(Integer userId) {
-        return cartStorage.getOrDefault(userId, new ArrayList<>());
-    }
-    
-    @Override
-    public void removeFromCart(Integer userId, Integer roomId) {
-        List<CartItemDto> items = cartStorage.get(userId);
-        if (items != null) {
-            items.removeIf(item -> item.getRoomId().equals(roomId));
-        }
-    }
-    
-    @Override
-    public void clearCart(Integer userId) {
-        cartStorage.remove(userId);
-    }
-    
-    @Override
-    public int getCartItemCount(Integer userId) {
-        List<CartItemDto> items = cartStorage.get(userId);
-        return items != null ? items.size() : 0;
-    }
 
-    @Override
-    @Transactional
-    public List<Integer> checkout(Integer userId) {
-        List<CartItemDto> cartItems = getCartItems(userId);
-        
-        if (cartItems == null || cartItems.isEmpty()) {
-            throw new RuntimeException("Giỏ hàng trống");
-        }
-        
-        List<Integer> orderIds = new ArrayList<>();
-        
-        // Create an order for each cart item
-        for (CartItemDto item : cartItems) {
-            // Get room to get floorId
-            Room room = roomRepository.findById(item.getRoomId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng ID: " + item.getRoomId()));
-            
-            // Create Order
-            Order order = new Order();
-            order.setUserId(userId);
-            order.setFloorId(room.getFloorId());
-            order.setCheckIn(item.getCheckIn());
-            order.setCheckOut(item.getCheckOut());
-            order.setStatus("PENDING");
-            
-            Order savedOrder = orderRepository.save(order);
-            orderIds.add(savedOrder.getOrderId());
-            
-            // Create OrderDetail
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setOrderId(savedOrder.getOrderId());
-            orderDetail.setUserId(userId);
-            orderDetail.setRoomId(item.getRoomId());
-            orderDetail.setFloorId(room.getFloorId());
-            orderDetail.setStartDate(item.getCheckIn());
-            orderDetail.setEndDate(item.getCheckOut());
-            orderDetail.setCheckIn(item.getCheckIn());
-            orderDetail.setCheckOut(item.getCheckOut());
-            orderDetail.setStatus("PENDING");
-            orderDetail.setOrderDescription("Đặt phòng " + item.getRoomType() + " - " + item.getRoomNumber() 
-                    + " từ " + item.getCheckIn() + " đến " + item.getCheckOut());
-            
-            orderDetailRepository.save(orderDetail);
-        }
-        
-        // Clear cart after successful checkout
-        clearCart(userId);
-        
-        return orderIds;
-    }
+	private final RoomRepository roomRepository;
+	private final RoomImageRepository roomImageRepository;
+	private final OrderRepository orderRepository;
+	private final OrderDetailRepository orderDetailRepository;
+
+	@Override
+	@Transactional
+	public void addToCart(Integer userId, AddToCartRequest request) {
+		System.out.println("=== Adding to cart for userId: " + userId + " ===");
+
+		// Validate request
+		if (request.getRoomId() == null) {
+			throw new RuntimeException("Room ID is required");
+		}
+		if (request.getCheckIn() == null) {
+			throw new RuntimeException("Check-in date is required");
+		}
+		if (request.getCheckOut() == null) {
+			throw new RuntimeException("Check-out date is required");
+		}
+
+		Room room = roomRepository.findById(request.getRoomId())
+				.orElseThrow(() -> new RuntimeException("Room not found with ID: " + request.getRoomId()));
+
+		// Calculate number of days
+		long days = ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut());
+		if (days <= 0) {
+			throw new RuntimeException("Check-out date must be after check-in date");
+		}
+
+		// Create Order with status CART
+		Order order = new Order();
+		order.setUserId(userId);
+		order.setFloorId(room.getFloorId());
+		order.setCheckIn(request.getCheckIn());
+		order.setCheckOut(request.getCheckOut());
+		order.setStatus("PENDING"); // Status CART for cart items
+
+		Order savedOrder = orderRepository.save(order);
+		System.out.println("Created cart order with ID: " + savedOrder.getOrderId());
+
+		// Create OrderDetail
+		OrderDetail orderDetail = new OrderDetail();
+		orderDetail.setOrderId(savedOrder.getOrderId());
+		orderDetail.setUserId(userId);
+		orderDetail.setRoomId(room.getRoomId());
+		orderDetail.setFloorId(room.getFloorId());
+		orderDetail.setStartDate(request.getCheckIn());
+		orderDetail.setEndDate(request.getCheckOut());
+		orderDetail.setCheckIn(request.getCheckIn());
+		orderDetail.setCheckOut(request.getCheckOut());
+		orderDetail.setStatus("CART");
+		orderDetail.setOrderDescription("Giỏ hàng - " + room.getRoomType() + " - Phòng " + room.getRoomNumber());
+
+		orderDetailRepository.save(orderDetail);
+
+		System.out.println("Cart item added successfully to database!");
+	}
+
+	@Override
+	public List<CartItemDto> getCartItems(Integer userId) {
+		System.out.println("=== Getting cart items for userId: " + userId + " ===");
+
+		// Get all orders with status CART
+		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
+		System.out.println("Found " + cartOrders.size() + " cart orders");
+
+		List<CartItemDto> cartItems = new ArrayList<>();
+
+		for (Order order : cartOrders) {
+			// Get order details
+			List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
+
+			for (OrderDetail detail : orderDetails) {
+				Room room = roomRepository.findById(detail.getRoomId()).orElse(null);
+				if (room == null) continue;
+
+				// Calculate days and total price
+				long days = ChronoUnit.DAYS.between(detail.getCheckIn(), detail.getCheckOut());
+				BigDecimal totalPrice = room.getPrice().multiply(BigDecimal.valueOf(days));
+
+				// Get room image
+				String imageUrl = null;
+				List<RoomImage> roomImages = roomImageRepository.findByRoomIdAndIsDeletedFalse(room.getRoomId());
+				if (!roomImages.isEmpty()) {
+					imageUrl = roomImages.get(0).getRoomImageUrl();
+				}
+
+				// Create CartItemDto
+				CartItemDto cartItem = new CartItemDto();
+				cartItem.setRoomId(room.getRoomId());
+				cartItem.setRoomType(room.getRoomType());
+				cartItem.setRoomNumber(room.getRoomNumber());
+				cartItem.setPrice(room.getPrice());
+				cartItem.setCheckIn(detail.getCheckIn());
+				cartItem.setCheckOut(detail.getCheckOut());
+				cartItem.setNumberOfDays((int) days);
+				cartItem.setTotalPrice(totalPrice);
+				cartItem.setImageRoom(imageUrl);
+
+				cartItems.add(cartItem);
+			}
+		}
+
+		System.out.println("Returning " + cartItems.size() + " cart items");
+		return cartItems;
+	}
+
+	@Override
+	@Transactional
+	public void removeFromCart(Integer userId, Integer roomId) {
+		System.out.println("=== Removing room " + roomId + " from cart for userId: " + userId + " ===");
+
+		// Find cart orders
+		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
+
+		for (Order order : cartOrders) {
+			List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
+
+			// Find and remove order detail with matching roomId
+			for (OrderDetail detail : orderDetails) {
+				if (detail.getRoomId().equals(roomId)) {
+					orderDetailRepository.delete(detail);
+
+					// If no more details, delete the order
+					List<OrderDetail> remainingDetails = orderDetailRepository.findByOrderId(order.getOrderId());
+					if (remainingDetails.isEmpty()) {
+						orderRepository.delete(order);
+					}
+
+					System.out.println("Removed cart item successfully");
+					return;
+				}
+			}
+		}
+	}
+
+	@Override
+	@Transactional
+	public void clearCart(Integer userId) {
+		System.out.println("=== Clearing cart for userId: " + userId + " ===");
+
+		// Find all cart orders
+		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "PENDING");
+
+		for (Order order : cartOrders) {
+			// Delete all order details first
+			List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
+			orderDetailRepository.deleteAll(orderDetails);
+
+			// Delete the order
+			orderRepository.delete(order);
+		}
+
+		System.out.println("Cart cleared successfully");
+	}
+
+	@Override
+	public int getCartItemCount(Integer userId) {
+		List<CartItemDto> items = getCartItems(userId);
+		return items.size();
+	}
+
+	@Override
+	@Transactional
+	public List<Integer> checkout(Integer userId) {
+		System.out.println("=== Checkout for userId: " + userId + " ===");
+
+		// Get all cart orders
+		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "PENDING");
+
+		if (cartOrders.isEmpty()) {
+			throw new RuntimeException("Giỏ hàng trống");
+		}
+
+		List<Integer> orderIds = new ArrayList<>();
+
+		// Change status from CART to PENDING
+		for (Order order : cartOrders) {
+			order.setStatus("PENDING");
+			orderRepository.save(order);
+			orderIds.add(order.getOrderId());
+
+			// Update order details status
+			List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
+			for (OrderDetail detail : orderDetails) {
+				detail.setStatus("PENDING");
+				orderDetailRepository.save(detail);
+			}
+		}
+
+		System.out.println("Checkout completed. " + orderIds.size() + " orders created");
+		return orderIds;
+	}
 }

@@ -19,63 +19,66 @@ import java.util.List;
 @RequestMapping("/hotel")
 public class OrderController {
 
-    private final OrderService orderService;
+	private final OrderService orderService;
 
-    @GetMapping("/order")
-    public String viewOrders(Model model, HttpSession session) {
-        Integer userId = getUserIdFromSession(session);
-        if (userId == null) {
-            return "redirect:/hotel/login";
-        }
+	@GetMapping("/order")
+	public String viewOrders(Model model, HttpSession session) {
+		Integer userId = getUserIdFromSession(session);
+		if (userId == null) {
+			return "redirect:/hotel/login";
+		}
 
-        List<OrderDto> orders = orderService.getOrdersByUserId(userId);
-        
-        model.addAttribute("orders", orders);
-        return "order/orders";
-    }
+		List<OrderDto> orders = orderService.getOrdersByUserId(userId);
 
-    /**
-     * API endpoint: Lấy thông tin đặt phòng của user
-     * Trả về: orderId, orderDetailId, checkIn (ngày đặt), checkOut (ngày hết hạn), roomNumber, roomType, status
-     */
-    @GetMapping("/api/booking-info")
-    @ResponseBody
-    public ResponseEntity<List<BookingInfoDto>> getBookingInfo(HttpSession session) {
-        Integer userId = getUserIdFromSession(session);
-        if (userId == null) {
-            return ResponseEntity.ok(List.of());
-        }
+		model.addAttribute("orders", orders);
+		return "order/orders";
+	}
 
-        List<BookingInfoDto> bookingInfo = orderService.getBookingInfoByUserId(userId);
-        return ResponseEntity.ok(bookingInfo);
-    }
+	/**
+	 * API endpoint: Lấy thông tin đặt phòng của user
+	 * Trả về: orderId, orderDetailId, checkIn (ngày đặt), checkOut (ngày hết hạn), roomNumber, roomType, status
+	 */
+	@GetMapping("/api/booking-info")
+	@ResponseBody
+	public ResponseEntity<List<BookingInfoDto>> getBookingInfo(HttpSession session) {
+		Integer userId = getUserIdFromSession(session);
+		if (userId == null) {
+			return ResponseEntity.ok(List.of());
+		}
 
-    /**
-     * API endpoint: Lấy tất cả thông tin đặt phòng (cho admin)
-     * Trả về: orderId, orderDetailId, checkIn (ngày đặt), checkOut (ngày hết hạn), roomNumber, roomType, status
-     */
-    @GetMapping("/api/all-booking-info")
-    @ResponseBody
-    public ResponseEntity<List<BookingInfoDto>> getAllBookingInfo() {
-        List<BookingInfoDto> bookingInfo = orderService.getAllBookingInfo();
-        return ResponseEntity.ok(bookingInfo);
-    }
+		List<BookingInfoDto> bookingInfo = orderService.getBookingInfoByUserId(userId);
+		return ResponseEntity.ok(bookingInfo);
+	}
 
-    private Integer getUserIdFromSession(HttpSession session) {
-        Object userIdObj = session.getAttribute("userId");
-        if (userIdObj != null) {
-            return (Integer) userIdObj;
-        }
+	/**
+	 * API endpoint: Lấy tất cả thông tin đặt phòng (cho admin)
+	 * Trả về: orderId, orderDetailId, checkIn (ngày đặt), checkOut (ngày hết hạn), roomNumber, roomType, status
+	 */
+	@GetMapping("/api/all-booking-info")
+	@ResponseBody
+	public ResponseEntity<List<BookingInfoDto>> getAllBookingInfo() {
+		List<BookingInfoDto> bookingInfo = orderService.getAllBookingInfo();
+		return ResponseEntity.ok(bookingInfo);
+	}
 
-        Object user = session.getAttribute("user");
-        if (user != null) {
-            try {
-                return (Integer) user.getClass().getMethod("getUserId").invoke(user);
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
+	private Integer getUserIdFromSession(HttpSession session) {
+		// Check userId attribute first
+		Object userIdObj = session.getAttribute("userId");
+		if (userIdObj != null) {
+			return (Integer) userIdObj;
+		}
 
-        return 1; // Temporary for testing
-    }
+		// Fallback: check if user object exists in session
+		Object user = session.getAttribute("user");
+		if (user != null) {
+			try {
+				return (Integer) user.getClass().getMethod("getUserId").invoke(user);
+			} catch (Exception e) {
+				System.err.println("Failed to get userId from user object: " + e.getMessage());
+			}
+		}
+
+		// Return null if not logged in - require authentication
+		return null;
+	}
 }

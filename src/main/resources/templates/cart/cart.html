@@ -45,192 +45,333 @@
 </head>
 
 <body>
-    <!-- import header -->
-    <div th:replace="~{common/header :: header}"></div>
+<!-- import header -->
+<div th:replace="~{common/header :: header}"></div>
 
-    <!-- ================ start banner area ================= -->
-    <section class="home-banner-area" id="home">
-        <div class="container h-100">
-            <div class="home-banner">
-                <div class="text-center">
-                    <h4>Xem sự khác biệt mà một kỳ nghỉ mang lại!</h4>
-                    <h1>Giỏ Hàng <em>Của Bạn</em></h1>
-                </div>
+<!-- ================ start banner area ================= -->
+<section class="home-banner-area" id="home">
+    <div class="container h-100">
+        <div class="home-banner">
+            <div class="text-center">
+                <h4>Xem sự khác biệt mà một kỳ nghỉ mang lại!</h4>
+                <h1>Giỏ Hàng <em>Của Bạn</em></h1>
             </div>
         </div>
-    </section>
-    <!-- ================ end banner area ================= -->
+    </div>
+</section>
+<!-- ================ end banner area ================= -->
 
-    <section class="section-margin">
-        <div class="container">
-            <h2 class="mb-4">Giỏ Hàng Của Bạn</h2>
+<section class="section-margin">
+    <div class="container">
+        <h2 class="mb-4">Giỏ Hàng Của Bạn</h2>
 
-            <div class="row">
-                <!-- Cart Items -->
-                <div class="col-lg-8">
-                    <div th:if="${#lists.isEmpty(cartItems)}" class="alert alert-info">
-                        Giỏ hàng của bạn đang trống. <a th:href="@{/rooms}">Tiếp tục mua sắm</a>
-                    </div>
+        <!-- Error message if not logged in -->
+        <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
 
-                    <div th:each="item : ${cartItems}" class="cart-item">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h5 th:text="${item.roomType}">Room Type</h5>
-                                <p class="text-muted mb-1">Phòng số: <span th:text="${item.roomNumber}">101</span></p>
-                                <p class="text-muted mb-1">
-                                    Check-in: <span
-                                        th:text="${#temporals.format(item.checkIn, 'dd/MM/yyyy')}">01/01/2024</span>
-                                </p>
-                                <p class="text-muted mb-1">
-                                    Check-out: <span
-                                        th:text="${#temporals.format(item.checkOut, 'dd/MM/yyyy')}">05/01/2024</span>
-                                </p>
-                                <p class="text-muted">
-                                    Số đêm: <span th:text="${item.numberOfDays}">4</span> đêm
-                                </p>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <h5 class="text-primary"
-                                    th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
-                                    1,400,000 VNĐ
-                                </h5>
-                                <p class="text-muted small"
-                                    th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/đêm'">
-                                    350,000 VNĐ/đêm
-                                </p>
-                                <button class="btn btn-sm btn-outline-danger remove-btn"
+        <div class="row">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                <div th:if="${cartItems == null || #lists.isEmpty(cartItems)}" class="alert alert-info">
+                    <i class="fas fa-shopping-cart"></i> Giỏ hàng của bạn đang trống.
+                    <a th:href="@{/hotel/rooms}">Tiếp tục mua sắm</a>
+                </div>
+
+                <div th:each="item : ${cartItems}" class="cart-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 th:text="${item.roomType}">Room Type</h5>
+                            <p class="text-muted mb-1">Phòng số: <span th:text="${item.roomNumber}">101</span></p>
+                            <p class="text-muted mb-1">
+                                Check-in: <span
+                                    th:text="${#temporals.format(item.checkIn, 'dd/MM/yyyy')}">01/01/2024</span>
+                            </p>
+                            <p class="text-muted mb-1">
+                                Check-out: <span
+                                    th:text="${#temporals.format(item.checkOut, 'dd/MM/yyyy')}">05/01/2024</span>
+                            </p>
+                            <p class="text-muted">
+                                Số đêm: <span th:text="${item.numberOfDays}">4</span> đêm
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <h5 class="text-primary"
+                                th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                1,400,000 VNĐ
+                            </h5>
+                            <p class="text-muted small"
+                               th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/đêm'">
+                                350,000 VNĐ/đêm
+                            </p>
+                            <button class="btn btn-sm btn-outline-danger remove-btn"
                                     th:onclick="'removeFromCart(' + ${item.roomId} + ')'">
-                                    <i class="fas fa-trash"></i> Xóa
-                                </button>
-                            </div>
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Cart Summary -->
-                <div class="col-lg-4">
-                    <div class="cart-summary">
-                        <h4 class="mb-3">Tổng Quan Đơn Hàng</h4>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Số phòng:</span>
-                            <span th:text="${cartItems.size()}">0</span>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between mb-3">
-                            <strong>Tổng cộng:</strong>
-                            <strong class="text-primary" id="totalAmount">
+            <!-- Cart Summary -->
+            <div class="col-lg-4">
+                <div class="cart-summary">
+                    <h4 class="mb-3">Tổng Quan Đơn Hàng</h4>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Số phòng:</span>
+                        <span th:text="${cartItems.size()}">0</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Tổng cộng:</strong>
+                        <strong class="text-primary" id="totalAmount">
                                 <span
-                                    th:text="${#numbers.formatDecimal(#aggregates.sum(cartItems.![totalPrice]), 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                        th:text="${#numbers.formatDecimal(#aggregates.sum(cartItems.![totalPrice]), 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
                                     0 VNĐ
                                 </span>
-                            </strong>
-                        </div>
-                        <button class="btn btn-primary w-100 mb-2" onclick="checkout()"
-                            th:disabled="${#lists.isEmpty(cartItems)}">
-                            <i class="fas fa-check-circle"></i> Tiến Hành Đặt Phòng
-                        </button>
-                        <button class="btn btn-outline-secondary w-100" onclick="clearCart()"
-                            th:disabled="${#lists.isEmpty(cartItems)}">
-                            Xóa Tất Cả
-                        </button>
+                        </strong>
                     </div>
+                    <button class="btn btn-primary w-100 mb-2" onclick="checkout()"
+                            th:disabled="${#lists.isEmpty(cartItems)}">
+                        <i class="fas fa-check-circle"></i> Tiến Hành Đặt Phòng
+                    </button>
+                    <button class="btn btn-outline-secondary w-100" onclick="clearCart()"
+                            th:disabled="${#lists.isEmpty(cartItems)}">
+                        Xóa Tất Cả
+                    </button>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- import footer -->
-    <div th:replace="~{common/footer :: footer}"></div>
+<!-- Confirm Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="border: none; padding: 25px 25px 15px;">
+                <h5 class="modal-title" id="confirmModalTitle" style="font-weight: 600; color: #2c3e50;">
+                    <i class="fas fa-exclamation-circle" style="color: #ffc107;"></i> Xác nhận
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 15px 25px 25px;">
+                <p id="confirmModalMessage" style="font-size: 1.05rem; color: #495057; margin: 0;">
+                    Bạn có chắc chắn muốn thực hiện hành động này?
+                </p>
+            </div>
+            <div class="modal-footer" style="border: none; padding: 15px 25px 25px;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        style="border-radius: 8px; padding: 10px 20px;">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmModalBtn"
+                        style="border-radius: 8px; padding: 10px 20px;">
+                    <i class="fas fa-check"></i> Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
-    <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
-    <script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
-    <script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
-    <script src="/vendors/easing.min.js"></script>
-    <script src="/vendors/superfish.min.js"></script>
-    <script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
-    <script src="/vendors/jquery.ajaxchimp.min.js"></script>
-    <script src="/vendors/mail-script.js"></script>
-    <script src="/js/main.js"></script>
+<!-- import footer -->
+<div th:replace="~{common/footer :: footer}"></div>
 
-    <script>
-        function removeFromCart(roomId) {
-            if (!confirm('Bạn có chắc muốn xóa phòng này khỏi giỏ hàng?')) {
-                return;
-            }
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
+<script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
+<script src="/vendors/easing.min.js"></script>
+<script src="/vendors/superfish.min.js"></script>
+<script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
+<script src="/vendors/jquery.ajaxchimp.min.js"></script>
+<script src="/vendors/mail-script.js"></script>
+<script src="/js/main.js"></script>
 
-            fetch('/cart/remove/' + roomId, {
-                method: 'DELETE'
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert(data.message);
-                    }
+<script>
+    // Show custom confirm modal
+    function showConfirmModal(title, message, onConfirm) {
+        $('#confirmModalTitle').html('<i class="fas fa-exclamation-circle" style="color: #ffc107;"></i> ' + title);
+        $('#confirmModalMessage').text(message);
+
+        // Remove old click handlers
+        $('#confirmModalBtn').off('click');
+
+        // Add new click handler
+        $('#confirmModalBtn').on('click', function () {
+            $('#confirmModal').modal('hide');
+            onConfirm();
+        });
+
+        $('#confirmModal').modal('show');
+    }
+
+    function removeFromCart(roomId) {
+        showConfirmModal(
+            'Xóa phòng',
+            'Bạn có chắc muốn xóa phòng này khỏi giỏ hàng?',
+            function () {
+                // Show loading
+                const btn = event.target.closest('button');
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xóa...';
+
+                fetch('/cart/remove/' + roomId, {
+                    method: 'DELETE'
                 })
-                .catch(err => {
-                    console.error('Error:', err);
-                    alert('Có lỗi xảy ra!');
-                });
-        }
-
-        function clearCart() {
-            if (!confirm('Bạn có chắc muốn xóa tất cả phòng khỏi giỏ hàng?')) {
-                return;
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            showToast('success', 'Đã xóa phòng khỏi giỏ hàng');
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showToast('error', data.message);
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        showToast('error', 'Có lỗi xảy ra!');
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    });
             }
+        );
+    }
 
-            fetch('/cart/clear', {
-                method: 'POST'
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    }
+    function clearCart() {
+        showConfirmModal(
+            'Xóa tất cả',
+            'Bạn có chắc muốn xóa tất cả phòng khỏi giỏ hàng?',
+            function () {
+                fetch('/cart/clear', {
+                    method: 'POST'
                 })
-                .catch(err => {
-                    console.error('Error:', err);
-                    alert('Có lỗi xảy ra!');
-                });
-        }
-
-        function checkout() {
-            if (!confirm('Xác nhận đặt phòng? Đơn hàng sẽ được tạo với trạng thái chờ xử lý.')) {
-                return;
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('success', 'Đã xóa tất cả phòng');
+                            setTimeout(() => location.reload(), 1000);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        showToast('error', 'Có lỗi xảy ra!');
+                    });
             }
+        );
+    }
 
-            // Show loading
-            const checkoutBtn = document.querySelector('.btn-primary');
-            const originalText = checkoutBtn.innerHTML;
-            checkoutBtn.disabled = true;
-            checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+    function checkout() {
+        showConfirmModal(
+            'Xác nhận đặt phòng',
+            'Bạn có chắc muốn đặt phòng? Đơn hàng sẽ được tạo với trạng thái chờ xử lý.',
+            function () {
+                // Show loading
+                const checkoutBtn = document.querySelector('.btn-primary');
+                const originalText = checkoutBtn.innerHTML;
+                checkoutBtn.disabled = true;
+                checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
 
-            fetch('/cart/checkout', {
-                method: 'POST'
-            })
-                .then(res => res.json())
-                .then(data => {
-                    checkoutBtn.disabled = false;
-                    checkoutBtn.innerHTML = originalText;
-
-                    if (data.success) {
-                        alert(data.message);
-                        // Redirect to orders page or reload
-                        window.location.href = '/hotel/order';
-                    } else {
-                        alert(data.message || 'Có lỗi xảy ra!');
-                    }
+                fetch('/cart/checkout', {
+                    method: 'POST'
                 })
-                .catch(err => {
-                    console.error('Error:', err);
-                    checkoutBtn.disabled = false;
-                    checkoutBtn.innerHTML = originalText;
-                    alert('Có lỗi xảy ra khi đặt phòng!');
-                });
-        }
-    </script>
+                    .then(res => res.json())
+                    .then(data => {
+                        checkoutBtn.disabled = false;
+                        checkoutBtn.innerHTML = originalText;
+
+                        if (data.success) {
+                            showToast('success', data.message);
+                            setTimeout(() => {
+                                window.location.href = '/hotel/order';
+                            }, 1500);
+                        } else {
+                            showToast('error', data.message || 'Có lỗi xảy ra!');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        checkoutBtn.disabled = false;
+                        checkoutBtn.innerHTML = originalText;
+                        showToast('error', 'Có lỗi xảy ra khi đặt phòng!');
+                    });
+            }
+        );
+    }
+
+    // Toast notification
+    function showToast(type, message) {
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast ' + type;
+        toast.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 30px;
+                min-width: 300px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+                padding: 16px 20px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                z-index: 10000;
+                animation: slideInRight 0.4s ease-out;
+                border-left: 4px solid ${type === 'success' ? '#10b981' : '#ef4444'};
+            `;
+
+        const icon = type === 'success' ? '✓' : '✕';
+        const iconBg = type === 'success' ? '#d1fae5' : '#fee2e2';
+        const iconColor = type === 'success' ? '#10b981' : '#ef4444';
+
+        toast.innerHTML = `
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: ${iconBg}; 
+                            color: ${iconColor}; display: flex; align-items: center; justify-content: center; 
+                            font-size: 20px; font-weight: bold;">${icon}</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: #1f2937;">
+                        ${type === 'success' ? 'Thành công!' : 'Lỗi!'}
+                    </div>
+                    <div style="font-size: 13px; color: #6b7280;">${message}</div>
+                </div>
+                <button onclick="this.parentElement.remove()" 
+                        style="background: none; border: none; color: #9ca3af; cursor: pointer; 
+                               font-size: 20px; padding: 0; width: 24px; height: 24px;">×</button>
+            `;
+
+        document.body.appendChild(toast);
+
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s ease-in forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // Add animation keyframes
+    const style = document.createElement('style');
+    style.textContent = `
+            @keyframes slideInRight {
+                from { opacity: 0; transform: translateX(100px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            @keyframes slideOutRight {
+                from { opacity: 1; transform: translateX(0); }
+                to { opacity: 0; transform: translateX(100px); }
+            }
+        `;
+    document.head.appendChild(style);
+</script>
+</script>
 
 </body>
 
