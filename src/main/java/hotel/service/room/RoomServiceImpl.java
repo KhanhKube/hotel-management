@@ -12,6 +12,13 @@ import hotel.db.repository.size.SizeRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QPageRequest;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,49 +42,114 @@ public class RoomServiceImpl implements RoomService {
 	private final SizeRepository sizeRepository;
 
     @Override
-    public List<RoomBookListDto> getRoomListForBooking() {
+    public Page<RoomBookListDto> getRoomListWithFiltersAndPagination(BigDecimal minPrice, BigDecimal maxPrice, String roomType,
+                                                                     Integer floor, String bedType, String sortBy, int page, int size) {
         List<Room> rooms = roomRepository.findAll();
-        return rooms.stream()
+
+        //Filter theo roomType (Loại phòng)
+        if (roomType != null && !roomType.isEmpty()) {
+            rooms = rooms.stream()
+                    .filter(x->x.getRoomType().equals(roomType))
+                    .collect(Collectors.toList());
+        }
+        //Filter theo giá min
+        if (minPrice != null) {
+            rooms = rooms.stream()
+                    .filter(x -> x.getPrice().compareTo(minPrice) >= 0)
+                    .collect(Collectors.toList());
+        }
+        //Filter theo giá trần
+        if (maxPrice != null) {
+            rooms = rooms.stream()
+                    .filter(x -> x.getPrice().compareTo(maxPrice) <= 0)
+                    .collect(Collectors.toList());
+        }
+        //Filter theo tầng
+        if (floor != null) {
+            rooms = rooms.stream()
+                    .filter(x -> floor.equals(x.getFloorId()))
+                    .collect(Collectors.toList());
+        }
+        //Filter theo bedtype
+        if (bedType != null && !bedType.isEmpty()) {
+            rooms = rooms.stream()
+                    .filter(x -> bedType.equals(x.getBedType()))
+                    .collect(Collectors.toList());
+        }
+        //Thêm đk Sort
+        if (sortBy != null) {
+            switch (sortBy) {
+                case "price-asc":
+                    rooms.sort(Comparator.comparing(Room::getPrice));
+                    break;
+                case "price-desc":
+                    rooms.sort(Comparator.comparing(Room::getPrice).reversed());
+                    break;
+                case "room-asc":
+                    rooms.sort(Comparator.comparing(Room::getRoomNumber));
+                    break;
+                case "room-desc":
+                    rooms.sort(Comparator.comparing(Room::getRoomNumber).reversed());
+                    break;
+            }
+        }
+        List <RoomBookListDto> BookList = rooms.stream() //Lấy Listcác phòng đã được lọc field qua Dto
                 .filter(x -> !"Bảo trì".equals(x.getStatus()))
                 .map(x -> {
-                    RoomBookListDto dto = new RoomBookListDto();
-                    dto.setRoomId(x.getRoomId());
-                    dto.setRoomType(x.getRoomType());
-                    dto.setPrice(x.getPrice());
-                    dto.setRoomDescription(x.getRoomDescription());
-
-                    //Lấy ảnh đầu tiên của phòng theo id
-                    List<RoomImage> roomImages = roomImageRepository.findByRoomId(x.getRoomId());
-                    if (!roomImages.isEmpty()) {
-                        dto.setImageRoom(roomImages.get(0).getRoomImageUrl()); //Lấy url của ảnh đầu tiên (index 0)
-                    } else {
-                        dto.setImageRoom("https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg"); //lấy ảnh mạng
-                    }
-
-                    //Logic nghiệp vụ cho Status phòng VIPVIPVIPV
-                    if ("Trống".equals(x.getStatus())) {
-                        dto.setStatusDisplay("Trống");;
-                        dto.setAvailableFrom(null);
-                    } else {
-                        LocalDate nextAvailable = orderDetailRepository.findNextAvailableDateByRoomId(x.getRoomId());
-                        if (nextAvailable != null) {
-                            dto.setStatusDisplay("Có thể đặt từ " +
-                                    nextAvailable.plusDays(1/12)
-                                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))); // có thể đặt tiếp phòng sau 2 tiếng enddate của phòng cũ
-                            dto.setAvailableFrom(nextAvailable.plusDays(1/12)); // tăng thêm 2 tiếng.
-                        } else {
-                            //TH query trả về null.
-                            dto.setStatusDisplay("Trống");
-                            dto.setAvailableFrom(null);
-                        }
-                    }
-
-                    return dto;
+                    return toRoomBookDto(x);
                 }).collect(Collectors.toList());
+
+        //Paging thủ công
+        int startpage = page*size;
+        int endpage = Math.min(startpage + size, BookList.size());
+
+        List<RoomBookListDto> pageDtos = BookList.subList(startpage, endpage);
+
+        return new PageImpl<>(pageDtos, PageRequest.of(page, size), BookList.size());
     }
 
     /*
-    Trả về về List chứa các field cần thiết.
+    //Dto trả về field cho trang hiển thị danh sách phòng cho bên customer booking
+    */
+    private RoomBookListDto toRoomBookDto(Room x) {
+        RoomBookListDto dto = new RoomBookListDto();
+        dto.setRoomId(x.getRoomId());
+        dto.setRoomNumber(x.getRoomNumber());
+        dto.setRoomType(x.getRoomType());
+        dto.setPrice(x.getPrice());
+        dto.setRoomDescription(x.getRoomDescription());
+
+        //Lấy ảnh đầu tiên của phòng theo id
+        List<RoomImage> roomImages = roomImageRepository.findByRoomId(x.getRoomId());
+        if (!roomImages.isEmpty()) {
+            dto.setImageRoom(roomImages.get(0).getRoomImageUrl()); //Lấy url của ảnh đầu tiên (index 0)
+        } else {
+            dto.setImageRoom("https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg"); //lấy ảnh mạng
+        }
+
+        //Logic nghiệp vụ cho Status phòng VIPVIPVIPV
+        if ("Trống".equals(x.getStatus())) {
+            dto.setStatusDisplay("Trống");;
+            dto.setAvailableFrom(null);
+        } else {
+            LocalDate nextAvailable = orderDetailRepository.findNextAvailableDateByRoomId(x.getRoomId());
+            if (nextAvailable != null) {
+                dto.setStatusDisplay("Có thể đặt từ " +
+                        nextAvailable.plusDays(1/12)
+                                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))); // có thể đặt tiếp phòng sau 2 tiếng enddate của phòng cũ
+                dto.setAvailableFrom(nextAvailable.plusDays(1/12)); // tăng thêm 2 tiếng.
+            } else {
+                //TH query trả về null.
+                dto.setStatusDisplay("Trống");
+                dto.setAvailableFrom(null);
+            }
+        }
+
+        return dto;
+    }
+
+    /*
+    Listtrả về về List chứa các field cần thiết.
     */
     @Override
     public List<RoomListDto> getRoomList() {
@@ -217,6 +289,13 @@ public class RoomServiceImpl implements RoomService {
         }
         return "";
     }
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Room r SET r.view = r.view + 1 WHERE r.roomId = :roomId")
+    @Override
+    public void incrementView(@Param("roomId") Integer roomId){}
+
 
 	@Override
 	@NotNull

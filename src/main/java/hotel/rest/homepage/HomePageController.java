@@ -50,6 +50,9 @@ public class HomePageController {
                              Model model,
                              RedirectAttributes redirectAttrs) {
         RoomDetailResponseDto room = roomService.getRoomDetailById(id);
+
+        roomService.incrementView(id);
+
         if(room == null) {
             redirectAttrs.addFlashAttribute("error", ROOMNOTEXIST);
             return "redirect:/hotel";
