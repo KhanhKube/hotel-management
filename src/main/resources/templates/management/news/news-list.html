@@ -1,248 +1,419 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>News Management</title>
-    <link rel="icon" href="/img/favicon.png" type="image/png">
-    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
-    <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <base th:href="@{/static}">
+    <!-- Corona Admin assets -->
+    <!-- plugins:css -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <!-- End plugins:css -->
+    <!-- Plugin css for this page -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/jvectormap/jquery-jvectormap.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/flag-icon-css/css/flag-icon.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.theme.default.min.css}">
+    <!-- End plugin css for this page -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <!-- End layout styles -->
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
     <style>
-        .news-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .search-filter-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-        }
-        .table-container {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .table thead th {
-            border: none;
-            padding: 1rem;
-            font-weight: 600;
-        }
-        .table tbody tr {
-            transition: all 0.3s ease;
-        }
-        .table tbody tr:hover {
-            background-color: #f8f9fa;
-            transform: scale(1.01);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .btn-action {
-            margin: 0 2px;
-            transition: all 0.3s ease;
-        }
-        .btn-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .status-badge {
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        .status-draft {
-            background: linear-gradient(135deg, #ffa751 0%, #ffe259 100%);
-            color: white;
-        }
-        .status-published {
-            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
-            color: white;
-        }
-        .status-archived {
-            background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
-            color: white;
-        }
-        .view-badge {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 0.4rem 0.8rem;
-            border-radius: 15px;
-            font-weight: 600;
-        }
-        .pagination {
-            margin-top: 2rem;
-        }
-        .page-link {
-            color: #667eea;
-            border: 1px solid #dee2e6;
-            margin: 0 2px;
-            border-radius: 5px;
-        }
-        .page-link:hover {
-            background-color: #667eea;
-            color: white;
-        }
-        .page-item.active .page-link {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: #667eea;
-        }
-        .main-panel {
-            background: #f5f7ff;
-        }
-        .content-wrapper {
-            padding: 2rem;
+        tbody tr:hover {
+            cursor: pointer;
+            opacity: 0.65;
+            transition: background-color 0.2s;
         }
     </style>
 </head>
 <body>
 <div class="container-scroller">
-    <!-- Sidebar -->
+    <!-- Include sidebar -->
     <div th:replace="~{common/sidebar :: sidebar}"></div>
-
+    <!-- partial -->
     <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_navbar.html -->
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                                                                               alt="logo" /></a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            </div>
+        </nav>
+        <!-- partial -->
         <div class="main-panel">
             <div class="content-wrapper">
-                <!-- Header -->
-                <div class="news-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2><i class="fas fa-newspaper me-2"></i>News Management</h2>
-                            <p class="mb-0">Total News: <strong th:text="${newsPage.totalElements}">0</strong></p>
+                <div class="row ">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- Search & Filter Bar -->
+                                <div class="filter-section mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px;">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
+                                        <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Tin Tức</h5>
+                                    </div>
+
+                                    <!-- Row 1: Search -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <i class="mdi mdi-magnify text-primary"></i>
+                                                </span>
+                                                <input id="searchInput" type="text" class="form-control border-start-0"
+                                                       placeholder="Tìm kiếm tiêu đề tin tức...">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 2: Filters -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-3 col-sm-6 mb-2">
+                                            <select id="filterStatus" class="form-select">
+                                                <option value="">-- Tất cả trạng thái --</option>
+                                                <option value="DRAFT">Bản nháp</option>
+                                                <option value="PUBLISHED">Đã xuất bản</option>
+                                                <option value="ARCHIVED">Đã lưu trữ</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3 col-sm-6 mb-2">
+                                            <select id="filterNewsGroup" class="form-select">
+                                                <option value="">-- Tất cả nhóm tin --</option>
+                                                <option th:each="group : ${newsGroups}"
+                                                        th:value="${group.name}"
+                                                        th:text="${group.name}"></option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3 col-sm-6 mb-2">
+                                            <input type="number" id="filterViewsFrom" class="form-control"
+                                                   placeholder="Lượt xem từ...">
+                                        </div>
+
+                                        <div class="col-md-3 col-sm-6 mb-2">
+                                            <input type="number" id="filterViewsTo" class="form-control"
+                                                   placeholder="Lượt xem đến...">
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 3: Buttons -->
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6 col-sm-12 mb-2">
+                                            <button onclick="applyAllFilters()" class="btn btn-info me-2">
+                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                            </button>
+                                            <button onclick="resetAllFilters()" class="btn btn-light">
+                                                <i class="mdi mdi-refresh"></i> Reset
+                                            </button>
+                                        </div>
+
+                                        <div class="col-md-6 col-sm-12 mb-2 text-end">
+                                            <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
+                                                <i class="mdi mdi-newspaper"></i>
+                                                Tổng: <strong id="resultCount" th:text="${newsPage.totalElements}">0</strong> tin tức
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Error Message -->
+                                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <strong>Lỗi!</strong> <span th:text="${error}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+
+                                <!-- Success Message -->
+                                <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-check-circle"></i>
+                                    <strong>Thành công!</strong> <span th:text="${message}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">News Management</h4>
+                                    <a th:href="@{/management/news/add}" class="btn btn-primary">
+                                        <i class="mdi mdi-plus"></i> Create New News
+                                    </a>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table" id="newsTable">
+                                        <thead>
+                                        <tr>
+                                            <th> STT </th>
+                                            <th onclick="sortTable(1, this)" style="cursor: pointer;">
+                                                Title <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th onclick="sortTable(2, this)" style="cursor: pointer;">
+                                                Status <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th onclick="sortTable(3, this)" style="cursor: pointer;">
+                                                Views <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th onclick="sortTable(4, this)" style="cursor: pointer;">
+                                                Created Date <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th> Actions </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="n, stat : ${newsPage.content}"
+                                            th:onclick="|window.location.href='@{/management/news/view/{id}(id=${n.newsId})}';|"
+                                            style="cursor: pointer;">
+
+                                            <td th:text="${stat.count}"></td>
+                                            <td th:text="${n.title != null ? n.title : 'N/A'}"></td>
+                                            <td>
+                                                <div th:switch="${n.status}">
+                                                    <span th:case="'DRAFT'" class="badge badge-outline-warning">DRAFT</span>
+                                                    <span th:case="'PUBLISHED'" class="badge badge-outline-success">PUBLISHED</span>
+                                                    <span th:case="'ARCHIVED'" class="badge badge-outline-secondary">ARCHIVED</span>
+                                                </div>
+                                            </td>
+                                            <td th:text="${n.view != null ? n.view : 0}"></td>
+                                            <td th:text="${n.createdAt != null ? #temporals.format(n.createdAt, 'dd/MM/yyyy') : 'N/A'}"></td>
+                                            <td onclick="event.stopPropagation();">
+                                                <a th:href="@{/management/news/view/{id}(id=${n.newsId})}" class="btn btn-info btn-sm me-1">
+                                                    <i class="mdi mdi-eye"></i>
+                                                </a>
+                                                <a th:href="@{/management/news/edit/{id}(id=${n.newsId})}" class="btn btn-warning btn-sm me-1">
+                                                    <i class="mdi mdi-pencil"></i>
+                                                </a>
+                                                <form th:action="@{/management/news/delete/{id}(id=${n.newsId})}" method="post" style="display:inline">
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('Are you sure you want to delete this news?')">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+
+                                        <tr th:if="${#lists.isEmpty(newsPage.content)}">
+                                            <td colspan="6" class="text-center text-muted">No news available</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <nav th:if="${totalPages > 1}">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/management/news(page=${currentPage - 1}, search=${search}, status=${status})}">
+                                                <i class="mdi mdi-chevron-left"></i> Previous
+                                            </a>
+                                        </li>
+                                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                            th:classappend="${i == currentPage} ? 'active'">
+                                            <a class="page-link" th:href="@{/management/news(page=${i}, search=${search}, status=${status})}"
+                                               th:text="${i + 1}"></a>
+                                        </li>
+                                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/management/news(page=${currentPage + 1}, search=${search}, status=${status})}">
+                                                Next <i class="mdi mdi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
                         </div>
-                        <a th:href="@{/management/news/add}" class="btn btn-light btn-lg">
-                            <i class="fas fa-plus-circle me-2"></i>Create News
-                        </a>
                     </div>
                 </div>
-
-                <!-- Search and Filter Form -->
-                <div class="search-filter-card">
-                    <form method="get" th:action="@{/management/news}">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label"><i class="fas fa-search me-2"></i>Search by Title</label>
-                                <input type="text" name="search" th:value="${search}" class="form-control" placeholder="Enter news title..." />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label"><i class="fas fa-filter me-2"></i>Status</label>
-                                <select name="status" class="form-control">
-                                    <option th:selected="${status} == null" value="">All Status</option>
-                                    <option th:selected="${status} == 'DRAFT'" value="DRAFT">Draft</option>
-                                    <option th:selected="${status} == 'PUBLISHED'" value="PUBLISHED">Published</option>
-                                    <option th:selected="${status} == 'ARCHIVED'" value="ARCHIVED">Archived</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-filter me-2"></i>Filter
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- News Table -->
-                <div class="table-container">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Title</th>
-                                <th>Status</th>
-                                <th>Views</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="n : ${newsPage}">
-                                <td><strong th:text="${n.newsId}"></strong></td>
-                                <td>
-                                    <i class="fas fa-newspaper text-primary me-2"></i>
-                                    <strong th:text="${n.title}"></strong>
-                                </td>
-                                <td>
-                            <span th:class="'status-badge status-' + ${#strings.toLowerCase(n.status)}"
-                                  th:text="${n.status}"></span>
-                                </td>
-                                <td>
-                            <span class="view-badge">
-                                <i class="fas fa-eye me-1"></i>
-                                <span th:text="${n.view}">0</span>
-                            </span>
-                                </td>
-                                <td class="text-center">
-                                    <a th:href="@{'/management/news/view/' + ${n.newsId}}"
-                                       class="btn btn-info btn-sm btn-action" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a th:href="@{'/management/news/edit/' + ${n.newsId}}"
-                                       class="btn btn-warning btn-sm btn-action" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form th:action="@{'/management/news/delete/' + ${n.newsId}}" method="post" style="display:inline">
-                                        <button type="submit" class="btn btn-danger btn-sm btn-action"
-                                                onclick="return confirm('Are you sure you want to delete this news?')"
-                                                title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(newsPage.content)}">
-                                <td colspan="5" class="text-center py-5">
-                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                                    <p class="text-muted">No news found. Click "Create News" to add one.</p>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    <nav th:if="${totalPages > 1}">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                <a class="page-link" th:href="@{/management/news(page=${currentPage - 1}, search=${search}, status=${status})}">
-                                    <i class="fas fa-chevron-left"></i> Previous
-                                </a>
-                            </li>
-                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                                th:classappend="${i == currentPage} ? 'active'">
-                                <a class="page-link" th:href="@{/management/news(page=${i}, search=${search}, status=${status})}"
-                                   th:text="${i + 1}"></a>
-                            </li>
-                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                                <a class="page-link" th:href="@{/management/news(page=${currentPage + 1}, search=${search}, status=${status})}">
-                                    Next <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-
             </div>
+            <!-- content-wrapper ends -->
+            <!-- partial:partials/_footer.html -->
+            <footer class="footer">
+                <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                        <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright ©
+                            bootstrapdash.com 2020</span>
+                </div>
+            </footer>
+            <!-- partial -->
         </div>
+        <!-- main-panel ends -->
     </div>
+    <!-- page-body-wrapper ends -->
 </div>
+<!-- container-scroller -->
 
-<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
-<script src="/assets/js/off-canvas.js"></script>
-<script src="/assets/js/hoverable-collapse.js"></script>
-<script src="/assets/js/misc.js"></script>
+<!-- plugins:js -->
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<!-- End plugins:js -->
+<!-- Plugin js for this page -->
+<script th:src="@{/assets/vendors/chart.js/Chart.min.js}"></script>
+<script th:src="@{/assets/vendors/progressbar.js/progressbar.min.js}"></script>
+<script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap.min.js}"></script>
+<script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js}"></script>
+<script th:src="@{/assets/vendors/owl-carousel-2/owl.carousel.min.js}"></script>
+<!-- End plugin js for this page -->
+<!-- inject:js -->
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+<script th:src="@{/assets/js/settings.js}"></script>
+<script th:src="@{/assets/js/todolist.js}"></script>
+<!-- endinject -->
+<!-- Custom js for this page -->
+<script th:src="@{/assets/js/dashboard.js}"></script>
+<!-- End custom js for this page -->
+<script>
+    // Lấy tất cả elements
+    const searchInput = document.getElementById('searchInput');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterNewsGroup = document.getElementById('filterNewsGroup');
+    const filterViewsFrom = document.getElementById('filterViewsFrom');
+    const filterViewsTo = document.getElementById('filterViewsTo');
+    const newsTable = document.getElementById('newsTable');
+    const tableRows = Array.from(newsTable.getElementsByTagName('tr')).slice(1); // Bỏ header
+    const resultCount = document.getElementById('resultCount');
+
+    // Function apply tất cả filters (AND logic)
+    function applyAllFilters() {
+        const searchText = searchInput.value.toLowerCase().trim();
+        const selectedStatus = filterStatus.value.toUpperCase();
+        const selectedNewsGroup = filterNewsGroup.value.trim();
+        const viewsFrom = parseInt(filterViewsFrom.value) || 0;
+        const viewsTo = parseInt(filterViewsTo.value) || Infinity;
+
+        let visibleCount = 0;
+
+        tableRows.forEach(row => {
+            // Bỏ qua row empty message
+            if (row.querySelector('td[colspan]')) {
+                row.style.display = 'none';
+                return;
+            }
+
+            // Lấy giá trị từ các columns
+            const title = row.cells[1]?.textContent.toLowerCase().trim() || '';
+            const status = row.cells[2]?.textContent.toUpperCase().trim() || '';
+            const views = parseInt(row.cells[3]?.textContent.trim()) || 0;
+
+            // Kiểm tra TẤT CẢ điều kiện (AND logic)
+            const matchSearch = searchText === '' || title.includes(searchText);
+            const matchStatus = selectedStatus === '' || status === selectedStatus;
+            const matchViews = views >= viewsFrom && views <= viewsTo;
+
+            // Chỉ hiện row nếu TẤT CẢ điều kiện đều đúng
+            if (matchSearch && matchStatus && matchViews) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Update count
+        resultCount.textContent = visibleCount;
+    }
+
+    // Function reset filters
+    function resetAllFilters() {
+        searchInput.value = '';
+        filterStatus.value = '';
+        filterNewsGroup.value = '';
+        filterViewsFrom.value = '';
+        filterViewsTo.value = '';
+        applyAllFilters();
+    }
+
+    // Gắn event listeners
+    searchInput.addEventListener('keyup', applyAllFilters);
+    filterStatus.addEventListener('change', applyAllFilters);
+    filterNewsGroup.addEventListener('change', applyAllFilters);
+    filterViewsFrom.addEventListener('change', applyAllFilters);
+    filterViewsTo.addEventListener('change', applyAllFilters);
+</script>
+<!--SortTable với 3 trạng thái-->
+<script>
+    // Lưu trạng thái sort cho từng column
+    const sortStates = {}; // { columnIndex: 0|1|2 } - 0: none, 1: asc, 2: desc
+    let originalRowsOrder = []; // Lưu thứ tự ban đầu
+
+    // Lưu thứ tự ban đầu khi load trang
+    document.addEventListener('DOMContentLoaded', function() {
+        const table = document.getElementById("newsTable");
+        originalRowsOrder = Array.from(table.tBodies[0].rows);
+    });
+
+    function sortTable(columnIndex, headerElement) {
+        const table = document.getElementById("newsTable");
+        const tbody = table.tBodies[0];
+
+        // Khởi tạo state nếu chưa có
+        if (sortStates[columnIndex] === undefined) {
+            sortStates[columnIndex] = 0;
+        }
+
+        // Chuyển sang state tiếp theo: 0 -> 1 -> 2 -> 0
+        sortStates[columnIndex] = (sortStates[columnIndex] + 1) % 3;
+
+        // Reset icon của tất cả headers
+        const allHeaders = table.querySelectorAll('thead th');
+        allHeaders.forEach(th => {
+            const icon = th.querySelector('i');
+            if (icon) {
+                icon.className = 'mdi mdi-sort';
+                icon.style.color = '';
+            }
+        });
+
+        // Update icon của header hiện tại
+        const icon = headerElement.querySelector('i');
+        if (sortStates[columnIndex] === 0) {
+            // None - quay về thứ tự ban đầu
+            icon.className = 'mdi mdi-sort';
+            icon.style.color = '';
+            tbody.innerHTML = "";
+            originalRowsOrder.forEach(row => tbody.appendChild(row.cloneNode(true)));
+            return;
+        } else if (sortStates[columnIndex] === 1) {
+            // Ascending
+            icon.className = 'mdi mdi-sort-ascending';
+            icon.style.color = '#667eea';
+        } else {
+            // Descending
+            icon.className = 'mdi mdi-sort-descending';
+            icon.style.color = '#667eea';
+        }
+
+        // Lấy rows và sort
+        const rows = Array.from(tbody.rows);
+        rows.sort((a, b) => {
+            const cellA = a.cells[columnIndex].textContent.trim().toLowerCase();
+            const cellB = b.cells[columnIndex].textContent.trim().toLowerCase();
+
+            // Kiểm tra xem là số hay là chữ
+            const valA = isNaN(cellA) ? cellA : Number(cellA);
+            const valB = isNaN(cellB) ? cellB : Number(cellB);
+
+            if (valA < valB) {
+                return sortStates[columnIndex] === 1 ? -1 : 1; // 1=asc, 2=desc
+            }
+            if (valA > valB) {
+                return sortStates[columnIndex] === 1 ? 1 : -1;
+            }
+            return 0;
+        });
+
+        // Render lại table
+        tbody.innerHTML = "";
+        rows.forEach(row => tbody.appendChild(row));
+    }
+</script>
 </body>
+
 </html>
 
 

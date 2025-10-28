@@ -11,6 +11,11 @@ import java.util.List;
 @Repository
 public interface NewsRepository extends JpaRepository<News, Integer> {
 
+    // Find all non-deleted news
+    List<News> findByIsDeletedFalse();
+
+    Page<News> findByIsDeletedFalse(Pageable pageable);
+
     List<News> findByStatusAndIsDeletedFalse(String status);
 
     Page<News> findByStatusAndIsDeletedFalse(String status, Pageable pageable);

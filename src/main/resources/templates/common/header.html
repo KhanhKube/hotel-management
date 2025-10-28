@@ -58,7 +58,8 @@
                         </li>
                         <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">TRANG CHỦ</a></li>
                         <li class="nav-item"><a class="nav-link" th:href="@{/rooms}">PHÒNG</a></li>
-                        <li class="nav-item"><a class="nav-link" th:href="@{/news}">TIN TỨC</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#news-section" onclick="scrollToNews(); return false;">
+                            TIN TỨC</a></li>
                         <li class="nav-item"th:if="${user != null and user.role == 'CUSTOMER'}"><a class="nav-link" th:href="@{/sale}">SALE</a></li>
                         <li class="nav-item"th:if="${user != null and (user.role == 'RECEPTIONIST' || user.role == 'STAFF')}"><a class="nav-link" th:href="@{/order}">ĐƠN ĐẶT PHÒNG</a></li>
                         <li class="nav-item submenu dropdown">
@@ -79,10 +80,10 @@
                         <a class="nav-link dropdown-toggle position-relative" href="#" id="cartDropdown" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="fas fa-shopping-cart"></i>
-                            <span class="badge badge-danger position-absolute" id="cart-badge" 
+                            <span class="badge badge-danger position-absolute" id="cart-badge"
                                   style="top: -5px; right: -10px; font-size: 10px; display: none;">0</span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-right cart-dropdown" aria-labelledby="cartDropdown" 
+                        <div class="dropdown-menu dropdown-menu-right cart-dropdown" aria-labelledby="cartDropdown"
                              style="min-width: 350px; max-height: 400px; overflow-y: auto;">
                             <h6 class="dropdown-header">Giỏ Hàng</h6>
                             <div class="dropdown-divider"></div>
@@ -176,7 +177,7 @@
                 const badge = document.getElementById('cart-badge');
                 const itemsContainer = document.getElementById('cart-items-preview');
                 const totalElement = document.getElementById('cart-total-preview');
-                
+
                 if (data.length === 0) {
                     badge.style.display = 'none';
                     itemsContainer.innerHTML = '<p class="dropdown-item text-muted">Giỏ hàng trống</p>';
@@ -184,10 +185,10 @@
                 } else {
                     badge.style.display = 'inline';
                     badge.textContent = data.length;
-                    
+
                     let total = 0;
                     let html = '';
-                    
+
                     data.forEach(item => {
                         total += item.totalPrice;
                         html += `
@@ -205,17 +206,17 @@
                             </div>
                         `;
                     });
-                    
+
                     itemsContainer.innerHTML = html;
                     totalElement.textContent = total.toLocaleString('vi-VN') + ' VNĐ';
                 }
             })
             .catch(err => console.error('Error loading cart:', err));
     }
-    
+
     // Load on page load
     document.addEventListener('DOMContentLoaded', loadCartPreview);
-    
+
     // Reload cart when dropdown is opened
     document.getElementById('cartDropdown')?.addEventListener('click', loadCartPreview);
 </script>
