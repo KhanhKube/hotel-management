@@ -34,7 +34,7 @@ public class RoomServiceImpl implements RoomService {
 
 	private final SizeRepository sizeRepository;
 
-
+    @Override
     public List<RoomBookListDto> getRoomListForBooking() {
         List<Room> rooms = roomRepository.findAll();
         return rooms.stream()

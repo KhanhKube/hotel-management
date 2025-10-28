@@ -190,18 +190,8 @@
                                             </td>
 
                                             <td onclick="event.stopPropagation();">
-                                                <a th:href="@{/hotel-management/room/edit/{id}(id=${d.roomId})}"
-                                                   class="btn btn-sm btn-warning me-1" title="Chỉnh sửa phòng">
-                                                    <i class="mdi mdi-pencil"></i>
-                                                </a>
-                                                <a th:href="@{/management/rooms/{roomId}/services(roomId=${d.roomId})}"
-                                                   class="btn btn-sm btn-info me-1" title="Quản lý dịch vụ">
-                                                    <i class="mdi mdi-room-service"></i>
-                                                </a>
-                                                <a th:href="@{/hotel-management/room/delete/{id}(id=${d.roomId})}"
-                                                   class="btn btn-sm btn-danger" title="Xóa phòng">
-                                                    <i class="mdi mdi-delete"></i>
-                                                </a>
+                                                <a th:href="@{/hotel-management/room/edit/{id}(id=${d.roomId})}">Sửa</a>
+                                                <a th:href="@{/hotel-management/room/delete/{id}(id=${d.roomId})}">Xóa</a>
                                             </td>
                                         </tr>
 
