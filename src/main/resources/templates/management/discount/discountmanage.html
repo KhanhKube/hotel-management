@@ -55,89 +55,89 @@
                         <div class="card">
                             <div class="card-body">
                                 <!-- Search & Filter Bar -->
-                                <div class="filter-section mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px;">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
-                                        <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Voucher</h5>
-                                    </div>
+                                <form th:action="@{/hotel-management/discount}" method="get">
+                                    <div class="filter-section mb-4" style="background: #4a90e2; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
+                                            <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Voucher</h5>
+                                        </div>
 
-                                    <!-- Row 1: Search -->
-                                    <div class="row mb-3">
-                                        <div class="col-md-12">
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-white border-end-0">
-                                                    <i class="mdi mdi-magnify text-primary"></i>
+                                        <!-- Row 1: Search -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-white border-end-0">
+                                                        <i class="mdi mdi-magnify text-primary"></i>
+                                                    </span>
+                                                    <input name="search" type="text" class="form-control border-start-0" 
+                                                           placeholder="Tìm kiếm mã voucher..." th:value="${param.search}">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 2: Filters -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select name="discountType" class="form-select">
+                                                    <option value="">-- Tất cả loại giảm giá --</option>
+                                                    <option value="PERCENT" th:selected="${param.discountType != null && param.discountType[0] == 'PERCENT'}">Phần trăm (%)</option>
+                                                    <option value="AMOUNT" th:selected="${param.discountType != null && param.discountType[0] == 'AMOUNT'}">Số tiền cố định</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select name="roomType" class="form-select">
+                                                    <option value="">-- Tất cả loại phòng --</option>
+                                                    <option th:each="type : ${roomTypes}" 
+                                                            th:value="${type}" 
+                                                            th:text="${type}"
+                                                            th:selected="${param.roomType != null && param.roomType[0] == type}"></option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select name="status" class="form-select">
+                                                    <option value="">-- Tất cả trạng thái --</option>
+                                                    <option value="ACTIVE" th:selected="${param.status != null && param.status[0] == 'ACTIVE'}">Đang hoạt động</option>
+                                                    <option value="PENDING" th:selected="${param.status != null && param.status[0] == 'PENDING'}">Chưa bắt đầu</option>
+                                                    <option value="EXPIRED" th:selected="${param.status != null && param.status[0] == 'EXPIRED'}">Hết hạn</option>
+                                                    <option value="EXHAUSTED" th:selected="${param.status != null && param.status[0] == 'EXHAUSTED'}">Hết số lượng</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select name="sortBy" class="form-select">
+                                                    <option value="">-- Sắp xếp --</option>
+                                                    <option value="code,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'code,asc'}">Mã tăng dần</option>
+                                                    <option value="code,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'code,desc'}">Mã giảm dần</option>
+                                                    <option value="value,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'value,asc'}">Giá trị tăng dần</option>
+                                                    <option value="value,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'value,desc'}">Giá trị giảm dần</option>
+                                                    <option value="startDate,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'startDate,asc'}">Ngày bắt đầu tăng dần</option>
+                                                    <option value="startDate,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'startDate,desc'}">Ngày bắt đầu giảm dần</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 3: Buttons -->
+                                        <div class="row align-items-center">
+                                            <div class="col-md-9 col-sm-12 mb-2">
+                                                <button type="submit" class="btn btn-info me-2">
+                                                    <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                                </button>
+                                                <a th:href="@{/hotel-management/discount}" class="btn btn-light">
+                                                    <i class="mdi mdi-refresh"></i> Reset
+                                                </a>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-12 mb-2 text-end">
+                                                <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
+                                                    <i class="mdi mdi-ticket-percent"></i>
+                                                    Tổng: <strong th:text="${totalElements != null ? totalElements : #lists.size(listDiscount)}">0</strong> voucher
                                                 </span>
-                                                <input id="searchInput" type="text" class="form-control border-start-0" 
-                                                       placeholder="Tìm kiếm mã voucher...">
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Row 2: Filters -->
-                                    <div class="row mb-3">
-                                        <div class="col-md-3 col-sm-6 mb-2">
-                                            <select id="filterDiscountType" class="form-select">
-                                                <option value="">-- Tất cả loại giảm giá --</option>
-                                                <option value="PERCENT">Phần trăm (%)</option>
-                                                <option value="AMOUNT">Số tiền cố định</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-6 mb-2">
-                                            <select id="filterRoomType" class="form-select">
-                                                <option value="">-- Tất cả loại phòng --</option>
-                                                <option th:each="type : ${roomTypes}" 
-                                                        th:value="${type}" 
-                                                        th:text="${type}"></option>
-                                            </select>
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-6 mb-2">
-                                            <select id="filterStatus" class="form-select">
-                                                <option value="">-- Tất cả trạng thái --</option>
-                                                <option value="ACTIVE">Đang hoạt động</option>
-                                                <option value="PENDING">Chưa bắt đầu</option>
-                                                <option value="EXPIRED">Hết hạn</option>
-                                                <option value="EXHAUSTED">Hết số lượng</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-6 mb-2">
-                                            <input type="date" id="filterDate" class="form-control" 
-                                                   placeholder="Lọc theo ngày">
-                                        </div>
-                                    </div>
-
-                                    <!-- Row 3: Value Range + Buttons -->
-                                    <div class="row align-items-center">
-                                        <div class="col-md-2 col-sm-6 mb-2">
-                                            <input type="number" id="filterValueFrom" class="form-control" 
-                                                   placeholder="Giá trị từ...">
-                                        </div>
-
-                                        <div class="col-md-2 col-sm-6 mb-2">
-                                            <input type="number" id="filterValueTo" class="form-control" 
-                                                   placeholder="Giá trị đến...">
-                                        </div>
-
-                                        <div class="col-md-5 col-sm-12 mb-2">
-                                            <button onclick="applyAllFilters()" class="btn btn-info me-2">
-                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
-                                            </button>
-                                            <button onclick="resetAllFilters()" class="btn btn-light">
-                                                <i class="mdi mdi-refresh"></i> Reset
-                                            </button>
-                                        </div>
-
-                                        <div class="col-md-3 col-sm-12 mb-2 text-end">
-                                            <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
-                                                <i class="mdi mdi-ticket-percent"></i>
-                                                Tổng: <strong id="resultCount" th:text="${#lists.size(listDiscount)}">0</strong> voucher
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                                </form>
                             </div>
                             <div class="card-body">
                                 <!-- Error Message -->
@@ -160,21 +160,11 @@
                                         <thead>
                                         <tr>
                                             <th> STT </th>
-                                            <th onclick="sortTable(1, this)" style="cursor: pointer;">
-                                                Discount Code <i class="mdi mdi-sort"></i>
-                                            </th>
-                                            <th onclick="sortTable(2, this)" style="cursor: pointer;">
-                                                Discount Value <i class="mdi mdi-sort"></i>
-                                            </th>
-                                            <th onclick="sortTable(3, this)" style="cursor: pointer;">
-                                                Room Type <i class="mdi mdi-sort"></i>
-                                            </th>
-                                            <th onclick="sortTable(4, this)" style="cursor: pointer;">
-                                                Start Date <i class="mdi mdi-sort"></i>
-                                            </th>
-                                            <th onclick="sortTable(5, this)" style="cursor: pointer;">
-                                                End Date <i class="mdi mdi-sort"></i>
-                                            </th>
+                                            <th> Discount Code </th>
+                                            <th> Discount Value </th>
+                                            <th> Room Type </th>
+                                            <th> Start Date </th>
+                                            <th> End Date </th>
                                             <th> Status </th>
                                             <th> Update </th>
                                         </tr>
@@ -205,10 +195,48 @@
                                         </tr>
 
                                         <tr th:if="${#lists.isEmpty(listDiscount)}">
-                                            <td colspan="9" class="text-center text-muted">No discounts available</td>
+                                            <td colspan="8" class="text-center text-muted">No discounts available</td>
                                         </tr>
                                         </tbody>
                                     </table>
+                                </div>
+                                
+                                <!-- Pagination -->
+                                <div class="pagination-wrapper" th:if="${totalPages > 1}">
+                                    <nav>
+                                        <ul class="pagination justify-content-center">
+                                            <!-- Previous -->
+                                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                                <a class="page-link" th:href="@{/hotel-management/discount(page=${currentPage - 1}, pageSize=${pageSize},
+                                                search=${param.search}, discountType=${param.discountType}, roomType=${param.roomType},
+                                                status=${param.status}, sortBy=${param.sortBy})}">
+                                                    Trước
+                                                </a>
+                                            </li>
+
+                                            <!-- Page numbers -->
+                                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                                th:classappend="${i == currentPage} ? 'active'">
+                                                <a class="page-link" th:href="@{/hotel-management/discount(page=${i}, pageSize=${pageSize},
+                                                search=${param.search}, discountType=${param.discountType}, roomType=${param.roomType},
+                                                status=${param.status}, sortBy=${param.sortBy})}" th:text="${i + 1}">1</a>
+                                            </li>
+
+                                            <!-- Next -->
+                                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                                <a class="page-link" th:href="@{/hotel-management/discount(page=${currentPage + 1}, pageSize=${pageSize},
+                                                search=${param.search}, discountType=${param.discountType}, roomType=${param.roomType},
+                                                status=${param.status}, sortBy=${param.sortBy})}">
+                                                    Sau
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+
+                                    <!-- Info -->
+                                    <div class="text-center mt-3">
+                                        <p>Trang [[${currentPage + 1}]] / [[${totalPages}]] - Tổng [[${totalElements}]] voucher</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -250,184 +278,7 @@
 <!-- Custom js for this page -->
 <script th:src="@{/assets/js/dashboard.js}"></script>
 <!-- End custom js for this page -->
-<script>
-    // Lấy tất cả elements
-    const searchInput = document.getElementById('searchInput');
-    const filterDiscountType = document.getElementById('filterDiscountType');
-    const filterRoomType = document.getElementById('filterRoomType');
-    const filterStatus = document.getElementById('filterStatus');
-    const filterDate = document.getElementById('filterDate');
-    const filterValueFrom = document.getElementById('filterValueFrom');
-    const filterValueTo = document.getElementById('filterValueTo');
-    const discountTable = document.getElementById('discountTable');
-    const tableRows = Array.from(discountTable.getElementsByTagName('tr')).slice(1); // Bỏ header
-    const resultCount = document.getElementById('resultCount');
 
-    // Function apply tất cả filters (AND logic)
-    function applyAllFilters() {
-        const searchText = searchInput.value.toLowerCase().trim();
-        const selectedDiscountType = filterDiscountType.value.toUpperCase();
-        const selectedRoomType = filterRoomType.value.trim();
-        const selectedStatus = filterStatus.value.toUpperCase();
-        const selectedDate = filterDate.value;
-        const valueFrom = parseFloat(filterValueFrom.value) || 0;
-        const valueTo = parseFloat(filterValueTo.value) || Infinity;
-        
-        let visibleCount = 0;
-
-        tableRows.forEach(row => {
-            // Bỏ qua row empty message
-            if (row.querySelector('td[colspan]')) {
-                row.style.display = 'none';
-                return;
-            }
-
-            // Lấy giá trị từ các columns
-            const code = row.cells[1]?.textContent.toLowerCase().trim() || '';
-            const valueText = row.cells[2]?.textContent.trim() || '';
-            const roomType = row.cells[3]?.textContent.trim() || '';
-            const startDate = row.cells[4]?.textContent.trim() || '';
-            const endDate = row.cells[5]?.textContent.trim() || '';
-            const status = row.cells[6]?.textContent.toUpperCase().trim() || '';
-
-            // Parse value (bỏ % hoặc VND)
-            const value = parseFloat(valueText.replace(/[^\d.]/g, '')) || 0;
-            
-            // Xác định discount type từ value text
-            const discountType = valueText.includes('%') ? 'PERCENT' : 'AMOUNT';
-
-            // Kiểm tra TẤT CẢ điều kiện (AND logic)
-            const matchSearch = searchText === '' || code.includes(searchText);
-            const matchDiscountType = selectedDiscountType === '' || discountType === selectedDiscountType;
-            const matchRoomType = selectedRoomType === '' || roomType === selectedRoomType;
-            const matchStatus = selectedStatus === '' || status === selectedStatus;
-            const matchValue = value >= valueFrom && value <= valueTo;
-            
-            // Kiểm tra date (nếu có chọn date, check xem date có nằm trong khoảng start-end không)
-            let matchDate = true;
-            if (selectedDate) {
-                const filterDateObj = new Date(selectedDate);
-                const startDateObj = parseDate(startDate);
-                const endDateObj = parseDate(endDate);
-                matchDate = filterDateObj >= startDateObj && filterDateObj <= endDateObj;
-            }
-
-            // Chỉ hiện row nếu TẤT CẢ điều kiện đều đúng
-            if (matchSearch && matchDiscountType && matchRoomType && matchStatus && matchValue && matchDate) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Update count
-        resultCount.textContent = visibleCount;
-    }
-
-    // Helper function parse date dd/MM/yyyy
-    function parseDate(dateStr) {
-        if (!dateStr || dateStr === 'N/A') return new Date(0);
-        const parts = dateStr.split('/');
-        return new Date(parts[2], parts[1] - 1, parts[0]);
-    }
-
-    // Function reset filters
-    function resetAllFilters() {
-        searchInput.value = '';
-        filterDiscountType.value = '';
-        filterRoomType.value = '';
-        filterStatus.value = '';
-        filterDate.value = '';
-        filterValueFrom.value = '';
-        filterValueTo.value = '';
-        applyAllFilters();
-    }
-
-    // Gắn event listeners
-    searchInput.addEventListener('keyup', applyAllFilters);
-    filterDiscountType.addEventListener('change', applyAllFilters);
-    filterRoomType.addEventListener('change', applyAllFilters);
-    filterStatus.addEventListener('change', applyAllFilters);
-    filterDate.addEventListener('change', applyAllFilters);
-</script>
-<!--SortTable với 3 trạng thái-->
-<script>
-    // Lưu trạng thái sort cho từng column
-    const sortStates = {}; // { columnIndex: 0|1|2 } - 0: none, 1: asc, 2: desc
-    let originalRowsOrder = []; // Lưu thứ tự ban đầu
-
-    // Lưu thứ tự ban đầu khi load trang
-    document.addEventListener('DOMContentLoaded', function() {
-        const table = document.getElementById("discountTable");
-        originalRowsOrder = Array.from(table.tBodies[0].rows);
-    });
-
-    function sortTable(columnIndex, headerElement) {
-        const table = document.getElementById("discountTable");
-        const tbody = table.tBodies[0];
-        
-        // Khởi tạo state nếu chưa có
-        if (sortStates[columnIndex] === undefined) {
-            sortStates[columnIndex] = 0;
-        }
-        
-        // Chuyển sang state tiếp theo: 0 -> 1 -> 2 -> 0
-        sortStates[columnIndex] = (sortStates[columnIndex] + 1) % 3;
-        
-        // Reset icon của tất cả headers
-        const allHeaders = table.querySelectorAll('thead th');
-        allHeaders.forEach(th => {
-            const icon = th.querySelector('i');
-            if (icon) {
-                icon.className = 'mdi mdi-sort';
-                icon.style.color = '';
-            }
-        });
-        
-        // Update icon của header hiện tại
-        const icon = headerElement.querySelector('i');
-        if (sortStates[columnIndex] === 0) {
-            // None - quay về thứ tự ban đầu
-            icon.className = 'mdi mdi-sort';
-            icon.style.color = '';
-            tbody.innerHTML = "";
-            originalRowsOrder.forEach(row => tbody.appendChild(row.cloneNode(true)));
-            return;
-        } else if (sortStates[columnIndex] === 1) {
-            // Ascending
-            icon.className = 'mdi mdi-sort-ascending';
-            icon.style.color = '#667eea';
-        } else {
-            // Descending
-            icon.className = 'mdi mdi-sort-descending';
-            icon.style.color = '#667eea';
-        }
-        
-        // Lấy rows và sort
-        const rows = Array.from(tbody.rows);
-        rows.sort((a, b) => {
-            const cellA = a.cells[columnIndex].textContent.trim().toLowerCase();
-            const cellB = b.cells[columnIndex].textContent.trim().toLowerCase();
-
-            // Kiểm tra xem là số hay là chữ
-            const valA = isNaN(cellA) ? cellA : Number(cellA);
-            const valB = isNaN(cellB) ? cellB : Number(cellB);
-
-            if (valA < valB) {
-                return sortStates[columnIndex] === 1 ? -1 : 1; // 1=asc, 2=desc
-            }
-            if (valA > valB) {
-                return sortStates[columnIndex] === 1 ? 1 : -1;
-            }
-            return 0;
-        });
-
-        // Render lại table
-        tbody.innerHTML = "";
-        rows.forEach(row => tbody.appendChild(row));
-    }
-</script>
 </body>
 
 </html>

@@ -18,9 +18,26 @@ public class DiscountController {
     private final DiscountRepository discountRepository;
 
     @GetMapping
-    public String view(Model model) {
-        model.addAttribute("listDiscount", discountService.getListDiscount());
+    public String view(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String discountType,
+            @RequestParam(required = false) String roomType,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            Model model) {
+        
+        org.springframework.data.domain.Page<hotel.db.dto.discount.DiscountResponseDto> discountPage = 
+                discountService.getDiscountListForManagement(search, discountType, roomType, status, sortBy, page, pageSize);
+        
+        model.addAttribute("listDiscount", discountPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", discountPage.getTotalPages());
+        model.addAttribute("totalElements", discountPage.getTotalElements());
+        model.addAttribute("pageSize", pageSize);
         model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
+        
         return "management/discount/discountmanage";
     }
 

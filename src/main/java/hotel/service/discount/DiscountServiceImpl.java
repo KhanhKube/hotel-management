@@ -65,5 +65,79 @@ public class DiscountServiceImpl implements DiscountService {
     public List<String> getRoomTypesForDiscount() {
         return Arrays.asList(RoomType.ALL); // Chỉ trả về các loại phòng từ enum, không có "Tất cả"
     }
+    
+    @Override
+    public Page<DiscountResponseDto> getDiscountListForManagement(String search, String discountType, String roomType,
+                                                                  String status, String sortBy, int page, int pageSize) {
+        List<Discount> discounts = discountRepository.findAllByIsDeletedFalse();
+        
+        // Filter theo search (mã voucher)
+        if (search != null && !search.trim().isEmpty()) {
+            String searchLower = search.trim().toLowerCase();
+            discounts = discounts.stream()
+                    .filter(d -> d.getCode().toLowerCase().contains(searchLower))
+                    .collect(java.util.stream.Collectors.toList());
+        }
+        
+        // Filter theo discount type
+        if (discountType != null && !discountType.isEmpty()) {
+            discounts = discounts.stream()
+                    .filter(d -> d.getDiscountType().equalsIgnoreCase(discountType))
+                    .collect(java.util.stream.Collectors.toList());
+        }
+        
+        // Filter theo room type
+        if (roomType != null && !roomType.isEmpty()) {
+            discounts = discounts.stream()
+                    .filter(d -> d.getRoomType().equals(roomType))
+                    .collect(java.util.stream.Collectors.toList());
+        }
+        
+        // Filter theo status
+        if (status != null && !status.isEmpty()) {
+            discounts = discounts.stream()
+                    .filter(d -> calculateStatus(d).equals(status))
+                    .collect(java.util.stream.Collectors.toList());
+        }
+        
+        // Sort
+        if (sortBy != null && !sortBy.isEmpty()) {
+            String[] sortParams = sortBy.split(",");
+            String field = sortParams[0];
+            String direction = sortParams.length > 1 ? sortParams[1] : "asc";
+            
+            java.util.Comparator<Discount> comparator = null;
+            
+            if ("code".equals(field)) {
+                comparator = java.util.Comparator.comparing(Discount::getCode);
+            } else if ("value".equals(field)) {
+                comparator = java.util.Comparator.comparing(Discount::getValue);
+            } else if ("startDate".equals(field)) {
+                comparator = java.util.Comparator.comparing(Discount::getStartDate);
+            }
+            
+            if (comparator != null) {
+                if ("desc".equals(direction)) {
+                    comparator = comparator.reversed();
+                }
+                discounts.sort(comparator);
+            }
+        }
+        
+        // Convert to DTO
+        List<DiscountResponseDto> discountDtos = discounts.stream()
+                .map(this::getListDiscountDto)
+                .collect(java.util.stream.Collectors.toList());
+        
+        // Pagination thủ công
+        int startPage = page * pageSize;
+        int endPage = Math.min(startPage + pageSize, discountDtos.size());
+        
+        List<DiscountResponseDto> pagedDtos = discountDtos.subList(startPage, endPage);
+        
+        return new org.springframework.data.domain.PageImpl<>(pagedDtos, 
+                org.springframework.data.domain.PageRequest.of(page, pageSize), 
+                discountDtos.size());
+    }
 
 }

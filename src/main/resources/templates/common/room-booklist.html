@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,94 +14,344 @@
     <link rel="stylesheet" href="/vendors/linericon/style.css">
     <link rel="stylesheet" href="/css/style.css">
     <style>
-        body, html {
+        body,
+        html {
             margin: 0 !important;
             padding: 0 !important;
         }
 
         /* Override margin-top của section sau header */
-        .header_area + section {
+        .header_area+section {
             margin-top: 0 !important;
         }
-        
+
         /* Đổ bóng đậm hơn cho card */
         .card-explore {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
-            border: 1px solid #ffffff;
         }
-        
+
         /* Hiệu ứng hover - nâng card lên và đổ bóng đậm hơn */
         .card-explore:hover {
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
             transform: translateY(-5px);
         }
+
+        /* Filter Bar Styles */
+        .filter-bar {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            max-width: 1150px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-item label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        .filter-item .form-control {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .filter-item .form-control:focus {
+            outline: none;
+            border-color: #CDA872;
+            box-shadow: 0 0 0 3px rgba(205, 168, 114, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .filter-buttons .btn {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-buttons .btn-primary {
+            background-color: #CDA872;
+            color: white;
+        }
+
+        .filter-buttons .btn-primary:hover {
+            background-color: #b8956a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(205, 168, 114, 0.3);
+        }
+
+        .filter-buttons .btn-secondary {
+            background-color: #f5f5f5;
+            color: #666;
+        }
+
+        .filter-buttons .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* .pagination-wrapper {
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .pagination .page-link {
+            color: #CDA872;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            margin: 0 5px;
+            border-radius: 6px;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #CDA872;
+            border-color: #CDA872;
+            color: white;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-link:hover:not(.disabled) {
+            background-color: #b8956a;
+            color: white;
+        } */
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .filter-row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-bar {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
-<body>
-<!-- Include header -->
-<div th:replace="~{common/header :: header}"></div>
 
-<!-- Nội dung trang của bạn -->
-<section class="section-margin">
-    <div class="container">
-        <div class="section-intro text-center pb-80px">
-            <div class="section-intro__style">
-                <img src="/img/home/bed-icon.png" alt="">
-            </div>
-            <h2>Danh sách phòng của chúng tôi</h2>
-        </div>
+<body style="background-color: #CDA872;">
+    <!-- Include header -->
+    <div th:replace="~{common/header :: header}"></div>
 
-        <div class="row">
-            <!-- 4 cards per row: col-lg-3 -->
-            <div class="col-md-6 col-lg-4 mb-4" th:each="r : ${rooms}">
-                <div class="card card-explore">
-                    <div class="card-explore__img">
-                        <img class="card-img" th:src="${r.imageRoom != null ? r.imageRoom : '/images/room/room-01.png'}"
-                             alt="">
+    <!-- Nội dung trang của bạn -->
+    <section class="section-margin">
+        <div class="container" style="padding-top: 225px;">
+            <div class="section-intro text-center pb-80px">
+                <h2>Danh sách phòng của chúng tôi</h2>
+
+                <!-- Search & Filter Bar -->
+                <form th:action="@{/hotel/rooms}" method="get">
+                    <div class="filter-bar">
+                        <div class="filter-row">
+                            <!-- Price From -->
+                            <div class="filter-item">
+                                <label>Giá từ</label>
+                                <input type="number" name="minPrice" class="form-control" placeholder="Tối thiểu"
+                                    th:value="${selectedMinPrice != null ? selectedMinPrice : ''}">
+                            </div>
+
+                            <!-- Price To -->
+                            <div class="filter-item">
+                                <label>Giá đến</label>
+                                <input type="number" name="maxPrice" class="form-control" placeholder="Tối đa"
+                                    th:value="${selectedMaxPrice != null ? selectedMaxPrice : ''}">
+                            </div>
+
+                            <!-- Room Type -->
+                            <div class="filter-item">
+                                <label>Loại phòng</label>
+                                <select name="roomType" class="form-control">
+                                    <option value="">Tất cả</option>
+                                    <option th:each="x : ${roomTypes}" th:value="${x}" th:text="${x}"
+                                        th:selected="${x == selectedRoomType}"></option>
+                                </select>
+                            </div>
+
+                            <!-- Floor -->
+                            <div class="filter-item">
+                                <label>Tầng</label>
+                                <select name="floor" class="form-control">
+                                    <option value="">Tất cả</option>
+                                    <option th:each="x : ${floors}" th:value="${x.floorNumber}"
+                                        th:text="'Tầng '+${x.floorNumber}"
+                                        th:selected="${x.floorNumber == selectedFloor}"></option>
+                                </select>
+                            </div>
+
+                            <!-- Bed Type -->
+                            <div class="filter-item">
+                                <label>Loại giường</label>
+                                <select name="bedType" class="form-control">
+                                    <option value="">Tất cả</option>
+                                    <option th:each="x : ${bedTypes}" th:value="${x}" th:text="${x}"
+                                        th:selected="${x == selectedBedType}"></option>
+                                </select>
+                            </div>
+
+                            <!-- Sort -->
+                            <div class="filter-item">
+                                <label>Sắp xếp</label>
+                                <select name="sortBy" class="form-control">
+                                    <option value="price-asc" th:selected="${selectedSortBy == 'price-asc'}">Giá tăng
+                                        dần</option>
+                                    <option value="price-desc" th:selected="${selectedSortBy == 'price-desc'}">Giá giảm
+                                        dần</option>
+                                    <option value="room-asc" th:selected="${selectedSortBy == 'room-asc'}">Phòng tăng
+                                        dần</option>
+                                    <option value="room-desc" th:selected="${selectedSortBy == 'price-desc'}">Phòng giảm
+                                        dần</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="filter-buttons">
+                            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                            <button type="button" class="btn btn-secondary" onclick="window.location.href='hotel/rooms'">Đặt
+                                lại
+                            </button>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <h3 class="card-explore__price"
-                            th:text="${#numbers.formatInteger(r.price.intValue(), 3, 'POINT')} + ' VNĐ'">350.000 <sub>/
-                            Ngày</sub></h3>
-                        <h4 class="card-explore__title">
-                            <a th:text="${r.roomType}" th:href="@{/hotel/room/{id}(id=${r.roomId})}">Classic Bed
-                                Room</a>
-                        </h4>
-                        <p th:text="${r.roomDescription}">Room description</p>
-                        <a class="card-explore__link" th:href="@{/hotel/room/{id}(id=${r.roomId})}">
-                            Đặt ngay <i class="ti-arrow-right"></i>
-                        </a>
+                </form>
+            </div>
+
+            <div class="row">
+                <!-- 4 cards per row: col-lg-3 -->
+                <div class="col-md-6 col-lg-4 mb-4" th:each="r : ${rooms}">
+                    <div class="card card-explore">
+                        <div class="card-explore__img">
+                            <img class="card-img"
+                                th:src="${r.imageRoom != null ? r.imageRoom : '/images/room/room-01.png'}" alt="">
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-explore__price"
+                                th:text="${#numbers.formatInteger(r.price.intValue(), 3, 'POINT')} + ' VNĐ'">350.000
+                                <sub>/
+                                    Ngày</sub>
+                            </h3>
+                            <h4 class="card-explore__title">
+                                <a th:text="${r.roomType}" th:href="@{/hotel/room/{id}(id=${r.roomId})}">Classic Bed
+                                    Room</a>
+                            </h4>
+                            <p>
+                                <span th:text="${r.roomDescription}">Room description</span><br><br>
+                                <span th:text="'Phòng: ' + ${r.roomNumber}"></span><br>
+                                <span
+                                    th:text="${r.statusDisplay == 'Trống' ? 'Trạng thái: Trống' :'Trạng thái: ' + r.statusDisplay}">
+                                    Có thể đặt ngay
+                                </span>
+                            </p>
+                            <a class="card-explore__link" th:href="@{/hotel/room/{id}(id=${r.roomId})}">
+                                Đặt ngay <i class="ti-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- If list empty -->
-            <div class="col-12 text-center" th:if="${#lists.isEmpty(rooms)}">
-                <p class="text-muted">Hiện không có phòng nào.</p>
+                <!-- If list empty -->
+                <div class="col-12 text-center" th:if="${#lists.isEmpty(rooms)}">
+                    <p class="text-muted">Hiện không có phòng nào.</p>
+                </div>
+            </div>
+            <!-- Pagination -->
+            <div class="pagination-wrapper" th:if="${totalPages > 1}">
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <!-- Previous -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/hotel/rooms(page=${currentPage - 1}, size=9,
+                            minPrice=${param.minPrice}, maxPrice=${param.maxPrice},
+                            roomType=${param.roomType}, floor=${param.floor},
+                            bedType=${param.bedType}, sortBy=${param.sortBy})}">
+                                Trước
+                            </a>
+                        </li>
+
+                        <!-- Page numbers -->
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/hotel/rooms(page=${i}, size=9,
+                            minPrice=${param.minPrice}, maxPrice=${param.maxPrice},
+                            roomType=${param.roomType}, floor=${param.floor},
+                            bedType=${param.bedType}, sortBy=${param.sortBy})}" th:text="${i + 1}">1</a>
+                        </li>
+
+                        <!-- Next -->
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/hotel/rooms(page=${currentPage + 1}, size=9,
+                            minPrice=${param.minPrice}, maxPrice=${param.maxPrice},
+                            roomType=${param.roomType}, floor=${param.floor},
+                            bedType=${param.bedType}, sortBy=${param.sortBy})}">
+                                Sau
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <!-- Info -->
+                <div class="text-center mt-3">
+                    <p>Trang [[${currentPage + 1}]] / [[${totalPages}]] - Tổng [[${totalItems}]] phòng</p>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Include footer nếu có -->
-<div th:replace="~{common/footer :: footer}"></div>
+    <!-- Include footer nếu có -->
+    <div th:replace="~{common/footer :: footer}"></div>
 
-<!-- JS của template khách hàng -->
-<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
-<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
-<script src="/js/main.js"></script>
+    <!-- JS của template khách hàng -->
+    <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+    <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
 
-<!-- Sticky Header Script -->
-<script>
-    $(window).on('scroll', function () {
-        var scroll = $(window).scrollTop();
-        if (scroll >= 50) {
-            $(".header_area").addClass("navbar_fixed");
-        } else {
-            $(".header_area").removeClass("navbar_fixed");
-        }
-    });
-</script>
+    <!-- Sticky Header Script -->
+    <script>
+        $(window).on('scroll', function () {
+            var scroll = $(window).scrollTop();
+            if (scroll >= 50) {
+                $(".header_area").addClass("navbar_fixed");
+            } else {
+                $(".header_area").removeClass("navbar_fixed");
+            }
+        });
+    </script>
 </body>
+
 </html>

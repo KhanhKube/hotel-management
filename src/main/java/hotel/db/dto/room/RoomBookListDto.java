@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class RoomBookListDto {
     private Integer roomId;
+    private String roomNumber;
     private String imageRoom;
     private String roomType;
     private BigDecimal price;

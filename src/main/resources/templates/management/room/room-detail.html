@@ -65,11 +65,7 @@
                                                 </h5>
                                                 <table class="table table-borderless">
                                                     <tr>
-                                                        <td style="width: 40%;"><i class="mdi mdi-identifier"></i> <strong>ID:</strong></td>
-                                                        <td><span class="badge badge-dark" th:text="${room.roomId}"></span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><i class="mdi mdi-door"></i> <strong>Số phòng:</strong></td>
+                                                        <td style="width: 40%;"><i class="mdi mdi-door"></i> <strong>Số phòng:</strong></td>
                                                         <td><span class="badge badge-primary" th:text="${room.roomNumber}"></span></td>
                                                     </tr>
                                                     <tr>
@@ -158,9 +154,7 @@
                                                          style="height: 200px; object-fit: cover; cursor: pointer;"
                                                          th:alt="'Ảnh phòng ' + ${room.roomNumber}"
                                                          onclick="openImageModal(this.src)">
-                                                    <div class="card-body p-2 text-center">
-                                                        <small class="text-muted">ID: <span th:text="${image.roomImageId}"></span></small>
-                                                    </div>
+
                                                 </div>
                                             </div>
                                         </div>
