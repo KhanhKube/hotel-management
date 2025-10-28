@@ -1,5 +1,6 @@
 package hotel.service.account;
 
+import ch.qos.logback.core.util.StringUtil;
 import hotel.db.dto.user.AccountRequestDto;
 import hotel.db.dto.user.AccountResponseDto;
 import hotel.db.entity.User;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -65,8 +67,9 @@ public class AccountServiceImpl implements AccountService {
             predicates.add(cb.equal(root.get("isDeleted"), false));
             
             // Search by full name (firstName + lastName), username, email, or phone
-            if (searchTerm != null && !searchTerm.isEmpty()) {
-                String pattern = "%" + searchTerm.toLowerCase() + "%";
+            String search = searchTerm.trim();
+            if (StringUtil.isNullOrEmpty(search)) {
+                String pattern = "%" + search + "%";
                 // Search in firstName, lastName, username, email, or phone
                 Predicate firstNamePredicate = cb.like(cb.lower(root.get("firstName")), pattern);
                 Predicate lastNamePredicate = cb.like(cb.lower(root.get("lastName")), pattern);
@@ -86,7 +89,7 @@ public class AccountServiceImpl implements AccountService {
         };
         
         // Pagination
-        Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size);
         Page<User> userPage = userRepository.findAll(spec, pageable);
         
         // Convert to DTO
