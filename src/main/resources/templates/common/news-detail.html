@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${news.title} + ' - Hotel'">Chi tiết tin tức - Hotel</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/vendors/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="/vendors/linericon/style.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .news-detail-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 0 40px;
+            color: white;
+        }
+        .breadcrumb-custom {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .breadcrumb-custom a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+        }
+        .breadcrumb-custom a:hover {
+            color: white;
+        }
+        .breadcrumb-custom .active {
+            color: white;
+        }
+        .news-detail-section {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+        .news-content-wrapper {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .news-header {
+            padding: 40px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .news-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+        .news-meta {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            color: #6c757d;
+            font-size: 1rem;
+        }
+        .news-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .news-meta-item i {
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+        .news-featured-image {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+        }
+        .news-body {
+            padding: 40px;
+        }
+        .news-heading {
+            font-size: 1.3rem;
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+        .news-content {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: #495057;
+            margin-bottom: 40px;
+        }
+        .news-content p {
+            margin-bottom: 20px;
+        }
+        .news-footer {
+            padding: 30px 40px;
+            background: #f8f9fa;
+            border-top: 2px solid #e9ecef;
+        }
+        .share-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .share-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .share-btn:hover {
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: white;
+        }
+        .share-facebook {
+            background: #3b5998;
+        }
+        .share-twitter {
+            background: #1da1f2;
+        }
+        .share-linkedin {
+            background: #0077b5;
+        }
+        .related-news {
+            margin-top: 60px;
+        }
+        .related-news h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .card-news-small {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .card-news-small:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .card-news-small__img {
+            height: 200px;
+            overflow: hidden;
+        }
+        .card-news-small__img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .card-news-small:hover .card-news-small__img img {
+            transform: scale(1.1);
+        }
+        .card-news-small .card-body {
+            padding: 20px;
+        }
+        .card-news-small h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .card-news-small h5 a {
+            color: #2c3e50;
+            text-decoration: none;
+        }
+        .card-news-small h5 a:hover {
+            color: #667eea;
+        }
+        .card-news-small .news-date {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .back-to-news {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 25px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+        .back-to-news:hover {
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<!-- import header -->
+<div th:replace="~{common/header :: header}"></div>
+
+<!-- News Detail Banner -->
+<section class="news-detail-banner">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item"><a th:href="@{/}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/news}">Tin tức</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${news.title}">Chi tiết</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!-- News Detail Section -->
+<section class="news-detail-section">
+    <div class="container">
+        <a th:href="@{/news}" class="back-to-news">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại danh sách tin tức
+        </a>
+
+        <div class="news-content-wrapper">
+            <!-- News Header -->
+            <div class="news-header">
+                <h1 th:text="${news.title}">Tiêu đề tin tức</h1>
+                <div class="news-meta">
+                    <div class="news-meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span th:text="${#temporals.format(news.createdAt, 'dd/MM/yyyy HH:mm')}">20/11/2024</span>
+                    </div>
+                    <div class="news-meta-item">
+                        <i class="fas fa-eye"></i>
+                        <span th:text="${news.view != null ? news.view : 0} + ' lượt xem'">0 lượt xem</span>
+                    </div>
+                    <div class="news-meta-item" th:if="${news.status == 'PUBLISHED'}">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Đã xuất bản</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Image -->
+            <img th:if="${news.image != null}" 
+                 th:src="${news.image}" 
+                 th:alt="${news.title}"
+                 class="news-featured-image">
+
+            <!-- News Body -->
+            <div class="news-body">
+                <div class="news-heading" th:if="${news.heading != null}" th:text="${news.heading}">
+                    Mô tả ngắn về tin tức
+                </div>
+
+                <div class="news-content" th:utext="${news.content}">
+                    <p>Nội dung tin tức sẽ được hiển thị ở đây...</p>
+                </div>
+
+                <!-- External Link -->
+                <div th:if="${news.link != null}" class="mt-4">
+                    <a th:href="${news.link}" target="_blank" class="btn btn-primary btn-lg">
+                        <i class="fas fa-external-link-alt me-2"></i>
+                        Xem thêm thông tin
+                    </a>
+                </div>
+            </div>
+
+            <!-- News Footer -->
+            <div class="news-footer">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <h5 class="mb-3 mb-md-0">Chia sẻ tin tức này:</h5>
+                    <div class="share-buttons">
+                        <a href="#" class="share-btn share-facebook" onclick="shareOnFacebook(); return false;">
+                            <i class="fab fa-facebook-f"></i>
+                            Facebook
+                        </a>
+                        <a href="#" class="share-btn share-twitter" onclick="shareOnTwitter(); return false;">
+                            <i class="fab fa-twitter"></i>
+                            Twitter
+                        </a>
+                        <a href="#" class="share-btn share-linkedin" onclick="shareOnLinkedIn(); return false;">
+                            <i class="fab fa-linkedin-in"></i>
+                            LinkedIn
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related News -->
+        <div class="related-news" th:if="${relatedNews != null and !#lists.isEmpty(relatedNews)}">
+            <h3>Tin tức liên quan</h3>
+            <div class="row">
+                <div class="col-md-4 mb-4" th:each="related : ${relatedNews}">
+                    <div class="card-news-small">
+                        <div class="card-news-small__img">
+                            <img th:src="${related.image != null ? related.image : '/img/home/explore1.png'}" 
+                                 th:alt="${related.title}">
+                        </div>
+                        <div class="card-body">
+                            <h5>
+                                <a th:href="@{/news/{id}(id=${related.newsId})}" 
+                                   th:text="${related.title}">Tiêu đề tin tức</a>
+                            </h5>
+                            <div class="news-date">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                <span th:text="${#temporals.format(related.createdAt, 'dd/MM/yyyy')}">20/11/2024</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- import footer -->
+<div th:replace="~{common/footer :: footer}"></div>
+
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="/vendors/easing.min.js"></script>
+<script src="/vendors/superfish.min.js"></script>
+<script src="/js/main.js"></script>
+<script>
+    function shareOnFacebook() {
+        const url = window.location.href;
+        window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank', 'width=600,height=400');
+    }
+
+    function shareOnTwitter() {
+        const url = window.location.href;
+        const title = document.querySelector('h1').textContent;
+        window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(title), '_blank', 'width=600,height=400');
+    }
+
+    function shareOnLinkedIn() {
+        const url = window.location.href;
+        window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), '_blank', 'width=600,height=400');
+    }
+</script>
+</body>
+</html>

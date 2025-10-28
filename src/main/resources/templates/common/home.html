@@ -171,9 +171,9 @@
                 <h1>Sang trọng <em>và</em> Riêng Tư</h1>
                 <div class="banner-buttons d-flex justify-content-center gap-3 flex-wrap mt-4">
                     <a class="button home-banner-btn" href="#">Đặt ngay</a>
-                    <a class="button button-outline" href="#news-section" onclick="scrollToNews(); return false;">
-                        <i class="fas fa-newspaper me-2"></i>Xem tin tức
-                    </a>
+<!--                    <a class="button button-outline" href="#news-section" onclick="scrollToNews(); return false;">-->
+<!--                        <i class="fas fa-newspaper me-2"></i>Xem tin tức-->
+<!--                    </a>-->
                 </div>
             </div>
         </div>
@@ -519,7 +519,6 @@
                 <img src="img/home/bed-icon.png" alt="">
             </div>
             <h2>Tin tức & Sự kiện</h2>
-            <p class="mt-3 text-muted">Cập nhật những tin tức mới nhất và các sự kiện đặc biệt tại khách sạn</p>
         </div>
 
         <div class="row">
@@ -1074,6 +1073,18 @@
         }
     }
 
+    // Smooth scroll to services section
+    function scrollToServices() {
+        const servicesSection = document.getElementById('services-section');
+        if (servicesSection) {
+            const offsetTop = servicesSection.offsetTop - 80; // Account for header height
+            window.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
+            });
+        }
+    }
+
     // Initialize animations when document is ready
     $(document).ready(function() {
         // Intersection Observer for scroll animations
@@ -1092,6 +1103,13 @@
 
         // Observe all news cards with staggered animation
         $('.news-card-animate').each(function(index) {
+            const delay = index * 0.1; // Stagger animation by 0.1s
+            $(this).css('transition-delay', delay + 's');
+            observer.observe(this);
+        });
+
+        // Observe all service cards with staggered animation
+        $('.service-card-animate').each(function(index) {
             const delay = index * 0.1; // Stagger animation by 0.1s
             $(this).css('transition-delay', delay + 's');
             observer.observe(this);
@@ -1117,6 +1135,29 @@
             function() {
                 $(this).css('cursor', 'default');
                 $(this).closest('.card-news').removeClass('hover-effect');
+            }
+        );
+
+        // Add click handlers for service cards (only on card body, not on links)
+        $('.card-service .card-body').on('click', function(e) {
+            // Prevent if clicking on actual links
+            if (!$(e.target).closest('a').length) {
+                const link = $(this).find('.card-service__title a').attr('href');
+                if (link) {
+                    window.location.href = link;
+                }
+            }
+        });
+
+        // Add hover effect for better UX (only on card body)
+        $('.card-service .card-body').hover(
+            function() {
+                $(this).css('cursor', 'pointer');
+                $(this).closest('.card-service').addClass('hover-effect');
+            },
+            function() {
+                $(this).css('cursor', 'default');
+                $(this).closest('.card-service').removeClass('hover-effect');
             }
         );
     });

@@ -41,13 +41,13 @@ public class NewsServiceImpl implements NewsService {
     @Override
     @Transactional(readOnly = true)
     public List<News> findAll() {
-        return newsRepository.findAll();
+        return newsRepository.findByIsDeletedFalse();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<News> findAll(Pageable pageable) {
-        return newsRepository.findAll(pageable);
+        return newsRepository.findByIsDeletedFalse(pageable);
     }
 
     @Override
@@ -67,8 +67,12 @@ public class NewsServiceImpl implements NewsService {
         Optional<News> newsOpt = newsRepository.findById(newsId);
         if (newsOpt.isPresent()) {
             News news = newsOpt.get();
-            news.setIsDeleted(true);
-            newsRepository.save(news);
+            if (!news.getIsDeleted()) {
+                news.setIsDeleted(true);
+                newsRepository.save(news);
+            }
+        } else {
+            throw new RuntimeException("News not found with id: " + newsId);
         }
     }
 
@@ -98,7 +102,7 @@ public class NewsServiceImpl implements NewsService {
     @Override
     @Transactional(readOnly = true)
     public List<NewsGroup> findAllNewsGroups() {
-        return newsGroupRepository.findAll();
+        return newsGroupRepository.findByIsDeletedFalse();
     }
 
     @Override
@@ -117,8 +121,12 @@ public class NewsServiceImpl implements NewsService {
         Optional<NewsGroup> newsGroupOpt = newsGroupRepository.findById(newsGroupId);
         if (newsGroupOpt.isPresent()) {
             NewsGroup newsGroup = newsGroupOpt.get();
-            newsGroup.setIsDeleted(true);
-            newsGroupRepository.save(newsGroup);
+            if (!newsGroup.getIsDeleted()) {
+                newsGroup.setIsDeleted(true);
+                newsGroupRepository.save(newsGroup);
+            }
+        } else {
+            throw new RuntimeException("NewsGroup not found with id: " + newsGroupId);
         }
     }
 
