@@ -96,7 +96,7 @@ public class CommonServiceImpl implements CommonService {
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
-        user.setRole(USER);
+        user.setRole(CUSTOMER);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setPhone(dto.getPhone());
         user.setFirstName(dto.getFirstName());
