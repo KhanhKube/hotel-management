@@ -277,14 +277,16 @@
                 <div th:if="${error}" class="error-message" th:text="${error}"></div>
                 <div th:if="${message}" class="success-message" th:text="${message}"></div>
                 
-                <div th:if="${param.error == 'duplicate'}" class="alert-banner">
+                <div th:if="${error == 'duplicate' or param.error == 'duplicate'}" class="alert-banner">
                     <div class="alert-content">
                         <div class="alert-icon">
                             <i class="mdi mdi-alert-circle"></i>
                         </div>
                         <div class="alert-text">
                             <h4>⚠️ View đã tồn tại!</h4>
-                            <p>Loại view này đã có trong hệ thống. Vui lòng nhập tên view mới khác để tiếp tục.</p>
+                            <p th:text="${message != null and !message.isEmpty() ? message : (param.message != null and !param.message.isEmpty() ? param.message : 'Loại view này đã có trong hệ thống. Vui lòng nhập tên view mới khác để tiếp tục.')}">
+                                Loại view này đã có trong hệ thống. Vui lòng nhập tên view mới khác để tiếp tục.
+                            </p>
                         </div>
                         <div class="alert-actions">
                             <button type="button" onclick="clearForm()" class="btn-alert">

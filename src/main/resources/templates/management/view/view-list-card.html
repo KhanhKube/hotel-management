@@ -185,18 +185,6 @@
             border: 2px dashed #666666;
         }
         
-        .view-id-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-            color: #1a1a1a;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
-        }
         
         .view-eye-icon {
             position: absolute;
@@ -436,7 +424,6 @@
                         <div th:unless="${viewImageService.getImageForView(view.viewId) != null}" class="view-image-placeholder">
                             <i class="mdi mdi-image"></i>
                         </div>
-                        <div class="view-id-badge" th:text="'ID: ' + ${view.viewId}">ID: 1</div>
                         <a th:href="@{/hotel-management/view/detail/{id}(id=${view.viewId})}" class="view-eye-icon">
                             <i class="mdi mdi-eye"></i>
                         </a>
@@ -499,12 +486,8 @@
                     return nameA.localeCompare(nameB, 'vi');
                 });
             } else {
-                // Default sort by ID
-                cards.sort((a, b) => {
-                    const idA = parseInt(a.querySelector('.view-id-badge').textContent.split(': ')[1]);
-                    const idB = parseInt(b.querySelector('.view-id-badge').textContent.split(': ')[1]);
-                    return idA - idB;
-                });
+                // Default sort - keep original order
+                // Don't sort, keep the order from server
             }
             
             // Re-append sorted cards

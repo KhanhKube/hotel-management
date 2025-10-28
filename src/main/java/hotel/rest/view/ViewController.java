@@ -55,7 +55,8 @@ public class ViewController extends BaseController {
     // Lưu view mới
     @PostMapping("/view/save")
     public String saveView(@ModelAttribute("view") View view, 
-                          @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+                          @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                          Model model) {
         log.info("Received request to save view: {}", view.getViewType());
         try {
             // Save view first to get the ID
@@ -79,10 +80,19 @@ public class ViewController extends BaseController {
             return "redirect:/hotel-management/view?created=" + System.currentTimeMillis();
         } catch (IllegalArgumentException e) {
             log.warn("Validation error when saving view: {}", e.getMessage());
-            return "redirect:/hotel-management/view/new?error=duplicate";
+            // Hiển thị error ngay trên màn hình
+            model.addAttribute("error", "duplicate");
+            model.addAttribute("message", e.getMessage());
+            model.addAttribute("view", view); // Giữ lại data người dùng đã nhập
+            model.addAttribute("viewImageService", viewImageService);
+            return "management/view/view-form";
         } catch (Exception e) {
             log.error("Error saving view", e);
-            return "redirect:/hotel-management/view/new?error=upload";
+            model.addAttribute("error", "upload");
+            model.addAttribute("message", "Lỗi khi tạo view. Vui lòng thử lại.");
+            model.addAttribute("view", view);
+            model.addAttribute("viewImageService", viewImageService);
+            return "management/view/view-form";
         }
     }
 
@@ -108,7 +118,8 @@ public class ViewController extends BaseController {
     @PostMapping("/view/update/{id}")
     public String updateView(@PathVariable Integer id, 
                            @ModelAttribute("view") View view,
-                           @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+                           @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                           Model model) {
         try {
             View existingView = viewService.getViewById(id);
             existingView.setViewType(view.getViewType());
@@ -126,10 +137,19 @@ public class ViewController extends BaseController {
             return "redirect:/hotel-management/view?updated=" + System.currentTimeMillis();
         } catch (IllegalArgumentException e) {
             log.warn("Validation error when updating view: {}", e.getMessage());
-            return "redirect:/hotel-management/view/edit/" + id + "?error=duplicate";
+            // Hiển thị error ngay trên màn hình
+            model.addAttribute("error", "duplicate");
+            model.addAttribute("message", e.getMessage());
+            model.addAttribute("view", view); // Giữ lại data người dùng đã nhập
+            model.addAttribute("viewImageService", viewImageService);
+            return "management/view/view-form";
         } catch (Exception e) {
             log.error("Error updating view with image", e);
-            return "redirect:/hotel-management/view/edit/" + id + "?error=upload";
+            model.addAttribute("error", "upload");
+            model.addAttribute("message", "Lỗi khi cập nhật view. Vui lòng thử lại.");
+            model.addAttribute("view", view);
+            model.addAttribute("viewImageService", viewImageService);
+            return "management/view/view-form";
         }
     }
 
