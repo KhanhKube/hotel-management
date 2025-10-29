@@ -1,275 +1,310 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Hotels Management</title>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" href="/img/favicon.png" type="image/png">
-    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
-    <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Hotels Management</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/jvectormap/jquery-jvectormap.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/flag-icon-css/css/flag-icon.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.theme.default.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
     <style>
-        .hotel-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .search-filter-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-        }
-        .table-container {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .table thead th {
-            border: none;
-            padding: 1rem;
-            font-weight: 600;
-        }
-        .table tbody tr {
-            transition: all 0.3s ease;
-        }
-        .table tbody tr:hover {
-            background-color: #f8f9fa;
-            transform: scale(1.01);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .btn-action {
-            margin: 0 2px;
-            transition: all 0.3s ease;
-        }
-        .btn-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .status-badge {
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        .status-draft {
-            background: linear-gradient(135deg, #ffa751 0%, #ffe259 100%);
-            color: white;
-        }
-        .status-active {
-            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
-            color: white;
-        }
-        .status-inactive {
-            background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
-            color: white;
-        }
-        .stars-badge {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 0.4rem 0.8rem;
-            border-radius: 15px;
-            font-weight: 600;
-        }
-        .view-count-badge {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 0.4rem 0.8rem;
-            border-radius: 15px;
-            font-weight: 600;
-        }
-        .pagination {
-            margin-top: 2rem;
-        }
-        .page-link {
-            color: #667eea;
-            border: 1px solid #dee2e6;
-            margin: 0 2px;
-            border-radius: 5px;
-        }
-        .page-link:hover {
-            background-color: #667eea;
-            color: white;
-        }
-        .page-item.active .page-link {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: #667eea;
-        }
-        .main-panel {
-            background: #f5f7ff;
-        }
-        .content-wrapper {
-            padding: 2rem;
+        tbody tr:hover {
+            cursor: pointer;
+            opacity: 0.8;
+            transition: background-color 0.2s;
         }
     </style>
 </head>
 <body>
 <div class="container-scroller">
-    <!-- Sidebar -->
     <div th:replace="~{common/sidebar :: sidebar}"></div>
-
     <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html">
+                    <img src="assets/images/logo-mini.svg" alt="logo"/>
+                </a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch"></div>
+        </nav>
+
         <div class="main-panel">
             <div class="content-wrapper">
-                <!-- Header -->
-                <div class="hotel-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2><i class="fas fa-hotel me-2"></i>Hotels Management</h2>
-                            <p class="mb-0">Total Hotels: <strong th:text="${hotels.totalElements}">0</strong></p>
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- Filter Bar -->
+                                <div class="filter-section mb-4"
+                                     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                            padding: 20px; border-radius: 10px;">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="mdi mdi-magnify"
+                                           style="font-size: 24px; color: white; margin-right: 10px;"></i>
+                                        <h5 class="mb-0" style="color: white;">Tìm Kiếm & Lọc Khách Sạn</h5>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <i class="mdi mdi-magnify text-primary"></i>
+                                                </span>
+                                                <input id="searchHotel" type="text" class="form-control border-start-0"
+                                                       placeholder="Tìm theo tên khách sạn...">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select id="filterStars" class="form-select">
+                                                <option value="">-- Tất cả số sao --</option>
+                                                <option value="1">⭐ 1 sao</option>
+                                                <option value="2">⭐⭐ 2 sao</option>
+                                                <option value="3">⭐⭐⭐ 3 sao</option>
+                                                <option value="4">⭐⭐⭐⭐ 4 sao</option>
+                                                <option value="5">⭐⭐⭐⭐⭐ 5 sao</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select id="filterStatus" class="form-select">
+                                                <option value="">-- Tất cả trạng thái --</option>
+                                                <option value="DRAFT">Bản nháp</option>
+                                                <option value="ACTIVE">Hoạt động</option>
+                                                <option value="INACTIVE">Ngưng hoạt động</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2 text-end">
+                                            <button onclick="applyFilters()" class="btn btn-info me-2">
+                                                <i class="mdi mdi-magnify"></i> Lọc
+                                            </button>
+                                            <button onclick="resetFilters()" class="btn btn-light">
+                                                <i class="mdi mdi-refresh"></i> Reset
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-end">
+                                        <span class="badge badge-dark" style="font-size:14px; padding:10px 15px;">
+                                            <i class="mdi mdi-hotel"></i> Tổng:
+                                            <strong id="hotelCount" th:text="${hotels.totalElements}">0</strong> khách sạn
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <!-- Alert -->
+                                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <strong>Lỗi!</strong> <span th:text="${error}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+
+                                <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-check-circle"></i>
+                                    <strong>Thành công!</strong> <span th:text="${message}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+
+                                <!-- Title + Add -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Hotels Management</h4>
+                                    <a th:href="@{/management/hotels/new}" class="btn btn-primary">
+                                        <i class="mdi mdi-plus"></i> Thêm khách sạn mới
+                                    </a>
+                                </div>
+
+                                <!-- Table -->
+                                <div class="table-responsive">
+                                    <table class="table" id="hotelTable">
+                                        <thead>
+                                        <tr>
+                                            <th> STT </th>
+                                            <th onclick="sortTable(1, this)" style="cursor:pointer;">
+                                                Tên khách sạn <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th>Địa chỉ</th>
+                                            <th onclick="sortTable(3, this)" style="cursor:pointer;">
+                                                Số sao <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th>Trạng thái</th>
+                                            <th>Lượt xem</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="h, stat : ${hotels.content}">
+                                            <td th:text="${stat.count}"></td>
+                                            <td th:text="${h.name}"></td>
+                                            <td th:text="${#strings.length(h.address) > 40 ? #strings.substring(h.address,0,40)+'...' : h.address}"></td>
+                                            <td th:text="${h.stars + '⭐'}"></td>
+                                            <td>
+                                                <span th:switch="${h.status}">
+                                                    <span th:case="'DRAFT'" class="badge badge-outline-warning">Bản nháp</span>
+                                                    <span th:case="'ACTIVE'" class="badge badge-outline-success">Hoạt động</span>
+                                                    <span th:case="'INACTIVE'" class="badge badge-outline-secondary">Ngưng</span>
+                                                </span>
+                                            </td>
+                                            <td th:text="${h.viewCount != null ? h.viewCount : 0}"></td>
+                                            <td>
+                                                <a th:href="@{/management/hotels/view/{id}(id=${h.id})}" class="btn btn-info btn-sm me-1">
+                                                    <i class="mdi mdi-eye"></i>
+                                                </a>
+                                                <a th:href="@{/management/hotels/edit/{id}(id=${h.id})}" class="btn btn-warning btn-sm me-1">
+                                                    <i class="mdi mdi-pencil"></i>
+                                                </a>
+                                                <form th:action="@{/management/hotels/delete/{id}(id=${h.id})}" method="post" style="display:inline">
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('Xóa khách sạn này?')">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(hotels.content)}">
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                Không có khách sạn nào
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <nav th:if="${totalPages > 1}">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/management/hotels(page=${currentPage-1}, name=${name}, status=${status})}">
+                                                <i class="mdi mdi-chevron-left"></i> Trước
+                                            </a>
+                                        </li>
+                                        <li class="page-item" th:each="i : ${#numbers.sequence(0,totalPages-1)}"
+                                            th:classappend="${i == currentPage}? 'active'">
+                                            <a class="page-link"
+                                               th:href="@{/management/hotels(page=${i}, name=${name}, status=${status})}"
+                                               th:text="${i+1}"></a>
+                                        </li>
+                                        <li class="page-item" th:classappend="${currentPage == totalPages-1} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/management/hotels(page=${currentPage+1}, name=${name}, status=${status})}">
+                                                Sau <i class="mdi mdi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
                         </div>
-                        <a th:href="@{/management/hotels/new}" class="btn btn-light btn-lg">
-                            <i class="fas fa-plus-circle me-2"></i>Add New Hotel
-                        </a>
                     </div>
-                </div>
-
-                <!-- Search and Filter Form -->
-                <div class="search-filter-card">
-                    <form th:action="@{/management/hotels}" method="get">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label"><i class="fas fa-search me-2"></i>Search by Name</label>
-                                <input type="text" name="name" th:value="${name}" class="form-control" placeholder="Enter hotel name...">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label"><i class="fas fa-star me-2"></i>Stars</label>
-                                <select name="stars" class="form-control">
-                                    <option value="">All Stars</option>
-                                    <option th:value="1" th:selected="${stars == 1}">⭐ 1 Star</option>
-                                    <option th:value="2" th:selected="${stars == 2}">⭐⭐ 2 Stars</option>
-                                    <option th:value="3" th:selected="${stars == 3}">⭐⭐⭐ 3 Stars</option>
-                                    <option th:value="4" th:selected="${stars == 4}">⭐⭐⭐⭐ 4 Stars</option>
-                                    <option th:value="5" th:selected="${stars == 5}">⭐⭐⭐⭐⭐ 5 Stars</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label"><i class="fas fa-toggle-on me-2"></i>Status</label>
-                                <select name="status" class="form-control">
-                                    <option value="">All Status</option>
-                                    <option value="DRAFT" th:selected="${status == 'DRAFT'}">Draft</option>
-                                    <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">Active</option>
-                                    <option value="INACTIVE" th:selected="${status == 'INACTIVE'}">Inactive</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2 d-flex align-items-end">
-                                <input type="hidden" name="sortBy" th:value="${sortBy}">
-                                <input type="hidden" name="sortDir" th:value="${sortDir}">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-filter me-2"></i>Filter
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Hotels Table -->
-                <div class="table-container">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Hotel Name</th>
-                                <th>Address</th>
-                                <th>Stars</th>
-                                <th>Status</th>
-                                <th>Views</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="hotel : ${hotels.content}">
-                                <td><strong th:text="${hotel.id}"></strong></td>
-                                <td>
-                                    <i class="fas fa-hotel text-primary me-2"></i>
-                                    <strong th:text="${hotel.name}"></strong>
-                                </td>
-                                <td>
-                                    <i class="fas fa-map-marker-alt text-danger me-1"></i>
-                                    <span th:text="${#strings.length(hotel.address) > 40 ? #strings.substring(hotel.address, 0, 40) + '...' : hotel.address}"></span>
-                                </td>
-                                <td>
-                            <span class="stars-badge">
-                                <i class="fas fa-star me-1"></i>
-                                <span th:text="${hotel.stars}">0</span>
-                            </span>
-                                </td>
-                                <td>
-                            <span th:class="'status-badge status-' + ${#strings.toLowerCase(hotel.status)}"
-                                  th:text="${hotel.status}"></span>
-                                </td>
-                                <td>
-                            <span class="view-count-badge">
-                                <i class="fas fa-eye me-1"></i>
-                                <span th:text="${hotel.viewCount}">0</span>
-                            </span>
-                                </td>
-                                <td class="text-center">
-                                    <a th:href="@{/management/hotels/view/{id}(id=${hotel.id})}"
-                                       class="btn btn-info btn-sm btn-action" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a th:href="@{/management/hotels/edit/{id}(id=${hotel.id})}"
-                                       class="btn btn-warning btn-sm btn-action" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a th:href="@{/management/hotels/delete/{id}(id=${hotel.id})}"
-                                       class="btn btn-danger btn-sm btn-action"
-                                       onclick="return confirm('Are you sure you want to delete this hotel?')"
-                                       title="Delete">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(hotels.content)}">
-                                <td colspan="7" class="text-center py-5">
-                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                                    <p class="text-muted">No hotels found. Click "Add New Hotel" to create one.</p>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    <nav th:if="${totalPages > 1}">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                <a class="page-link" th:href="@{/management/hotels(page=${currentPage - 1}, size=10, name=${name}, stars=${stars}, status=${status}, sortBy=${sortBy}, sortDir=${sortDir})}">
-                                    <i class="fas fa-chevron-left"></i> Previous
-                                </a>
-                            </li>
-                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                                th:classappend="${i == currentPage} ? 'active'">
-                                <a class="page-link" th:href="@{/management/hotels(page=${i}, size=10, name=${name}, stars=${stars}, status=${status}, sortBy=${sortBy}, sortDir=${sortDir})}"
-                                   th:text="${i + 1}"></a>
-                            </li>
-                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                                <a class="page-link" th:href="@{/management/hotels(page=${currentPage + 1}, size=10, name=${name}, stars=${stars}, status=${status}, sortBy=${sortBy}, sortDir=${sortDir})}">
-                                    Next <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
                 </div>
             </div>
+
+            <footer class="footer">
+                <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                    <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">
+                        Copyright © bootstrapdash.com 2020
+                    </span>
+                </div>
+            </footer>
         </div>
     </div>
+</div>
 
-    <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
-    <script src="/assets/js/off-canvas.js"></script>
-    <script src="/assets/js/hoverable-collapse.js"></script>
-    <script src="/assets/js/misc.js"></script>
+<!-- JS assets -->
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/vendors/chart.js/Chart.min.js}"></script>
+<script th:src="@{/assets/vendors/progressbar.js/progressbar.min.js}"></script>
+<script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap.min.js}"></script>
+<script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js}"></script>
+<script th:src="@{/assets/vendors/owl-carousel-2/owl.carousel.min.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+<script th:src="@{/assets/js/settings.js}"></script>
+<script th:src="@{/assets/js/todolist.js}"></script>
+<script th:src="@{/assets/js/dashboard.js}"></script>
+
+<script>
+    const searchHotel = document.getElementById('searchHotel');
+    const filterStars = document.getElementById('filterStars');
+    const filterStatus = document.getElementById('filterStatus');
+    const hotelTable = document.getElementById('hotelTable');
+    const rows = Array.from(hotelTable.getElementsByTagName('tr')).slice(1);
+    const hotelCount = document.getElementById('hotelCount');
+
+    function applyFilters() {
+        const nameText = searchHotel.value.toLowerCase();
+        const starsVal = filterStars.value;
+        const statusVal = filterStatus.value.toUpperCase();
+        let visible = 0;
+
+        rows.forEach(row => {
+            if (row.querySelector('td[colspan]')) return;
+            const name = row.cells[1]?.textContent.toLowerCase();
+            const stars = row.cells[3]?.textContent.replace('⭐','').trim();
+            const status = row.cells[4]?.textContent.toUpperCase();
+            const matchName = nameText === '' || name.includes(nameText);
+            const matchStars = starsVal === '' || stars === starsVal;
+            const matchStatus = statusVal === '' || status === statusVal;
+            if (matchName && matchStars && matchStatus) {
+                row.style.display = '';
+                visible++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        hotelCount.textContent = visible;
+    }
+
+    function resetFilters() {
+        searchHotel.value = '';
+        filterStars.value = '';
+        filterStatus.value = '';
+        applyFilters();
+    }
+
+    searchHotel.addEventListener('keyup', applyFilters);
+    filterStars.addEventListener('change', applyFilters);
+    filterStatus.addEventListener('change', applyFilters);
+
+    // Sort 3-trạng thái
+    const sortStates = {};
+    let originalRows = [];
+    document.addEventListener('DOMContentLoaded', () => {
+        originalRows = Array.from(hotelTable.tBodies[0].rows);
+    });
+
+    function sortTable(colIndex, th) {
+        const tbody = hotelTable.tBodies[0];
+        sortStates[colIndex] = (sortStates[colIndex] || 0) + 1;
+        if (sortStates[colIndex] > 2) sortStates[colIndex] = 0;
+        const icon = th.querySelector('i');
+        document.querySelectorAll('#hotelTable thead i').forEach(i=>{i.className='mdi mdi-sort';i.style.color='';});
+        if (sortStates[colIndex]===0){
+            tbody.innerHTML='';
+            originalRows.forEach(r=>tbody.appendChild(r.cloneNode(true)));
+            return;
+        }
+        icon.className = sortStates[colIndex]===1?'mdi mdi-sort-ascending':'mdi mdi-sort-descending';
+        icon.style.color='#667eea';
+
+        const rowsToSort = Array.from(tbody.rows);
+        rowsToSort.sort((a,b)=>{
+            const A=a.cells[colIndex].textContent.trim().toLowerCase();
+            const B=b.cells[colIndex].textContent.trim().toLowerCase();
+            const valA=isNaN(A)?A:Number(A);const valB=isNaN(B)?B:Number(B);
+            return sortStates[colIndex]===1?(valA>valB?1:-1):(valA<valB?1:-1);
+        });
+        tbody.innerHTML='';
+        rowsToSort.forEach(r=>tbody.appendChild(r));
+    }
+</script>
 </body>
 </html>
