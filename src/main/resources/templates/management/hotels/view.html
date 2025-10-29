@@ -1,35 +1,193 @@
 <!-- templates/hotels/view.html -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Hotel Details</title>
-    <meta charset="UTF-8">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Chi tiết khách sạn</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
 </head>
 <body>
-<div class="container mt-5">
-    <h2 th:text="${hotel.name}"></h2>
+<div class="container-scroller">
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
 
-    <div class="row">
-        <div class="col-md-6">
-            <p><strong>ID:</strong> <span th:text="${hotel.id}"></span></p>
-            <p><strong>Address:</strong> <span th:text="${hotel.address}"></span></p>
-            <p><strong>Phone:</strong> <span th:text="${hotel.phone}"></span></p>
-            <p><strong>Email:</strong> <span th:text="${hotel.email}"></span></p>
-            <p><strong>Stars:</strong> <span th:text="${hotel.stars}"></span></p>
-            <p><strong>Status:</strong> <span th:text="${hotel.status}"></span></p>
-            <p><strong>View Count:</strong> <span th:text="${hotel.viewCount}"></span></p>
-        </div>
-        <div class="col-md-6">
-            <p><strong>Description:</strong></p>
-            <p th:text="${hotel.description}"></p>
-<!--            <p><strong>Services:</strong></p>-->
-<!--            <p th:text="${hotel.services}"></p>-->
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html">
+                    <img src="assets/images/logo-mini.svg" alt="logo" />
+                </a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch"></div>
+        </nav>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- Header -->
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h4 class="card-title mb-0">
+                                        <i class="mdi mdi-hotel"></i> Chi Tiết Khách Sạn
+                                    </h4>
+                                    <div>
+                                        <a th:href="@{/management/hotels/edit/{id}(id=${hotel.id})}"
+                                           class="btn btn-primary btn-sm">
+                                            <i class="mdi mdi-pencil"></i> Chỉnh sửa
+                                        </a>
+                                        <a th:href="@{/management/hotels}" class="btn btn-secondary btn-sm">
+                                            <i class="mdi mdi-arrow-left"></i> Quay lại
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Title Banner -->
+                                <div class="alert alert-info text-white text-center"
+                                     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border:none;">
+                                    <i class="mdi mdi-hotel" style="font-size: 48px;"></i>
+                                    <h2 class="mt-2 mb-1" th:text="${hotel.name}"></h2>
+                                    <p class="mb-0" th:text="${hotel.address}"></p>
+                                </div>
+
+                                <!-- Info Sections -->
+                                <div class="row mt-4">
+                                    <!-- Left Info -->
+                                    <div class="col-md-6">
+                                        <div class="card mb-3" style="border-left: 4px solid #667eea;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-information"></i> Thông Tin Cơ Bản
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td style="width: 40%;"><i class="mdi mdi-identifier"></i> <strong>ID:</strong></td>
+                                                        <td><span class="badge badge-dark" th:text="${hotel.id}"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-phone"></i> <strong>Điện thoại:</strong></td>
+                                                        <td th:text="${hotel.phone != null ? hotel.phone : 'N/A'}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-email"></i> <strong>Email:</strong></td>
+                                                        <td th:text="${hotel.email != null ? hotel.email : 'N/A'}"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-star"></i> <strong>Số sao:</strong></td>
+                                                        <td>
+                                                            <span class="badge badge-outline-warning">
+                                                                <i class="mdi mdi-star"></i>
+                                                                <span th:text="${hotel.stars}"></span> Sao
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-eye"></i> <strong>Lượt xem:</strong></td>
+                                                        <td>
+                                                            <span class="text-primary" style="font-weight: bold;">
+                                                                <span th:text="${hotel.viewCount != null ? hotel.viewCount : 0}"></span>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right Info -->
+                                    <div class="col-md-6">
+                                        <div class="card mb-3" style="border-left: 4px solid #f093fb;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-toggle-switch"></i> Trạng Thái & Liên Hệ
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td style="width: 40%;"><strong>Trạng thái:</strong></td>
+                                                        <td>
+                                                            <span th:if="${hotel.status == 'DRAFT'}" class="badge badge-warning">
+                                                                <i class="mdi mdi-file-document-outline"></i> Bản nháp
+                                                            </span>
+                                                            <span th:if="${hotel.status == 'ACTIVE'}" class="badge badge-success">
+                                                                <i class="mdi mdi-check-circle"></i> Hoạt động
+                                                            </span>
+                                                            <span th:if="${hotel.status == 'INACTIVE'}" class="badge badge-secondary">
+                                                                <i class="mdi mdi-close-circle"></i> Ngưng hoạt động
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr th:if="${hotel.createdAt != null}">
+                                                        <td><i class="mdi mdi-clock-plus"></i> <strong>Ngày tạo:</strong></td>
+                                                        <td th:text="${#temporals.format(hotel.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                                                    </tr>
+                                                    <tr th:if="${hotel.updatedAt != null}">
+                                                        <td><i class="mdi mdi-clock-edit"></i> <strong>Cập nhật:</strong></td>
+                                                        <td th:text="${#temporals.format(hotel.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="card mt-3" style="border-left: 4px solid #4facfe;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="mdi mdi-text-subject"></i> Mô Tả Chi Tiết
+                                        </h5>
+                                        <p class="mt-2" th:utext="${hotel.description != null ? hotel.description : 'Không có mô tả'}"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Change Status -->
+                                <div class="card mt-4" style="border-left: 4px solid #ffa751;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="mdi mdi-toggle-switch"></i> Thay Đổi Trạng Thái
+                                        </h5>
+                                        <form th:action="@{/management/hotels/change-status/{id}(id=${hotel.id})}"
+                                              method="post" class="d-flex gap-2">
+                                            <select name="status" class="form-control" style="max-width:200px;">
+                                                <option value="DRAFT" th:selected="${hotel.status == 'DRAFT'}">Bản nháp</option>
+                                                <option value="ACTIVE" th:selected="${hotel.status == 'ACTIVE'}">Hoạt động</option>
+                                                <option value="INACTIVE" th:selected="${hotel.status == 'INACTIVE'}">Ngưng hoạt động</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-warning">
+                                                <i class="mdi mdi-check"></i> Cập nhật
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="mt-4 text-center">
+                                    <a th:href="@{/management/hotels}" class="btn btn-secondary btn-lg">
+                                        <i class="mdi mdi-arrow-left"></i> Quay lại danh sách
+                                    </a>
+                                    <a th:href="@{/management/hotels/edit/{id}(id=${hotel.id})}"
+                                       class="btn btn-primary btn-lg">
+                                        <i class="mdi mdi-pencil"></i> Chỉnh sửa khách sạn
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <a th:href="@{/management/hotels/edit/{id}(id=${hotel.id})}" class="btn btn-warning">Edit</a>
-    <a th:href="@{/management/hotels}" class="btn btn-secondary">Back to List</a>
 </div>
+
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
 </body>
 </html>
