@@ -9,6 +9,10 @@ import java.util.List;
 
 public interface DiscountService {
 
+    boolean checkVoucherCodeExist(String code);
+
+    boolean checkDiscountCodeExistExceptItSelft(String code, Long discountId);
+
     List<DiscountResponseDto> getListDiscount();
 
     String calculateStatus(Discount d); //Tính giá trị cho status
