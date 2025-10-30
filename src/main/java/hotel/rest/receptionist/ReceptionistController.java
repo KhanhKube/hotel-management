@@ -1,6 +1,5 @@
 package hotel.rest.receptionist;
 
-import hotel.db.dto.user.UserLoginDto;
 import hotel.db.entity.User;
 import hotel.service.receptionist.ReceptionistService;
 import hotel.util.MessageResponse;

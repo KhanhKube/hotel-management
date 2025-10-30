@@ -63,8 +63,6 @@ public class CommonServiceImpl implements CommonService {
                 isNullOrEmpty(dto.getEmail()) ||
                 isNullOrEmpty(dto.getPassword()) ||
                 isNullOrEmpty(dto.getConfirmPassword()) ||
-                isNullOrEmpty(dto.getFirstName()) ||
-                isNullOrEmpty(dto.getLastName()) ||
                 isNullOrEmpty(dto.getPhone()) ||
                 dto.getDob() == null) {
             return new MessageResponse(false, FILLALLFEILD);
@@ -103,7 +101,6 @@ public class CommonServiceImpl implements CommonService {
         user.setLastName(dto.getLastName());
         user.setGender(gender);
         user.setDob(dto.getDob());
-        user.setAddress(dto.getAddress());
         String otp = generateOtp();
         user.setOtp(otp);
         userRepository.save(user);
