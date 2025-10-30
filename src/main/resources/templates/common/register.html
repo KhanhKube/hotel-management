@@ -116,25 +116,6 @@
         </span>
                 </div>
 
-                <!-- Gender -->
-                <div class="wrap-input100">
-                    <label class="d-block">Giới tính</label>
-                    <div class="d-flex align-items-center">
-                        <label class="mr-3">
-                            <input type="radio" th:field="*{gender}" value="true" checked="checked"/>
-                            Nam
-                        </label>
-                        <label>
-                            <input type="radio" th:field="*{gender}" value="false"/>
-                            Nữ
-                        </label>
-                    </div>
-                    <span class="focus-input100"></span>
-                    <span class="symbol-input100">
-        <i class="fa fa-venus-mars" aria-hidden="true"></i>
-    </span>
-                </div>
-
                 <!-- Date of Birth -->
                 <div class="wrap-input100">
                     <input class="input100" type="date" th:field="*{dob}" placeholder="Ngày sinh"/>
@@ -143,17 +124,9 @@
             <i class="fa fa-id-badge" aria-hidden="true"></i></span>
                 </div>
 
-                <!-- Address -->
-                <div class="wrap-input100">
-                    <input class="input100" type="text" th:field="*{address}" placeholder="Địa chỉ"/>
-                    <span class="focus-input100"></span>
-                    <span class="symbol-input100">
-            <i class="fa fa-home" aria-hidden="true"></i>
-        </span>
-                </div>
-
                 <!-- Submit -->
                 <div class="container-login100-form-btn">
+                    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
                     <button type="submit" class="login100-form-btn">
                         Đăng ký
                     </button>

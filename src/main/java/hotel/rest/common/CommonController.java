@@ -89,6 +89,9 @@ public class CommonController {
                         redirectAttrs.addFlashAttribute("verifyDto", verifyOtpDto);
                         return "redirect:/hotel/verify";
                     }
+                    if(!user.getRole().equals(CUSTOMER)){
+                        return "redirect:/hotel/dashboard";
+                    }
                     model.addAttribute("message", "Welcome " + user.getFirstName());
                     redirectAttrs.addFlashAttribute("message", "Welcome " + user.getFirstName());
                     return "redirect:/hotel";
@@ -132,10 +135,14 @@ public class CommonController {
     }
 
     @PostMapping("/verify")
-    public String verifyOtp(@ModelAttribute("verifyDto") VerifyOtpDto dto, Model model) {
+    public String verifyOtp(@ModelAttribute("verifyDto") VerifyOtpDto dto,
+                            Model model,
+                            RedirectAttributes redirectAttrs) {
         MessageResponse response = commonService.verifyOtp(dto);
         if (response.isSuccess()) {
             model.addAttribute("message", "Xác thực thành công! Hãy đăng nhập.");
+            UserLoginDto userLoginDto = new UserLoginDto(dto.getUsername(), null);
+            redirectAttrs.addFlashAttribute("userLogin", userLoginDto);
             return "redirect:/hotel/login";
         } else {
             model.addAttribute("error", response.getMessage());
