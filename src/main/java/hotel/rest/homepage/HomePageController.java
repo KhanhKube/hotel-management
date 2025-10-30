@@ -7,7 +7,6 @@ import hotel.db.entity.News;
 import hotel.db.enums.BedType;
 import hotel.db.enums.RoomType;
 import hotel.db.repository.floor.FloorRepository;
-import hotel.db.repository.size.SizeRepository;
 import hotel.service.room.RoomService;
 import hotel.service.news.NewsService;
 import jakarta.servlet.http.HttpSession;
@@ -32,7 +31,6 @@ public class HomePageController {
     private final RoomService roomService;
     private final NewsService newsService;
     private final FloorRepository floorRepository;
-    private final SizeRepository sizeRepository;
 
     @GetMapping({"/", "", "/home"})
     public String home(HttpSession session, Model model) {

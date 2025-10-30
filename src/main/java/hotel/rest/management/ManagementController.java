@@ -26,15 +26,15 @@ import java.util.HashMap;
 public class ManagementController {
 
     private final ViewService viewService;
-    private final SizeService sizeService;
     private final FloorService floorService;
     private final RoomService roomService;
+    private final SizeService sizeService;
 
     @GetMapping("/location-room")
     public String locationRoomManagement(Model model) {
         // Get counts for statistics
         int viewCount = viewService.getAllViews().size();
-        int sizeCount = sizeService.getAllActiveSizes().size();
+        int sizeCount = sizeService.getAllSizes().size();
         int floorCount = floorService.getAllActiveFloors().size();
 
         model.addAttribute("viewCount", viewCount);
@@ -47,7 +47,7 @@ public class ManagementController {
     // SIZE MANAGEMENT
     @GetMapping("/size")
     public String sizeManagement(Model model) {
-        model.addAttribute("sizes", sizeService.getAllActiveSizes());
+        model.addAttribute("sizes", sizeService.getAllSizes());
         return "management/size-management";
     }
 
@@ -70,9 +70,9 @@ public class ManagementController {
 
     @GetMapping("/size/edit/{id}")
     public String editSize(@PathVariable Integer id, Model model) {
-        SizeResponseDto sizeResponse = sizeService.getSizeById(id);
+        Size size = sizeService.getSizeById(id);
         SizeRequestDto sizeRequest = new SizeRequestDto();
-        sizeRequest.setSize(sizeResponse.getSize());
+        sizeRequest.setSize(size.getSize());
         model.addAttribute("sizeRequest", sizeRequest);
         model.addAttribute("sizeId", id);
         return "management/size-form";

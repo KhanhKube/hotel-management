@@ -23,6 +23,30 @@
             font-weight: 600;
             color: #495057;
         }
+        
+        /* Prevent text overflow in table cells */
+        .table td {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .table td:nth-child(3) {
+            max-width: 200px; /* Họ tên column */
+        }
+        
+        .table td:nth-child(4) {
+            max-width: 200px; /* Email column */
+        }
+        
+        /* Allow action buttons column to wrap normally */
+        .table td:nth-child(8) {
+            max-width: none;
+            overflow: visible;
+            white-space: normal;
+        }
+        
         .btn-outline-primary:hover {
             background-color: #007bff;
             border-color: #007bff;
@@ -247,7 +271,7 @@
                         <div>
                             <h4 class="card-title mb-0">Quản lý Tài khoản</h4>
                             <p class="card-description mb-0">
-                                Quản lý tài khoản người dùng trong hệ thống (Manager, Receptionist, Customer)
+                                Quản lý tài khoản người dùng trong hệ thống
                             </p>
                         </div>
                         <a href="/hotel-management/accounts/new" class="btn btn-primary">
@@ -255,12 +279,37 @@
                         </a>
                     </div>
 
+                    <!-- Tabs để chuyển đổi giữa Customer và Staff -->
+                    <ul class="nav nav-tabs mb-4" id="accountTypeTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" 
+                               th:classappend="${accountType == 'customers'} ? 'active' : ''"
+                               th:href="@{/hotel-management/accounts(type='customers', search=${searchTerm}, status=${status})}"
+                               id="customers-tab" 
+                               role="tab">
+                                <i class="mdi mdi-account"></i> Khách hàng
+                                <span class="badge badge-info ml-2" th:text="${totalCustomers}">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link"
+                               th:classappend="${accountType == 'staffs'} ? 'active' : ''"
+                               th:href="@{/hotel-management/accounts(type='staffs', search=${searchTerm}, status=${status})}"
+                               id="staffs-tab" 
+                               role="tab">
+                                <i class="mdi mdi-account-group"></i> Nhân viên
+                                <span class="badge badge-info ml-2" th:text="${totalStaffs}">0</span>
+                            </a>
+                        </li>
+                    </ul>
+
                     <!-- Search and Filter Form -->
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <form th:action="@{/hotel-management/accounts}" method="get" class="d-flex gap-2">
                                 <input type="hidden" name="page" value="0">
                                 <input type="hidden" name="size" th:value="${size}">
+                                <input type="hidden" name="type" th:value="${accountType}">
                                 
                                 <select name="status" class="form-control" style="width: 180px;">
                                     <option value="ALL" th:selected="${status == 'ALL'}">Tất cả trạng thái</option>
@@ -279,7 +328,7 @@
                                     <i class="mdi mdi-magnify"></i> Tìm kiếm
                                 </button>
                                 
-                                <a th:href="@{/hotel-management/accounts}" class="btn btn-secondary">
+                                <a th:href="@{/hotel-management/accounts(type=${accountType})}" class="btn btn-secondary">
                                     <i class="mdi mdi-refresh"></i> Làm mới
                                 </a>
                             </form>
@@ -358,14 +407,14 @@
                                 <ul class="pagination justify-content-center">
                                     <!-- First Page -->
                                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                        <a class="page-link" th:href="@{/hotel-management/accounts(search=${searchTerm}, status=${status}, page=0, size=${size})}">
+                                        <a class="page-link" th:href="@{/hotel-management/accounts(type=${accountType}, search=${searchTerm}, status=${status}, page=0, size=${size})}">
                                             <i class="mdi mdi-page-first"></i>
                                         </a>
                                     </li>
                                     
                                     <!-- Previous Page -->
                                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                        <a class="page-link" th:href="@{/hotel-management/accounts(search=${searchTerm}, status=${status}, page=${currentPage - 1}, size=${size})}">
+                                        <a class="page-link" th:href="@{/hotel-management/accounts(type=${accountType}, search=${searchTerm}, status=${status}, page=${currentPage - 1}, size=${size})}">
                                             <i class="mdi mdi-chevron-left"></i>
                                         </a>
                                     </li>
@@ -373,20 +422,20 @@
                                     <!-- Page Numbers -->
                                     <li class="page-item" th:classappend="${currentPage == pageNum} ? 'active'" 
                                         th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}">
-                                        <a class="page-link" th:href="@{/hotel-management/accounts(search=${searchTerm}, status=${status}, page=${pageNum}, size=${size})}"
+                                        <a class="page-link" th:href="@{/hotel-management/accounts(type=${accountType}, search=${searchTerm}, status=${status}, page=${pageNum}, size=${size})}"
                                            th:text="${pageNum + 1}">1</a>
                                     </li>
                                     
                                     <!-- Next Page -->
                                     <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                                        <a class="page-link" th:href="@{/hotel-management/accounts(search=${searchTerm}, status=${status}, page=${currentPage + 1}, size=${size})}">
+                                        <a class="page-link" th:href="@{/hotel-management/accounts(type=${accountType}, search=${searchTerm}, status=${status}, page=${currentPage + 1}, size=${size})}">
                                             <i class="mdi mdi-chevron-right"></i>
                                         </a>
                                     </li>
                                     
                                     <!-- Last Page -->
                                     <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                                        <a class="page-link" th:href="@{/hotel-management/accounts(search=${searchTerm}, status=${status}, page=${totalPages - 1}, size=${size})}">
+                                        <a class="page-link" th:href="@{/hotel-management/accounts(type=${accountType}, search=${searchTerm}, status=${status}, page=${totalPages - 1}, size=${size})}">
                                             <i class="mdi mdi-page-last"></i>
                                         </a>
                                     </li>

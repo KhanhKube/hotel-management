@@ -1,6 +1,5 @@
 package hotel.service.account;
 
-import ch.qos.logback.core.util.StringUtil;
 import hotel.db.dto.user.AccountRequestDto;
 import hotel.db.dto.user.AccountResponseDto;
 import hotel.db.entity.User;
@@ -67,8 +66,110 @@ public class AccountServiceImpl implements AccountService {
             predicates.add(cb.equal(root.get("isDeleted"), false));
             
             // Search by full name (firstName + lastName), username, email, or phone
-            String search = searchTerm.trim();
-            if (StringUtil.isNullOrEmpty(search)) {
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                String search = searchTerm.trim().toLowerCase();
+                String pattern = "%" + search + "%";
+                // Search in firstName, lastName, username, email, or phone
+                Predicate firstNamePredicate = cb.like(cb.lower(root.get("firstName")), pattern);
+                Predicate lastNamePredicate = cb.like(cb.lower(root.get("lastName")), pattern);
+                Predicate usernamePredicate = cb.like(cb.lower(root.get("username")), pattern);
+                Predicate emailPredicate = cb.like(cb.lower(root.get("email")), pattern);
+                Predicate phonePredicate = cb.like(root.get("phone"), pattern);
+                Predicate searchOr = cb.or(firstNamePredicate, lastNamePredicate, usernamePredicate, emailPredicate, phonePredicate);
+                predicates.add(searchOr);
+            }
+            
+            // Filter by status
+            if (status != null && !status.isEmpty() && !"ALL".equals(status.toUpperCase())) {
+                predicates.add(cb.equal(root.get("status"), status.toUpperCase()));
+            }
+            
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        
+        // Pagination
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findAll(spec, pageable);
+        
+        // Convert to DTO
+        List<AccountResponseDto> dtos = userPage.getContent().stream()
+                .map(AccountResponseDto::new)
+                .collect(Collectors.toList());
+        
+        return new PageImpl<>(dtos, pageable, userPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AccountResponseDto> getCustomersWithPagination(String searchTerm, String status, int page, int size) {
+        log.info("Getting customers with pagination - page: {}, size: {}, search: {}, status: {}", page, size, searchTerm, status);
+        
+        // Build specification for filtering customers only
+        Specification<User> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new java.util.ArrayList<>();
+            
+            // Only CUSTOMER role
+            predicates.add(cb.equal(root.get("role"), "CUSTOMER"));
+            
+            // Exclude soft deleted accounts
+            predicates.add(cb.equal(root.get("isDeleted"), false));
+            
+            // Search by full name (firstName + lastName), username, email, or phone
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                String search = searchTerm.trim().toLowerCase();
+                String pattern = "%" + search + "%";
+                // Search in firstName, lastName, username, email, or phone
+                Predicate firstNamePredicate = cb.like(cb.lower(root.get("firstName")), pattern);
+                Predicate lastNamePredicate = cb.like(cb.lower(root.get("lastName")), pattern);
+                Predicate usernamePredicate = cb.like(cb.lower(root.get("username")), pattern);
+                Predicate emailPredicate = cb.like(cb.lower(root.get("email")), pattern);
+                Predicate phonePredicate = cb.like(root.get("phone"), pattern);
+                Predicate searchOr = cb.or(firstNamePredicate, lastNamePredicate, usernamePredicate, emailPredicate, phonePredicate);
+                predicates.add(searchOr);
+            }
+            
+            // Filter by status
+            if (status != null && !status.isEmpty() && !"ALL".equals(status.toUpperCase())) {
+                predicates.add(cb.equal(root.get("status"), status.toUpperCase()));
+            }
+            
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        
+        // Pagination
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findAll(spec, pageable);
+        
+        // Convert to DTO
+        List<AccountResponseDto> dtos = userPage.getContent().stream()
+                .map(AccountResponseDto::new)
+                .collect(Collectors.toList());
+        
+        return new PageImpl<>(dtos, pageable, userPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AccountResponseDto> getStaffsWithPagination(String searchTerm, String status, int page, int size) {
+        log.info("Getting staffs with pagination - page: {}, size: {}, search: {}, status: {}", page, size, searchTerm, status);
+        
+        // Build specification for filtering staffs only (STAFF, RECEPTIONIST, MANAGER)
+        Specification<User> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new java.util.ArrayList<>();
+            
+            // Only STAFF, RECEPTIONIST, MANAGER roles
+            Predicate staffRole = cb.equal(root.get("role"), "STAFF");
+            Predicate receptionistRole = cb.equal(root.get("role"), "RECEPTIONIST");
+            Predicate managerRole = cb.equal(root.get("role"), "MANAGER");
+            Predicate staffRoles = cb.or(staffRole, receptionistRole, managerRole);
+            predicates.add(staffRoles);
+            
+            // Exclude soft deleted accounts
+            predicates.add(cb.equal(root.get("isDeleted"), false));
+            
+            // Search by full name (firstName + lastName), username, email, or phone
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                String search = searchTerm.trim().toLowerCase();
                 String pattern = "%" + search + "%";
                 // Search in firstName, lastName, username, email, or phone
                 Predicate firstNamePredicate = cb.like(cb.lower(root.get("firstName")), pattern);
@@ -173,6 +274,11 @@ public class AccountServiceImpl implements AccountService {
             throw new RuntimeException("Số điện thoại đã tồn tại: " + accountRequestDto.getPhone());
         }
 
+        // Không cho phép đổi role khi update
+        if (!existingUser.getRole().equals(accountRequestDto.getRole())) {
+            throw new RuntimeException("Không được phép thay đổi vai trò (role) của tài khoản");
+        }
+
         // Cập nhật thông tin
         existingUser.setUsername(accountRequestDto.getUsername());
         existingUser.setEmail(accountRequestDto.getEmail());
@@ -182,7 +288,7 @@ public class AccountServiceImpl implements AccountService {
         existingUser.setGender(accountRequestDto.getGender());
         existingUser.setDob(accountRequestDto.getDob());
         existingUser.setAddress(accountRequestDto.getAddress());
-        existingUser.setRole(accountRequestDto.getRole());
+        // Không cập nhật role - giữ nguyên role hiện tại
         existingUser.setStatus(accountRequestDto.getStatus());
         existingUser.setAvatarUrl(accountRequestDto.getAvatarUrl());
 
@@ -229,6 +335,27 @@ public class AccountServiceImpl implements AccountService {
         userRepository.save(user);
         
         log.info("=== SOFT DELETE THÀNH CÔNG ID: {} - ĐÃ ẨN KHỎI GIAO DIỆN ===", userId);
+    }
+
+    @Override
+    public void deleteAllTestAccounts(Integer userId) {
+        log.info("=== BẮT ĐẦU HARD DELETE TÀI KHOẢN ID: {} ===", userId);
+        
+        // Kiểm tra user có tồn tại không
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với ID: " + userId));
+        
+        // Không cho phép xóa ADMIN
+        if ("ADMIN".equals(user.getRole())) {
+            throw new RuntimeException("Không được phép xóa tài khoản ADMIN");
+        }
+        
+        log.info("Tìm thấy user: {} - {} - Role: {}", user.getUsername(), user.getEmail(), user.getRole());
+        
+        // HARD DELETE - Xóa vĩnh viễn
+        userRepository.delete(user);
+        
+        log.info("=== HARD DELETE THÀNH CÔNG ID: {} ===", userId);
     }
 
     @Override
