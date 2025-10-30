@@ -3,6 +3,7 @@ package hotel.db.dto.user;
 import hotel.db.entity.User;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
@@ -24,17 +25,18 @@ public class AccountRequestDto {
     private String phone;
     
     @NotBlank(message = "Tên không được để trống")
-    @Size(max = 50, message = "Tên không được quá 50 ký tự")
+    @Size(max = 20, message = "Tên không được quá 20 ký tự")
     private String firstName;
     
     @NotBlank(message = "Họ không được để trống")
-    @Size(max = 50, message = "Họ không được quá 50 ký tự")
+    @Size(max = 20, message = "Họ không được quá 20 ký tự")
     private String lastName;
     
     @NotNull(message = "Giới tính không được để trống")
     private User.Gender gender;
     
     @NotNull(message = "Ngày sinh không được để trống")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dob;
     
     @Size(max = 255, message = "Địa chỉ không được quá 255 ký tự")

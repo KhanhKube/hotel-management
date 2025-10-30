@@ -13,8 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -30,16 +28,26 @@ public class AccountController extends BaseController {
     private final AccountService accountService;
 
     /**
-     * Hiển thị danh sách tất cả accounts (trừ ADMIN) với pagination và search
+     * Hiển thị danh sách tất cả accounts - Tách riêng Customer và Staff
      */
     @GetMapping
     public String listAccounts(
+            @RequestParam(value = "type", required = false, defaultValue = "customers") String type,
             @RequestParam(value = "search", required = false, defaultValue = "") String searchTerm,
             @RequestParam(value = "status", required = false, defaultValue = "ALL") String status,
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             HttpSession session, Model model) {
-        Page<AccountResponseDto> accountsPage = accountService.getAccountsWithPagination(searchTerm, status, page, size);
+        
+        Page<AccountResponseDto> accountsPage;
+        
+        // Phân tách customer và staff
+        if ("staffs".equalsIgnoreCase(type)) {
+            accountsPage = accountService.getStaffsWithPagination(searchTerm, status, page, size);
+        } else {
+            accountsPage = accountService.getCustomersWithPagination(searchTerm, status, page, size);
+        }
+        
         model.addAttribute("accounts", accountsPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", accountsPage.getTotalPages());
@@ -47,6 +55,14 @@ public class AccountController extends BaseController {
         model.addAttribute("searchTerm", searchTerm);
         model.addAttribute("status", status);
         model.addAttribute("size", size);
+        model.addAttribute("accountType", type);
+        
+        // Lấy tổng số để hiển thị thống kê
+        Page<AccountResponseDto> customersPage = accountService.getCustomersWithPagination("", "ALL", 0, 1);
+        Page<AccountResponseDto> staffsPage = accountService.getStaffsWithPagination("", "ALL", 0, 1);
+        model.addAttribute("totalCustomers", customersPage.getTotalElements());
+        model.addAttribute("totalStaffs", staffsPage.getTotalElements());
+        
         return "management/account/account-list";
     }
 
@@ -86,9 +102,12 @@ public class AccountController extends BaseController {
     @PostMapping("/save")
     public String saveAccount(@Valid @ModelAttribute("account") AccountRequestDto accountRequestDto,
                               BindingResult bindingResult,
-                              RedirectAttributes redirectAttributes) {
+                              RedirectAttributes redirectAttributes,
+                              Model model) {
         
         if (bindingResult.hasErrors()) {
+            // Giữ lại dữ liệu đã nhập khi có lỗi validation
+            model.addAttribute("account", accountRequestDto);
             return "management/account/account-form";
         }
 
@@ -97,8 +116,10 @@ public class AccountController extends BaseController {
             redirectAttributes.addFlashAttribute("successMessage", "Tạo account thành công!");
             return "redirect:/hotel-management/accounts?success=add";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi tạo account: " + e.getMessage());
-            return "redirect:/hotel-management/accounts/new";
+            // Giữ lại dữ liệu đã nhập khi có lỗi business logic (username/email đã tồn tại)
+            model.addAttribute("account", accountRequestDto);
+            model.addAttribute("errorMessage", "Lỗi khi tạo account: " + e.getMessage());
+            return "management/account/account-form";
         }
     }
 
@@ -141,9 +162,12 @@ public class AccountController extends BaseController {
     public String updateAccount(@PathVariable Integer id,
                                @Valid @ModelAttribute("account") AccountRequestDto accountRequestDto,
                                BindingResult bindingResult,
-                               RedirectAttributes redirectAttributes) {
+                               RedirectAttributes redirectAttributes,
+                               Model model) {
         
         if (bindingResult.hasErrors()) {
+            // Giữ lại accountId để form biết đang ở chế độ edit
+            model.addAttribute("accountId", id);
             return "management/account/account-form";
         }
 
@@ -152,8 +176,11 @@ public class AccountController extends BaseController {
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật account thành công!");
             return "redirect:/hotel-management/accounts?success=edit";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật account: " + e.getMessage());
-            return "redirect:/hotel-management/accounts/edit/" + id;
+            // Giữ lại dữ liệu đã nhập khi có lỗi business logic
+            model.addAttribute("account", accountRequestDto);
+            model.addAttribute("accountId", id);
+            model.addAttribute("errorMessage", "Lỗi khi cập nhật account: " + e.getMessage());
+            return "management/account/account-form";
         }
     }
 
@@ -216,4 +243,47 @@ public class AccountController extends BaseController {
         }
     }
 
+    /**
+     * Hiển thị danh sách customers với pagination và search
+     */
+    @GetMapping("/customers")
+    public String listCustomers(
+            @RequestParam(value = "search", required = false, defaultValue = "") String searchTerm,
+            @RequestParam(value = "status", required = false, defaultValue = "ALL") String status,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            HttpSession session, Model model) {
+        Page<AccountResponseDto> customersPage = accountService.getCustomersWithPagination(searchTerm, status, page, size);
+        model.addAttribute("accounts", customersPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", customersPage.getTotalPages());
+        model.addAttribute("totalElements", customersPage.getTotalElements());
+        model.addAttribute("searchTerm", searchTerm);
+        model.addAttribute("status", status);
+        model.addAttribute("size", size);
+        model.addAttribute("accountType", "customers");
+        return "management/account/account-list";
+    }
+
+    /**
+     * Hiển thị danh sách staffs (STAFF, RECEPTIONIST, MANAGER) với pagination và search
+     */
+    @GetMapping("/staffs")
+    public String listStaffs(
+            @RequestParam(value = "search", required = false, defaultValue = "") String searchTerm,
+            @RequestParam(value = "status", required = false, defaultValue = "ALL") String status,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            HttpSession session, Model model) {
+        Page<AccountResponseDto> staffsPage = accountService.getStaffsWithPagination(searchTerm, status, page, size);
+        model.addAttribute("accounts", staffsPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", staffsPage.getTotalPages());
+        model.addAttribute("totalElements", staffsPage.getTotalElements());
+        model.addAttribute("searchTerm", searchTerm);
+        model.addAttribute("status", status);
+        model.addAttribute("size", size);
+        model.addAttribute("accountType", "staffs");
+        return "management/account/account-list";
+    }
 }

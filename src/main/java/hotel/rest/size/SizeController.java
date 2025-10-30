@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +52,7 @@ public class SizeController {
 	@GetMapping("/{sizeId}")
 	public ResponseEntity<Map<String, Object>> getSizeById(@PathVariable Integer sizeId) {
 		try {
-			SizeResponseDto size = sizeService.getSizeById(sizeId);
+			SizeResponseDto size = sizeService.getSizeByIdDto(sizeId);
 			Map<String, Object> response = new HashMap<>();
 			response.put("success", true);
 			response.put("message", "Lấy thông tin kích thước thành công");

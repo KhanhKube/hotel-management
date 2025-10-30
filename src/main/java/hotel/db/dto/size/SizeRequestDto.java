@@ -5,10 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import java.math.BigDecimal;
+import jakarta.validation.constraints.*;
 
 @Data
 @NoArgsConstructor
@@ -17,7 +14,7 @@ import java.math.BigDecimal;
 public class SizeRequestDto {
 
     @NotNull(message = "Kích thước không được để trống")
-    @DecimalMin(value = "0.01", message = "Kích thước phải lớn hơn 0")
-    @DecimalMax(value = "999.99", message = "Kích thước không được vượt quá 999.99")
+    @DecimalMin(value = "0.1", message = "Kích thước phải lớn hơn 0")
+    @DecimalMax(value = "1000.0", message = "Kích thước không được vượt quá 1000")
     private Double size;
 }
