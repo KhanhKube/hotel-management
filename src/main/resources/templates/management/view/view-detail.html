@@ -5,45 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chi Tiết View - Hệ Thống Khách Sạn</title>
     <link rel="icon" href="/img/favicon.png" type="image/png">
-    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1a1a;
-            color: #ffffff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         .container-scroller {
             display: flex;
             min-height: 100vh;
         }
-        
+
         .main-panel {
             flex: 1;
-            padding: 30px;
-            background: #1a1a1a;
+            padding: 20px;
+            background: transparent;
         }
-        
-        .detail-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
+
+        .detail-container {
+            background: white;
             border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-            position: relative;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            margin: 20px 0;
         }
-        
+
+        .detail-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
         .detail-header::before {
             content: '';
             position: absolute;
@@ -54,136 +62,154 @@
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
             animation: float 6s ease-in-out infinite;
         }
-        
+
         @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(180deg); }
         }
-        
+
         .detail-title {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: bold;
             margin-bottom: 15px;
             position: relative;
             z-index: 1;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-        
+
         .detail-subtitle {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             opacity: 0.9;
             position: relative;
             z-index: 1;
         }
-        
-        .detail-content {
+
+        .detail-body {
+            padding: 30px;
+        }
+
+        .stats-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
             margin-bottom: 30px;
         }
-        
-        .detail-card {
-            background: #2d2d2d;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            border: 1px solid #404040;
-            transition: all 0.3s ease;
-        }
-        
-        .detail-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-            border-color: #ffd700;
-        }
-        
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #ffd700;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .card-title i {
-            font-size: 1.8rem;
-        }
-        
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding: 12px;
-            background: #404040;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .info-item:hover {
-            background: #505050;
-            transform: translateX(5px);
-        }
-        
-        .info-icon {
-            color: #ffd700;
-            font-size: 1.2rem;
-            width: 24px;
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
             text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
         }
-        
-        .info-label {
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-color);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--dark-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .detail-group {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .detail-group:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .detail-label {
             font-weight: 600;
-            color: #cccccc;
-            min-width: 120px;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
-        .info-value {
-            color: #ffffff;
+
+        .detail-value {
+            color: var(--dark-color);
             font-weight: 500;
+            font-size: 1.1rem;
+            word-break: break-word;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        
+
         .image-preview {
-            background: #404040;
+            background: #f8f9fa;
             border-radius: 12px;
             height: 300px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
-            border: 2px solid #404040;
+            border: 2px solid #e9ecef;
             transition: all 0.3s ease;
             overflow: hidden;
         }
-        
+
         .image-preview:hover {
-            border-color: #667eea;
-            background: #505050;
+            border-color: var(--primary-color);
+            background: #ffffff;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
         }
-        
+
         .image-preview img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             border-radius: 10px;
         }
-        
+
         .image-preview i {
             font-size: 4rem;
-            color: #666666;
+            color: #6c757d;
         }
-        
+
         .action-buttons {
             display: flex;
             gap: 15px;
             justify-content: center;
             margin-top: 30px;
+            flex-wrap: wrap;
         }
-        
+
         .btn {
             padding: 12px 24px;
             border: none;
@@ -196,104 +222,108 @@
             align-items: center;
             gap: 8px;
             font-size: 1rem;
+            min-width: 150px;
+            justify-content: center;
         }
-        
+
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: #ffffff;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
-        
+
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: #ffffff;
         }
-        
+
         .btn-secondary {
             background: #6c757d;
             color: #ffffff;
             box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
         }
-        
+
         .btn-secondary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+            color: #ffffff;
         }
-        
+
         .btn-danger {
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
             color: #ffffff;
             box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
         }
-        
+
         .btn-danger:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-            color: #1a1a1a;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-        }
-        
-        .btn-warning:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: #2d2d2d;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            border: 1px solid #404040;
-            transition: all 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-3px);
-            border-color: #ffd700;
-        }
-        
-        .stat-icon {
-            font-size: 2.5rem;
-            color: #ffd700;
-            margin-bottom: 10px;
-        }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
             color: #ffffff;
-            margin-bottom: 5px;
         }
-        
-        .stat-label {
-            color: #cccccc;
-            font-size: 0.9rem;
+
+        .status-active {
+            color: var(--success-color);
+            font-weight: 600;
         }
-        
+
+        .status-deleted {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+
         @media (max-width: 768px) {
             .detail-content {
                 grid-template-columns: 1fr;
             }
             
             .detail-title {
-                font-size: 2rem;
+                font-size: 1.8rem;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
             
             .action-buttons {
                 flex-direction: column;
                 align-items: stretch;
+            }
+
+            .btn {
+                min-width: auto;
+            }
+
+            .main-panel {
+                padding: 10px;
+            }
+
+            .detail-body {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .detail-title {
+                font-size: 1.5rem;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            .detail-header {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -304,148 +334,172 @@
         <div th:replace="common/sidebar"></div>
         
         <div class="main-panel">
-            <div class="detail-header">
-                <h1 class="detail-title">
-                    <i class="mdi mdi-eye me-3"></i>
-                    <span th:text="${view.viewType}">View Biển</span>
-                </h1>
-                <p class="detail-subtitle">Chi tiết thông tin về loại view này</p>
-            </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="mdi mdi-identifier"></i>
-                    </div>
-                    <div class="stat-value" th:text="${view.viewId}">1</div>
-                    <div class="stat-label">ID View</div>
+            <div class="detail-container">
+                <div class="detail-header">
+                    <h1 class="detail-title">
+                        <i class="fas fa-eye me-3"></i>
+                        <span th:text="${view.viewType}">View Biển</span>
+                    </h1>
+                    <p class="detail-subtitle">Chi tiết thông tin về loại view này</p>
                 </div>
                 
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="mdi mdi-calendar-plus"></i>
-                    </div>
-                    <div class="stat-value" th:text="${#temporals.format(view.createdAt, 'dd/MM/yyyy')}">05/10/2025</div>
-                    <div class="stat-label">Ngày Tạo</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="mdi mdi-clock-outline"></i>
-                    </div>
-                    <div class="stat-value" th:text="${#temporals.format(view.updatedAt, 'dd/MM/yyyy')}">05/10/2025</div>
-                    <div class="stat-label">Cập Nhật Cuối</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="mdi mdi-check-circle"></i>
-                    </div>
-                    <div class="stat-value" th:text="${view.isDeleted ? 'Không' : 'Có'}">Có</div>
-                    <div class="stat-label">Trạng Thái</div>
-                </div>
-            </div>
-            
-            <div class="detail-content">
-                <div class="detail-card">
-                    <h3 class="card-title">
-                        <i class="mdi mdi-information"></i>
-                        Thông Tin Cơ Bản
-                    </h3>
-                    
-                    <div class="info-item">
-                        <i class="mdi mdi-identifier info-icon"></i>
-                        <span class="info-label">ID:</span>
-                        <span class="info-value" th:text="${view.viewId}">1</span>
+                <div class="detail-body">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-hashtag"></i>
+                            </div>
+                            <div class="stat-value" th:text="${view.viewId}">1</div>
+                            <div class="stat-label">ID View</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-plus"></i>
+                            </div>
+                            <div class="stat-value" th:text="${#temporals.format(view.createdAt, 'dd/MM/yyyy')}">05/10/2025</div>
+                            <div class="stat-label">Ngày Tạo</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-value" th:text="${#temporals.format(view.updatedAt, 'dd/MM/yyyy')}">05/10/2025</div>
+                            <div class="stat-label">Cập Nhật Cuối</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-value" th:text="${view.isDeleted ? 'Không' : 'Có'}">Có</div>
+                            <div class="stat-label">Trạng Thái</div>
+                        </div>
                     </div>
                     
-                    <div class="info-item">
-                        <i class="mdi mdi-eye info-icon"></i>
-                        <span class="info-label">Loại View:</span>
-                        <span class="info-value" th:text="${view.viewType}">View Biển</span>
+                    <div class="details-grid">
+                        <div class="detail-group">
+                            <div class="detail-label">
+                                <i class="fas fa-hashtag me-2"></i>ID View
+                            </div>
+                            <div class="detail-value" th:text="${view.viewId}">1</div>
+                        </div>
+                        
+                        <div class="detail-group">
+                            <div class="detail-label">
+                                <i class="fas fa-eye me-2"></i>Loại View
+                            </div>
+                            <div class="detail-value" th:text="${view.viewType}">View Biển</div>
+                        </div>
+                        
+                        <div class="detail-group">
+                            <div class="detail-label">
+                                <i class="fas fa-calendar-plus me-2"></i>Ngày Tạo
+                            </div>
+                            <div class="detail-value" th:text="${#temporals.format(view.createdAt, 'dd/MM/yyyy HH:mm')}">05/10/2025 09:30</div>
+                        </div>
+                        
+                        <div class="detail-group">
+                            <div class="detail-label">
+                                <i class="fas fa-clock me-2"></i>Cập Nhật Cuối
+                            </div>
+                            <div class="detail-value" th:text="${#temporals.format(view.updatedAt, 'dd/MM/yyyy HH:mm')}">05/10/2025 09:30</div>
+                        </div>
+                        
+                        <div class="detail-group">
+                            <div class="detail-label">
+                                <i class="fas fa-check-circle me-2"></i>Trạng Thái
+                            </div>
+                            <div class="detail-value">
+                                <span th:class="${view.isDeleted ? 'status-deleted' : 'status-active'}" 
+                                      th:text="${view.isDeleted ? 'Đã Xóa' : 'Hoạt Động'}">Hoạt Động</span>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-group">
+                            <div class="detail-label">
+                                <i class="fas fa-image me-2"></i>Hình Ảnh
+                            </div>
+                            <div class="detail-value" th:text="${viewImageService.getImageForView(view.viewId) != null ? 'Có ảnh' : 'Chưa có ảnh'}">Chưa có ảnh</div>
+                        </div>
                     </div>
-                    
-                    <div class="info-item">
-                        <i class="mdi mdi-calendar-plus info-icon"></i>
-                        <span class="info-label">Ngày Tạo:</span>
-                        <span class="info-value" th:text="${#temporals.format(view.createdAt, 'dd/MM/yyyy HH:mm')}">05/10/2025 09:30</span>
-                    </div>
-                    
-                    <div class="info-item">
-                        <i class="mdi mdi-clock-outline info-icon"></i>
-                        <span class="info-label">Cập Nhật Cuối:</span>
-                        <span class="info-value" th:text="${#temporals.format(view.updatedAt, 'dd/MM/yyyy HH:mm')}">05/10/2025 09:30</span>
-                    </div>
-                    
-                    <div class="info-item">
-                        <i class="mdi mdi-check-circle info-icon"></i>
-                        <span class="info-label">Trạng Thái:</span>
-                        <span class="info-value" th:text="${view.isDeleted ? 'Đã Xóa' : 'Hoạt Động'}">Hoạt Động</span>
-                    </div>
-                </div>
-                
-                <div class="detail-card">
-                    <h3 class="card-title">
-                        <i class="mdi mdi-image"></i>
-                        Hình Ảnh Minh Họa
-                    </h3>
                     
                     <div class="image-preview">
                         <div th:if="${viewImageService.getImageForView(view.viewId) != null}">
-                            <img th:src="${viewImageService.getImageForView(view.viewId)}" th:alt="${view.viewType}" 
-                                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"
+                            <img th:src="@{${viewImageService.getImageForView(view.viewId)}(v=${#dates.createNow().time})}" th:alt="${view.viewType}" 
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center;">
-                                <i class="mdi mdi-image" style="font-size: 4rem; color: #666666;"></i>
+                                <i class="fas fa-image" style="font-size: 4rem; color: #6c757d;"></i>
                             </div>
                         </div>
                         <div th:unless="${viewImageService.getImageForView(view.viewId) != null}">
-                            <i class="mdi mdi-image"></i>
+                            <i class="fas fa-image"></i>
                         </div>
                     </div>
                     
-                    <div class="info-item">
-                        <i class="mdi mdi-information info-icon"></i>
-                        <span class="info-label">Trạng thái ảnh:</span>
-                        <span class="info-value" th:text="${viewImageService.getImageForView(view.viewId) != null ? 'Có ảnh' : 'Chưa có ảnh'}">Chưa có ảnh</span>
+                    <div th:if="${viewImageService.getImageForView(view.viewId) != null}" class="detail-group">
+                        <div class="detail-label">
+                            <i class="fas fa-link me-2"></i>Đường Dẫn Ảnh
+                        </div>
+                        <div class="detail-value" th:text="${viewImageService.getImageForView(view.viewId)}">/uploads/views/image.jpg</div>
                     </div>
                     
-                    <div th:if="${viewImageService.getImageForView(view.viewId) != null}" class="info-item">
-                        <i class="mdi mdi-link info-icon"></i>
-                        <span class="info-label">Đường dẫn:</span>
-                        <span class="info-value" th:text="${viewImageService.getImageForView(view.viewId)}" style="word-break: break-all;">/uploads/views/image.jpg</span>
+                    <div class="action-buttons">
+                        <a href="/hotel-management/view" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                            Quay Lại Danh Sách
+                        </a>
+                        
+                        <a th:href="@{/hotel-management/view/edit/{id}(id=${view.viewId})}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i>
+                            Chỉnh Sửa
+                        </a>
+                        
+                        <a th:href="@{/hotel-management/view/delete/{id}(id=${view.viewId})}" 
+                           class="btn btn-danger"
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa view này?')">
+                            <i class="fas fa-trash"></i>
+                            Xóa View
+                        </a>
                     </div>
                 </div>
-            </div>
-            
-            <div class="action-buttons">
-                <a href="/hotel-management/view" class="btn btn-secondary">
-                    <i class="mdi mdi-arrow-left"></i>
-                    Quay Lại Danh Sách
-                </a>
-                
-                <a th:href="@{/hotel-management/view/edit/{id}(id=${view.viewId})}" class="btn btn-primary">
-                    <i class="mdi mdi-pencil"></i>
-                    Chỉnh Sửa
-                </a>
-                
-                <a th:href="@{/hotel-management/view/delete/{id}(id=${view.viewId})}" 
-                   class="btn btn-danger"
-                   onclick="return confirm('Bạn có chắc chắn muốn xóa view này?')">
-                    <i class="mdi mdi-delete"></i>
-                    Xóa View
-                </a>
             </div>
         </div>
     </div>
     
-    <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
-    <script src="/assets/vendors/chart.js/Chart.min.js"></script>
-    <script src="/assets/js/off-canvas.js"></script>
-    <script src="/assets/js/hoverable-collapse.js"></script>
-    <script src="/assets/js/misc.js"></script>
-    <script src="/assets/js/settings.js"></script>
-    <script src="/assets/js/todolist.js"></script>
-    <script src="/assets/js/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Thêm hiệu ứng hover cho các card
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.stat-card, .detail-group');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Cắt ngắn tên view nếu quá dài (hơn 20 ký tự)
+            const viewTitle = document.querySelector('.detail-title span');
+            if (viewTitle && viewTitle.textContent.length > 20) {
+                const truncatedText = viewTitle.textContent.substring(0, 20) + '...';
+                viewTitle.textContent = truncatedText;
+                viewTitle.title = viewTitle.textContent; // Thêm tooltip để xem tên đầy đủ
+            }
+
+            // Cắt ngắn các giá trị detail nếu quá dài
+            const detailValues = document.querySelectorAll('.detail-value');
+            detailValues.forEach(value => {
+                if (value.textContent.length > 30) {
+                    const truncatedText = value.textContent.substring(0, 30) + '...';
+                    value.title = value.textContent; // Thêm tooltip
+                    value.textContent = truncatedText;
+                }
+            });
+        });
+    </script>
 </body>
 </html>
