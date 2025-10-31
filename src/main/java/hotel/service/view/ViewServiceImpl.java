@@ -16,7 +16,9 @@ public class ViewServiceImpl implements  ViewService{
 
     @Override
     public List<View> getAllViews() {
-        return viewRepository.findAll();
+        return viewRepository.findAll().stream()
+                .filter(view -> !view.getIsDeleted())
+                .toList();
     }
 
     @Override
@@ -64,9 +66,36 @@ public class ViewServiceImpl implements  ViewService{
     public void deleteView(Integer id) {
         View view = viewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("View not found"));
-        // Hard delete - xóa hẳn khỏi database
+        // Hard delete - xóa vĩnh viễn khỏi DB
         viewRepository.delete(view);
     }
 
+    @Override
+    @Transactional
+    public void restoreView(Integer id) {
+        View view = viewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("View not found"));
+        // Khôi phục view đã bị xóa
+        view.setIsDeleted(false);
+        viewRepository.save(view);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllViews() {
+        viewRepository.deleteAll();
+    }
+
+    @Override
+    @Transactional
+    public void restoreAllViews() {
+        List<View> all = viewRepository.findAll();
+        for (View v : all) {
+            if (Boolean.TRUE.equals(v.getIsDeleted())) {
+                v.setIsDeleted(false);
+                viewRepository.save(v);
+            }
+        }
+    }
 
 }
