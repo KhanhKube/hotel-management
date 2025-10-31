@@ -11,6 +11,8 @@ public interface DiscountService {
 
     boolean checkVoucherCodeExist(String code);
 
+    Discount findDiscountById(Long id);
+
     boolean checkDiscountCodeExistExceptItSelft(String code, Long discountId);
 
     Discount findDiscountById(Long id);
