@@ -6,20 +6,16 @@ import hotel.db.entity.Room;
 import hotel.db.entity.RoomImage;
 import hotel.db.entity.Size;
 import hotel.db.repository.floor.FloorRepository;
+import hotel.service.size.SizeService;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
 import hotel.db.repository.room.RoomRepository;
 import hotel.db.repository.roomimage.RoomImageRepository;
-import hotel.db.repository.size.SizeRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QPageRequest;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +36,7 @@ public class RoomServiceImpl implements RoomService {
     private final OrderDetailRepository orderDetailRepository;
 	private final RoomImageRepository roomImageRepository;
 
-	private final SizeRepository sizeRepository;
+    private final SizeService sizeService;
 
     @Override
     public Page<RoomBookListDto> getRoomListWithFiltersAndPagination(BigDecimal minPrice, BigDecimal maxPrice, String roomType,
@@ -209,9 +205,12 @@ public class RoomServiceImpl implements RoomService {
                     .filter(x -> {
                         Integer roomSizeId = x.getSizeId();
                         if (roomSizeId == null) return false;
-                        return sizeRepository.findById(roomSizeId)
-                                .map(s -> s.getSize().equals(size))
-                                .orElse(false);
+                        try {
+                            Size sizeEntity = sizeService.getSizeById(roomSizeId);
+                            return sizeEntity != null && sizeEntity.getSize().equals(size);
+                        } catch (Exception e) {
+                            return false;
+                        }
                     })
                     .collect(Collectors.toList());
         }
@@ -278,9 +277,12 @@ public class RoomServiceImpl implements RoomService {
         // Query size từ repository
         Double sizeValue = null;
         if (room.getSizeId() != null) {
-            sizeValue = sizeRepository.findById(room.getSizeId())
-                    .map(size -> size.getSize().doubleValue())
-                    .orElse(null);
+            try {
+                Size sizeEntity = sizeService.getSizeById(room.getSizeId());
+                sizeValue = sizeEntity != null ? sizeEntity.getSize() : null;
+            } catch (Exception e) {
+                sizeValue = null;
+            }
         }
 
         return new RoomListDto(
@@ -335,29 +337,32 @@ public class RoomServiceImpl implements RoomService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))
                 .getFloorNumber();
 
-        Double sizeNumber = sizeRepository.findById(sizeId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))
-                .getSize();
+        Double sizeNumber;
+        try {
+            sizeNumber = sizeService.getSizeById(sizeId).getSize();
+        } catch (Exception e) {
+            sizeNumber = null;
+        }
 
         if (roomType.equals("Tiêu chuẩn")) {
-            if (sizeNumber > 40) {
+            if (sizeNumber != null && sizeNumber > 40) {
                 return "Phòng Tiêu chuẩn diện tích vui lòng nhỏ hơn hoặc bằng 40 mét vuông!";
             }
             if (bedType.equals("Giường King") || bedType.equals("Giường Queen")) {
                 return "Phong tiêu chuẩn chỉ được chọn giường Đơn hoặc Đôi!";
             }
         } else if (roomType.equals("Cao cấp") || roomType.equals("Hạng sang")) {
-            if (sizeNumber > 50 || sizeNumber <= 40) {
+            if (sizeNumber != null && (sizeNumber > 50 || sizeNumber <= 40)) {
                 return "Phòng "+roomType+" diện tích vui lòng nhỏ hơn hoặc bằng " +
                         "50 và lớn hơn 40 mét vuông!";
             }
         } else if (roomType.equals("VIP")) {
-            if (sizeNumber > 70 || sizeNumber <= 50) {
+            if (sizeNumber != null && (sizeNumber > 70 || sizeNumber <= 50)) {
                 return "Phòng "+roomType+" diện tích vui lòng nhỏ hơn hoặc bằng " +
                         "70 và lớn hơn 50 mét vuông!";
             }
         } else {
-            if (sizeNumber < 80) {
+            if (sizeNumber != null && sizeNumber < 80) {
                 return "Phòng "+roomType+" diện tích vui lòng lớn hơn hoặc bằng 80 mét vuông!";
             }
             if (!bedType.equals("Giường King") && !bedType.equals("Giường Queen")) {
@@ -416,7 +421,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<Size> getAllSizes() {
-        return sizeRepository.findAll();
+        return sizeService.getAllSizes();
     }
 
 
@@ -458,9 +463,12 @@ public class RoomServiceImpl implements RoomService {
 
 		Double size = null;
 		if (room.getSizeId() != null) {
-			size = sizeRepository.findById(room.getSizeId())
-					.map(s -> s.getSize())
-					.orElse(null);
+			try {
+                Size sizeEntity = sizeService.getSizeById(room.getSizeId());
+                size = sizeEntity != null ? sizeEntity.getSize() : null;
+            } catch (Exception e) {
+                size = null;
+            }
 		}
 
 		return RoomResponseDto.builder()
@@ -596,7 +604,12 @@ public class RoomServiceImpl implements RoomService {
 		}
 
 		// Lấy thông tin kích thước phòng (size)
-		Size size = sizeRepository.findBySizeIdAndIsDeletedIsFalse(room.getSizeId());
+		Size size;
+        try {
+            size = sizeService.getSizeById(room.getSizeId());
+        } catch (Exception e) {
+            size = null;
+        }
 
 		// Tạo DTO trả về
 		RoomDetailResponseDto dto = new RoomDetailResponseDto();

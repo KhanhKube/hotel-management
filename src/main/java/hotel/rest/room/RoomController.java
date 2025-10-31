@@ -11,7 +11,6 @@ import hotel.db.enums.RoomStatus;
 import hotel.db.enums.RoomType;
 import hotel.db.repository.floor.FloorRepository;
 import hotel.db.repository.roomimage.RoomImageRepository;
-import hotel.db.repository.size.SizeRepository;
 import hotel.service.booking.BookingService;
 import hotel.service.file.RoomImageUploadService;
 import hotel.service.image.ImageService;

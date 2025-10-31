@@ -29,7 +29,7 @@ public class ViewController extends BaseController {
         List<View> views = viewService.getAllViews();
         // Add image paths to each view
         for (View view : views) {
-            String imagePath = viewImageService.getImageForView(view.getViewId());
+            viewImageService.getImageForView(view.getViewId());
             // We'll add this to the model as a separate attribute
         }
         model.addAttribute("views", views);
@@ -77,7 +77,7 @@ public class ViewController extends BaseController {
             
             log.info("Redirecting to view list");
             // Add timestamp to prevent browser cache
-            return "redirect:/hotel-management/view?created=" + System.currentTimeMillis();
+            return "redirect:/hotel-management/view";
         } catch (IllegalArgumentException e) {
             log.warn("Validation error when saving view: {}", e.getMessage());
             // Hiển thị error ngay trên màn hình
@@ -119,7 +119,8 @@ public class ViewController extends BaseController {
     public String updateView(@PathVariable Integer id, 
                            @ModelAttribute("view") View view,
                            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-                           Model model) {
+                           Model model,
+                           org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         try {
             View existingView = viewService.getViewById(id);
             existingView.setViewType(view.getViewType());
@@ -133,8 +134,9 @@ public class ViewController extends BaseController {
             }
             
             viewService.saveView(existingView);
-            // Add timestamp to prevent browser cache
-            return "redirect:/hotel-management/view?updated=" + System.currentTimeMillis();
+            // Redirect back to edit page and show success message via flash attribute
+            redirectAttributes.addFlashAttribute("message", "View đã được cập nhật thành công!");
+            return "redirect:/hotel-management/view/edit/" + id;
         } catch (IllegalArgumentException e) {
             log.warn("Validation error when updating view: {}", e.getMessage());
             // Hiển thị error ngay trên màn hình
@@ -158,7 +160,7 @@ public class ViewController extends BaseController {
     public String deleteView(@PathVariable Integer id) {
         try {
             // Check if view exists first
-            View view = viewService.getViewById(id);
+            viewService.getViewById(id);
             
             // Delete associated image first (even if no image exists)
             boolean imageDeleted = viewImageService.deleteImageForView(id);
@@ -182,13 +184,55 @@ public class ViewController extends BaseController {
             return "redirect:/hotel-management/view?error=delete";
         }
     }
-    
-    // Refresh image mappings endpoint (for debugging)
-    @GetMapping("/view/refresh-images")
-    public String refreshImages() {
-        log.info("Refreshing image mappings...");
-        viewImageService.refreshImageMappings();
-        log.info("Image mappings refreshed. Views with images: {}", viewImageService.getViewIdsWithImages());
-        return "redirect:/hotel-management/view?success=refresh";
+
+    // Khôi phục view đã xóa
+    @GetMapping("/view/restore/{id}")
+    public String restoreView(@PathVariable Integer id) {
+        try {
+            viewService.restoreView(id);
+            log.info("View {} restored successfully", id);
+            return "redirect:/hotel-management/view?success=restore";
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("not found")) {
+                log.warn("View {} not found for restoration", id);
+                return "redirect:/hotel-management/view?error=notfound";
+            } else {
+                log.error("Error restoring view {}", id, e);
+                return "redirect:/hotel-management/view?error=restore";
+            }
+        } catch (Exception e) {
+            log.error("Unexpected error restoring view {}", id, e);
+            return "redirect:/hotel-management/view?error=restore";
+        }
     }
+    
+    
+
+    // Delete all views (soft delete all)
+    @GetMapping("/view/delete-all")
+    public String deleteAllViews() {
+        try {
+            viewService.deleteAllViews();
+            // Refresh images mapping as many views now hidden
+            viewImageService.refreshImageMappings();
+            return "redirect:/hotel-management/view?success=deleteall";
+        } catch (Exception e) {
+            log.error("Error deleting all views", e);
+            return "redirect:/hotel-management/view?error=deleteall";
+        }
+    }
+
+    // Restore all soft-deleted views
+    @GetMapping("/view/restore-all")
+    public String restoreAllViews() {
+        try {
+            viewService.restoreAllViews();
+            viewImageService.refreshImageMappings();
+            return "redirect:/hotel-management/view?success=restoreall";
+        } catch (Exception e) {
+            log.error("Error restoring all views", e);
+            return "redirect:/hotel-management/view?error=restoreall";
+        }
+    }
+
 }

@@ -62,4 +62,19 @@ public interface AccountService {
      * Kiểm tra email đã tồn tại chưa
      */
     boolean existsByEmail(String email);
+    
+    /**
+     * Lấy danh sách customers với pagination và search
+     */
+    Page<AccountResponseDto> getCustomersWithPagination(String searchTerm, String status, int page, int size);
+    
+    /**
+     * Lấy danh sách staffs (STAFF, RECEPTIONIST, MANAGER) với pagination và search
+     */
+    Page<AccountResponseDto> getStaffsWithPagination(String searchTerm, String status, int page, int size);
+    
+    /**
+     * Xóa vĩnh viễn tài khoản (HARD DELETE) - Chỉ dùng cho xóa tài khoản test
+     */
+    void deleteAllTestAccounts(Integer userId);
 }

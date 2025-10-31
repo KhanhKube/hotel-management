@@ -218,16 +218,23 @@
         .form-row {
             display: flex;
             gap: 20px;
+            margin-bottom: 0;
         }
 
         .form-row .col-md-6 {
             flex: 1;
+            min-width: 0; /* Prevent overflow */
         }
 
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
                 gap: 0;
+            }
+            
+            .form-row .col-md-6 {
+                width: 100%;
+                margin-bottom: 0;
             }
             
             .form-body {
@@ -240,6 +247,20 @@
             
             .form-header h2 {
                 font-size: 1.5rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn-group {
+                width: 100%;
+                flex-direction: column;
+            }
+            
+            .btn-group .btn {
+                width: 100%;
             }
         }
 
@@ -326,6 +347,7 @@
                                                th:field="*{firstName}" 
                                                class="form-control" 
                                                placeholder="Nhập họ"
+                                               maxlength="20"
                                                th:classappend="${#fields.hasErrors('firstName') ? 'is-invalid' : ''}">
                                         <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
                                     </div>
@@ -341,6 +363,7 @@
                                                th:field="*{lastName}" 
                                                class="form-control" 
                                                placeholder="Nhập tên"
+                                               maxlength="20"
                                                th:classappend="${#fields.hasErrors('lastName') ? 'is-invalid' : ''}">
                                         <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
                                     </div>
@@ -390,7 +413,7 @@
                                         </label>
                                         <input type="date" 
                                                id="dob" 
-                                               th:field="*{dob}" 
+                                               th:field="*{dob}"
                                                class="form-control"
                                                th:classappend="${#fields.hasErrors('dob') ? 'is-invalid' : ''}">
                                         <div class="invalid-feedback" th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}"></div>
@@ -402,15 +425,23 @@
                                         <label for="role" class="form-label">
                                             <i class="fas fa-user-shield"></i> Vai trò <span class="required">*</span>
                                         </label>
+                                        <!-- Hidden input để đảm bảo gửi giá trị role khi edit (select disabled không submit) -->
+                                        <input type="hidden" th:if="${account.userId != null}" th:field="*{role}" />
                                         <select id="role" 
                                                 th:field="*{role}" 
                                                 class="form-control"
+                                                th:disabled="${account.userId != null}"
+                                                th:readonly="${account.userId == null ? false : true}"
                                                 th:classappend="${#fields.hasErrors('role') ? 'is-invalid' : ''}">
                                             <option value="">Chọn vai trò</option>
                                             <option value="MANAGER">Manager</option>
                                             <option value="RECEPTIONIST">Receptionist</option>
+                                            <option value="STAFF">Staff</option>
                                             <option value="CUSTOMER">Customer</option>
                                         </select>
+                                        <small class="form-text text-muted" th:if="${account.userId != null}" style="margin-top: 5px; display: block;">
+                                            <i class="fas fa-info-circle"></i> Vai trò không thể thay đổi khi chỉnh sửa
+                                        </small>
                                         <div class="invalid-feedback" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
                                     </div>
                                 </div>

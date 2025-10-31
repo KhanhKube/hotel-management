@@ -9,133 +9,118 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class SizeServiceImpl implements SizeService {
 
-	private final SizeRepository sizeRepository;
+    private final SizeRepository sizeRepository;
 
-	@Override
-	@Transactional(readOnly = true)
-	public List<SizeResponseDto> getAllActiveSizes() {
-		log.info("Getting all active sizes");
-		List<Size> sizes = sizeRepository.findAllByIsDeletedIsFalse();
-		return sizes.stream()
-				.map(this::convertToResponseDto)
-				.collect(Collectors.toList());
-	}
+    @Override
+    public List<Size> getAllSizes() {
+        return sizeRepository.findAll();
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public SizeResponseDto getSizeById(Integer sizeId) {
-		log.info("Getting size by ID: {}", sizeId);
-		Size size = sizeRepository.findBySizeIdAndIsDeletedIsFalse(sizeId);
-		if (size == null) {
-			throw new RuntimeException("Size not found");
-		}
-		return convertToResponseDto(size);
-	}
+    @Override
+    public List<SizeResponseDto> getAllActiveSizes() {
+        return sizeRepository.findAll().stream()
+                .filter(size -> !Boolean.TRUE.equals(size.getIsDeleted()))
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 
-	@Override
-	public SizeResponseDto createSize(SizeRequestDto sizeRequestDto) {
-		log.info("Creating new size with value: {}", sizeRequestDto.getSize());
+    @Override
+    public Size getSizeById(Integer id) {
+        return sizeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Size not found with ID: " + id));
+    }
 
-		// Kiểm tra giá trị size đã tồn tại chưa
-		if (sizeRepository.existsBySizeAndIsDeletedIsFalse(sizeRequestDto.getSize())) {
-			throw new RuntimeException("Kích thước " + sizeRequestDto.getSize() + " đã tồn tại");
-		}
+    @Override
+    public SizeResponseDto getSizeByIdDto(Integer id) {
+        Size size = getSizeById(id);
+        return convertToDto(size);
+    }
 
-		Size size = buildSize(sizeRequestDto);
+    @Override
+    @Transactional
+    public SizeResponseDto createSize(SizeRequestDto sizeRequestDto) {
+        Size size = new Size();
+        size.setSize(sizeRequestDto.getSize());
+        Size savedSize = saveSize(size);
+        return convertToDto(savedSize);
+    }
 
-		Size savedSize = sizeRepository.save(size);
-		log.info("Created size with ID: {}", savedSize.getSizeId());
+    @Override
+    @Transactional
+    public SizeResponseDto updateSize(Integer id, SizeRequestDto sizeRequestDto) {
+        Size existingSize = getSizeById(id);
+        existingSize.setSize(sizeRequestDto.getSize());
+        Size savedSize = saveSize(existingSize);
+        return convertToDto(savedSize);
+    }
 
-		return convertToResponseDto(savedSize);
-	}
+    @Override
+    @Transactional
+    public Size saveSize(Size size) {
+        // Enforce DB constraint: size NOT NULL and > 0
+        if (size.getSize() == null || size.getSize() <= 0) {
+            throw new IllegalArgumentException("Size must be greater than 0");
+        }
+        
+        // Check for duplicate size only for new sizes
+        if (size.getSizeId() == null && existsBySize(size.getSize())) {
+            throw new IllegalArgumentException("Kích thước " + size.getSize() + "m² đã tồn tại!");
+        }
+        
+        // For existing sizes, check if the new size conflicts with other sizes
+        if (size.getSizeId() != null) {
+            List<Size> existingSizes = sizeRepository.findBySizeAndSizeIdNot(size.getSize(), size.getSizeId());
+            if (!existingSizes.isEmpty()) {
+                throw new IllegalArgumentException("Kích thước " + size.getSize() + "m² đã tồn tại!");
+            }
+        }
+        
+        return sizeRepository.save(size);
+    }
 
-	private Size buildSize(SizeRequestDto sizeRequestDto) {
-		Size size = new Size();
-		size.setSize(sizeRequestDto.getSize());
-		size.setIsDeleted(false);
-		return size;
+    @Override
+    @Transactional
+    public void deleteSize(Integer id) {
+        if (!sizeRepository.existsById(id)) {
+            throw new RuntimeException("Size not found with ID: " + id);
+        }
+        sizeRepository.deleteById(id);
+    }
 
-	}
+    @Override
+    public boolean existsById(Integer id) {
+        return sizeRepository.existsById(id);
+    }
 
-	@Override
-	public SizeResponseDto updateSize(Integer sizeId, SizeRequestDto sizeRequestDto) {
-		log.info("Updating size with ID: {}", sizeId);
+    @Override
+    public boolean existsBySize(Double size) {
+        return sizeRepository.existsBySize(size);
+    }
 
-		Size existingSize = sizeRepository.findBySizeIdAndIsDeletedIsFalse(sizeId);
-		if (existingSize == null) {
-			throw new RuntimeException("Size not found");
-		}
+    @Override
+    public List<SizeResponseDto> getSizesByRange(Double minSize, Double maxSize) {
+        return sizeRepository.findAll().stream()
+                .filter(size -> !Boolean.TRUE.equals(size.getIsDeleted()))
+                .filter(size -> size.getSize() >= minSize && size.getSize() <= maxSize)
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 
-		// Kiểm tra giá trị size đã tồn tại chưa (loại trừ size hiện tại)
-		if (sizeRepository.existsBySizeAndIsDeletedIsFalse(sizeRequestDto.getSize())) {
-			throw new RuntimeException("Kích thước " + sizeRequestDto.getSize() + " đã tồn tại");
-		}
-
-		existingSize.setSize(sizeRequestDto.getSize());
-		Size updatedSize = sizeRepository.save(existingSize);
-
-		log.info("Updated size with ID: {}", updatedSize.getSizeId());
-		return convertToResponseDto(updatedSize);
-	}
-
-	@Override
-	public void deleteSize(Integer sizeId) {
-		log.info("Deleting size with ID: {}", sizeId);
-
-		Size size = sizeRepository.findBySizeIdAndIsDeletedIsFalse(sizeId);
-		if (size == null) {
-			throw new RuntimeException("Size not found");
-		}
-
-		size.setIsDeleted(true);
-		sizeRepository.save(size);
-
-		log.info("Deleted size with ID: {}", sizeId);
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public boolean existsById(Integer sizeId) {
-		Size size = sizeRepository.findBySizeIdAndIsDeletedIsFalse(sizeId);
-		if (size == null) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public boolean existsBySize(Double size) {
-		return sizeRepository.existsBySizeAndIsDeletedIsFalse(size);
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<SizeResponseDto> getSizesByRange(Double minSize, Double maxSize) {
-		log.info("Getting sizes in range: {} - {}", minSize, maxSize);
-		List<Size> sizes = sizeRepository.findBySizeRangeAndIsDeletedIsFalse(minSize, maxSize);
-		return sizes.stream()
-				.map(this::convertToResponseDto)
-				.collect(Collectors.toList());
-	}
-
-
-	private SizeResponseDto convertToResponseDto(Size size) {
-		return SizeResponseDto.builder()
-				.sizeId(size.getSizeId())
-				.size(size.getSize())
-				.createdAt(size.getCreatedAt())
-				.updatedAt(size.getUpdatedAt())
-				.build();
-	}
+    private SizeResponseDto convertToDto(Size size) {
+        return SizeResponseDto.builder()
+                .sizeId(size.getSizeId())
+                .size(size.getSize())
+                .createdAt(size.getCreatedAt())
+                .updatedAt(size.getUpdatedAt())
+                .isDeleted(size.getIsDeleted())
+                .build();
+    }
 }

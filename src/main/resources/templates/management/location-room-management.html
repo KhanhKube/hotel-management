@@ -166,79 +166,190 @@
                         <p class="page-subtitle">Tổng quan và quản lý các thành phần định vị phòng trong hệ thống khách sạn</p>
                     </div>
 
-                    <!-- Statistics Row -->
-                    <div class="row">
-                        <div class="col-lg-4 col-md-6">
-                            <div class="stats-card view">
-                                <div class="stats-icon">
-                                    <i class="mdi mdi-eye"></i>
-                                </div>
-                                <div class="stats-number" th:text="${viewCount}">0</div>
-                                <div class="stats-label">Loại View</div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="stats-card size">
-                                <div class="stats-icon">
-                                    <i class="mdi mdi-resize"></i>
-                                </div>
-                                <div class="stats-number" th:text="${sizeCount}">0</div>
-                                <div class="stats-label">Kích Thước Phòng</div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="stats-card floor">
-                                <div class="stats-icon">
-                                    <i class="mdi mdi-layers"></i>
-                                </div>
-                                <div class="stats-number" th:text="${floorCount}">0</div>
-                                <div class="stats-label">Tầng</div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Statistics Row removed per request -->
 
-                    <!-- Management Cards Row -->
+                    <!-- Unified Management Table -->
                     <div class="row">
-                        <div class="col-lg-6 col-md-12">
-                            <div class="management-card view">
-                                <div class="management-icon view">
-                                    <i class="mdi mdi-eye"></i>
-                                </div>
-                                <h3 class="management-title">Quản Lý View</h3>
-                                <p class="management-description">Quản lý các loại view của phòng như Sea View, City View, Garden View...</p>
-                                <a th:href="@{/hotel-management/view}" class="btn-management">
-                                    <i class="mdi mdi-cog"></i>
-                                    Quản Lý View
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-12">
-                            <div class="management-card size">
-                                <div class="management-icon size">
-                                    <i class="mdi mdi-resize"></i>
-                                </div>
-                                <h3 class="management-title">Quản Lý Kích Thước</h3>
-                                <p class="management-description">Quản lý các kích thước phòng như Standard, Deluxe, Suite...</p>
-                                <a th:href="@{/hotel-management/size}" class="btn-management">
-                                    <i class="mdi mdi-cog"></i>
-                                    Quản Lý Kích Thước
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h4 class="card-title mb-0">Quản Lý Vị Trí Phòng</h4>
+                                        <div class="btn-group" role="group">
+                                            <a th:href="@{/hotel-management/location-room(type='floor', page=0)}" 
+                                               class="btn btn-outline-primary"
+                                               th:classappend="${currentType == 'floor'} ? 'active'">
+                                                <i class="mdi mdi-layers"></i> Tầng
+                                            </a>
+                                            <a th:href="@{/hotel-management/location-room(type='view', page=0)}" 
+                                               class="btn btn-outline-primary"
+                                               th:classappend="${currentType == 'view'} ? 'active'">
+                                                <i class="mdi mdi-eye"></i> View
+                                            </a>
+                                            <a th:href="@{/hotel-management/location-room(type='size', page=0)}" 
+                                               class="btn btn-outline-primary"
+                                               th:classappend="${currentType == 'size'} ? 'active'">
+                                                <i class="mdi mdi-resize"></i> Kích Thước
+                                            </a>
+                                        </div>
+                                    </div>
 
-                    <div class="row">
-                        <div class="col-lg-6 col-md-12">
-                            <div class="management-card floor">
-                                <div class="management-icon floor">
-                                    <i class="mdi mdi-layers"></i>
+                                    <!-- Search and Filter -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="mdi mdi-magnify"></i>
+                                                </span>
+                                                <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm...">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 text-end">
+                                            <a th:if="${currentType == 'floor'}" th:href="@{/hotel-management/floor/new}" class="btn btn-primary">
+                                                <i class="mdi mdi-plus"></i> Thêm Mới
+                                            </a>
+                                            <a th:if="${currentType == 'view'}" th:href="@{/hotel-management/view/new}" class="btn btn-primary">
+                                                <i class="mdi mdi-plus"></i> Thêm Mới
+                                            </a>
+                                            <a th:if="${currentType == 'size'}" th:href="@{/hotel-management/size/new}" class="btn btn-primary">
+                                                <i class="mdi mdi-plus"></i> Thêm Mới
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Unified Table -->
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="unifiedTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>STT</th>
+                                                    <th>Tên</th>
+                                                    <th>Mô Tả</th>
+                                                    <th>Trạng Thái</th>
+                                                    <th>Ngày Tạo</th>
+                                                    <th>Thao Tác</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tableBody">
+                                                <!-- Floor Data -->
+                                                <tr th:if="${currentType == 'floor'}" th:each="floor, iterStat : ${floors}">
+                                                    <td th:text="${(currentPage * pageSize) + iterStat.count}">1</td>
+                                                    <td th:text="'Tầng ' + ${floor.floorNumber}">Tầng 1</td>
+                                                    <td th:text="'Tầng ' + ${floor.floorNumber}">Mô tả</td>
+                                                    <td><span class="badge bg-success">Active</span></td>
+                                                    <td th:text="${#temporals.format(floor.createdAt, 'dd/MM/yyyy')}">01/01/2024</td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a th:href="@{/hotel-management/floor/edit/{id}(id=${floor.floorId})}" class="btn btn-outline-primary" title="Sửa">
+                                                                <i class="mdi mdi-pencil"></i>
+                                                            </a>
+                                                            <form th:action="@{/hotel-management/floor/delete/{id}(id=${floor.floorId})}" method="post" class="d-inline">
+                                                                <button type="submit" class="btn btn-outline-danger" 
+                                                                        onclick="return confirm('Bạn có chắc chắn muốn xóa?')"
+                                                                        title="Xóa">
+                                                                    <i class="mdi mdi-delete"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <!-- View Data -->
+                                                <tr th:if="${currentType == 'view'}" th:each="view, iterStat : ${views}">
+                                                    <td th:text="${(currentPage * pageSize) + iterStat.count}">1</td>
+                                                    <td th:text="${view.viewType}">Sea View</td>
+                                                    <td th:text="${view.viewType}">Mô tả</td>
+                                                    <td><span class="badge bg-success">Active</span></td>
+                                                    <td th:text="${#temporals.format(view.createdAt, 'dd/MM/yyyy')}">01/01/2024</td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a th:href="@{/hotel-management/view/edit/{id}(id=${view.viewId})}" class="btn btn-outline-primary">
+                                                                <i class="mdi mdi-pencil"></i>
+                                                            </a>
+                                                            <a th:href="@{/hotel-management/view/detail/{id}(id=${view.viewId})}" class="btn btn-outline-info">
+                                                                <i class="mdi mdi-eye"></i>
+                                                            </a>
+                                                            <a th:href="@{/hotel-management/view/delete/{id}(id=${view.viewId})}" 
+                                                               class="btn btn-outline-danger"
+                                                               onclick="return confirm('Bạn có chắc chắn muốn xóa? View sẽ bị xóa vĩnh viễn!')">
+                                                                <i class="mdi mdi-delete"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <!-- Size Data -->
+                                                <tr th:if="${currentType == 'size'}" th:each="size, iterStat : ${sizes}">
+                                                    <td th:text="${(currentPage * pageSize) + iterStat.count}">1</td>
+                                                    <td th:text="${#numbers.formatDecimal(size.size, 1, 1)} + ' m²'">25 m²</td>
+                                                    <td th:text="'Kích thước ' + ${#numbers.formatDecimal(size.size, 1, 1)} + ' m²'">Mô tả</td>
+                                                    <td><span class="badge bg-success">Active</span></td>
+                                                    <td th:text="${#temporals.format(size.createdAt, 'dd/MM/yyyy')}">01/01/2024</td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a th:href="@{/hotel-management/size/edit/{id}(id=${size.sizeId})}" class="btn btn-outline-primary" title="Sửa">
+                                                                <i class="mdi mdi-pencil"></i>
+                                                            </a>
+                                                            <form th:action="@{/hotel-management/size/delete/{id}(id=${size.sizeId})}" method="post" class="d-inline">
+                                                                <button type="submit" class="btn btn-outline-danger" 
+                                                                        onclick="return confirm('Bạn có chắc chắn muốn xóa?')"
+                                                                        title="Xóa">
+                                                                    <i class="mdi mdi-delete"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Pagination -->
+                                    <div th:if="${totalPages > 1 || totalItems > 0}">
+                                        <nav th:if="${totalPages > 1}" aria-label="Page navigation" class="mb-2">
+                                            <ul class="pagination justify-content-center">
+                                                <li class="page-item" th:classappend="${isFirst} ? 'disabled'">
+                                                    <a class="page-link" th:href="@{/hotel-management/location-room(type=${currentType}, page=${currentPage - 1})}" 
+                                                       th:if="${!isFirst}">
+                                                        <i class="mdi mdi-chevron-left"></i> Trước
+                                                    </a>
+                                                    <span class="page-link" th:if="${isFirst}">
+                                                        <i class="mdi mdi-chevron-left"></i> Trước
+                                                    </span>
+                                                </li>
+                                                
+                                                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                                                    class="page-item" 
+                                                    th:classappend="${i == currentPage} ? 'active'">
+                                                    <a class="page-link" 
+                                                       th:href="@{/hotel-management/location-room(type=${currentType}, page=${i})}"
+                                                       th:text="${i + 1}">1</a>
+                                                </li>
+                                                
+                                                <li class="page-item" th:classappend="${isLast} ? 'disabled'">
+                                                    <a class="page-link" th:href="@{/hotel-management/location-room(type=${currentType}, page=${currentPage + 1})}" 
+                                                       th:if="${!isLast}">
+                                                        Sau <i class="mdi mdi-chevron-right"></i>
+                                                    </a>
+                                                    <span class="page-link" th:if="${isLast}">
+                                                        Sau <i class="mdi mdi-chevron-right"></i>
+                                                    </span>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                        <div class="text-center mt-2">
+                                            <small class="text-muted">
+                                                Hiển thị 
+                                                <span th:if="${totalItems > 0}" th:text="${(currentPage * pageSize) + 1}">1</span>
+                                                <span th:if="${totalItems == 0}">0</span>
+                                                - 
+                                                <span th:if="${totalItems > 0}" 
+                                                      th:text="${currentPage * pageSize + (currentType == 'floor' ? #lists.size(floors) : (currentType == 'view' ? #lists.size(views) : #lists.size(sizes)))}">10</span>
+                                                <span th:if="${totalItems == 0}">0</span>
+                                                trong tổng số <span th:text="${totalItems}">0</span> 
+                                                <span th:text="${currentType == 'floor'} ? 'tầng' : (currentType == 'view' ? 'view' : 'kích thước')">mục</span>
+                                            </small>
+                                        </div>
+                                    </div>
                                 </div>
-                                <h3 class="management-title">Quản Lý Tầng</h3>
-                                <p class="management-description">Quản lý các tầng của khách sạn và phân bố phòng theo tầng</p>
-                                <a th:href="@{/hotel-management/floor}" class="btn-management">
-                                    <i class="mdi mdi-cog"></i>
-                                    Quản Lý Tầng
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -248,6 +359,41 @@
     </div>
 
     <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+    <script>
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    filterTable();
+                });
+            }
+        });
+
+        function filterTable() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('unifiedTable');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName('td');
+                let found = false;
+                
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        const txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toLowerCase().includes(filter)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                
+                tr[i].style.display = found ? '' : 'none';
+            }
+        }
+    </script>
     <script src="/assets/vendors/chart.js/Chart.min.js"></script>
     <script src="/assets/js/off-canvas.js"></script>
     <script src="/assets/js/hoverable-collapse.js"></script>

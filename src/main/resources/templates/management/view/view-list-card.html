@@ -29,19 +29,19 @@
         
         .main-panel {
             flex: 1;
-            padding: 30px;
+            padding: 18px;
             background: #1a1a1a;
         }
         
         .control-bar {
             background: #2d2d2d;
-            padding: 20px 30px;
-            border-radius: 12px;
-            margin-bottom: 30px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.25);
         }
         
         .sort-section {
@@ -126,20 +126,22 @@
             color: #ffffff;
             text-decoration: none;
         }
+
+        /* reset-btn removed per request */
         
         .views-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
         }
         
         .view-card {
             background: #2d2d2d;
-            border-radius: 15px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+            transition: all 0.25s ease;
             border: 1px solid #404040;
         }
         
@@ -151,7 +153,7 @@
         
         .view-image-container {
             position: relative;
-            height: 200px;
+            height: 180px;
             background: #404040;
             overflow: hidden;
             border-radius: 8px;
@@ -217,19 +219,19 @@
         }
         
         .view-content {
-            padding: 25px;
+            padding: 14px;
         }
         
         .view-title {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #ffffff;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
             text-align: center;
         }
         
         .view-dates {
-            margin-bottom: 25px;
+            margin-bottom: 10px;
         }
         
         .view-date {
@@ -248,12 +250,12 @@
         
         .view-actions {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             justify-content: center;
         }
         
         .action-btn {
-            padding: 10px 20px;
+            padding: 8px 12px;
             border: none;
             border-radius: 8px;
             font-weight: 600;
@@ -339,7 +341,7 @@
             
             .control-bar {
                 flex-direction: column;
-                gap: 20px;
+                gap: 12px;
                 align-items: stretch;
             }
             
@@ -389,10 +391,11 @@
                     </button>
                 </div>
                 <div>
-                    <a href="/hotel-management/view/refresh-images" class="refresh-btn" title="Làm mới danh sách ảnh">
-                        <i class="mdi mdi-refresh"></i>
-                        Làm mới ảnh
+                    <a href="/hotel-management/location-room" class="refresh-btn" title="Quay lại Vị trí phòng">
+                        <i class="mdi mdi-arrow-left"></i>
+                        Quay lại
                     </a>
+                    
                     <a href="/hotel-management/view/new" class="add-btn">
                         <i class="mdi mdi-plus"></i>
                         Thêm View Mới
@@ -414,7 +417,7 @@
                 <div th:each="view, iterStat : ${views}" class="view-card" th:data-view-type="${view.viewType}">
                     <div class="view-image-container">
                         <div th:if="${viewImageService.getImageForView(view.viewId) != null}">
-                            <img th:src="${viewImageService.getImageForView(view.viewId)}" th:alt="${view.viewType}" 
+                            <img th:src="@{${viewImageService.getImageForView(view.viewId)}(v=${#dates.createNow().time})}" th:alt="${view.viewType}" 
                                  class="view-image"
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div class="view-image-placeholder" style="display: none;">

@@ -1,11 +1,11 @@
 package hotel.rest.management;
 
 import hotel.db.dto.size.SizeRequestDto;
-import hotel.db.dto.size.SizeResponseDto;
 import hotel.db.dto.floor.FloorRequestDto;
 import hotel.db.dto.floor.FloorResponseDto;
 import hotel.db.dto.room.RoomRequestDto;
 import hotel.db.entity.Room;
+import hotel.db.entity.Size;
 import hotel.service.view.ViewService;
 import hotel.service.size.SizeService;
 import hotel.service.floor.FloorService;
@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 @Controller
 @RequestMapping("/hotel-management")
@@ -26,20 +27,83 @@ import java.util.HashMap;
 public class ManagementController {
 
     private final ViewService viewService;
-    private final SizeService sizeService;
     private final FloorService floorService;
     private final RoomService roomService;
+    private final SizeService sizeService;
 
     @GetMapping("/location-room")
-    public String locationRoomManagement(Model model) {
+    public String locationRoomManagement(
+            @RequestParam(value = "type", defaultValue = "floor") String type,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model) {
         // Get counts for statistics
         int viewCount = viewService.getAllViews().size();
-        int sizeCount = sizeService.getAllActiveSizes().size();
+        int sizeCount = sizeService.getAllSizes().size();
         int floorCount = floorService.getAllActiveFloors().size();
 
         model.addAttribute("viewCount", viewCount);
         model.addAttribute("sizeCount", sizeCount);
         model.addAttribute("floorCount", floorCount);
+        
+        // Load data based on type with pagination
+        model.addAttribute("currentType", type);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+        
+        List<?> allItems = new ArrayList<>();
+        int totalItems = 0;
+        
+        switch(type) {
+            case "view":
+                List<hotel.db.entity.View> allViews = viewService.getAllViews();
+                allItems = allViews;
+                totalItems = allViews.size();
+                break;
+            case "size":
+                List<Size> allSizes = sizeService.getAllSizes();
+                allItems = allSizes;
+                totalItems = allSizes.size();
+                break;
+            case "floor":
+            default:
+                List<FloorResponseDto> allFloors = floorService.getAllActiveFloors();
+                allItems = allFloors;
+                totalItems = allFloors.size();
+                break;
+        }
+        
+        // Calculate pagination
+        int totalPages = totalItems > 0 ? (int) Math.ceil((double) totalItems / size) : 0;
+        int start = page * size;
+        int end = Math.min(start + size, totalItems);
+        
+        // Get paginated items
+        List<?> paginatedItems = new ArrayList<>();
+        if (totalItems > 0 && start < totalItems) {
+            paginatedItems = allItems.subList(start, end);
+        }
+        
+        // Add paginated data to model
+        switch(type) {
+            case "view":
+                model.addAttribute("views", paginatedItems);
+                break;
+            case "size":
+                model.addAttribute("sizes", paginatedItems);
+                break;
+            case "floor":
+            default:
+                model.addAttribute("floors", paginatedItems);
+                break;
+        }
+        
+        model.addAttribute("totalPages", Math.max(totalPages, 1)); // At least 1 page even if empty
+        model.addAttribute("totalItems", totalItems);
+        model.addAttribute("hasPrevious", page > 0);
+        model.addAttribute("hasNext", totalPages > 0 && page < totalPages - 1);
+        model.addAttribute("isFirst", page == 0);
+        model.addAttribute("isLast", totalPages == 0 || page >= totalPages - 1);
 
         return "management/location-room-management";
     }
@@ -47,7 +111,7 @@ public class ManagementController {
     // SIZE MANAGEMENT
     @GetMapping("/size")
     public String sizeManagement(Model model) {
-        model.addAttribute("sizes", sizeService.getAllActiveSizes());
+        model.addAttribute("sizes", sizeService.getAllSizes());
         return "management/size-management";
     }
 
@@ -70,9 +134,9 @@ public class ManagementController {
 
     @GetMapping("/size/edit/{id}")
     public String editSize(@PathVariable Integer id, Model model) {
-        SizeResponseDto sizeResponse = sizeService.getSizeById(id);
+        Size size = sizeService.getSizeById(id);
         SizeRequestDto sizeRequest = new SizeRequestDto();
-        sizeRequest.setSize(sizeResponse.getSize());
+        sizeRequest.setSize(size.getSize());
         model.addAttribute("sizeRequest", sizeRequest);
         model.addAttribute("sizeId", id);
         return "management/size-form";
