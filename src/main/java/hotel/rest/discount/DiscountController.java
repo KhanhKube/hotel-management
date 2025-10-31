@@ -78,7 +78,7 @@ public class DiscountController {
 
     @GetMapping("/edit/{id}")
     public String editDiscountForm(@PathVariable Long id, Model model) {
-        Discount discount =  discountRepository.findById(id).orElse(null);;
+        Discount discount =  discountService.findDiscountById(id);
         if  (discount == null) {
             return "redirect:/hotel-management/discount";
         }
