@@ -85,7 +85,12 @@ public class CommonController {
                     // Lưu user vào session
                     session.setAttribute("user", user);
                     if(!user.getOtpVerified()){
-                        VerifyOtpDto verifyOtpDto = new VerifyOtpDto(user.getUsername(), user.getEmail(), null);
+                        commonService.resendOtp(user.getEmail());
+                        VerifyOtpDto verifyOtpDto = new VerifyOtpDto();
+                        verifyOtpDto.setEmail(user.getEmail());
+                        verifyOtpDto.setUsername(user.getUsername());
+                        verifyOtpDto.setPhoneNumber(user.getPhone());
+                        verifyOtpDto.setOtp(null);
                         redirectAttrs.addFlashAttribute("verifyDto", verifyOtpDto);
                         return "redirect:/hotel/verify";
                     }
@@ -118,7 +123,11 @@ public class CommonController {
         MessageResponse response = commonService.registerUser(dto);
         if (response.isSuccess()) {
             model.addAttribute("message", response.getMessage());
-            VerifyOtpDto verifyOtpDto = new VerifyOtpDto(dto.getUsername(), dto.getEmail(), null);
+            VerifyOtpDto verifyOtpDto = new VerifyOtpDto();
+            verifyOtpDto.setEmail(dto.getEmail());
+            verifyOtpDto.setUsername(dto.getUsername());
+            verifyOtpDto.setPhoneNumber(dto.getPhone());
+            verifyOtpDto.setOtp(null);
             redirectAttrs.addFlashAttribute("verifyDto", verifyOtpDto);
             return "redirect:/hotel/verify";
         } else {
