@@ -347,14 +347,6 @@
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-hashtag"></i>
-                            </div>
-                            <div class="stat-value" th:text="${view.viewId}">1</div>
-                            <div class="stat-label">ID View</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon">
                                 <i class="fas fa-calendar-plus"></i>
                             </div>
                             <div class="stat-value" th:text="${#temporals.format(view.createdAt, 'dd/MM/yyyy')}">05/10/2025</div>
@@ -373,19 +365,12 @@
                             <div class="stat-icon">
                                 <i class="fas fa-check-circle"></i>
                             </div>
-                            <div class="stat-value" th:text="${view.isDeleted ? 'Không' : 'Có'}">Có</div>
+                            <div class="stat-value" th:text="${view.isDeleted ? 'Không' : 'Hoạt động'}">Hoạt động</div>
                             <div class="stat-label">Trạng Thái</div>
                         </div>
                     </div>
                     
                     <div class="details-grid">
-                        <div class="detail-group">
-                            <div class="detail-label">
-                                <i class="fas fa-hashtag me-2"></i>ID View
-                            </div>
-                            <div class="detail-value" th:text="${view.viewId}">1</div>
-                        </div>
-                        
                         <div class="detail-group">
                             <div class="detail-label">
                                 <i class="fas fa-eye me-2"></i>Loại View
@@ -405,16 +390,6 @@
                                 <i class="fas fa-clock me-2"></i>Cập Nhật Cuối
                             </div>
                             <div class="detail-value" th:text="${#temporals.format(view.updatedAt, 'dd/MM/yyyy HH:mm')}">05/10/2025 09:30</div>
-                        </div>
-                        
-                        <div class="detail-group">
-                            <div class="detail-label">
-                                <i class="fas fa-check-circle me-2"></i>Trạng Thái
-                            </div>
-                            <div class="detail-value">
-                                <span th:class="${view.isDeleted ? 'status-deleted' : 'status-active'}" 
-                                      th:text="${view.isDeleted ? 'Đã Xóa' : 'Hoạt Động'}">Hoạt Động</span>
-                            </div>
                         </div>
                         
                         <div class="detail-group">
@@ -446,7 +421,7 @@
                     </div>
                     
                     <div class="action-buttons">
-                        <a href="/hotel-management/view" class="btn btn-secondary">
+                        <a th:href="@{/hotel-management/location-room}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i>
                             Quay Lại Danh Sách
                         </a>
