@@ -50,8 +50,14 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public Optional<User> login(String username, String rawPassword) {
-        return userRepository.findByUsername(username)
-                .filter(user -> passwordEncoder.matches(rawPassword, user.getPassword()));
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            user = userRepository.findByEmail(username);
+        }
+        if (user.isEmpty()) {
+            user = userRepository.findByPhone(username);
+        }
+        return user.filter(u -> passwordEncoder.matches(rawPassword, u.getPassword()));
     }
 
     @Override
