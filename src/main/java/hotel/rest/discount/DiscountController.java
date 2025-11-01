@@ -55,7 +55,7 @@ public class DiscountController {
                                  BindingResult result, Model model) {
         if (discount.getDiscountId() == null) {
             // CREATE: check code có tồn tại chưa
-            if (discountRepository.existsByCodeAndIsDeletedFalse(discount.getCode())) {
+            if (discountService.checkVoucherCodeExist(discount.getCode())) {
                 model.addAttribute("errorMessage", "Mã giảm giá này đã tồn tại!");
                 model.addAttribute("discount", discount);
                 model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
@@ -63,7 +63,7 @@ public class DiscountController {
             }
         } else {
             // UPDATE: check code có trùng với record KHÁC không
-            if (discountRepository.existsByCodeAndDiscountIdNotAndIsDeletedFalse(
+            if (discountService.checkDiscountCodeExistExceptItSelft(
                     discount.getCode(), discount.getDiscountId())) {
                 model.addAttribute("errorMessage", "Mã giảm giá này đã tồn tại!");
                 model.addAttribute("discount", discount);
@@ -78,7 +78,7 @@ public class DiscountController {
 
     @GetMapping("/edit/{id}")
     public String editDiscountForm(@PathVariable Long id, Model model) {
-        Discount discount =  discountRepository.findById(id).orElse(null);;
+        Discount discount =  discountService.findDiscountById(id);
         if  (discount == null) {
             return "redirect:/hotel-management/discount";
         }

@@ -47,6 +47,21 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
+    public boolean checkVoucherCodeExist(String code) {
+        return discountRepository.existsByCodeAndIsDeletedFalse(code);
+    }
+
+    @Override
+    public Discount findDiscountById(Long id) {
+        return discountRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public boolean checkDiscountCodeExistExceptItSelft(String code, Long discountId) {
+        return discountRepository.existsByCodeAndDiscountIdNotAndIsDeletedFalse(code, discountId);
+    }
+
+    @Override
     public List<DiscountResponseDto> getListDiscount() {
         List<Discount> entities = discountRepository.findAllByIsDeletedFalse();
         List<DiscountResponseDto> result = new ArrayList<>();
