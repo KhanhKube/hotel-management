@@ -1,10 +1,7 @@
 package hotel.service.room;
 
 import hotel.db.dto.room.*;
-import hotel.db.entity.Floor;
-import hotel.db.entity.Room;
-import hotel.db.entity.RoomImage;
-import hotel.db.entity.Size;
+import hotel.db.entity.*;
 import hotel.db.repository.floor.FloorRepository;
 import hotel.service.size.SizeService;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
@@ -21,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,10 +30,10 @@ import java.util.stream.Collectors;
 @Transactional
 public class RoomServiceImpl implements RoomService {
 
-	private final RoomRepository roomRepository;
-	private final FloorRepository floorRepository;
+    private final RoomRepository roomRepository;
+    private final FloorRepository floorRepository;
     private final OrderDetailRepository orderDetailRepository;
-	private final RoomImageRepository roomImageRepository;
+    private final RoomImageRepository roomImageRepository;
 
     private final SizeService sizeService;
 
@@ -46,7 +45,7 @@ public class RoomServiceImpl implements RoomService {
         //Filter theo roomType (Loại phòng)
         if (roomType != null && !roomType.isEmpty()) {
             rooms = rooms.stream()
-                    .filter(x->x.getRoomType().equals(roomType))
+                    .filter(x -> x.getRoomType().equals(roomType))
                     .collect(Collectors.toList());
         }
         //Filter theo giá min
@@ -90,14 +89,14 @@ public class RoomServiceImpl implements RoomService {
                     break;
             }
         }
-        List <RoomBookListDto> BookList = rooms.stream() //Lấy Listcác phòng đã được lọc field qua Dto
+        List<RoomBookListDto> BookList = rooms.stream() //Lấy Listcác phòng đã được lọc field qua Dto
                 .filter(x -> !"Bảo trì".equals(x.getStatus()))
                 .map(x -> {
                     return toRoomBookDto(x);
                 }).collect(Collectors.toList());
 
         //Paging thủ công
-        int startpage = page*size;
+        int startpage = page * size;
         int endpage = Math.min(startpage + size, BookList.size());
 
         List<RoomBookListDto> pageDtos = BookList.subList(startpage, endpage);
@@ -124,25 +123,79 @@ public class RoomServiceImpl implements RoomService {
             dto.setImageRoom("https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg"); //lấy ảnh mạng
         }
 
-        //Logic nghiệp vụ cho Status phòng VIPVIPVIPV
-        if ("Trống".equals(x.getStatus())) {
-            dto.setStatusDisplay("Trống");;
-            dto.setAvailableFrom(null);
-        } else {
-            LocalDate nextAvailable = orderDetailRepository.findNextAvailableDateByRoomId(x.getRoomId());
-            if (nextAvailable != null) {
-                dto.setStatusDisplay("Có thể đặt từ " +
-                        nextAvailable.plusDays(1/12)
-                                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))); // có thể đặt tiếp phòng sau 2 tiếng enddate của phòng cũ
-                dto.setAvailableFrom(nextAvailable.plusDays(1/12)); // tăng thêm 2 tiếng.
+        //Logic hiện status phòng nhanh cho khách hàng booking.
+        LocalDateTime now = LocalDateTime.now();
+        if (now.getHour() < 14) {
+            // Case 1: Trước 14h - check có thể đặt ngay hôm nay không
+            LocalDateTime todayCheckin = now.toLocalDate().atTime(14, 0);
+            LocalDateTime todayCheckout = now.toLocalDate().plusDays(1).atTime(12, 0);
+
+            if(orderDetailRepository.isRoomAvailableForToday(
+                    x.getRoomId(), todayCheckin, todayCheckout
+            )) {
+                dto.setStatusDisplay("Có thể đặt ngay bây giờ!");
+                dto.setAvailableFrom(now.toLocalDate());
             } else {
-                //TH query trả về null.
-                dto.setStatusDisplay("Trống");
+                // Hôm nay không trống, tìm ngày trống tiếp theo
+                LocalDate nextDate = findNextAvailableDate(x.getRoomId(), todayCheckin);
+                if (nextDate != null) {
+                    dto.setStatusDisplay("Có thể đặt phòng vào " +
+                            nextDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                    dto.setAvailableFrom(nextDate);
+                } else {
+                    dto.setStatusDisplay("Phòng đã kín lịch");
+                    dto.setAvailableFrom(null);
+                }
+            }
+        } else {
+            // Case 2: Sau 14h - chỉ có thể đặt từ ngày mai trở đi
+            LocalDateTime tomorrowCheckin = now.toLocalDate().plusDays(1).atTime(14, 0);
+            LocalDate nextDate = findNextAvailableDate(x.getRoomId(), tomorrowCheckin);
+
+            if (nextDate != null) {
+                dto.setStatusDisplay("Có thể đặt phòng vào " +
+                        nextDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                dto.setAvailableFrom(nextDate);
+            } else {
+                dto.setStatusDisplay("Phòng đã kín lịch");
                 dto.setAvailableFrom(null);
             }
         }
 
         return dto;
+    }
+    /*
+    Tìm ngày trống thoả mãn điều kiện booking đầu tiên
+    */
+    private LocalDate findNextAvailableDate(Integer roomId, LocalDateTime startFrom) {
+        // Lấy tất cả booking từ startFrom trở đi
+        List<OrderDetail> bookings = orderDetailRepository.findUpcomingBookingsByRoomId(
+                roomId,
+                startFrom
+        );
+
+        // Bắt đầu check từ ngày startFrom
+        LocalDate checkDate = startFrom.toLocalDate();
+
+        // Giới hạn check tối đa 365 ngày (tránh loop vô hạn)
+        for (int i = 0; i < 365; i++) {
+            LocalDateTime checkin = checkDate.atTime(14, 0);
+            LocalDateTime checkout = checkDate.plusDays(1).atTime(12, 0);
+
+            // Check xem có booking nào conflict không
+            boolean hasConflict = bookings.stream().anyMatch(booking ->
+                    booking.getStartDate().isBefore(checkout) &&
+                            booking.getEndDate().isAfter(checkin)
+            );
+
+            if (!hasConflict) {
+                return checkDate; // Tìm thấy ngày trống
+            }
+
+            checkDate = checkDate.plusDays(1); // Check ngày tiếp theo
+        }
+
+        return null; // chưa có khách book phòng.
     }
 
     /*
@@ -300,10 +353,12 @@ public class RoomServiceImpl implements RoomService {
     public boolean checkForCreateRoomNumber(String roomNumber) {
         return roomRepository.existsByRoomNumber(roomNumber);
     }
+
     @Override
     public boolean checkForEditRoomNumber(String roomNumber, Long roomId) {
         return roomRepository.existsByRoomNumberAndRoomId(roomNumber, roomId);
     }
+
     @Override
     public HashMap<String, String> saveRoom(Room room) {
         HashMap<String, String> result = new HashMap<>();
@@ -326,6 +381,7 @@ public class RoomServiceImpl implements RoomService {
             return result;
         }
     }
+
     @Override
     public void DeleteRoom(Integer id) {
         roomRepository.softDeleteById(id);
@@ -353,17 +409,17 @@ public class RoomServiceImpl implements RoomService {
             }
         } else if (roomType.equals("Cao cấp") || roomType.equals("Hạng sang")) {
             if (sizeNumber != null && (sizeNumber > 50 || sizeNumber <= 40)) {
-                return "Phòng "+roomType+" diện tích vui lòng nhỏ hơn hoặc bằng " +
+                return "Phòng " + roomType + " diện tích vui lòng nhỏ hơn hoặc bằng " +
                         "50 và lớn hơn 40 mét vuông!";
             }
         } else if (roomType.equals("VIP")) {
             if (sizeNumber != null && (sizeNumber > 70 || sizeNumber <= 50)) {
-                return "Phòng "+roomType+" diện tích vui lòng nhỏ hơn hoặc bằng " +
+                return "Phòng " + roomType + " diện tích vui lòng nhỏ hơn hoặc bằng " +
                         "70 và lớn hơn 50 mét vuông!";
             }
         } else {
             if (sizeNumber != null && sizeNumber < 80) {
-                return "Phòng "+roomType+" diện tích vui lòng lớn hơn hoặc bằng 80 mét vuông!";
+                return "Phòng " + roomType + " diện tích vui lòng lớn hơn hoặc bằng 80 mét vuông!";
             }
             if (!bedType.equals("Giường King") && !bedType.equals("Giường Queen")) {
                 return "Phòng Tổng thống vui lòng chọn giường King hoặc Queen!";
@@ -404,6 +460,7 @@ public class RoomServiceImpl implements RoomService {
         }
         return "";
     }
+
     @Override
     public void incrementView(Integer roomId) {
         Room room = roomRepository.findById(roomId).orElse(null);
@@ -426,216 +483,216 @@ public class RoomServiceImpl implements RoomService {
 
 
     @Override
-	@NotNull
-	public List<Room> getAllRooms() {
-		log.info("Getting all rooms");
-		return roomRepository.findAll();
-	}
+    @NotNull
+    public List<Room> getAllRooms() {
+        log.info("Getting all rooms");
+        return roomRepository.findAll();
+    }
 
-	@Override
-	public ListRoomResponse getAllRoomForSearch() {
-		List<Room> rooms = roomRepository.findAllByIsDeletedIsFalse();
-		return buildListRoomResponse(rooms);
-	}
+    @Override
+    public ListRoomResponse getAllRoomForSearch() {
+        List<Room> rooms = roomRepository.findAllByIsDeletedIsFalse();
+        return buildListRoomResponse(rooms);
+    }
 
-	public ListRoomResponse buildListRoomResponse(List<Room> rooms) {
-		if (rooms == null || rooms.isEmpty()) {
-			return new ListRoomResponse(Collections.emptyList());
-		}
+    public ListRoomResponse buildListRoomResponse(List<Room> rooms) {
+        if (rooms == null || rooms.isEmpty()) {
+            return new ListRoomResponse(Collections.emptyList());
+        }
 
-		List<RoomResponseDto> roomDtos = rooms.stream()
-				.map(this::buildRoomResponse)
-				.collect(Collectors.toList());
+        List<RoomResponseDto> roomDtos = rooms.stream()
+                .map(this::buildRoomResponse)
+                .collect(Collectors.toList());
 
-		return new ListRoomResponse(roomDtos);
-	}
+        return new ListRoomResponse(roomDtos);
+    }
 
-	private RoomResponseDto buildRoomResponse(Room room) {
-		if (room == null) return null;
+    private RoomResponseDto buildRoomResponse(Room room) {
+        if (room == null) return null;
 
-		// Query floor và size từ repository
-		Integer floorNumber = null;
-		if (room.getFloorId() != null) {
-			floorNumber = floorRepository.findById(room.getFloorId())
-					.map(floor -> floor.getFloorNumber())
-					.orElse(null);
-		}
+        // Query floor và size từ repository
+        Integer floorNumber = null;
+        if (room.getFloorId() != null) {
+            floorNumber = floorRepository.findById(room.getFloorId())
+                    .map(floor -> floor.getFloorNumber())
+                    .orElse(null);
+        }
 
-		Double size = null;
-		if (room.getSizeId() != null) {
-			try {
+        Double size = null;
+        if (room.getSizeId() != null) {
+            try {
                 Size sizeEntity = sizeService.getSizeById(room.getSizeId());
                 size = sizeEntity != null ? sizeEntity.getSize() : null;
             } catch (Exception e) {
                 size = null;
             }
-		}
+        }
 
-		return RoomResponseDto.builder()
-				.roomId(room.getRoomId() != null ? room.getRoomId().longValue() : null)
-				.roomNumber(room.getRoomNumber())
-				.roomType(room.getRoomType())
-				.bedType(room.getBedType())
-				.floorNumber(floorNumber)
-				.size(size)
-				.roomDescription(room.getRoomDescription())
-				.price(room.getPrice())
-				.status(room.getStatus())
-				.sold(room.getSold())
-				.view(room.getView())
-				.createdAt(room.getCreatedAt())
-				.updatedAt(room.getUpdatedAt())
-				.isDeleted(room.getIsDeleted())
-				.build();
-	}
+        return RoomResponseDto.builder()
+                .roomId(room.getRoomId() != null ? room.getRoomId().longValue() : null)
+                .roomNumber(room.getRoomNumber())
+                .roomType(room.getRoomType())
+                .bedType(room.getBedType())
+                .floorNumber(floorNumber)
+                .size(size)
+                .roomDescription(room.getRoomDescription())
+                .price(room.getPrice())
+                .status(room.getStatus())
+                .sold(room.getSold())
+                .view(room.getView())
+                .createdAt(room.getCreatedAt())
+                .updatedAt(room.getUpdatedAt())
+                .isDeleted(room.getIsDeleted())
+                .build();
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public Room getRoomById(Integer roomId) {
-		log.info("Getting room by ID: {}", roomId);
-		return roomRepository.findById(roomId)
-				.orElseThrow(() -> new RuntimeException("Không tìm thấy phòng với ID: " + roomId));
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public Room getRoomById(Integer roomId) {
+        log.info("Getting room by ID: {}", roomId);
+        return roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng với ID: " + roomId));
+    }
 
-	@Override
-	public Room createRoom(Room room) {
-		log.info("Creating new room: {}", room.getRoomNumber());
+    @Override
+    public Room createRoom(Room room) {
+        log.info("Creating new room: {}", room.getRoomNumber());
 
-		// Kiểm tra room number có trùng không
-		if (roomRepository.existsByRoomNumber(room.getRoomNumber())) {
-			throw new RuntimeException("Phòng " + room.getRoomNumber() + " đã tồn tại. Vui lòng nhập số phòng khác.");
-		}
+        // Kiểm tra room number có trùng không
+        if (roomRepository.existsByRoomNumber(room.getRoomNumber())) {
+            throw new RuntimeException("Phòng " + room.getRoomNumber() + " đã tồn tại. Vui lòng nhập số phòng khác.");
+        }
 
-		Room savedRoom = roomRepository.save(room);
-		log.info("Created room with ID: {}", savedRoom.getRoomId());
-		return savedRoom;
-	}
+        Room savedRoom = roomRepository.save(room);
+        log.info("Created room with ID: {}", savedRoom.getRoomId());
+        return savedRoom;
+    }
 
-	@Override
-	public Room updateRoom(Integer roomId, Room room) {
-		log.info("Updating room with ID: {}", roomId);
+    @Override
+    public Room updateRoom(Integer roomId, Room room) {
+        log.info("Updating room with ID: {}", roomId);
 
-		Room existingRoom = getRoomById(roomId);
+        Room existingRoom = getRoomById(roomId);
 
-		// Kiểm tra room number có trùng không (trừ phòng hiện tại)
-		if (!existingRoom.getRoomNumber().equals(room.getRoomNumber()) &&
-				roomRepository.existsByRoomNumber(room.getRoomNumber())) {
-			throw new RuntimeException("Phòng " + room.getRoomNumber() + " đã tồn tại. Vui lòng nhập số phòng khác.");
-		}
+        // Kiểm tra room number có trùng không (trừ phòng hiện tại)
+        if (!existingRoom.getRoomNumber().equals(room.getRoomNumber()) &&
+                roomRepository.existsByRoomNumber(room.getRoomNumber())) {
+            throw new RuntimeException("Phòng " + room.getRoomNumber() + " đã tồn tại. Vui lòng nhập số phòng khác.");
+        }
 
-		existingRoom.setRoomNumber(room.getRoomNumber());
-		existingRoom.setRoomType(room.getRoomType());
-		existingRoom.setBedType(room.getBedType());
-		existingRoom.setFloorId(room.getFloorId());
-		existingRoom.setSizeId(room.getSizeId());
-		existingRoom.setPrice(room.getPrice());
-		existingRoom.setStatus(room.getStatus());
-		existingRoom.setRoomDescription(room.getRoomDescription());
-		existingRoom.setSold(room.getSold() != null ? room.getSold() : existingRoom.getSold());
-		existingRoom.setView(room.getView() != null ? room.getView() : existingRoom.getView());
+        existingRoom.setRoomNumber(room.getRoomNumber());
+        existingRoom.setRoomType(room.getRoomType());
+        existingRoom.setBedType(room.getBedType());
+        existingRoom.setFloorId(room.getFloorId());
+        existingRoom.setSizeId(room.getSizeId());
+        existingRoom.setPrice(room.getPrice());
+        existingRoom.setStatus(room.getStatus());
+        existingRoom.setRoomDescription(room.getRoomDescription());
+        existingRoom.setSold(room.getSold() != null ? room.getSold() : existingRoom.getSold());
+        existingRoom.setView(room.getView() != null ? room.getView() : existingRoom.getView());
 
-		Room updatedRoom = roomRepository.save(existingRoom);
-		log.info("Updated room with ID: {}", updatedRoom.getRoomId());
-		return updatedRoom;
-	}
+        Room updatedRoom = roomRepository.save(existingRoom);
+        log.info("Updated room with ID: {}", updatedRoom.getRoomId());
+        return updatedRoom;
+    }
 
-	@Override
-	@Transactional
-	public void hardDeleteRoom(Integer roomId) {
-		log.info("Hard deleting room with ID: {}", roomId);
+    @Override
+    @Transactional
+    public void hardDeleteRoom(Integer roomId) {
+        log.info("Hard deleting room with ID: {}", roomId);
 
-		// Kiểm tra phòng có tồn tại không
-		getRoomById(roomId);
+        // Kiểm tra phòng có tồn tại không
+        getRoomById(roomId);
 
-		// Xóa các bản ghi liên quan trước khi xóa room
-		// Xóa room views
-		roomRepository.deleteRoomViewsByRoomId(roomId);
+        // Xóa các bản ghi liên quan trước khi xóa room
+        // Xóa room views
+        roomRepository.deleteRoomViewsByRoomId(roomId);
 
-		// Xóa room furnishings
-		roomRepository.deleteRoomFurnishingsByRoomId(roomId);
+        // Xóa room furnishings
+        roomRepository.deleteRoomFurnishingsByRoomId(roomId);
 
-		// Xóa room images
-		roomRepository.deleteRoomImagesByRoomId(roomId);
+        // Xóa room images
+        roomRepository.deleteRoomImagesByRoomId(roomId);
 
-		// Xóa order details liên quan đến room này
-		roomRepository.deleteOrderDetailsByRoomId(roomId);
+        // Xóa order details liên quan đến room này
+        roomRepository.deleteOrderDetailsByRoomId(roomId);
 
-		// Cuối cùng xóa room
-		roomRepository.hardDeleteRoom(roomId);
-		log.info("Hard deleted room with ID: {}", roomId);
-	}
+        // Cuối cùng xóa room
+        roomRepository.hardDeleteRoom(roomId);
+        log.info("Hard deleted room with ID: {}", roomId);
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public boolean existsByRoomNumber(String roomNumber) {
-		log.info("Checking if room number exists: {}", roomNumber);
-		return roomRepository.existsByRoomNumber(roomNumber);
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByRoomNumber(String roomNumber) {
+        log.info("Checking if room number exists: {}", roomNumber);
+        return roomRepository.existsByRoomNumber(roomNumber);
+    }
 
-	@Override
-	public List<RoomHomepageResponseDto> getTop3Rooms() {
-		List<Room> rooms = roomRepository.findTop3ByOrderBySoldDesc();
-		List<RoomHomepageResponseDto> results = new ArrayList<>();
+    @Override
+    public List<RoomHomepageResponseDto> getTop3Rooms() {
+        List<Room> rooms = roomRepository.findTop3ByOrderBySoldDesc();
+        List<RoomHomepageResponseDto> results = new ArrayList<>();
 
-		for (Room room : rooms) {
-			RoomHomepageResponseDto dto = new RoomHomepageResponseDto();
-			dto.setRoomId(room.getRoomId());
-			dto.setPrice(room.getPrice());
-			dto.setRoomType(room.getRoomType());
-			dto.setRoomDescription(room.getRoomDescription());
+        for (Room room : rooms) {
+            RoomHomepageResponseDto dto = new RoomHomepageResponseDto();
+            dto.setRoomId(room.getRoomId());
+            dto.setPrice(room.getPrice());
+            dto.setRoomType(room.getRoomType());
+            dto.setRoomDescription(room.getRoomDescription());
 
-			List<RoomImage> roomImages = roomImageRepository.findByRoomId(room.getRoomId());
-			if (roomImages != null && !roomImages.isEmpty()) {
-				dto.setImageRoom(roomImages.get(0).getRoomImageUrl());
-			}
+            List<RoomImage> roomImages = roomImageRepository.findByRoomId(room.getRoomId());
+            if (roomImages != null && !roomImages.isEmpty()) {
+                dto.setImageRoom(roomImages.get(0).getRoomImageUrl());
+            }
 
-			results.add(dto);
-		}
+            results.add(dto);
+        }
 
-		return results;
-	}
+        return results;
+    }
 
 
-	@Override
-	public RoomDetailResponseDto getRoomDetailById(Integer roomId) {
-		Room room = roomRepository.findByRoomId(roomId);
-		if (room == null) {
-			return null;
-		}
+    @Override
+    public RoomDetailResponseDto getRoomDetailById(Integer roomId) {
+        Room room = roomRepository.findByRoomId(roomId);
+        if (room == null) {
+            return null;
+        }
 
-		// Lấy thông tin kích thước phòng (size)
-		Size size;
+        // Lấy thông tin kích thước phòng (size)
+        Size size;
         try {
             size = sizeService.getSizeById(room.getSizeId());
         } catch (Exception e) {
             size = null;
         }
 
-		// Tạo DTO trả về
-		RoomDetailResponseDto dto = new RoomDetailResponseDto();
-		dto.setRoomId(room.getRoomId());
-		dto.setRoomNumber(room.getRoomNumber());
-		dto.setRoomType(room.getRoomType());
-		dto.setBedType(room.getBedType());
-		dto.setFloorNumber(room.getFloorId());
-		dto.setSize(size != null ? size.getSize() : null);
-		dto.setPrice(room.getPrice());
-		dto.setStatus(room.getStatus());
-		dto.setSold(room.getSold());
-		dto.setView(room.getView());
-		dto.setRoomDescription(room.getRoomDescription());
+        // Tạo DTO trả về
+        RoomDetailResponseDto dto = new RoomDetailResponseDto();
+        dto.setRoomId(room.getRoomId());
+        dto.setRoomNumber(room.getRoomNumber());
+        dto.setRoomType(room.getRoomType());
+        dto.setBedType(room.getBedType());
+        dto.setFloorNumber(room.getFloorId());
+        dto.setSize(size != null ? size.getSize() : null);
+        dto.setPrice(room.getPrice());
+        dto.setStatus(room.getStatus());
+        dto.setSold(room.getSold());
+        dto.setView(room.getView());
+        dto.setRoomDescription(room.getRoomDescription());
 
-		List<RoomImage> roomImages = roomImageRepository.findByRoomId(room.getRoomId());
-		List<String> imageUrls = new ArrayList<>();
+        List<RoomImage> roomImages = roomImageRepository.findByRoomId(room.getRoomId());
+        List<String> imageUrls = new ArrayList<>();
 
-		if (roomImages != null && !roomImages.isEmpty()) {
-			for (RoomImage roomImage : roomImages) {
-				imageUrls.add(roomImage.getRoomImageUrl());
-			}
-		}
+        if (roomImages != null && !roomImages.isEmpty()) {
+            for (RoomImage roomImage : roomImages) {
+                imageUrls.add(roomImage.getRoomImageUrl());
+            }
+        }
 
-		dto.setImages(imageUrls);
+        dto.setImages(imageUrls);
 
-		return dto;
-	}
+        return dto;
+    }
 }
