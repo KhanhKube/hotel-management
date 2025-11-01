@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import java.util.List;
@@ -23,4 +24,15 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
             "AND od.endDate >= CURRENT_TIMESTAMP " +
             "AND od.status NOT IN ('CANCELLED', 'COMPLETED')")
     LocalDate findNextAvailableDateByRoomId(@Param("roomId") Integer roomId);
+
+    @Query("SELECT COUNT(od) FROM OrderDetail od " +
+            "WHERE od.roomId = :roomId " +
+            "AND od.startDate < :endTime " +
+            "AND od.endDate > :startTime " +
+            "AND od.status NOT IN ('CANCELLED', 'COMPLETED')")
+    Long checkBookingToday(
+            @Param("roomId") Integer roomId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime
+    );
 }
