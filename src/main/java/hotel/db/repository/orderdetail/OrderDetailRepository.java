@@ -49,4 +49,18 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
             @Param("roomId") Integer roomId,
             @Param("fromDate") LocalDateTime fromDate
     );
+
+    //Tìm tất cả các ngày đã được book phòng
+    @Query("SELECT od FROM OrderDetail od " +
+            "WHERE od.roomId = :roomId " +
+            "AND od.status IN :statuses " +
+            "AND od.endDate >= :fromDate " +
+            "AND od.startDate <= :toDate " +
+            "ORDER BY od.startDate ASC")
+    List<OrderDetail> findBookingsByRoomAndDateRange(
+            @Param("roomId") Integer roomId,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            @Param("statuses") List<String> statuses
+    );
 }

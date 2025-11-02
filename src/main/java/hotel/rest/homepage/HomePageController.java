@@ -62,7 +62,14 @@ public class HomePageController {
             redirectAttrs.addFlashAttribute("error", ROOMNOTEXIST);
             return "redirect:/hotel";
         }
+
+        // Lấy 2 lists riêng biệt cho check-in và check-out calendar
+        List<String> bookedDatesCheckIn = roomService.getBookedDatesForBookingRoom(id);
+        List<String> bookedDatesCheckOut = roomService.getBookedDatesForCheckOut(id);
+        
         model.addAttribute("room", room);
+        model.addAttribute("bookedDatesCheckIn", bookedDatesCheckIn);
+        model.addAttribute("bookedDatesCheckOut", bookedDatesCheckOut);
         return "common/room-detail";
     }
 

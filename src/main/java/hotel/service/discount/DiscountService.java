@@ -15,6 +15,8 @@ public interface DiscountService {
 
     boolean checkDiscountCodeExistExceptItSelft(String code, Long discountId);
 
+    Discount findDiscountById(Long id);
+
     List<DiscountResponseDto> getListDiscount();
 
     String calculateStatus(Discount d); //Tính giá trị cho status
