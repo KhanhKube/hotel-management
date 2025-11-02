@@ -15,11 +15,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +34,76 @@ public class RoomServiceImpl implements RoomService {
     private final RoomImageRepository roomImageRepository;
 
     private final SizeService sizeService;
+
+    @Override
+    public List<String> getBookedDatesForBookingRoom(Integer roomId) {
+        LocalDateTime fromDate = LocalDateTime.now();
+        LocalDateTime toDate = fromDate.plusMonths(2);
+
+        List<OrderDetail> bookings = orderDetailRepository.findBookingsByRoomAndDateRange(
+                roomId,
+                fromDate,
+                toDate,
+                Arrays.asList("Đã xác nhận", "Đã check-in", "Đã check-out")
+        );
+
+        List<String> bookedDates = new ArrayList<>();
+
+        for (OrderDetail booking : bookings) {
+            LocalDate start = booking.getStartDate().toLocalDate();
+            LocalDate end = booking.getEndDate().toLocalDate();
+
+            // CHO CALENDAR "NGÀY NHẬN PHÒNG"
+            // DISABLE TẤT CẢ NGÀY TỪ START ĐẾN (END - 1)
+            // - Ngày START: Disable vì đã có người checkin 14:00
+            // - Ngày GIỮA: Disable vì phòng đang được thuê
+            // - Ngày END: KHÔNG disable vì khách mới có thể checkin sau khi khách cũ checkout
+            LocalDate current = start;
+            while (current.isBefore(end)) { // Không bao gồm ngày end
+                bookedDates.add(current.toString()); // Format: yyyy-MM-dd
+                current = current.plusDays(1);
+            }
+        }
+
+        System.out.println("Booked dates for check-in (room " + roomId + "): " + bookedDates);
+
+        return bookedDates;
+    }
+
+    @Override
+    public List<String> getBookedDatesForCheckOut(Integer roomId) {
+        LocalDateTime fromDate = LocalDateTime.now();
+        LocalDateTime toDate = fromDate.plusMonths(2);
+
+        List<OrderDetail> bookings = orderDetailRepository.findBookingsByRoomAndDateRange(
+                roomId,
+                fromDate,
+                toDate,
+                Arrays.asList("Đã xác nhận", "Đã check-in", "Đã check-out")
+        );
+
+        List<String> bookedDates = new ArrayList<>();
+
+        for (OrderDetail booking : bookings) {
+            LocalDate start = booking.getStartDate().toLocalDate();
+            LocalDate end = booking.getEndDate().toLocalDate();
+
+            // CHO CALENDAR "NGÀY TRẢ PHÒNG"
+            // CHỈ DISABLE CÁC NGÀY GIỮA (start+1 đến end-1)
+            // - Ngày START: KHÔNG disable vì khách mới có thể checkout 12:00 (trước khi khách cũ checkin 14:00)
+            // - Ngày GIỮA: Disable vì phòng đang được thuê
+            // - Ngày END: KHÔNG disable vì khách mới có thể checkout cùng ngày với khách cũ checkout
+            LocalDate current = start.plusDays(1); // Bắt đầu từ ngày sau start
+            while (current.isBefore(end)) { // Dừng trước ngày end
+                bookedDates.add(current.toString()); // Format: yyyy-MM-dd
+                current = current.plusDays(1);
+            }
+        }
+
+        System.out.println("Booked dates for check-out (room " + roomId + "): " + bookedDates);
+
+        return bookedDates;
+    }
 
     @Override
     public Page<RoomBookListDto> getRoomListWithFiltersAndPagination(BigDecimal minPrice, BigDecimal maxPrice, String roomType,
@@ -161,6 +229,7 @@ public class RoomServiceImpl implements RoomService {
                 dto.setAvailableFrom(null);
             }
         }
+
 
         return dto;
     }
@@ -381,7 +450,6 @@ public class RoomServiceImpl implements RoomService {
             return result;
         }
     }
-
     @Override
     public void DeleteRoom(Integer id) {
         roomRepository.softDeleteById(id);

@@ -12,6 +12,10 @@ import java.util.List;
 
 public interface RoomService {
 
+    List<String> getBookedDatesForBookingRoom(Integer roomId);
+    
+    List<String> getBookedDatesForCheckOut(Integer roomId);
+
     //Method filter dùng cho Room-BookingList bên phía customer.
     Page<RoomBookListDto> getRoomListWithFiltersAndPagination(BigDecimal minPrice, BigDecimal maxPrice,String roomType,
                                                               Integer floor, String bedType, String sortBy, int page, int size);
