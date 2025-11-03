@@ -4,6 +4,51 @@
  */
 
 let isChatOpen = false;
+const CHAT_HISTORY_KEY = 'aiChatHistory';
+
+/**
+ * Save chat history to localStorage
+ */
+function saveChatHistory() {
+    const chatArea = document.getElementById('chatArea');
+    const messages = chatArea.innerHTML;
+    localStorage.setItem(CHAT_HISTORY_KEY, messages);
+    console.log('Chat history saved');
+}
+
+/**
+ * Load chat history from localStorage
+ */
+function loadChatHistory() {
+    const savedHistory = localStorage.getItem(CHAT_HISTORY_KEY);
+    if (savedHistory) {
+        const chatArea = document.getElementById('chatArea');
+        chatArea.innerHTML = savedHistory;
+        chatArea.scrollTop = chatArea.scrollHeight;
+        console.log('Chat history loaded');
+    }
+}
+
+/**
+ * Clear chat history
+ */
+function clearChatHistory() {
+    localStorage.removeItem(CHAT_HISTORY_KEY);
+    const chatArea = document.getElementById('chatArea');
+    chatArea.innerHTML = `
+        <div id="welcomeMsg" class="welcome-message">
+            <div class="welcome-icon">👋</div>
+            <div class="welcome-title">Xin chào!</div>
+            <div class="welcome-text">Tôi là trợ lý AI của khách sạn. Hãy cho tôi biết bạn đang tìm loại phòng nào?</div>
+            <div class="welcome-examples">
+                <div class="example-chip" onclick="sendExampleMessage('Tôi muốn phòng VIP')">Phòng VIP</div>
+                <div class="example-chip" onclick="sendExampleMessage('Tìm phòng giá rẻ')">Phòng giá rẻ</div>
+                <div class="example-chip" onclick="sendExampleMessage('Phòng Deluxe')">Phòng Deluxe</div>
+            </div>
+        </div>
+    `;
+    console.log('Chat history cleared');
+}
 
 /**
  * Toggle chat widget visibility
@@ -14,6 +59,8 @@ function toggleAIChat() {
     widget.style.display = isChatOpen ? 'flex' : 'none';
 
     if (isChatOpen) {
+        // Load chat history when opening
+        loadChatHistory();
         document.getElementById('chatInput').focus();
     }
 }
@@ -22,8 +69,9 @@ function toggleAIChat() {
  * Add message to chat area
  * @param {string} text - Message text (can contain HTML)
  * @param {boolean} isUser - True if message from user, false if from bot
+ * @param {boolean} saveHistory - Whether to save to localStorage (default: true)
  */
-function addMessage(text, isUser) {
+function addMessage(text, isUser, saveHistory = true) {
     const chatArea = document.getElementById('chatArea');
     const welcome = document.getElementById('welcomeMsg');
     if (welcome) welcome.remove();
@@ -33,6 +81,11 @@ function addMessage(text, isUser) {
     msg.innerHTML = '<div class="message-bubble">' + text + '</div>';
     chatArea.appendChild(msg);
     chatArea.scrollTop = chatArea.scrollHeight;
+
+    // Save chat history after adding message
+    if (saveHistory) {
+        saveChatHistory();
+    }
 }
 
 /**
@@ -172,4 +225,13 @@ document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && isChatOpen) {
         toggleAIChat();
     }
+});
+
+/**
+ * Initialize chat on page load
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('AI Chat initialized');
+    // Don't auto-load history here, only when opening chat
+    // This prevents issues with elements not being ready
 });
