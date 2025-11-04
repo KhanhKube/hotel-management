@@ -75,38 +75,47 @@ public class CommonController {
         return "redirect:/hotel/login";
     }
 
-    @PostMapping("/login")
-    public String login(@ModelAttribute("user") UserLoginDto formUser,
-                        Model model,
-                        HttpSession session,
-                        RedirectAttributes redirectAttrs) {
-        return commonService.login(formUser.getUsername(), formUser.getPassword())
-                .map(user -> {
-                    // Lưu user vào session
-                    session.setAttribute("user", user);
-                    if(!user.getOtpVerified()){
-                        commonService.resendOtp(user.getEmail());
-                        VerifyOtpDto verifyOtpDto = new VerifyOtpDto();
-                        verifyOtpDto.setEmail(user.getEmail());
-                        verifyOtpDto.setUsername(user.getUsername());
-                        verifyOtpDto.setPhoneNumber(user.getPhone());
-                        verifyOtpDto.setOtp(null);
-                        redirectAttrs.addFlashAttribute("verifyDto", verifyOtpDto);
-                        return "redirect:/hotel/verify";
-                    }
-                    if(!user.getRole().equals(CUSTOMER)){
-                        return "redirect:/hotel/dashboard";
-                    }
-                    model.addAttribute("message", "Welcome " + user.getFirstName());
-                    redirectAttrs.addFlashAttribute("message", "Welcome " + user.getFirstName());
-                    return "redirect:/hotel";
-                })
-                .orElseGet(() -> {
-                    redirectAttrs.addFlashAttribute("error", LOGININVALID);
-                    redirectAttrs.addFlashAttribute("userLogin", formUser);
-                    return "redirect:/hotel/login";
-                });
-    }
+	@PostMapping("/login")
+	public String login(@ModelAttribute("user") UserLoginDto formUser,
+	                    Model model,
+	                    HttpSession session,
+	                    RedirectAttributes redirectAttrs) {
+		return commonService.login(formUser.getUsername(), formUser.getPassword())
+				.map(user -> {
+					// Lưu user vào session
+					session.setAttribute("user", user);
+					if (!user.getOtpVerified()) {
+						commonService.resendOtp(user.getEmail());
+						VerifyOtpDto verifyOtpDto = new VerifyOtpDto();
+						verifyOtpDto.setEmail(user.getEmail());
+						verifyOtpDto.setUsername(user.getUsername());
+						verifyOtpDto.setPhoneNumber(user.getPhone());
+						verifyOtpDto.setOtp(null);
+						redirectAttrs.addFlashAttribute("verifyDto", verifyOtpDto);
+						return "redirect:/hotel/verify";
+					}
+					if (!user.getRole().equals(CUSTOMER)) {
+						return "redirect:/hotel/dashboard";
+					}
+					session.setAttribute("userId", user.getUserId());
+
+					// Kiểm tra nếu có trang cần quay lại
+					String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
+					if (redirectUrl != null) {
+						session.removeAttribute("redirectAfterLogin");
+						return "redirect:" + redirectUrl;
+					}
+
+					model.addAttribute("message", "Welcome " + user.getFirstName());
+					redirectAttrs.addFlashAttribute("message", "Xin chào " + user.getFirstName());
+					return "redirect:/hotel";
+				})
+				.orElseGet(() -> {
+					redirectAttrs.addFlashAttribute("error", LOGININVALID);
+					redirectAttrs.addFlashAttribute("userLogin", formUser);
+					return "redirect:/hotel/login";
+				});
+	}
 
     // Hiển thị form register
     @GetMapping("/register")
