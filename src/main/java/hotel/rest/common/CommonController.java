@@ -163,7 +163,7 @@ public class CommonController {
     public String resendOtp(@RequestParam String email, Model model) {
         MessageResponse response = commonService.resendOtp(email);
         model.addAttribute(response.isSuccess() ? "message" : "error", response.getMessage());
-        return "common/verify";
+        return "common/verify-otp";
     }
 
     // Show profile
@@ -198,7 +198,7 @@ public class CommonController {
                                 RedirectAttributes redirectAttrs) {
         MessageResponse response = commonService.editUserProfile(dto);
         if (response.isSuccess()) {
-            User user = commonService.getUserByUsername(dto.getUsername());
+            User user = commonService.getUserByPhoneOrEmail(dto.getPhone());
             session.setAttribute("user", user);
             model.addAttribute("message", response.getMessage());
             redirectAttrs.addFlashAttribute("message", response.getMessage());
@@ -226,10 +226,10 @@ public class CommonController {
                 return "redirect:/hotel/profile";
             }
 
-            MessageResponse response = commonService.updateAvatar(user.getUsername(), file);
+            MessageResponse response = commonService.updateAvatar(user.getPhone(), file);
 
             if (response.isSuccess()) {
-                User updatedUser = commonService.getUserByUsername(user.getUsername());
+                User updatedUser = commonService.getUserByPhoneOrEmail(user.getPhone());
                 if (user == null) {
                     return "redirect:/login";
                 }

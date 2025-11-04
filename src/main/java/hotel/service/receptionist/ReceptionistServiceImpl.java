@@ -127,9 +127,6 @@ public class ReceptionistServiceImpl implements ReceptionistService {
         if (!user.getPassword().equals(user.getConfirmPassword())) {
             return new MessageResponse(false, PASSWORDNOTMATCH);
         }
-        if (userRepository.existsByUsername(user.getUsername())) {
-            return new MessageResponse(false, USERNAMEDUPLICATE);
-        }
         if (userRepository.existsByEmail(user.getEmail())) {
             return new MessageResponse(false, EMAILDUPLICATE);
         }
@@ -140,7 +137,6 @@ public class ReceptionistServiceImpl implements ReceptionistService {
         User.Gender gender = Boolean.TRUE.equals(user.getGender()) ? User.Gender.MALE : User.Gender.FEMALE;
 
         User userResult = new User();
-        userResult.setUsername(user.getUsername());
         userResult.setEmail(user.getEmail());
         userResult.setRole(role);
         userResult.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -190,7 +186,6 @@ public class ReceptionistServiceImpl implements ReceptionistService {
         User.Gender gender = Boolean.TRUE.equals(user.getGender()) ? User.Gender.MALE : User.Gender.FEMALE;
 
         User userResult = userRepository.findById(receptionistId).get();
-        userResult.setUsername(user.getUsername());
         userResult.setEmail(user.getEmail());
         userResult.setPhone(user.getPhone());
         userResult.setFirstName(user.getFirstName());

@@ -236,7 +236,7 @@ public class AccountServiceImpl implements AccountService {
         }
 
         // Kiểm tra phone đã tồn tại chưa
-        if (userRepository.existsByPhoneAndUsernameNot(accountRequestDto.getPhone(), accountRequestDto.getUsername())) {
+        if (userRepository.existsByPhoneAndEmailNot(accountRequestDto.getPhone(), accountRequestDto.getEmail())) {
             throw new RuntimeException("Số điện thoại đã tồn tại: " + accountRequestDto.getPhone());
         }
 
@@ -270,7 +270,7 @@ public class AccountServiceImpl implements AccountService {
 
         // Kiểm tra phone đã tồn tại chưa (trừ user hiện tại)
         if (!existingUser.getPhone().equals(accountRequestDto.getPhone()) &&
-            userRepository.existsByPhoneAndUsernameNot(accountRequestDto.getPhone(), existingUser.getUsername())) {
+            userRepository.existsByPhoneAndEmailNot(accountRequestDto.getPhone(), existingUser.getEmail())) {
             throw new RuntimeException("Số điện thoại đã tồn tại: " + accountRequestDto.getPhone());
         }
 
