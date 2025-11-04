@@ -1,10 +1,9 @@
 package hotel.rest.cart;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import hotel.db.dto.cart.AddToCartRequest;
 import hotel.db.dto.cart.CartItemDto;
 import hotel.service.cart.CartService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +41,9 @@ public class CartController {
 	@PostMapping("/add")
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> addToCart(
-			@RequestBody(required = false) String requestBody,
-			HttpSession session) {
+			@RequestBody(required = false) AddToCartRequest requestBody,
+			HttpSession session,
+			HttpServletRequest request) {
 
 		Map<String, Object> response = new HashMap<>();
 
@@ -51,36 +51,21 @@ public class CartController {
 		System.out.println("=== Raw Request Body ===");
 		System.out.println(requestBody);
 
-		// Parse request manually
-		AddToCartRequest request = null;
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.registerModule(new JavaTimeModule());
-			request = mapper.readValue(requestBody, AddToCartRequest.class);
-
-			System.out.println("=== Parsed Request ===");
-			System.out.println("Room ID: " + request.getRoomId());
-			System.out.println("Check-in: " + request.getCheckIn());
-			System.out.println("Check-out: " + request.getCheckOut());
-		} catch (Exception e) {
-			System.err.println("Error parsing request: " + e.getMessage());
-			e.printStackTrace();
-			response.put("success", false);
-			response.put("message", "Invalid request format: " + e.getMessage());
-			return ResponseEntity.ok(response);
-		}
-
 		Integer userId = getUserIdFromSession(session);
 		System.out.println("User ID: " + userId);
 
 		if (userId == null) {
+
+			String currentUrl = request.getHeader("Referer"); // Trang trước đó
+			session.setAttribute("redirectAfterLogin", currentUrl);
+
 			response.put("success", false);
 			response.put("message", "Vui lòng đăng nhập để thêm vào giỏ hàng");
 			return ResponseEntity.ok(response);
 		}
 
 		try {
-			cartService.addToCart(userId, request);
+			cartService.addToCart(userId, requestBody);
 
 			int cartCount = cartService.getCartItemCount(userId);
 
