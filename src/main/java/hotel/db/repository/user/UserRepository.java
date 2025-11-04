@@ -13,16 +13,14 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
     Optional<User> findByPhone(String phone);
-    List<User> findUsersByFirstName(String name);
     Boolean existsByEmail(String email);
     Boolean existsByUsername(String username);
     Boolean existsByPhone(String phone);
     List<User> findByRole(String role);
-    Boolean existsByPhoneAndUsernameNot(String phone, String username);
-    Boolean existsByEmailAndUsernameNot(String email, String username);
+    Boolean existsByPhoneAndEmailNot(String phone, String email);
+    Boolean existsByEmailAndPhoneNot(String email, String phone);
     Page<User> findAll(Specification<User> user, Pageable pageable);
 
     // Soft delete methods

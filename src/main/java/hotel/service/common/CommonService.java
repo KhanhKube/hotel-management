@@ -15,9 +15,9 @@ import java.util.Optional;
 @Service
 public interface CommonService {
 
-    User getUserByUsername(String username);
+    User getUserByPhoneOrEmail(String request);
 
-    Optional<User> login(String username, String password);
+    Optional<User> login(String request, String password);
 
     MessageResponse registerUser(UserRegisterDto userRegisterDto);
 
@@ -25,9 +25,9 @@ public interface CommonService {
 
     UserProfileDto userToUserProfile(User user);
 
-    MessageResponse updateAvatar(String userName, MultipartFile file) throws IOException;
+    MessageResponse updateAvatar(String phone, MultipartFile file) throws IOException;
 
     MessageResponse verifyOtp(VerifyOtpDto dto);
 
-    MessageResponse resendOtp(String username);
+    MessageResponse resendOtp(String email);
 }

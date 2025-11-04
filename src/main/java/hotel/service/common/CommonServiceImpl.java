@@ -40,22 +40,24 @@ public class CommonServiceImpl implements CommonService {
     private final JavaMailSender mailSender;
 
     @Override
-    public User getUserByUsername(String username) {
-        if (username == null || username.trim().isEmpty()) {
+    public User getUserByPhoneOrEmail(String request) {
+        if (request == null || request.isBlank()) {
             return null;
         }
-        return userRepository.findByUsername(username)
+
+        return userRepository.findByEmail(request)
+                .or(() -> userRepository.findByPhone(request))
                 .orElse(null);
     }
 
     @Override
-    public Optional<User> login(String username, String rawPassword) {
-        Optional<User> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            user = userRepository.findByEmail(username);
+    public Optional<User> login(String request, String rawPassword) {
+        if(request == null || rawPassword == null) {
+            return Optional.empty();
         }
+        Optional<User> user = userRepository.findByEmail(request);
         if (user.isEmpty()) {
-            user = userRepository.findByPhone(username);
+            user = userRepository.findByPhone(request);
         }
         return user.filter(u -> passwordEncoder.matches(rawPassword, u.getPassword()));
     }
@@ -65,8 +67,7 @@ public class CommonServiceImpl implements CommonService {
         if (dto == null) {
             return new MessageResponse(false, FILLALLFEILD);
         }
-        if (isNullOrEmpty(dto.getUsername()) ||
-                isNullOrEmpty(dto.getEmail()) ||
+        if (isNullOrEmpty(dto.getEmail()) ||
                 isNullOrEmpty(dto.getPassword()) ||
                 isNullOrEmpty(dto.getConfirmPassword()) ||
                 isNullOrEmpty(dto.getPhone()) ||
@@ -82,9 +83,9 @@ public class CommonServiceImpl implements CommonService {
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             return new MessageResponse(false, PASSWORDNOTMATCH);
         }
-        if (userRepository.existsByUsername(dto.getUsername())) {
-            return new MessageResponse(false, USERNAMEDUPLICATE);
-        }
+//        if (userRepository.existsByUsername(dto.getUsername())) {
+//            return new MessageResponse(false, USERNAMEDUPLICATE);
+//        }
         if (userRepository.existsByEmail(dto.getEmail())) {
             return new MessageResponse(false, EMAILDUPLICATE);
         }
@@ -116,7 +117,10 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public MessageResponse verifyOtp(VerifyOtpDto dto) {
-        User user = userRepository.findByUsername(dto.getUsername()).orElse(null);
+        User user = userRepository.findByPhone(dto.getPhoneNumber()).orElse(null);
+        if(user == null) {
+            user = userRepository.findByEmail(dto.getEmail()).orElse(null);
+        }
         if (user == null) {
             return new MessageResponse(false, "Email không tồn tại.");
         }
@@ -135,8 +139,8 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public MessageResponse resendOtp(String username) {
-        User user = userRepository.findByUsername(username).orElse(null);
+    public MessageResponse resendOtp(String email) {
+        User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
             return new MessageResponse(false, "Không tìm thấy người dùng với email này.");
         }
@@ -154,8 +158,7 @@ public class CommonServiceImpl implements CommonService {
         if (dto == null) {
             return new MessageResponse(false, FILLALLFEILD);
         }
-        if (isNullOrEmpty(dto.getUsername()) ||
-                isNullOrEmpty(dto.getEmail()) ||
+        if (isNullOrEmpty(dto.getEmail()) ||
                 isNullOrEmpty(dto.getFirstName()) ||
                 isNullOrEmpty(dto.getLastName()) ||
                 isNullOrEmpty(dto.getPhone()) ||
@@ -165,13 +168,13 @@ public class CommonServiceImpl implements CommonService {
         if (!dto.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
             return new MessageResponse(false, EMAILINVALID);
         }
-        if (userRepository.existsByEmailAndUsernameNot(dto.getEmail(), dto.getUsername())) {
+        if (userRepository.existsByEmailAndPhoneNot(dto.getEmail(), dto.getUsername())) {
             return new MessageResponse(false, EMAILEXIST);
         }
         if (!dto.getPhone().matches("^0\\d{9}$")) {
             return new MessageResponse(false, PHONEINVALID);
         }
-        if (userRepository.existsByPhoneAndUsernameNot(dto.getPhone(), dto.getUsername())) {
+        if (userRepository.existsByPhoneAndEmailNot(dto.getPhone(), dto.getEmail())) {
             return new MessageResponse(false, PHONEEXIST);
         }
         LocalDate today = LocalDate.now();
@@ -180,7 +183,7 @@ public class CommonServiceImpl implements CommonService {
         }
         User.Gender gender = Boolean.TRUE.equals(dto.getGender()) ? User.Gender.MALE : User.Gender.FEMALE;
 
-        User user = userRepository.findByUsername(dto.getUsername())
+        User user = userRepository.findByPhone(dto.getPhone())
                 .orElseThrow(() -> new RuntimeException(USERNOTEXIST));
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
@@ -228,7 +231,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public MessageResponse updateAvatar(String userName, MultipartFile file) throws IOException {
+    public MessageResponse updateAvatar(String phone, MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             return new MessageResponse(false, CHOOSEPICTURE);
         }
@@ -263,7 +266,7 @@ public class CommonServiceImpl implements CommonService {
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
         // Update user profile
-        User user = userRepository.findByUsername(userName)
+        User user = userRepository.findByPhone(phone)
                 .orElseThrow(() -> new RuntimeException(USERNOTEXIST));
         user.setAvatarUrl("/images/avatar/" + fileName);
         userRepository.save(user);
