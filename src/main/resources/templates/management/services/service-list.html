@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Service Management</title>
+    <base th:href="@{/static}">
+    <!-- Corona Admin assets -->
+    <!-- plugins:css -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <!-- End plugins:css -->
+    <!-- Plugin css for this page -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/jvectormap/jquery-jvectormap.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/flag-icon-css/css/flag-icon.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.theme.default.min.css}">
+    <!-- End plugin css for this page -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <!-- End layout styles -->
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <style>
+        tbody tr:hover {
+            cursor: pointer;
+            opacity: 0.65;
+            transition: background-color 0.2s;
+        }
+    </style>
+</head>
+<body>
+<div class="container-scroller">
+    <!-- Include sidebar -->
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_navbar.html -->
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                                                                               alt="logo" /></a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            </div>
+        </nav>
+        <!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row ">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- Search & Filter Bar -->
+                                <div class="filter-section mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px;">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
+                                        <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Dịch Vụ</h5>
+                                    </div>
+
+                                    <!-- Row 1: Search -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <i class="mdi mdi-magnify text-primary"></i>
+                                                </span>
+                                                <input id="searchInput" type="text" class="form-control border-start-0"
+                                                       placeholder="Tìm kiếm tên dịch vụ...">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 2: Filters -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <input type="number" id="filterPriceFrom" class="form-control"
+                                                   placeholder="Giá từ...">
+                                        </div>
+
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <input type="number" id="filterPriceTo" class="form-control"
+                                                   placeholder="Giá đến...">
+                                        </div>
+
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <input type="date" id="filterDate" class="form-control"
+                                                   placeholder="Lọc theo ngày">
+                                        </div>
+
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <select id="filterStatus" class="form-control">
+                                                <option value="">Tất cả trạng thái</option>
+                                                <option value="Active">Active</option>
+                                                <option value="Inactive">Inactive</option>
+                                                <option value="Pending">Pending</option>
+                                            </select>
+                                        </div>
+
+
+                                    </div>
+
+                                    <!-- Row 3: Buttons -->
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6 col-sm-12 mb-2">
+                                            <button  id="btnSearch" onclick="applyAllFilters()" class="btn btn-info me-2">
+                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                            </button>
+
+                                            <button onclick="resetAllFilters()" class="btn btn-light">
+                                                <i class="mdi mdi-refresh"></i> Reset
+                                            </button>
+                                        </div>
+
+                                        <div class="col-md-6 col-sm-12 mb-2 text-end">
+                                            <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
+                                                <i class="mdi mdi-room-service"></i>
+                                                Tổng: <strong id="resultCount" th:text="${services.totalElements}">0</strong> dịch vụ
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Error Message -->
+                                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <strong>Lỗi!</strong> <span th:text="${error}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+
+                                <!-- Success Message -->
+                                <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-check-circle"></i>
+                                    <strong>Thành công!</strong> <span th:text="${message}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Service Management</h4>
+                                    <a th:href="@{/management/services/add}" class="btn btn-primary">
+                                        <i class="mdi mdi-plus"></i> Create New Service
+                                    </a>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table" id="serviceTable">
+                                        <thead>
+                                        <tr>
+                                            <th> STT </th>
+                                            <th onclick="sortTable(1, this)" style="cursor: pointer;">
+                                                Service Name <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th onclick="sortTable(2, this)" style="cursor: pointer;">
+                                                Description <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th onclick="sortTable(3, this)" style="cursor: pointer;">
+                                                Price <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th onclick="sortTable(4, this)" style="cursor: pointer;">
+                                                Created Date <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th onclick="sortTable(5, this)" style="cursor: pointer;">
+                                                Status <i class="mdi mdi-sort"></i>
+                                            </th>
+                                            <th> Actions </th>
+
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="service, stat : ${services.content}"
+                                            th:onclick="|window.location.href='@{/management/services/view/{id}(id=${service.serviceId})}';|"
+                                            style="cursor: pointer;">
+
+                                            <td th:text="${stat.count}"></td>
+                                            <td th:text="${service.serviceName != null ? service.serviceName : 'N/A'}"></td>
+                                            <td th:text="${service.serviceDescription != null ? #strings.abbreviate(service.serviceDescription, 50) : 'N/A'}"></td>
+                                            <td>
+                                                <span class="badge badge-success"
+                                                      th:text="${service.price != null ? #numbers.formatInteger(service.price.intValue(), 3, 'POINT') + ' VNĐ' : 'N/A'}"></span>
+                                            </td>
+                                            <td th:text="${service.createdAt != null ? #temporals.format(service.createdAt, 'dd/MM/yyyy') : 'N/A'}"></td>
+
+                                            <td>
+    <span th:classappend="${service.status == 'Active'} ? 'badge badge-success'
+                         : (${service.status == 'Inactive'} ? 'badge badge-secondary'
+                         : 'badge badge-warning')"
+          th:text="${service.status != null ? service.status : 'N/A'}"></span>
+                                            </td>
+
+                                            <td onclick="event.stopPropagation();">
+                                                <a th:href="@{/management/services/view/{id}(id=${service.serviceId})}" class="btn btn-info btn-sm me-1">
+                                                    <i class="mdi mdi-eye"></i>
+                                                </a>
+                                                <a th:href="@{/management/services/edit/{id}(id=${service.serviceId})}" class="btn btn-warning btn-sm me-1">
+                                                    <i class="mdi mdi-pencil"></i>
+                                                </a>
+                                                <form th:action="@{/management/services/delete/{id}(id=${service.serviceId})}" method="post" style="display:inline">
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('Are you sure you want to delete this service?')">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+
+                                        <tr th:if="${#lists.isEmpty(services.content)}">
+                                            <td colspan="6" class="text-center text-muted">No services available</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <nav th:if="${totalPages > 1}">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/management/services(page=${currentPage - 1}, name=${name}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                                                <i class="mdi mdi-chevron-left"></i> Previous
+                                            </a>
+                                        </li>
+                                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                            th:classappend="${i == currentPage} ? 'active'">
+                                            <a class="page-link" th:href="@{/management/services(page=${i}, name=${name}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                                               th:text="${i + 1}"></a>
+                                        </li>
+                                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/management/services(page=${currentPage + 1}, name=${name}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                                                Next <i class="mdi mdi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- content-wrapper ends -->
+            <!-- partial:partials/_footer.html -->
+            <footer class="footer">
+                <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                        <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright ©
+                            bootstrapdash.com 2020</span>
+                </div>
+            </footer>
+            <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+</div>
+<!-- container-scroller -->
+
+<!-- plugins:js -->
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<!-- End plugins:js -->
+<!-- Plugin js for this page -->
+<script th:src="@{/assets/vendors/chart.js/Chart.min.js}"></script>
+<script th:src="@{/assets/vendors/progressbar.js/progressbar.min.js}"></script>
+<script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap.min.js}"></script>
+<script th:src="@{/assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js}"></script>
+<script th:src="@{/assets/vendors/owl-carousel-2/owl.carousel.min.js}"></script>
+<!-- End plugin js for this page -->
+<!-- inject:js -->
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+<script th:src="@{/assets/js/settings.js}"></script>
+<script th:src="@{/assets/js/todolist.js}"></script>
+<!-- endinject -->
+<!-- Custom js for this page -->
+<script th:src="@{/assets/js/dashboard.js}"></script>
+<!-- End custom js for this page -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchInput');
+        const filterPriceFrom = document.getElementById('filterPriceFrom');
+        const filterPriceTo = document.getElementById('filterPriceTo');
+        const filterDate = document.getElementById('filterDate');
+        const filterStatus = document.getElementById('filterStatus');
+        const btnSearch = document.getElementById('btnSearch');
+        const resultCount = document.getElementById('resultCount');
+        const serviceTable = document.getElementById('serviceTable');
+
+        let tableRows = Array.from(serviceTable.tBodies[0].rows);
+        let originalRowsOrder = [...tableRows];
+
+        // ===================== FILTER FUNCTION =====================
+        function applyAllFilters() {
+            const searchText = searchInput.value.toLowerCase().trim();
+            const priceFrom = parseFloat(filterPriceFrom.value) || 0;
+            const priceTo = parseFloat(filterPriceTo.value) || Infinity;
+            const selectedDate = filterDate.value;
+            const status = filterStatus.value.toLowerCase();
+
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                if (row.querySelector('td[colspan]')) {
+                    row.style.display = 'none';
+                    return;
+                }
+
+                const serviceName = row.cells[1]?.textContent.toLowerCase().trim() || '';
+                const priceText = row.cells[3]?.textContent.trim() || '';
+                const createdDate = row.cells[4]?.textContent.trim() || '';
+                const rowStatus = row.cells[5]?.textContent.trim().toLowerCase() || '';
+
+                const price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
+
+                const matchSearch = searchText === '' || serviceName.includes(searchText);
+                const matchPrice = price >= priceFrom && price <= priceTo;
+                const matchStatus = status === '' || rowStatus === status;
+
+                let matchDate = true;
+                if (selectedDate) {
+                    const filterDateObj = new Date(selectedDate);
+                    const createdDateObj = parseDate(createdDate);
+                    matchDate = createdDateObj.toDateString() === filterDateObj.toDateString();
+                }
+
+                if (matchSearch && matchPrice && matchDate && matchStatus) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            resultCount.textContent = visibleCount;
+        }
+
+        // ===================== DATE PARSER =====================
+        function parseDate(dateStr) {
+            if (!dateStr || dateStr === 'N/A') return new Date(0);
+            const parts = dateStr.split('/');
+            return new Date(parts[2], parts[1] - 1, parts[0]); // dd/MM/yyyy
+        }
+
+        // ===================== RESET FUNCTION =====================
+        window.resetAllFilters = function () {
+            searchInput.value = '';
+            filterPriceFrom.value = '';
+            filterPriceTo.value = '';
+            filterDate.value = '';
+            filterStatus.value = '';
+            applyAllFilters();
+        };
+
+        // ===================== SORT SCRIPT =====================
+        const sortStates = {};
+
+        window.sortTable = function (columnIndex, headerElement) {
+            const table = document.getElementById("serviceTable");
+            const tbody = table.tBodies[0];
+
+            if (sortStates[columnIndex] === undefined) sortStates[columnIndex] = 0;
+            sortStates[columnIndex] = (sortStates[columnIndex] + 1) % 3;
+
+            const allHeaders = table.querySelectorAll('thead th');
+            allHeaders.forEach(th => {
+                const icon = th.querySelector('i');
+                if (icon) {
+                    icon.className = 'mdi mdi-sort';
+                    icon.style.color = '';
+                }
+            });
+
+            const icon = headerElement.querySelector('i');
+            if (sortStates[columnIndex] === 0) {
+                icon.className = 'mdi mdi-sort';
+                icon.style.color = '';
+                tbody.innerHTML = '';
+                originalRowsOrder.forEach(row => tbody.appendChild(row.cloneNode(true)));
+                tableRows = Array.from(tbody.rows);
+                applyAllFilters();
+                return;
+            } else if (sortStates[columnIndex] === 1) {
+                icon.className = 'mdi mdi-sort-ascending';
+                icon.style.color = '#667eea';
+            } else {
+                icon.className = 'mdi mdi-sort-descending';
+                icon.style.color = '#667eea';
+            }
+
+            const rows = Array.from(tbody.rows);
+            rows.sort((a, b) => {
+                const cellA = a.cells[columnIndex].textContent.trim().toLowerCase();
+                const cellB = b.cells[columnIndex].textContent.trim().toLowerCase();
+
+                const valA = isNaN(cellA) ? cellA : Number(cellA);
+                const valB = isNaN(cellB) ? cellB : Number(cellB);
+
+                if (valA < valB) return sortStates[columnIndex] === 1 ? -1 : 1;
+                if (valA > valB) return sortStates[columnIndex] === 1 ? 1 : -1;
+                return 0;
+            });
+
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+            tableRows = Array.from(tbody.rows);
+            applyAllFilters();
+        };
+
+        // ===================== SEARCH BUTTON =====================
+        btnSearch.addEventListener('click', applyAllFilters);
+    });
+</script>
+
+
+
+
+</body>
+
+</html>

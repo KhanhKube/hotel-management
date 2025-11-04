@@ -252,8 +252,8 @@
             </div>
 
             <!-- Featured Image -->
-            <img th:if="${news.image != null}" 
-                 th:src="${news.image}" 
+            <img th:if="${news.image != null}"
+                 th:src="${news.image}"
                  th:alt="${news.title}"
                  class="news-featured-image">
 
@@ -305,12 +305,12 @@
                 <div class="col-md-4 mb-4" th:each="related : ${relatedNews}">
                     <div class="card-news-small">
                         <div class="card-news-small__img">
-                            <img th:src="${related.image != null ? related.image : '/img/home/explore1.png'}" 
+                            <img th:src="${related.image != null ? related.image : '/img/home/explore1.png'}"
                                  th:alt="${related.title}">
                         </div>
                         <div class="card-body">
                             <h5>
-                                <a th:href="@{/news/{id}(id=${related.newsId})}" 
+                                <a th:href="@{/news/{id}(id=${related.newsId})}"
                                    th:text="${related.title}">Tiêu đề tin tức</a>
                             </h5>
                             <div class="news-date">

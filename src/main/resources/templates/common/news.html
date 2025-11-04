@@ -213,6 +213,7 @@
 <section class="news-banner">
     <div class="container">
         <h1><i class="fas fa-newspaper me-3"></i>Tin tức & Sự kiện</h1>
+        <p>Cập nhật những tin tức mới nhất về khách sạn và các sự kiện đặc biệt</p>
     </div>
 </section>
 
@@ -222,19 +223,19 @@
         <!-- Filter -->
         <div class="news-filter">
             <div class="filter-tabs">
-                <a th:href="@{/news}" 
+                <a th:href="@{/news}"
                    th:class="${status == null ? 'filter-tab active' : 'filter-tab'}">
                     <i class="fas fa-th-large me-2"></i>Tất cả
                 </a>
-                <a th:href="@{/news(status='PUBLISHED')}" 
+                <a th:href="@{/news(status='PUBLISHED')}"
                    th:class="${status == 'PUBLISHED' ? 'filter-tab active' : 'filter-tab'}">
                     <i class="fas fa-star me-2"></i>Nổi bật
                 </a>
-                <a th:href="@{/news(groupId=1)}" 
+                <a th:href="@{/news(groupId=1)}"
                    th:class="${groupId == 1 ? 'filter-tab active' : 'filter-tab'}">
                     <i class="fas fa-calendar-alt me-2"></i>Sự kiện
                 </a>
-                <a th:href="@{/news(groupId=2)}" 
+                <a th:href="@{/news(groupId=2)}"
                    th:class="${groupId == 2 ? 'filter-tab active' : 'filter-tab'}">
                     <i class="fas fa-gift me-2"></i>Khuyến mãi
                 </a>
@@ -246,7 +247,7 @@
             <div class="col-md-6 col-lg-4 mb-4" th:each="news : ${newsList}">
                 <div class="card card-news">
                     <div class="card-news__img">
-                        <img th:src="${news.image != null ? news.image : '/img/home/explore1.png'}" 
+                        <img th:src="${news.image != null ? news.image : '/img/home/explore1.png'}"
                              th:alt="${news.title}">
                         <span class="news-badge" th:if="${news.status == 'PUBLISHED'}">
                             <i class="fas fa-fire me-1"></i>Mới
@@ -254,7 +255,7 @@
                     </div>
                     <div class="card-body">
                         <h4 class="card-news__title">
-                            <a th:href="@{/news/{id}(id=${news.newsId})}" 
+                            <a th:href="@{/news/{id}(id=${news.newsId})}"
                                th:text="${news.title}">Tiêu đề tin tức</a>
                         </h4>
                         <ul class="card-news__info">
@@ -297,7 +298,7 @@
                 </li>
                 <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                     th:class="${i == currentPage ? 'active' : ''}">
-                    <a th:href="@{/news(page=${i}, status=${status}, groupId=${groupId})}" 
+                    <a th:href="@{/news(page=${i}, status=${status}, groupId=${groupId})}"
                        th:text="${i + 1}">1</a>
                 </li>
                 <li th:if="${currentPage < totalPages - 1}">

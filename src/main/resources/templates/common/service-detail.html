@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${service.serviceName} + ' - Dịch vụ đặc biệt'">Chi tiết dịch vụ - Hotel</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/vendors/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="/vendors/linericon/style.css">
+    <link rel="stylesheet" href="/vendors/magnefic-popup/magnific-popup.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.theme.default.min.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.carousel.min.css">
+    <link rel="stylesheet" href="/vendors/nice-select/nice-select.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Service detail styling */
+        .service-detail-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 0;
+            color: white;
+            margin-bottom: 50px;
+        }
+        
+        .service-detail-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .service-detail-header .service-price {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+        
+        .service-detail-header .service-meta {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .service-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .service-meta-item i {
+            font-size: 1.2rem;
+        }
+        
+        /* Service image */
+        .service-image {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        .service-image img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+        
+        /* Service info cards */
+        .service-info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .service-info-card h3 {
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .service-info-card h3 i {
+            color: #667eea;
+        }
+        
+        .service-info-card p {
+            color: #6c757d;
+            line-height: 1.8;
+            margin-bottom: 0;
+        }
+        
+        /* Action buttons */
+        .service-actions {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .btn-service {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 10px 10px 0;
+        }
+        
+        .btn-service:hover {
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-service.btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+        
+        .btn-service.btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* Breadcrumb styling */
+        .breadcrumb-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 0;
+            margin-bottom: 0;
+        }
+        
+        .breadcrumb-custom .breadcrumb {
+            background: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .breadcrumb-custom .breadcrumb-item a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-custom .breadcrumb-item.active {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .service-detail-header h1 {
+                font-size: 2rem;
+            }
+            
+            .service-detail-header .service-meta {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .service-image img {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- import header -->
+<div th:replace="~{common/header :: header}"></div>
+
+<!-- Breadcrumb -->
+<section class="breadcrumb-custom">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/hotel}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/services}">Dịch vụ đặc biệt</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${service.serviceName}">Tên dịch vụ</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!-- Service Detail Header -->
+<section class="service-detail-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 th:text="${service.serviceName}">Tên dịch vụ</h1>
+<!--                <div class="service-price" th:if="${service.price != null}">-->
+<!--                    <span th:text="${#numbers.formatDecimal(service.price, 0, 'POINT')} + ' VNĐ'">0 VNĐ</span>-->
+<!--                </div>-->
+                <div class="service-meta">
+                    <div class="service-meta-item" th:if="${service.openingHours != null}">
+                        <i class="ti-time"></i>
+                        <span th:text="${service.openingHours}">Giờ mở cửa</span>
+                    </div>
+                    <div class="service-meta-item">
+                        <i class="ti-tag"></i>
+                        <span th:text="${service.status == 'ACTIVE' ? 'Đang hoạt động' : 'Tạm ngưng'}">Trạng thái</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Service Detail Content -->
+<section class="section-margin">
+    <div class="container">
+        <div class="row">
+            <!-- Service Image -->
+            <div class="col-lg-6 mb-4">
+                <div class="service-image">
+                    <img th:src="${service.image != null ? service.image : '/img/home/explore1.png'}" 
+                         th:alt="${service.serviceName}">
+                </div>
+            </div>
+            
+            <!-- Service Information -->
+            <div class="col-lg-6">
+                <!-- Description -->
+                <div class="service-info-card" th:if="${service.serviceDescription != null}">
+                    <h3><i class="ti-info"></i>Mô tả dịch vụ</h3>
+                    <p th:text="${service.serviceDescription}">Mô tả chi tiết về dịch vụ...</p>
+                </div>
+                
+                <!-- Short Description -->
+                <div class="service-info-card" th:if="${service.shortDescription != null}">
+                    <h3><i class="ti-bookmark"></i>Tóm tắt</h3>
+                    <p th:text="${service.shortDescription}">Mô tả ngắn về dịch vụ...</p>
+                </div>
+                
+                <!-- Opening Hours -->
+                <div class="service-info-card" th:if="${service.openingHours != null}">
+                    <h3><i class="ti-time"></i>Giờ hoạt động</h3>
+                    <p th:text="${service.openingHours}">Giờ mở cửa</p>
+                </div>
+                
+                <!-- Price Information -->
+                <div class="service-info-card" th:if="${service.price != null}">
+                    <h3><i class="ti-money"></i>Giá dịch vụ</h3>
+                    <p>
+                    <h3 class="card-explore__price" th:text="${#numbers.formatInteger(service.price.intValue(), 3, 'POINT')} + ' VNĐ'">350.000 <sub>/ Ngày</sub></h3>
+
+<!--                    <strong th:text="${#numbers.formatDecimal(service.price, 0, 'POINT')} + ' VNĐ'">0 VNĐ</strong>-->
+                        <span class="text-muted ms-2">(Giá có thể thay đổi tùy theo thời điểm)</span>
+                    </p>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="service-actions">
+                    <h3 class="mb-4">Đặt dịch vụ ngay</h3>
+                    <a href="#" class="btn-service" onclick="addToCart()">
+                        <i class="ti-shopping-cart"></i> Thêm vào giỏ hàng
+                    </a>
+                    <a th:href="@{/services}" class="btn-service btn-outline">
+                        <i class="ti-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Services Section -->
+<section class="section-margin bg-light">
+    <div class="container">
+        <div class="section-intro text-center pb-80px">
+            <div class="section-intro__style">
+                <img src="/img/home/bed-icon.png" alt="">
+            </div>
+            <h2>Dịch vụ khác</h2>
+            <p class="mt-3 text-muted">Khám phá thêm các dịch vụ đặc biệt khác</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-12 text-center">
+                <a th:href="@{/services}" class="btn-service">
+                    <i class="ti-list"></i> Xem tất cả dịch vụ
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- import footer -->
+<div th:replace="~{common/footer :: footer}"></div>
+
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
+<script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
+<script src="/vendors/easing.min.js"></script>
+<script src="/vendors/superfish.min.js"></script>
+<script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
+<script src="/vendors/jquery.ajaxchimp.min.js"></script>
+<script src="/vendors/mail-script.js"></script>
+<script src="/js/main.js"></script>
+
+<script>
+    function addToCart() {
+        // Get service information
+        const serviceId = /*[[${service.serviceId}]]*/ null;
+        const serviceName = /*[[${service.serviceName}]]*/ '';
+        const servicePrice = /*[[${service.price}]]*/ 0;
+        
+        // Create cart item
+        const cartItem = {
+            id: serviceId,
+            name: serviceName,
+            price: servicePrice,
+            type: 'service',
+            quantity: 1
+        };
+        
+        // Get existing cart or create new one
+        let cart = JSON.parse(localStorage.getItem('hotelCart') || '[]');
+        
+        // Check if item already exists in cart
+        const existingItem = cart.find(item => item.id === serviceId && item.type === 'service');
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push(cartItem);
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('hotelCart', JSON.stringify(cart));
+        
+        // Show success message
+        showNotification('Đã thêm dịch vụ vào giỏ hàng!', 'success');
+        
+        // Update cart count if exists
+        updateCartCount();
+    }
+    
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
+    }
+    
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('hotelCart') || '[]');
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        
+        // Update cart count in header if exists
+        const cartCountElement = document.querySelector('.cart-count');
+        if (cartCountElement) {
+            cartCountElement.textContent = totalItems;
+            cartCountElement.style.display = totalItems > 0 ? 'inline' : 'none';
+        }
+    }
+    
+    // Initialize cart count on page load
+    $(document).ready(function() {
+        updateCartCount();
+    });
+</script>
+</body>
+</html>
