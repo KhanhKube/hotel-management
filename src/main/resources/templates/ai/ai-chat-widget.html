@@ -1,67 +1,65 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="/css/ai-chat.css">
-</head>
-
 <body>
 
-    <!-- AI Chat Widget Fragment -->
-    <div th:fragment="aiChatWidget">
+<!-- AI Chat Widget Fragment -->
+<div th:fragment="aiChatWidget">
 
-        <!-- AI Chat Button -->
-        <button id="aiChatButton" onclick="toggleAIChat()">
-            <span class="chat-icon">💬</span>
-            <span class="ai-badge">AI</span>
-        </button>
+    <!-- AI Chat Button -->
+    <button id="aiChatButton" onclick="toggleAIChat()">
+        <span class="chat-icon">💬</span>
+        <span class="ai-badge">AI</span>
+    </button>
 
-        <!-- AI Chat Widget -->
-        <div id="aiChatWidget">
-            <!-- Header -->
-            <div class="chat-header">
-                <div class="chat-header-content">
-                    <div class="chat-avatar">🤖</div>
-                    <div class="chat-header-text">
-                        <div class="chat-title">AI Trợ Lý Đặt Phòng</div>
-                        <div class="chat-subtitle">Tìm phòng phù hợp cho bạn</div>
-                    </div>
-                </div>
-                <button class="chat-close-btn" onclick="toggleAIChat()">×</button>
-            </div>
-
-            <!-- Chat Messages Area -->
-            <div id="chatArea" class="chat-messages">
-                <div id="welcomeMsg" class="welcome-message">
-                    <div class="welcome-icon">👋</div>
-                    <div class="welcome-title">Xin chào!</div>
-                    <div class="welcome-text">Tôi là trợ lý AI của khách sạn. Hãy cho tôi biết bạn đang tìm loại phòng
-                        nào?</div>
-                    <div class="welcome-examples">
-                        <div class="example-chip" onclick="sendExampleMessage('Tôi muốn phòng VIP')">Phòng VIP</div>
-                        <div class="example-chip" onclick="sendExampleMessage('Tìm phòng giá rẻ')">Phòng giá rẻ</div>
-                        <div class="example-chip" onclick="sendExampleMessage('Phòng Deluxe')">Phòng Deluxe</div>
-                    </div>
+    <!-- AI Chat Widget -->
+    <div id="aiChatWidget">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="chat-header-content">
+                <div class="chat-avatar">🤖</div>
+                <div class="chat-header-text">
+                    <div class="chat-title">AI Trợ Lý Đặt Phòng</div>
+                    <div class="chat-subtitle">Tìm phòng phù hợp cho bạn</div>
                 </div>
             </div>
-
-            <!-- Input Area -->
-            <div class="chat-input-area">
-                <input type="text" id="chatInput" placeholder="Nhập yêu cầu của bạn..."
-                    onkeypress="handleKeyPress(event)">
-                <button class="chat-send-btn" onclick="sendMessage()">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                    </svg>
+            <div style="display: flex; gap: 8px;">
+                <button class="chat-clear-btn" onclick="clearChatHistory()" title="Xóa lịch sử chat">
+                    <i class="fas fa-trash-alt"></i>
                 </button>
+                <button class="chat-close-btn" onclick="toggleAIChat()">×</button>
             </div>
         </div>
 
-        <!-- Import AI Chat JavaScript -->
-        <script src="/js/ai-chat.js"></script>
+        <!-- Chat Messages Area -->
+        <div id="chatArea" class="chat-messages">
+            <div id="welcomeMsg" class="welcome-message">
+                <div class="welcome-icon">👋</div>
+                <div class="welcome-title">Xin chào!</div>
+                <div class="welcome-text">Tôi là trợ lý AI của khách sạn. Hãy cho tôi biết bạn đang tìm loại phòng
+                    nào?
+                </div>
+                <div class="welcome-examples">
+                    <div class="example-chip" onclick="sendExampleMessage('Tôi muốn phòng VIP')">Phòng VIP</div>
+                    <div class="example-chip" onclick="sendExampleMessage('Tìm phòng giá rẻ')">Phòng giá rẻ</div>
+                    <div class="example-chip" onclick="sendExampleMessage('Phòng Deluxe')">Phòng Deluxe</div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Input Area -->
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Nhập yêu cầu của bạn..."
+                   onkeypress="handleKeyPress(event)">
+            <button class="chat-send-btn" onclick="sendMessage()">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
     </div>
+
+</div>
 
 </body>
 

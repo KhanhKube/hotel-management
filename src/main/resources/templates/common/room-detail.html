@@ -19,6 +19,7 @@
 
     <!-- Flatpickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="/css/ai-chat.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -278,21 +279,26 @@
 
         </div>
 
-    </section>
-    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-    <!-- import header -->
-    <div th:replace="~{common/footer :: footer}"></div>
+</section>
 
-    <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
-    <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
-    <script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
-    <script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
-    <script src="/vendors/easing.min.js"></script>
-    <script src="/vendors/superfish.min.js"></script>
-    <script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
-    <script src="/vendors/jquery.ajaxchimp.min.js"></script>
-    <script src="/vendors/mail-script.js"></script>
-    <script src="/js/main.js"></script>
+<!-- import AI Chat Widget -->
+<div th:replace="~{ai/ai-chat-widget :: aiChatWidget}"></div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<!-- import footer -->
+<div th:replace="~{common/footer :: footer}"></div>
+
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
+<script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
+<script src="/vendors/easing.min.js"></script>
+<script src="/vendors/superfish.min.js"></script>
+<script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
+<script src="/vendors/jquery.ajaxchimp.min.js"></script>
+<script src="/vendors/mail-script.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/ai-chat.js"></script>
 
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

@@ -4,6 +4,88 @@
  */
 
 let isChatOpen = false;
+const CHAT_HISTORY_KEY = 'aiChatHistory';
+const CHAT_STATE_KEY = 'aiChatState';
+
+/**
+ * Save chat history to localStorage
+ */
+function saveChatHistory() {
+    const chatArea = document.getElementById('chatArea');
+    if (!chatArea) return;
+    const messages = chatArea.innerHTML;
+    localStorage.setItem(CHAT_HISTORY_KEY, messages);
+    console.log('Chat history saved');
+}
+
+/**
+ * Save chat state (open/close)
+ */
+function saveChatState() {
+    localStorage.setItem(CHAT_STATE_KEY, isChatOpen ? 'open' : 'closed');
+    console.log('Chat state saved:', isChatOpen ? 'open' : 'closed');
+}
+
+/**
+ * Load chat history from localStorage
+ */
+function loadChatHistory() {
+    const savedHistory = localStorage.getItem(CHAT_HISTORY_KEY);
+    if (savedHistory) {
+        const chatArea = document.getElementById('chatArea');
+        if (!chatArea) return;
+        
+        chatArea.innerHTML = savedHistory;
+        chatArea.scrollTop = chatArea.scrollHeight;
+        console.log('Chat history loaded');
+        
+        // Remove target="_blank" from all links to navigate in same tab
+        const links = chatArea.querySelectorAll('a');
+        links.forEach(link => {
+            link.removeAttribute('target');
+            link.removeAttribute('rel');
+        });
+    }
+}
+
+/**
+ * Restore chat state on page load
+ */
+function restoreChatState() {
+    const savedState = localStorage.getItem(CHAT_STATE_KEY);
+    console.log('Restoring chat state:', savedState);
+    
+    if (savedState === 'open') {
+        const widget = document.getElementById('aiChatWidget');
+        if (widget) {
+            isChatOpen = true;
+            widget.style.display = 'flex';
+            loadChatHistory();
+            console.log('Chat restored to open state');
+        }
+    }
+}
+
+/**
+ * Clear chat history
+ */
+function clearChatHistory() {
+    localStorage.removeItem(CHAT_HISTORY_KEY);
+    const chatArea = document.getElementById('chatArea');
+    chatArea.innerHTML = `
+        <div id="welcomeMsg" class="welcome-message">
+            <div class="welcome-icon">👋</div>
+            <div class="welcome-title">Xin chào!</div>
+            <div class="welcome-text">Tôi là trợ lý AI của khách sạn. Hãy cho tôi biết bạn đang tìm loại phòng nào?</div>
+            <div class="welcome-examples">
+                <div class="example-chip" onclick="sendExampleMessage('Tôi muốn phòng VIP')">Phòng VIP</div>
+                <div class="example-chip" onclick="sendExampleMessage('Tìm phòng giá rẻ')">Phòng giá rẻ</div>
+                <div class="example-chip" onclick="sendExampleMessage('Phòng Deluxe')">Phòng Deluxe</div>
+            </div>
+        </div>
+    `;
+    console.log('Chat history cleared');
+}
 
 /**
  * Toggle chat widget visibility
@@ -14,16 +96,23 @@ function toggleAIChat() {
     widget.style.display = isChatOpen ? 'flex' : 'none';
 
     if (isChatOpen) {
-        document.getElementById('chatInput').focus();
+        // Load chat history when opening
+        loadChatHistory();
+        const input = document.getElementById('chatInput');
+        if (input) input.focus();
     }
+    
+    // Save state
+    saveChatState();
 }
 
 /**
  * Add message to chat area
  * @param {string} text - Message text (can contain HTML)
  * @param {boolean} isUser - True if message from user, false if from bot
+ * @param {boolean} saveHistory - Whether to save to localStorage (default: true)
  */
-function addMessage(text, isUser) {
+function addMessage(text, isUser, saveHistory = true) {
     const chatArea = document.getElementById('chatArea');
     const welcome = document.getElementById('welcomeMsg');
     if (welcome) welcome.remove();
@@ -33,6 +122,11 @@ function addMessage(text, isUser) {
     msg.innerHTML = '<div class="message-bubble">' + text + '</div>';
     chatArea.appendChild(msg);
     chatArea.scrollTop = chatArea.scrollHeight;
+
+    // Save chat history after adding message
+    if (saveHistory) {
+        saveChatHistory();
+    }
 }
 
 /**
@@ -132,9 +226,9 @@ function processMessage(text) {
                                     <br>
                                     <i class="fas fa-money-bill-wave"></i> Giá: <strong>${priceFormatted} VNĐ/đêm</strong>
                                 </div>
-                                <a href="${link}" 
+                                <a href="${link}"
                                    style="display: inline-block; background: white; color: #667eea; 
-                                          padding: 8px 16px; border-radius: 8px; text-decoration: none; 
+                                          padding: 8px 16px; border-radius: 8px; text-decoration: none;
                                           font-weight: 600; transition: all 0.3s;"
                                    onmouseover="this.style.transform='scale(1.05)'" 
                                    onmouseout="this.style.transform='scale(1)'">
@@ -149,7 +243,8 @@ function processMessage(text) {
                             <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; 
                                         border-left: 4px solid #667eea;">
                                 <strong>Phòng #${roomId}</strong><br>
-                                <a href="${link}" style="color: #667eea; text-decoration: none; font-weight: 600;">
+                                <a href="${link}"
+                                   style="color: #667eea; text-decoration: none; font-weight: 600;">
                                     👉 Xem chi tiết và đặt phòng
                                 </a>
                             </div>
@@ -172,4 +267,19 @@ document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && isChatOpen) {
         toggleAIChat();
     }
+});
+
+/**
+ * Initialize chat on page load
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== AI Chat Initialized ===');
+    console.log('localStorage available:', typeof(Storage) !== "undefined");
+    console.log('Saved history exists:', !!localStorage.getItem(CHAT_HISTORY_KEY));
+    console.log('Saved state:', localStorage.getItem(CHAT_STATE_KEY));
+    
+    // Restore chat state if it was open
+    setTimeout(() => {
+        restoreChatState();
+    }, 300);
 });

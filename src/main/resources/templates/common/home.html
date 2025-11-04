@@ -964,6 +964,30 @@
 <script>
     let isChatOpen = false;
 
+    // Lưu lịch sử chat vào sessionStorage
+    function saveChatHistory() {
+        const chatArea = document.getElementById('chatArea');
+        if (chatArea) {
+            sessionStorage.setItem('aiChatHistory', chatArea.innerHTML);
+        }
+    }
+
+    // Khôi phục lịch sử chat từ sessionStorage
+    function restoreChatHistory() {
+        const chatArea = document.getElementById('chatArea');
+        const savedHistory = sessionStorage.getItem('aiChatHistory');
+        
+        if (savedHistory && chatArea) {
+            chatArea.innerHTML = savedHistory;
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+    }
+
+    // Khởi tạo khi trang load
+    document.addEventListener('DOMContentLoaded', function() {
+        restoreChatHistory();
+    });
+
     function toggleAIChat() {
         const widget = document.getElementById('aiChatWidget');
         isChatOpen = !isChatOpen;
@@ -984,6 +1008,9 @@
         msg.innerHTML = '<div class="message-bubble">' + text + '</div>';
         chatArea.appendChild(msg);
         chatArea.scrollTop = chatArea.scrollHeight;
+        
+        // Lưu lịch sử sau mỗi tin nhắn
+        saveChatHistory();
     }
 
     function sendMessage() {
@@ -1031,7 +1058,7 @@
                     setTimeout(() => {
                         const link = '/hotel/room/' + roomId;
                         const html = '<strong>Phòng #' + roomId + '</strong><br>' +
-                            '<a href="' + link + '" target="_blank">👉 Xem chi tiết và đặt phòng</a>';
+                            '<a href="' + link + '">👉 Xem chi tiết và đặt phòng</a>';
                         addMessage(html, false);
                     }, i * 300);
                 });
