@@ -1,9 +1,8 @@
 package hotel.service.discount;
 
-import hotel.db.entity.Discount;
 import hotel.db.dto.discount.DiscountResponseDto;
+import hotel.db.entity.Discount;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -14,8 +13,6 @@ public interface DiscountService {
     Discount findDiscountById(Long id);
 
     boolean checkDiscountCodeExistExceptItSelft(String code, Long discountId);
-
-    Discount findDiscountById(Long id);
 
     List<DiscountResponseDto> getListDiscount();
 
