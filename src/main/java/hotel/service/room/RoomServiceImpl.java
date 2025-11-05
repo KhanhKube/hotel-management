@@ -3,6 +3,8 @@ package hotel.service.room;
 import hotel.db.dto.room.*;
 import hotel.db.entity.*;
 import hotel.db.repository.floor.FloorRepository;
+import hotel.db.repository.roomview.RoomViewRepository;
+import hotel.db.repository.view.ViewRepository;
 import hotel.service.size.SizeService;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
 import hotel.db.repository.room.RoomRepository;
@@ -18,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,8 +33,14 @@ public class RoomServiceImpl implements RoomService {
     private final FloorRepository floorRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final RoomImageRepository roomImageRepository;
-
+    private final RoomViewRepository roomViewRepository;
+    private final ViewRepository viewRepository;
     private final SizeService sizeService;
+
+    private List<String> getRoomViewList(Integer roomId) {
+        return roomViewRepository.findRoomViewId(roomId).stream().map(viewId ->
+                viewRepository.findViewTypeByViewId(viewId)).collect(Collectors.toList());
+    }
 
     @Override
     public List<String> getBookedDatesForBookingRoom(Integer roomId) {
@@ -182,55 +189,7 @@ public class RoomServiceImpl implements RoomService {
         dto.setRoomType(x.getRoomType());
         dto.setPrice(x.getPrice());
         dto.setRoomDescription(x.getRoomDescription());
-
-        //Lấy ảnh đầu tiên của phòng theo id
-        List<RoomImage> roomImages = roomImageRepository.findByRoomId(x.getRoomId());
-        if (!roomImages.isEmpty()) {
-            dto.setImageRoom(roomImages.get(0).getRoomImageUrl()); //Lấy url của ảnh đầu tiên (index 0)
-        } else {
-            dto.setImageRoom("https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg"); //lấy ảnh mạng
-        }
-
-        //Logic hiện status phòng nhanh cho khách hàng booking.
-        LocalDateTime now = LocalDateTime.now();
-        if (now.getHour() < 14) {
-            // Case 1: Trước 14h - check có thể đặt ngay hôm nay không
-            LocalDateTime todayCheckin = now.toLocalDate().atTime(14, 0);
-            LocalDateTime todayCheckout = now.toLocalDate().plusDays(1).atTime(12, 0);
-
-            if(orderDetailRepository.isRoomAvailableForToday(
-                    x.getRoomId(), todayCheckin, todayCheckout
-            )) {
-                dto.setStatusDisplay("Có thể đặt ngay bây giờ!");
-                dto.setAvailableFrom(now.toLocalDate());
-            } else {
-                // Hôm nay không trống, tìm ngày trống tiếp theo
-                LocalDate nextDate = findNextAvailableDate(x.getRoomId(), todayCheckin);
-                if (nextDate != null) {
-                    dto.setStatusDisplay("Có thể đặt phòng vào " +
-                            nextDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                    dto.setAvailableFrom(nextDate);
-                } else {
-                    dto.setStatusDisplay("Phòng đã kín lịch");
-                    dto.setAvailableFrom(null);
-                }
-            }
-        } else {
-            // Case 2: Sau 14h - chỉ có thể đặt từ ngày mai trở đi
-            LocalDateTime tomorrowCheckin = now.toLocalDate().plusDays(1).atTime(14, 0);
-            LocalDate nextDate = findNextAvailableDate(x.getRoomId(), tomorrowCheckin);
-
-            if (nextDate != null) {
-                dto.setStatusDisplay("Có thể đặt phòng vào " +
-                        nextDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                dto.setAvailableFrom(nextDate);
-            } else {
-                dto.setStatusDisplay("Phòng đã kín lịch");
-                dto.setAvailableFrom(null);
-            }
-        }
-
-
+        dto.setRoomViews(getRoomViewList(x.getRoomId()));
         return dto;
     }
     /*

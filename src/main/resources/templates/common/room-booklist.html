@@ -271,12 +271,11 @@
                                     Room</a>
                             </h4>
                             <p>
-                                <span th:text="${r.roomDescription}">Room description</span><br><br>
-                                <span th:text="'Phòng: ' + ${r.roomNumber}"></span><br>
-                                <span
-                                    th:text="${r.statusDisplay == 'Trống' ? 'Trạng thái: Trống' :'Trạng thái: ' + r.statusDisplay}">
-                                    Có thể đặt ngay
-                                </span>
+                                <span th:text="'Số Phòng: ' + ${r.roomNumber}"></span><br>
+                                <span th:text="'Mổ tả: ' + ${r.roomDescription}"></span><br>
+                                <span th:if="${r.roomViews != null and !r.roomViews.isEmpty()}"
+                                      th:text="'Hướng nhìn: ' + ${#strings.listJoin(r.roomViews, ', ')}"></span>
+
                             </p>
                             <a class="card-explore__link" th:href="@{/hotel/room/{id}(id=${r.roomId})}">
                                 Đặt ngay <i class="ti-arrow-right"></i>
