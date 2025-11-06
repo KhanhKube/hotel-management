@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="/vendors/themify-icons/themify-icons.css">
     <link rel="stylesheet" href="/vendors/linericon/style.css">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         body,
         html {
@@ -80,6 +82,39 @@
             outline: none;
             border-color: #CDA872;
             box-shadow: 0 0 0 3px rgba(205, 168, 114, 0.1);
+        }
+
+        /* Improved filter layout */
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .filter-row {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .filter-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+
+        /* Date range input styling */
+        #date-range {
+            text-align: center;
+        }
+
+        #date-range::placeholder {
+            color: #6c757d;
+            font-size: 13px;
         }
 
         .filter-buttons {
@@ -225,6 +260,12 @@
                                 </select>
                             </div>
 
+                            <!-- Date Range -->
+                            <div class="filter-item">
+                                <label>Ngày đi - Ngày về</label>
+                                <input type="text" id="date-range" class="form-control" placeholder="Chọn ngày" name="date">
+                            </div>
+
                             <!-- Sort -->
                             <div class="filter-item">
                                 <label>Sắp xếp</label>
@@ -240,7 +281,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <!-- Buttons -->
                         <div class="filter-buttons">
                             <button type="submit" class="btn btn-primary">Tìm kiếm</button>
@@ -349,6 +389,33 @@
             } else {
                 $(".header_area").removeClass("navbar_fixed");
             }
+        });
+    </script>
+    <script>
+        flatpickr("#date-range", {
+          mode: "range",
+          dateFormat: "Y-m-d", // giá trị raw để xử lý
+          minDate: "today",
+          onClose: function (selectedDates, dateStr, instance) {
+            const [startDate, endDate] = dateStr.split(" to ");
+
+            // Nếu người dùng chưa chọn đủ 2 ngày (chỉ click 1 lần) thì thoát sớm
+            if (!endDate) return;
+
+            // Format ngày sang dd/mm/yyyy
+            const formatDate = (date) => {
+              const d = new Date(date);
+              const day = String(d.getDate()).padStart(2, "0");
+              const month = String(d.getMonth() + 1).padStart(2, "0");
+              const year = d.getFullYear();
+              return `${day}/${month}/${year}`;
+            };
+
+            const displayText = `${formatDate(startDate)} − ${formatDate(endDate)}`;
+
+            // Gán lại lên chính input
+            instance.input.value = displayText;
+          }
         });
     </script>
 </body>

@@ -90,12 +90,13 @@ public class HomePageController {
             @RequestParam(required = false) Integer floor,
             @RequestParam(required = false) String bedType,
             @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String date,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "9") int size,
             Model model) {
 
         Page<RoomBookListDto> roomPage = roomService.getRoomListWithFiltersAndPagination(
-                minPrice, maxPrice, roomType, floor, bedType, sortBy, page, size
+                minPrice, maxPrice, roomType, floor, bedType, sortBy, page, size, date
         );
         //field pagnitation
         model.addAttribute("rooms", roomPage.getContent());

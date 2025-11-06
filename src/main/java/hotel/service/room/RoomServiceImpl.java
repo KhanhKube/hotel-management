@@ -37,7 +37,7 @@ public class RoomServiceImpl implements RoomService {
     private final ViewRepository viewRepository;
     private final SizeService sizeService;
 
-    private List<String> getRoomViewList(Integer roomId) {
+    public List<String> getRoomViewList(Integer roomId) {
         return roomViewRepository.findRoomViewId(roomId).stream().map(viewId ->
                 viewRepository.findViewTypeByViewId(viewId)).collect(Collectors.toList());
     }
@@ -114,7 +114,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Page<RoomBookListDto> getRoomListWithFiltersAndPagination(BigDecimal minPrice, BigDecimal maxPrice, String roomType,
-                                                                     Integer floor, String bedType, String sortBy, int page, int size) {
+                                                                     Integer floor, String bedType, String sortBy, int page, int size, String date) {
         List<Room> rooms = roomRepository.findAll();
 
         //Filter theo roomType (Loại phòng)
@@ -163,6 +163,13 @@ public class RoomServiceImpl implements RoomService {
                     rooms.sort(Comparator.comparing(Room::getRoomNumber).reversed());
                     break;
             }
+        }
+        //Filter theo StartDate EndDate
+        if (date != null && !date.isEmpty()) {
+            String[] dateArr = date.split(" - ");
+            String startDate = dateArr[0];
+            String endDate = dateArr[1];
+
         }
         List<RoomBookListDto> BookList = rooms.stream() //Lấy Listcác phòng đã được lọc field qua Dto
                 .filter(x -> !"Bảo trì".equals(x.getStatus()))
@@ -719,6 +726,10 @@ public class RoomServiceImpl implements RoomService {
         }
 
         dto.setImages(imageUrls);
+        
+        // Lấy danh sách room views
+        List<String> roomViews = getRoomViewList(room.getRoomId());
+        dto.setRoomViews(roomViews);
 
         return dto;
     }

@@ -22,5 +22,6 @@ public class RoomDetailResponseDto {
     private String status;
     private Integer sold;
     private Integer view;
+    private List<String> roomViews;
     private List<String> images;
 }
