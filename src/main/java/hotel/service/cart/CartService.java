@@ -12,4 +12,5 @@ public interface CartService {
     void clearCart(Integer userId);
     int getCartItemCount(Integer userId);
     List<Integer> checkout(Integer userId);
+    int fixLegacyCartStatus(Integer userId);
 }

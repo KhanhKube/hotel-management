@@ -59,7 +59,7 @@ public class CartServiceImpl implements CartService {
 		order.setFloorId(room.getFloorId());
 		order.setCheckIn(request.getCheckIn());
 		order.setCheckOut(request.getCheckOut());
-		order.setStatus("PENDING"); // Status CART for cart items
+		order.setStatus("CART"); // Status CART for cart items
 
 		Order savedOrder = orderRepository.save(order);
 		System.out.println("Created cart order with ID: " + savedOrder.getOrderId());
@@ -88,7 +88,7 @@ public class CartServiceImpl implements CartService {
 
 		// Get all orders with status CART
 		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
-		System.out.println("Found " + cartOrders.size() + " cart orders");
+		System.out.println("Found " + cartOrders.size() + " CART orders");
 
 		List<CartItemDto> cartItems = new ArrayList<>();
 
@@ -166,7 +166,7 @@ public class CartServiceImpl implements CartService {
 		System.out.println("=== Clearing cart for userId: " + userId + " ===");
 
 		// Find all cart orders
-		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "PENDING");
+		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
 
 		for (Order order : cartOrders) {
 			// Delete all order details first
@@ -192,7 +192,7 @@ public class CartServiceImpl implements CartService {
 		System.out.println("=== Checkout for userId: " + userId + " ===");
 
 		// Get all cart orders
-		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "PENDING");
+		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
 
 		if (cartOrders.isEmpty()) {
 			throw new RuntimeException("Giỏ hàng trống");
@@ -216,5 +216,42 @@ public class CartServiceImpl implements CartService {
 
 		System.out.println("Checkout completed. " + orderIds.size() + " orders created");
 		return orderIds;
+	}
+
+	@Override
+	@Transactional
+	public int fixLegacyCartStatus(Integer userId) {
+		System.out.println("=== Fixing legacy cart status for userId: " + userId + " ===");
+		
+		// Find all PENDING orders that should be CART
+		// (Orders without confirmed status that are still in cart)
+		List<Order> pendingOrders = orderRepository.findByUserIdAndStatus(userId, "PENDING");
+		
+		int fixed = 0;
+		for (Order order : pendingOrders) {
+			// Check if order details have CART status
+			List<OrderDetail> details = orderDetailRepository.findByOrderId(order.getOrderId());
+			boolean isCart = details.stream().anyMatch(d -> "CART".equals(d.getStatus()));
+			
+			if (isCart || details.isEmpty()) {
+				// This is a cart order, fix the status
+				order.setStatus("CART");
+				orderRepository.save(order);
+				
+				// Also fix order details
+				for (OrderDetail detail : details) {
+					if (!"CART".equals(detail.getStatus())) {
+						detail.setStatus("CART");
+						orderDetailRepository.save(detail);
+					}
+				}
+				
+				fixed++;
+				System.out.println("Fixed order " + order.getOrderId() + " to CART status");
+			}
+		}
+		
+		System.out.println("Fixed " + fixed + " legacy cart orders");
+		return fixed;
 	}
 }

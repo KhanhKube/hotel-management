@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,10 +39,10 @@ public class CartController {
 		return "cart/cart";
 	}
 
-	@PostMapping("/add")
+	@PostMapping(value = "/add")
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> addToCart(
-			@RequestBody(required = false) AddToCartRequest requestBody,
+			@RequestBody AddToCartRequest requestBody,
 			HttpSession session,
 			HttpServletRequest request) {
 
@@ -49,7 +50,13 @@ public class CartController {
 
 		// Log raw request body
 		System.out.println("=== Raw Request Body ===");
-		System.out.println(requestBody);
+		System.out.println("Request Body: " + requestBody);
+		if (requestBody != null) {
+			System.out.println("Room ID: " + requestBody.getRoomId());
+			System.out.println("Check In: " + requestBody.getCheckIn());
+			System.out.println("Check Out: " + requestBody.getCheckOut());
+			System.out.println("Early Check In: " + requestBody.getEarlyCheckIn());
+		}
 
 		Integer userId = getUserIdFromSession(session);
 		System.out.println("User ID: " + userId);
@@ -180,11 +187,66 @@ public class CartController {
 	public ResponseEntity<List<CartItemDto>> getCartItems(HttpSession session) {
 		Integer userId = getUserIdFromSession(session);
 		if (userId == null) {
+			System.out.println("User not logged in - returning empty cart");
 			return ResponseEntity.ok(List.of());
 		}
 
+		System.out.println("=== Getting cart items for user: " + userId + " ===");
 		List<CartItemDto> items = cartService.getCartItems(userId);
+		System.out.println("Returning " + items.size() + " cart items");
 		return ResponseEntity.ok(items);
+	}
+
+	@GetMapping("/debug")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> debugCart(HttpSession session) {
+		Map<String, Object> debug = new HashMap<>();
+		Integer userId = getUserIdFromSession(session);
+		
+		debug.put("userId", userId);
+		debug.put("sessionId", session.getId());
+		
+		if (userId != null) {
+			List<CartItemDto> items = cartService.getCartItems(userId);
+			debug.put("cartItems", items);
+			debug.put("itemCount", items.size());
+			
+			// Show details of each item
+			List<Map<String, Object>> itemDetails = new ArrayList<>();
+			for (CartItemDto item : items) {
+				Map<String, Object> detail = new HashMap<>();
+				detail.put("roomId", item.getRoomId());
+				detail.put("roomNumber", item.getRoomNumber());
+				detail.put("checkIn", item.getCheckIn());
+				detail.put("checkOut", item.getCheckOut());
+				itemDetails.add(detail);
+			}
+			debug.put("itemDetails", itemDetails);
+		}
+		
+		return ResponseEntity.ok(debug);
+	}
+
+	@PostMapping("/fix-legacy-cart")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> fixLegacyCart(HttpSession session) {
+		Map<String, Object> response = new HashMap<>();
+		Integer userId = getUserIdFromSession(session);
+		
+		if (userId == null) {
+			response.put("success", false);
+			response.put("message", "Not logged in");
+			return ResponseEntity.ok(response);
+		}
+		
+		// This will be implemented in service
+		int fixed = cartService.fixLegacyCartStatus(userId);
+		
+		response.put("success", true);
+		response.put("fixed", fixed);
+		response.put("message", "Fixed " + fixed + " cart items");
+		
+		return ResponseEntity.ok(response);
 	}
 
 	/**
