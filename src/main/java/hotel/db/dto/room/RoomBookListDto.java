@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -16,9 +17,5 @@ public class RoomBookListDto {
     private String roomType;
     private BigDecimal price;
     private String roomDescription;
-
-    // Chỉ 2 trường hợp: "Trống" hoặc "Có thể đặt từ dd/MM/yyyy"
-    private String statusDisplay;
-
-    private LocalDate availableFrom; //Lấy được thời giản available booking.
+    private List<String> roomViews;
 }

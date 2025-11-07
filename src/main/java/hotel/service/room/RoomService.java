@@ -18,7 +18,7 @@ public interface RoomService {
 
     //Method filter dùng cho Room-BookingList bên phía customer.
     Page<RoomBookListDto> getRoomListWithFiltersAndPagination(BigDecimal minPrice, BigDecimal maxPrice,String roomType,
-                                                              Integer floor, String bedType, String sortBy, int page, int size);
+                                                              Integer floor, String bedType, String sortBy, int page, int size, String date);
 
     //Tăng view lên khi người dùng xem phòng.
     void incrementView(Integer roomId);

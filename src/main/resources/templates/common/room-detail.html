@@ -235,7 +235,7 @@
                 <p><strong>Loại giường:</strong> <span th:text="${room.bedType}"></span></p>
                 <p><strong>Tầng:</strong> <span th:text="${room.floorNumber}"></span></p>
                 <p><strong>Kích thước:</strong> <span th:text="${room.size} + ' m²'"></span></p>
-                <p><strong>Trạng thái:</strong> <span th:text="${room.status}"></span></p>
+                <p><strong>Hướng nhìn: </strong> <span th:text="${#strings.listJoin(room.roomViews, ', ')}"></span></p>
                 <p><strong>Mô tả:</strong></p>
                 <p class="room-description" th:text="${room.roomDescription}"></p>
             </div>
