@@ -19,238 +19,265 @@
 </head>
 
 <body>
-<!-- ================ header section start ================= -->
-<header class="header_area" th:fragment="header" xmlns:th="http://www.thymeleaf.org" th:with="user=${session.user}">
-    <div class="header-top">
-        <div class="container">
-            <div class="d-flex align-items-center">
-                <div id="logo">
-                    <a th:href="@{/hotel}"><img src="/img/Logo.png" alt="" title=""/></a>
-                </div>
-                <div class="ml-auto d-none d-md-block d-md-flex">
-                    <div class="media header-top-info">
-                        <span class="header-top-info__icon"><i class="ti-email"></i></span>
-                        <div class="media-body">
-                            <p>Liên Hệ?</p>
-                            <p>Miễn Phí: <a href="tel:+12 365 5233">+84 6503 3812</a></p>
+    <!-- ================ header section start ================= -->
+    <header class="header_area" th:fragment="header" xmlns:th="http://www.thymeleaf.org" th:with="user=${session.user}">
+        <div class="header-top">
+            <div class="container">
+                <div class="d-flex align-items-center">
+                    <div id="logo">
+                        <a th:href="@{/hotel}"><img src="/img/Logo.png" alt="" title="" /></a>
+                    </div>
+                    <div class="ml-auto d-none d-md-block d-md-flex">
+                        <div class="media header-top-info">
+                            <span class="header-top-info__icon"><i class="ti-email"></i></span>
+                            <div class="media-body">
+                                <p>Liên Hệ?</p>
+                                <p>Miễn Phí: <a href="tel:+12 365 5233">+84 6503 3812</a></p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
 
-    <div class="main_menu">
-        <nav class="navbar navbar-expand-lg navbar-light">
-            <div class="container">
-                <button class="navbar-toggler" type="button" data-toggle="collapse"
+        <div class="main_menu">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <div class="container">
+                    <button class="navbar-toggler" type="button" data-toggle="collapse"
                         data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
-                    <ul class="nav navbar-nav menu_nav">
-                        <li class="nav-item" th:if="${user != null and user.role != 'CUSTOMER'}"><a class="nav-link"
-                                                                                                    th:href="@{/hotel/dashboard}">DASHBOARD</a>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">TRANG CHỦ</a></li>
-                        <li class="nav-item"><a class="nav-link" th:href="@{/hotel/rooms}">PHÒNG</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#news-section"
-                                                onclick="scrollToNews(); return false;">
-                            TIN TỨC</a></li>
-                        <li class="nav-item" th:if="${user != null and user.role == 'CUSTOMER'}"><a class="nav-link"
-                                                                                                    th:href="@{/sale}">SALE</a>
-                        </li>
-                        <li class="nav-item"
-                            th:if="${user != null and (user.role == 'RECEPTIONIST' || user.role == 'STAFF')}"><a
-                                class="nav-link" th:href="@{/order}">ĐƠN ĐẶT PHÒNG</a></li>
-                        <li class="nav-item submenu dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button"
-                               aria-haspopup="true" aria-expanded="false">AI</a>
-                            <ul class="dropdown-menu">
-                                <li class="nav-item"><a class="nav-link" th:href="@{/ai/chatbot}">AI CHATBOT</a>
-                                </li>
-                                <li class="nav-item"><a class="nav-link" th:href="@{/ai/report}">BÁO CÁO</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" th:href="@{/contact}">LIÊN HỆ</a></li>
-                    </ul>
-                </div>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
+                        <ul class="nav navbar-nav menu_nav">
+                            <li class="nav-item" th:if="${user != null and user.role != 'CUSTOMER'}"><a class="nav-link"
+                                    th:href="@{/hotel/dashboard}">DASHBOARD</a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/hotel}">TRANG CHỦ</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/hotel/rooms}">PHÒNG</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#news-section"
+                                    onclick="scrollToNews(); return false;">
+                                    TIN TỨC</a></li>
+                            <li class="nav-item" th:if="${user != null and user.role == 'CUSTOMER'}"><a class="nav-link"
+                                    th:href="@{/sale}">SALE</a>
+                            </li>
+                            <li class="nav-item"
+                                th:if="${user != null and (user.role == 'RECEPTIONIST' || user.role == 'STAFF')}"><a
+                                    class="nav-link" th:href="@{/order}">ĐƠN ĐẶT PHÒNG</a></li>
+                            <li class="nav-item submenu dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button"
+                                    aria-haspopup="true" aria-expanded="false">AI</a>
+                                <ul class="dropdown-menu">
+                                    <li class="nav-item"><a class="nav-link" th:href="@{/ai/chatbot}">AI CHATBOT</a>
+                                    </li>
+                                    <li class="nav-item"><a class="nav-link" th:href="@{/ai/report}">BÁO CÁO</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/contact}">LIÊN HỆ</a></li>
+                        </ul>
+                    </div>
 
-                <ul class="social-icons ml-auto">
-                    <!-- Cart with dropdown - Only show if user is logged in -->
-                    <li class="nav-item dropdown" th:if="${user != null}">
-                        <a class="nav-link position-relative" href="#" id="cartDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                           style="cursor: pointer;">
-                            <i class="fas fa-shopping-cart" style="font-size: 1.2rem;"></i>
-                            <span class="badge badge-danger" id="cart-badge" style="position: absolute; top: -8px; right: -8px; font-size: 11px;
-                                         padding: 3px 6px; border-radius: 10px; display: none; 
-                                         background: #dc3545; color: white; font-weight: bold;">0</span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right cart-dropdown" aria-labelledby="cartDropdown"
-                             style="min-width: 380px; max-height: 500px; overflow-y: auto; border-radius: 8px;
+                    <ul class="social-icons ml-auto">
+                        <!-- Cart with dropdown - Only show if user is logged in -->
+                        <li class="nav-item dropdown" th:if="${user != null}">
+                            <a class="nav-link position-relative" href="#" id="cartDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                style="cursor: pointer;">
+                                <i class="fas fa-shopping-cart" style="font-size: 1.2rem; color: #333;"></i>
+                                <span class="badge badge-danger" id="cart-badge" style="position: absolute; 
+                                             top: -5px; 
+                                             right: -10px; 
+                                             font-size: 10px;
+                                             min-width: 18px;
+                                             height: 18px;
+                                             padding: 2px 5px; 
+                                             border-radius: 50%; 
+                                             display: inline-block; 
+                                             background: #ff4444; 
+                                             color: white; 
+                                             font-weight: bold;
+                                             line-height: 14px;
+                                             text-align: center;
+                                             box-shadow: 0 2px 4px rgba(0,0,0,0.2);">0</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right cart-dropdown" aria-labelledby="cartDropdown"
+                                style="min-width: 380px; max-height: 500px; overflow-y: auto; border-radius: 8px;
                                     box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 0;">
-                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                                         color: white; padding: 15px 20px; border-radius: 8px 8px 0 0;">
-                                <h6 class="mb-0" style="font-weight: 600;">
-                                    <i class="fas fa-shopping-cart"></i> Giỏ Hàng
-                                    <span id="cart-count-header" style="font-size: 0.9rem; opacity: 0.9;">(0 sản
+                                    <h6 class="mb-0" style="font-weight: 600;">
+                                        <i class="fas fa-shopping-cart"></i> Giỏ Hàng
+                                        <span id="cart-count-header" style="font-size: 0.9rem; opacity: 0.9;">(0 sản
                                             phẩm)</span>
-                                </h6>
-                            </div>
-                            <div id="cart-items-preview" style="max-height: 300px; overflow-y: auto;">
-                                <p class="dropdown-item text-muted text-center py-4">
-                                    <i class="fas fa-shopping-basket" style="font-size: 2rem; opacity: 0.3;"></i>
-                                    <br>Giỏ hàng trống
-                                </p>
-                            </div>
-                            <div class="dropdown-divider" style="margin: 0;"></div>
-                            <div class="px-3 py-3" style="background: #f8f9fa;">
-                                <div class="d-flex justify-content-between mb-2 align-items-center">
-                                    <strong style="font-size: 1.1rem;">Tổng cộng:</strong>
-                                    <strong class="text-primary" id="cart-total-preview"
-                                            style="font-size: 1.2rem; color: #667eea !important;">0 VNĐ</strong>
+                                    </h6>
                                 </div>
-                                <a th:href="@{/cart}" class="btn btn-primary btn-sm btn-block" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                <div id="cart-items-preview" style="max-height: 300px; overflow-y: auto;">
+                                    <p class="dropdown-item text-muted text-center py-4">
+                                        <i class="fas fa-shopping-basket" style="font-size: 2rem; opacity: 0.3;"></i>
+                                        <br>Giỏ hàng trống
+                                    </p>
+                                </div>
+                                <div class="dropdown-divider" style="margin: 0;"></div>
+                                <div class="px-3 py-3" style="background: #f8f9fa;">
+                                    <div class="d-flex justify-content-between mb-2 align-items-center">
+                                        <strong style="font-size: 1.1rem;">Tổng cộng:</strong>
+                                        <strong class="text-primary" id="cart-total-preview"
+                                            style="font-size: 1.2rem; color: #667eea !important;">0 VNĐ</strong>
+                                    </div>
+                                    <a th:href="@{/cart}" class="btn btn-primary btn-sm btn-block" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                                           border: none; padding: 10px; font-weight: 600; border-radius: 6px;">
-                                    <i class="fas fa-arrow-right"></i> Xem Giỏ Hàng
+                                        <i class="fas fa-arrow-right"></i> Xem Giỏ Hàng
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- If user is logged in -->
+                        <li th:if="${user != null}" class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-user"></i>
+                                <span th:text="${user.username}" class="ml-1"></span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
+
+                                <!-- Always visible for logged-in users -->
+                                <a class="dropdown-item" th:href="@{/hotel/order}">
+                                    <i class="fas fa-receipt mr-2"></i> Đơn hàng
+                                </a>
+                                <a class="dropdown-item" th:href="@{/hotel/profile}">
+                                    <i class="fas fa-user-circle mr-2"></i> Hồ sơ
+                                </a>
+                                <div class="dropdown-divider"></div>
+
+                                <!-- Logout -->
+                                <form th:action="@{/hotel/logout}" method="post" style="display: inline;">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+
+                        <!-- If user is null (not logged in) -->
+                        <li th:if="${user == null}" class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-user"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="loginDropdown">
+                                <a class="dropdown-item" th:href="@{/hotel/login}">
+                                    <i class="fas fa-sign-in-alt mr-2"></i> Đăng nhập
+                                </a>
+                                <a class="dropdown-item" th:href="@{/hotel/register}">
+                                    <i class="fas fa-user-plus mr-2"></i> Đăng ký
                                 </a>
                             </div>
-                        </div>
-                    </li>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
 
-                    <!-- If user is logged in -->
-                    <li th:if="${user != null}" class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-user"></i>
-                            <span th:text="${user.username}" class="ml-1"></span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
+        </div>
+        <div id="toast-container" class="toast-container">
+            <div th:if="${message}" class="toast toast-success" th:text="${message}"></div>
+            <div th:if="${error}" class="toast toast-error" th:text="${error}"></div>
+        </div>
+    </header>
+    <!-- Toast container -->
 
-                            <!-- Always visible for logged-in users -->
-                            <a class="dropdown-item" th:href="@{/hotel/order}">
-                                <i class="fas fa-receipt mr-2"></i> Đơn hàng
-                            </a>
-                            <a class="dropdown-item" th:href="@{/hotel/profile}">
-                                <i class="fas fa-user-circle mr-2"></i> Hồ sơ
-                            </a>
-                            <div class="dropdown-divider"></div>
+    <!-- ================ header section end ================= -->
 
-                            <!-- Logout -->
-                            <form th:action="@{/hotel/logout}" method="post" style="display: inline;">
-                                <button type="submit" class="dropdown-item text-danger">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
-                                </button>
-                            </form>
-                        </div>
-                    </li>
+    <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+    <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
+    <script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
+    <script src="/vendors/easing.min.js"></script>
+    <script src="/vendors/superfish.min.js"></script>
+    <script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
+    <script src="/vendors/jquery.ajaxchimp.min.js"></script>
+    <script src="/vendors/mail-script.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/cart-preview.js"></script>
 
-                    <!-- If user is null (not logged in) -->
-                    <li th:if="${user == null}" class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-user"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="loginDropdown">
-                            <a class="dropdown-item" th:href="@{/hotel/login}">
-                                <i class="fas fa-sign-in-alt mr-2"></i> Đăng nhập
-                            </a>
-                            <a class="dropdown-item" th:href="@{/hotel/register}">
-                                <i class="fas fa-user-plus mr-2"></i> Đăng ký
-                            </a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+    <script>
+        // DEPRECATED: Moved to cart-preview.js
+        // Load cart preview
+        function loadCartPreview() {
+            console.log('=== Loading cart preview ===');
 
-    </div>
-    <div id="toast-container" class="toast-container">
-        <div th:if="${message}" class="toast toast-success" th:text="${message}"></div>
-        <div th:if="${error}" class="toast toast-error" th:text="${error}"></div>
-    </div>
-</header>
-<!-- Toast container -->
+            // Check if cart elements exist (user must be logged in)
+            const badge = document.getElementById('cart-badge');
+            const itemsContainer = document.getElementById('cart-items-preview');
+            const totalElement = document.getElementById('cart-total-preview');
 
-<!-- ================ header section end ================= -->
+            console.log('Badge element:', badge);
+            console.log('Items container:', itemsContainer);
+            console.log('Total element:', totalElement);
 
-<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
-<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
-<script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
-<script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
-<script src="/vendors/easing.min.js"></script>
-<script src="/vendors/superfish.min.js"></script>
-<script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
-<script src="/vendors/jquery.ajaxchimp.min.js"></script>
-<script src="/vendors/mail-script.js"></script>
-<script src="/js/main.js"></script>
+            if (!badge || !itemsContainer || !totalElement) {
+                console.log('Cart elements not found - user not logged in');
+                return;
+            }
 
-<script>
-    // Load cart preview
-    function loadCartPreview() {
-        console.log('Loading cart preview...');
+            console.log('Fetching cart items from /cart/items...');
 
-        // Check if cart elements exist (user must be logged in)
-        const badge = document.getElementById('cart-badge');
-        const itemsContainer = document.getElementById('cart-items-preview');
-        const totalElement = document.getElementById('cart-total-preview');
+            fetch('/cart/items')
+                .then(res => {
+                    console.log('Cart API response status:', res.status);
 
-        if (!badge || !itemsContainer || !totalElement) {
-            console.log('Cart elements not found - user not logged in');
-            return;
-        }
-
-        fetch('/cart/items')
-            .then(res => {
-                console.log('Cart API response status:', res.status);
-
-                // If unauthorized, show login message
-                if (res.status === 401 || res.status === 403) {
-                    itemsContainer.innerHTML = `
+                    // If unauthorized, show login message
+                    if (res.status === 401 || res.status === 403) {
+                        itemsContainer.innerHTML = `
                             <div class="dropdown-item text-center py-4">
                                 <i class="fas fa-lock" style="font-size: 2rem; color: #ffc107;"></i>
                                 <br><strong>Vui lòng đăng nhập</strong>
                                 <br><small class="text-muted">để xem giỏ hàng</small>
                             </div>
                         `;
-                    return [];
-                }
+                        return [];
+                    }
 
-                return res.json();
-            })
-            .then(data => {
-                if (!data) return;
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data) return;
 
-                console.log('Cart items:', data);
+                    console.log('Cart items:', data);
 
-                const countHeader = document.getElementById('cart-count-header');
+                    const countHeader = document.getElementById('cart-count-header');
 
-                if (!data || data.length === 0) {
-                    badge.style.display = 'none';
-                    if (countHeader) countHeader.textContent = '(0 sản phẩm)';
-                    itemsContainer.innerHTML = `
+                    if (!data || data.length === 0) {
+                        // Show badge with 0 - gray background
+                        badge.style.setProperty('display', 'inline-block', 'important');
+                        badge.style.setProperty('background', '#999', 'important');
+                        badge.textContent = '0';
+                        console.log('Badge set to 0, display:', badge.style.display);
+                        if (countHeader) countHeader.textContent = '(0 sản phẩm)';
+                        itemsContainer.innerHTML = `
                         <p class="dropdown-item text-muted text-center py-4">
                             <i class="fas fa-shopping-basket" style="font-size: 2rem; opacity: 0.3;"></i>
                             <br>Giỏ hàng trống
                         </p>
                     `;
-                    totalElement.textContent = '0 VNĐ';
-                } else {
-                    badge.style.display = 'inline';
-                    badge.textContent = data.length;
-                    if (countHeader) countHeader.textContent = `(${data.length} sản phẩm)`;
+                        totalElement.textContent = '0 VNĐ';
+                    } else {
+                        // Show badge with count - red background
+                        badge.style.setProperty('display', 'inline-block', 'important');
+                        badge.style.setProperty('background', '#ff4444', 'important');
+                        badge.textContent = data.length;
+                        console.log('Badge set to', data.length, ', display:', badge.style.display);
+                        if (countHeader) countHeader.textContent = `(${data.length} sản phẩm)`;
 
-                    let total = 0;
-                    let html = '';
+                        let total = 0;
+                        let html = '';
 
-                    data.forEach((item, index) => {
-                        total += item.totalPrice;
-                        html += `
+                        data.forEach((item, index) => {
+                            total += item.totalPrice;
+                            html += `
                             <div class="dropdown-item" style="white-space: normal; padding: 12px 20px; 
                                                               border-bottom: 1px solid #f0f0f0; 
                                                               transition: background 0.2s;"
@@ -280,38 +307,50 @@
                                 </div>
                             </div>
                         `;
-                    });
+                        });
 
-                    itemsContainer.innerHTML = html;
-                    totalElement.textContent = total.toLocaleString('vi-VN') + ' VNĐ';
-                    console.log('Cart updated successfully. Total items:', data.length);
-                }
-            })
-            .catch(err => {
-                console.error('Error loading cart:', err);
-            });
-    }
-
-    // Load on page load
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log('DOM loaded, loading cart...');
-        loadCartPreview();
-    });
-
-    // Reload cart when dropdown is opened
-    document.addEventListener('DOMContentLoaded', function () {
-        const cartDropdown = document.getElementById('cartDropdown');
-        if (cartDropdown) {
-            cartDropdown.addEventListener('click', function (e) {
-                console.log('Cart dropdown clicked');
-                loadCartPreview();
-            });
+                        itemsContainer.innerHTML = html;
+                        totalElement.textContent = total.toLocaleString('vi-VN') + ' VNĐ';
+                        console.log('Cart updated successfully. Total items:', data.length);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error loading cart:', err);
+                });
         }
-    });
 
-    // Make function globally available
-    window.loadCartPreview = loadCartPreview;
-</script>
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM loaded, loading cart...');
+            loadCartPreview();
+
+            // Retry after 500ms to ensure it loads
+            setTimeout(function () {
+                console.log('Retrying cart load...');
+                loadCartPreview();
+            }, 500);
+        });
+
+        // Reload cart when dropdown is opened
+        document.addEventListener('DOMContentLoaded', function () {
+            const cartDropdown = document.getElementById('cartDropdown');
+            if (cartDropdown) {
+                cartDropdown.addEventListener('click', function (e) {
+                    console.log('Cart dropdown clicked');
+                    loadCartPreview();
+                });
+            }
+        });
+
+        // Make function globally available
+        window.loadCartPreview = loadCartPreview;
+
+        // Also try to load immediately if DOM already loaded
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            console.log('DOM already loaded, loading cart immediately...');
+            setTimeout(loadCartPreview, 100);
+        }
+    </script>
 </body>
 
 </html>

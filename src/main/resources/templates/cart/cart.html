@@ -370,7 +370,34 @@
             }
         `;
     document.head.appendChild(style);
-</script>
+
+    // Load cart preview on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Cart page loaded, updating cart badge...');
+        
+        // Wait a bit for header script to load
+        setTimeout(function() {
+            if (typeof window.loadCartPreview === 'function') {
+                window.loadCartPreview();
+            } else if (typeof loadCartPreview === 'function') {
+                loadCartPreview();
+            } else {
+                console.error('loadCartPreview function not found! Trying direct update...');
+                // Fallback: update badge directly
+                fetch('/cart/items')
+                    .then(r => r.json())
+                    .then(data => {
+                        const badge = document.getElementById('cart-badge');
+                        if (badge) {
+                            badge.style.setProperty('display', 'inline-block', 'important');
+                            badge.style.setProperty('background', '#ff4444', 'important');
+                            badge.textContent = data.length;
+                            console.log('Badge updated directly to:', data.length);
+                        }
+                    });
+            }
+        }, 100);
+    });
 </script>
 
 </body>
