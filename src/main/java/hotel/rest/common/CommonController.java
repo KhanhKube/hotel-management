@@ -256,4 +256,15 @@ public class CommonController {
         return "redirect:/hotel/profile";
     }
 
+    // Show profile
+    @GetMapping("/change-password")
+    public String changePassword(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel/login";
+        }
+        UserProfileDto userProfileDto = commonService.userToUserProfile(user);
+        model.addAttribute("userProfile", userProfileDto);
+        return "common/profile";
+    }
 }
