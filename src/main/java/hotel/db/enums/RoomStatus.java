@@ -5,8 +5,9 @@ public class RoomStatus {
     public static final String OCCUPIED = "Đang thuê";
     public static final String MAINTENANCE = "Bảo trì";
     public static final String RESERVED = "Đã đặt";
+    public static final String CLEANING = "Đang dọn dẹp";
     
     public static final String[] ALL = {
-        AVAILABLE, OCCUPIED, MAINTENANCE, RESERVED
+        AVAILABLE, OCCUPIED, MAINTENANCE, RESERVED, CLEANING
     };
 }
