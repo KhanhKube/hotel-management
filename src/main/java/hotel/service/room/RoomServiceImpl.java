@@ -624,6 +624,7 @@ public class RoomServiceImpl implements RoomService {
         existingRoom.setRoomDescription(room.getRoomDescription());
         existingRoom.setSold(room.getSold() != null ? room.getSold() : existingRoom.getSold());
         existingRoom.setView(room.getView() != null ? room.getView() : existingRoom.getView());
+        existingRoom.setMaxSizePeople(room.getMaxSizePeople());
 
         Room updatedRoom = roomRepository.save(existingRoom);
         log.info("Updated room with ID: {}", updatedRoom.getRoomId());

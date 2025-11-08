@@ -48,5 +48,8 @@ public class Room extends AbstractVersion {
 
     @Column(name = "view")
     private Integer view = 0;
+
+    @Column(name = "max_size_people")
+    private Integer maxSizePeople;
 }
 
