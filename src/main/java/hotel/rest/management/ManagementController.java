@@ -259,6 +259,7 @@ public class ManagementController {
             room.setStatus(roomRequest.getStatus());
             room.setSold(roomRequest.getSold() != null ? roomRequest.getSold() : 0);
             room.setView(roomRequest.getView() != null ? roomRequest.getView() : 0);
+            room.setMaxSizePeople(roomRequest.getMaxSizePeople());
             
             Room savedRoom = roomService.createRoom(room);
             redirectAttributes.addFlashAttribute("success", "add");
@@ -285,6 +286,7 @@ public class ManagementController {
             roomRequest.setStatus(room.getStatus());
             roomRequest.setSold(room.getSold());
             roomRequest.setView(room.getView());
+            roomRequest.setMaxSizePeople(room.getMaxSizePeople());
             
             model.addAttribute("roomRequest", roomRequest);
             model.addAttribute("roomId", id);
@@ -308,6 +310,7 @@ public class ManagementController {
             room.setStatus(roomRequest.getStatus());
             room.setSold(roomRequest.getSold() != null ? roomRequest.getSold() : 0);
             room.setView(roomRequest.getView() != null ? roomRequest.getView() : 0);
+            room.setMaxSizePeople(roomRequest.getMaxSizePeople());
             
             Room updatedRoom = roomService.updateRoom(id, room);
             redirectAttributes.addFlashAttribute("success", "edit");

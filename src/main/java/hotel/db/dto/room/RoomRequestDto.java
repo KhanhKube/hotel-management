@@ -43,4 +43,8 @@ public class RoomRequestDto {
 
     @Min(value = 0, message = "Số lượt xem không được âm")
     private Integer view;
+
+    @Min(value = 1, message = "Số lượng người tối đa phải lớn hơn 0")
+    @Max(value = 50, message = "Số lượng người tối đa không được vượt quá 50")
+    private Integer maxSizePeople;
 }

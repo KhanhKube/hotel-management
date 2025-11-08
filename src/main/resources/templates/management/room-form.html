@@ -183,6 +183,20 @@
                                         </div>
                                     </div>
 
+                                    <div class="form-group mb-3">
+                                        <label for="maxSizePeople">Số Lượng Người Tối Đa</label>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="maxSizePeople" 
+                                               th:field="*{maxSizePeople}"
+                                               placeholder="Nhập số lượng người tối đa"
+                                               min="1"
+                                               max="50">
+                                        <div th:if="${#fields.hasErrors('maxSizePeople')}" class="text-danger">
+                                            <span th:errors="*{maxSizePeople}"></span>
+                                        </div>
+                                    </div>
+
                                     <div class="form-group mb-4">
                                         <label for="roomDescription">Mô Tả</label>
                                         <textarea class="form-control" 
