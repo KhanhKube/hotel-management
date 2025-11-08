@@ -8,13 +8,17 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * DTO hiển thị thông tin booking
+ * Dùng cho cả check-in, check-out và after check-out
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CheckInResponseDto {
-
-    private Integer bookingId;
+public class BookingDto {
+    
+    private Integer orderDetailId;
     private Integer roomId;
     private String roomNumber;
     private String roomType;
@@ -24,12 +28,11 @@ public class CheckInResponseDto {
     private String customerEmail;
     private LocalDate checkInDate;
     private LocalDate expectedCheckOutDate;
-    private Integer numberOfGuests;
-    private String notes;
-    private String services;
-    private Double depositAmount;
-    private String paymentMethod;
+    private LocalDate actualCheckOutDate;
     private String status;
+    private String roomStatus;
     private LocalDateTime createdAt;
-    private String createdBy;
 }
+
+
+

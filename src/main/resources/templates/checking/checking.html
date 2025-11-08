@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Check-In/Check-Out - Hotel Management</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .tab-nav {
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+        .tab-nav .nav-link {
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            padding: 12px 24px;
+            transition: all 0.3s;
+        }
+        .tab-nav .nav-link:hover {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+        .tab-nav .nav-link.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+            font-weight: 600;
+        }
+        .badge-count {
+            margin-left: 8px;
+            font-size: 0.75rem;
+        }
+        .booking-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+        .booking-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-color: #007bff;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-cart { background: #fff3cd; color: #856404; }
+        .status-checked-in { background: #d4edda; color: #155724; }
+        .status-checked-out { background: #d1ecf1; color: #0c5460; }
+        .status-cleaning { background: #e2e3e5; color: #383d41; }
+        .btn-action {
+            margin-left: 8px;
+        }
+        
+        /* Responsive và chống vỡ khung */
+        .booking-card {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .booking-card .row {
+            margin: 0;
+        }
+        
+        .booking-card .col-md-2,
+        .booking-card .col-md-3,
+        .booking-card .col-md-4 {
+            padding: 8px;
+            word-break: break-word;
+            min-width: 0; /* Cho phép shrink */
+        }
+        
+        /* Đảm bảo không bị overflow */
+        .card-body {
+            overflow-x: hidden;
+            overflow-y: visible;
+        }
+        
+        /* Giới hạn chiều rộng tối đa cho text */
+        .booking-card strong,
+        .booking-card small {
+            display: block;
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        /* Responsive cho mobile */
+        @media (max-width: 768px) {
+            .booking-card {
+                padding: 12px;
+            }
+            
+            .booking-card .col-md-2,
+            .booking-card .col-md-3,
+            .booking-card .col-md-4 {
+                margin-bottom: 10px;
+                text-align: left !important;
+                padding: 4px 8px;
+            }
+            
+            .booking-card .text-md-right {
+                text-align: left !important;
+            }
+            
+            .booking-card .btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            .booking-card form {
+                width: 100%;
+            }
+            
+            .tab-nav .nav-link {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .badge-count {
+                display: block;
+                margin-left: 0;
+                margin-top: 4px;
+            }
+            
+            .pagination {
+                flex-wrap: wrap;
+            }
+            
+            .page-link {
+                padding: 6px 10px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Responsive cho tablet */
+        @media (max-width: 992px) and (min-width: 769px) {
+            .booking-card .col-md-3 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+            
+            .booking-card .col-md-2 {
+                flex: 0 0 25%;
+                max-width: 25%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-scroller">
+        <!-- Sidebar -->
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="container-fluid page-body-wrapper">
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <!-- Header -->
+                    <div class="page-header">
+                        <h3 class="page-title">
+                            <i class="mdi mdi-calendar-check"></i>
+                            Quản Lý Check-In/Check-Out
+                        </h3>
+                    </div>
+
+                    <!-- Messages -->
+                    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="mdi mdi-check-circle"></i> <span th:text="${successMessage}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="mdi mdi-alert-circle"></i> <span th:text="${errorMessage}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="nav nav-tabs tab-nav" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link" th:classappend="${currentType == 'checkin'} ? 'active'" 
+                                       th:href="@{/hotel-management/checking(type='checkin', page=0, size=10)}">
+                                        <i class="mdi mdi-login"></i> Check-In
+                                        <span class="badge badge-primary badge-count" th:text="${checkInCount}">0</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" th:classappend="${currentType == 'checkout'} ? 'active'" 
+                                       th:href="@{/hotel-management/checking(type='checkout', page=0, size=10)}">
+                                        <i class="mdi mdi-logout"></i> Check-Out
+                                        <span class="badge badge-warning badge-count" th:text="${checkOutCount}">0</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" th:classappend="${currentType == 'after-checkout'} ? 'active'" 
+                                       th:href="@{/hotel-management/checking(type='after-checkout', page=0, size=10)}">
+                                        <i class="mdi mdi-broom"></i> After Check-Out
+                                        <span class="badge badge-secondary badge-count" th:text="${afterCheckOutCount}">0</span>
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <!-- Tab Content -->
+                            <div class="tab-content mt-4">
+                                <!-- Check-In Tab -->
+                                <div th:if="${currentType == 'checkin'}">
+                                    <div th:if="${bookings != null and !bookings.isEmpty()}">
+                                        <div th:each="booking : ${bookings}" class="booking-card">
+                                            <div class="row align-items-center g-2">
+                                                <div class="col-12 col-md-3">
+                                                    <strong>Booking #<span th:text="${booking.orderDetailId}"></span></strong>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        Phòng: <span th:text="${booking.roomNumber}"></span> - 
+                                                        <span th:text="${booking.roomType}"></span>
+                                                    </small>
+                                                </div>
+                                                <div class="col-12 col-md-3">
+                                                    <strong th:text="${booking.customerName}"></strong>
+                                                    <br>
+                                                    <small class="text-muted" th:text="${booking.customerPhone}"></small>
+                                                </div>
+                                                <div class="col-12 col-md-2">
+                                                    <small>
+                                                        Check-in: <span th:text="${booking.checkInDate != null ? #temporals.format(booking.checkInDate, 'dd/MM/yyyy') : 'N/A'}"></span>
+                                                    </small>
+                                                </div>
+                                                <div class="col-12 col-md-2">
+                                                    <span th:if="${booking.status == 'PENDING'}" 
+                                                          class="status-badge status-pending">PENDING</span>
+                                                    <span th:if="${booking.status == 'CART'}" 
+                                                          class="status-badge status-cart">CART</span>
+                                                    <span th:if="${booking.status == 'CHECKED_IN'}" 
+                                                          class="status-badge status-checked-in">CHECKED_IN</span>
+                                                </div>
+                                                <div class="col-12 col-md-2 text-md-right text-left mt-2 mt-md-0">
+                                                    <form th:if="${booking.status == 'PENDING' or booking.status == 'CART'}" 
+                                                          th:action="@{/hotel-management/checking/checkin}" 
+                                                          method="post" 
+                                                          style="display: inline;"
+                                                          onsubmit="return confirm('Xác nhận check-in cho booking #' + this.orderDetailId.value + '?');">
+                                                        <input type="hidden" name="orderDetailId" th:value="${booking.orderDetailId}">
+                                                        <button type="submit" class="btn btn-success btn-sm w-100 w-md-auto">
+                                                            <i class="mdi mdi-check"></i> Check-In
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div th:if="${bookings == null or bookings.isEmpty()}" class="text-center p-5">
+                                        <i class="mdi mdi-information" style="font-size: 64px; color: #dee2e6;"></i>
+                                        <h5>Không có booking nào</h5>
+                                        <p class="text-muted">Hiện tại không có booking nào chờ check-in</p>
+                                    </div>
+                                </div>
+
+                                <!-- Check-Out Tab -->
+                                <div th:if="${currentType == 'checkout'}">
+                                    <div th:if="${bookings != null and !bookings.isEmpty()}">
+                                        <div th:each="booking : ${bookings}" class="booking-card">
+                                            <div class="row align-items-center g-2">
+                                                <div class="col-12 col-md-3">
+                                                    <strong>Booking #<span th:text="${booking.orderDetailId}"></span></strong>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        Phòng: <span th:text="${booking.roomNumber}"></span> - 
+                                                        <span th:text="${booking.roomType}"></span>
+                                                    </small>
+                                                </div>
+                                                <div class="col-12 col-md-3">
+                                                    <strong th:text="${booking.customerName}"></strong>
+                                                    <br>
+                                                    <small class="text-muted" th:text="${booking.customerPhone}"></small>
+                                                </div>
+                                                <div class="col-12 col-md-2">
+                                                    <small>
+                                                        Check-out: <span th:text="${booking.expectedCheckOutDate != null ? #temporals.format(booking.expectedCheckOutDate, 'dd/MM/yyyy') : 'N/A'}"></span>
+                                                    </small>
+                                                </div>
+                                                <div class="col-12 col-md-2">
+                                                    <span class="status-badge status-checked-in">CHECKED_IN</span>
+                                                </div>
+                                                <div class="col-12 col-md-2 text-md-right text-left mt-2 mt-md-0">
+                                                    <form th:action="@{/hotel-management/checking/checkout}" 
+                                                          method="post" 
+                                                          style="display: inline;"
+                                                          onsubmit="return confirm('Xác nhận check-out cho booking #' + this.orderDetailId.value + '?');">
+                                                        <input type="hidden" name="orderDetailId" th:value="${booking.orderDetailId}">
+                                                        <button type="submit" class="btn btn-warning btn-sm w-100 w-md-auto">
+                                                            <i class="mdi mdi-logout"></i> Check-Out
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div th:if="${bookings == null or bookings.isEmpty()}" class="text-center p-5">
+                                        <i class="mdi mdi-information" style="font-size: 64px; color: #dee2e6;"></i>
+                                        <h5>Không có booking nào</h5>
+                                        <p class="text-muted">Hiện tại không có booking nào chờ check-out</p>
+                                    </div>
+                                </div>
+
+                                <!-- After Check-Out Tab -->
+                                <div th:if="${currentType == 'after-checkout'}">
+                                    <div th:if="${bookings != null and !bookings.isEmpty()}">
+                                        <div th:each="booking : ${bookings}" class="booking-card">
+                                            <div class="row align-items-center g-2">
+                                                <div class="col-12 col-md-3">
+                                                    <strong>Booking #<span th:text="${booking.orderDetailId}"></span></strong>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        Phòng: <span th:text="${booking.roomNumber}"></span> - 
+                                                        <span th:text="${booking.roomType}"></span>
+                                                    </small>
+                                                </div>
+                                                <div class="col-12 col-md-3">
+                                                    <strong th:text="${booking.customerName}"></strong>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        Check-out: <span th:text="${booking.actualCheckOutDate != null ? #temporals.format(booking.actualCheckOutDate, 'dd/MM/yyyy') : 'N/A'}"></span>
+                                                    </small>
+                                                </div>
+                                                <div class="col-12 col-md-2">
+                                                    <span class="status-badge status-cleaning">CLEANING</span>
+                                                </div>
+                                                <div class="col-12 col-md-4 text-md-right text-left mt-2 mt-md-0">
+                                                    <form th:action="@{/hotel-management/checking/after-checkout}" 
+                                                          method="post" 
+                                                          style="display: inline-block; width: 100%;">
+                                                        <input type="hidden" name="orderDetailId" th:value="${booking.orderDetailId}">
+                                                        <input type="hidden" name="readyForNextGuest" th:id="'readyForNextGuest' + ${booking.orderDetailId}" value="">
+                                                        <button type="button" 
+                                                                class="btn btn-success btn-sm w-100 w-md-auto mb-2 mb-md-0"
+                                                                th:onclick="'submitAfterCheckout(true, this, ' + ${booking.orderDetailId} + ')'">
+                                                            <i class="mdi mdi-check"></i> Sẵn sàng
+                                                        </button>
+                                                        <button type="button" 
+                                                                class="btn btn-danger btn-sm w-100 w-md-auto"
+                                                                th:onclick="'submitAfterCheckout(false, this, ' + ${booking.orderDetailId} + ')'">
+                                                            <i class="mdi mdi-wrench"></i> Bảo trì
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div th:if="${bookings == null or bookings.isEmpty()}" class="text-center p-5">
+                                        <i class="mdi mdi-information" style="font-size: 64px; color: #dee2e6;"></i>
+                                        <h5>Không có phòng nào</h5>
+                                        <p class="text-muted">Hiện tại không có phòng nào cần dọn dẹp</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pagination -->
+                            <nav th:if="${totalPages > 1}" aria-label="Page navigation" class="mt-4">
+                                <ul class="pagination justify-content-center flex-wrap">
+                                    <li class="page-item" th:classappend="${isFirst} ? 'disabled'">
+                                        <a class="page-link" 
+                                           th:href="@{/hotel-management/checking(type=${currentType}, page=${currentPage - 1}, size=10)}" 
+                                           th:if="${!isFirst}">Trước</a>
+                                        <span class="page-link" th:if="${isFirst}">Trước</span>
+                                    </li>
+                                    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                                        class="page-item" 
+                                        th:classappend="${i == currentPage} ? 'active'">
+                                        <a class="page-link" 
+                                           th:href="@{/hotel-management/checking(type=${currentType}, page=${i}, size=10)}"
+                                           th:text="${i + 1}">1</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${isLast} ? 'disabled'">
+                                        <a class="page-link" 
+                                           th:href="@{/hotel-management/checking(type=${currentType}, page=${currentPage + 1}, size=10)}" 
+                                           th:if="${!isLast}">Sau</a>
+                                        <span class="page-link" th:if="${isLast}">Sau</span>
+                                    </li>
+                                </ul>
+                                <div class="text-center mt-2" th:if="${totalItems > 0}">
+                                    <small class="text-muted">
+                                        Hiển thị <span th:text="${startItem}">1</span> - 
+                                        <span th:text="${endItem}">10</span> 
+                                        trong tổng số <span th:text="${totalItems}">0</span> mục
+                                    </small>
+                                </div>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="/assets/js/off-canvas.js"></script>
+    <script src="/assets/js/hoverable-collapse.js"></script>
+    <script src="/assets/js/misc.js"></script>
+    <script>
+        function submitAfterCheckout(ready, button, bookingId) {
+            const message = ready 
+                ? 'Xác nhận phòng sẵn sàng cho khách mới?' 
+                : 'Xác nhận chuyển phòng sang bảo trì?';
+            
+            if (confirm(message)) {
+                const form = button.closest('form');
+                const input = form.querySelector('#readyForNextGuest' + bookingId);
+                if (input) {
+                    input.value = ready;
+                    form.submit();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+
