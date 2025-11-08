@@ -5,7 +5,6 @@ import hotel.db.enums.RoomType;
 import hotel.db.repository.discount.DiscountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -51,10 +50,10 @@ public class DiscountServiceImpl implements DiscountService {
         return discountRepository.existsByCodeAndIsDeletedFalse(code);
     }
 
-    @Override
-    public Discount findDiscountById(Long id) {
-        return discountRepository.findById(id).orElse(null);
-    }
+//    @Override
+//    public Discount findDiscountById(Long id) {
+//        return discountRepository.findById(id).orElse(null);
+//    }
 
     @Override
     public boolean checkDiscountCodeExistExceptItSelft(String code, Long discountId) {
