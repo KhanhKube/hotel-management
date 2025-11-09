@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -34,4 +35,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 			"ORDER BY o.created_at DESC",
 			nativeQuery = true)
 	List<Object[]> findAllBookingInfo();
+
+	// Find orders by status and created before a certain time (for cart cleanup)
+	List<Order> findByStatusAndCreatedAtBefore(String status, LocalDateTime createdAt);
 }

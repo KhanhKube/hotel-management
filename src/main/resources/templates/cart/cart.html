@@ -128,15 +128,17 @@
                     <div class="d-flex justify-content-between mb-3">
                         <strong>Tổng cộng:</strong>
                         <strong class="text-primary" id="totalAmount">
-                                <span
-                                        th:text="${#numbers.formatDecimal(#aggregates.sum(cartItems.![totalPrice]), 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                <span th:if="${!#lists.isEmpty(cartItems)}"
+                                      th:text="${#numbers.formatDecimal(#aggregates.sum(cartItems.![totalPrice]), 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                </span>
+                            <span th:if="${#lists.isEmpty(cartItems)}">
                                     0 VNĐ
                                 </span>
                         </strong>
                     </div>
                     <button class="btn btn-primary w-100 mb-2" onclick="checkout()"
                             th:disabled="${#lists.isEmpty(cartItems)}">
-                        <i class="fas fa-check-circle"></i> Tiến Hành Đặt Phòng
+                        <i class="fas fa-credit-card"></i> Thanh Toán Ngay
                     </button>
                     <button class="btn btn-outline-secondary w-100" onclick="clearCart()"
                             th:disabled="${#lists.isEmpty(cartItems)}">
@@ -272,37 +274,52 @@
 
     function checkout() {
         showConfirmModal(
-            'Xác nhận đặt phòng',
-            'Bạn có chắc muốn đặt phòng? Đơn hàng sẽ được tạo với trạng thái chờ xử lý.',
+            'Xác nhận thanh toán',
+            'Bạn sẽ được chuyển đến trang thanh toán PayOS để hoàn tất đặt phòng.',
             function () {
                 // Show loading
                 const checkoutBtn = document.querySelector('.btn-primary');
                 const originalText = checkoutBtn.innerHTML;
                 checkoutBtn.disabled = true;
-                checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+                checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo link thanh toán...';
 
-                fetch('/cart/checkout', {
-                    method: 'POST'
+                // Calculate total amount
+                const totalAmount = [[${#aggregates.sum(cartItems.![totalPrice]
+            )
+            }]]
+                ;
+
+                // Create payment link
+                fetch('/payment/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        productName: 'Đặt phòng khách sạn',
+                        description: 'Thanh toán đặt phòng',
+                        price: totalAmount,
+                        returnUrl: window.location.origin + '/payment/success',
+                        cancelUrl: window.location.origin + '/payment/cancel'
+                    })
                 })
                     .then(res => res.json())
                     .then(data => {
                         checkoutBtn.disabled = false;
                         checkoutBtn.innerHTML = originalText;
 
-                        if (data.success) {
-                            showToast('success', data.message);
-                            setTimeout(() => {
-                                window.location.href = '/hotel/order';
-                            }, 1500);
+                        if (data.error === 0 && data.data && data.data.checkoutUrl) {
+                            // Redirect to PayOS checkout page
+                            window.location.href = data.data.checkoutUrl;
                         } else {
-                            showToast('error', data.message || 'Có lỗi xảy ra!');
+                            showToast('error', data.message || 'Không thể tạo link thanh toán!');
                         }
                     })
                     .catch(err => {
                         console.error('Error:', err);
                         checkoutBtn.disabled = false;
                         checkoutBtn.innerHTML = originalText;
-                        showToast('error', 'Có lỗi xảy ra khi đặt phòng!');
+                        showToast('error', 'Có lỗi xảy ra khi tạo link thanh toán!');
                     });
             }
         );
@@ -371,18 +388,20 @@
         `;
     document.head.appendChild(style);
 
-    // Load cart preview on page load
-    document.addEventListener('DOMContentLoaded', function() {
+    // Load cart badge on page load
+    document.addEventListener('DOMContentLoaded', function () {
         console.log('Cart page loaded, updating cart badge...');
-        
+
         // Wait a bit for header script to load
-        setTimeout(function() {
-            if (typeof window.loadCartPreview === 'function') {
+        setTimeout(function () {
+            if (typeof window.loadCartBadge === 'function') {
+                window.loadCartBadge();
+            } else if (typeof window.loadCartPreview === 'function') {
                 window.loadCartPreview();
-            } else if (typeof loadCartPreview === 'function') {
-                loadCartPreview();
+            } else if (typeof loadCartBadge === 'function') {
+                loadCartBadge();
             } else {
-                console.error('loadCartPreview function not found! Trying direct update...');
+                console.error('loadCartBadge function not found! Trying direct update...');
                 // Fallback: update badge directly
                 fetch('/cart/items')
                     .then(r => r.json())
@@ -390,7 +409,7 @@
                         const badge = document.getElementById('cart-badge');
                         if (badge) {
                             badge.style.setProperty('display', 'inline-block', 'important');
-                            badge.style.setProperty('background', '#ff4444', 'important');
+                            badge.style.setProperty('background', data.length > 0 ? '#ff4444' : '#999', 'important');
                             badge.textContent = data.length;
                             console.log('Badge updated directly to:', data.length);
                         }

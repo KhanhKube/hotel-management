@@ -35,7 +35,7 @@
             color: #333 !important;
             text-decoration: none;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
         }
 
         /* News cards styling */
@@ -43,7 +43,7 @@
             background: white;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             height: 100%;
             display: flex;
@@ -52,7 +52,7 @@
 
         .card-news:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
         }
 
         .card-news__img {
@@ -171,9 +171,9 @@
                 <h1>Sang trọng <em>và</em> Riêng Tư</h1>
                 <div class="banner-buttons d-flex justify-content-center gap-3 flex-wrap mt-4">
                     <a class="button home-banner-btn" href="#">Đặt ngay</a>
-<!--                    <a class="button button-outline" href="#news-section" onclick="scrollToNews(); return false;">-->
-<!--                        <i class="fas fa-newspaper me-2"></i>Xem tin tức-->
-<!--                    </a>-->
+                    <!--                    <a class="button button-outline" href="#news-section" onclick="scrollToNews(); return false;">-->
+                    <!--                        <i class="fas fa-newspaper me-2"></i>Xem tin tức-->
+                    <!--                    </a>-->
                 </div>
             </div>
         </div>
@@ -288,9 +288,11 @@
             <div class="col-lg-7">
                 <div class="welcome-content">
                     <h2 class="mb-4"><span class="d-block">Chào mừng</span> đến với nơi ở của chúng tôi</h2>
-                    <p>Buổi ban đầu an lành khẽ trôi đến. Trong cõi thẳm sâu, Nơi có cá, có năm tháng, có khí trời tươi tốt, Hạt mầm hiện ra giữa hoàng hôn.
+                    <p>Buổi ban đầu an lành khẽ trôi đến. Trong cõi thẳm sâu, Nơi có cá, có năm tháng, có khí trời tươi
+                        tốt, Hạt mầm hiện ra giữa hoàng hôn.
 
-                        Hư không xuất hiện, Mang đến lần sinh thứ ba, Chia tách một đấng toàn năng, Vòm trời lay động, rồi hợp nhất. </p>
+                        Hư không xuất hiện, Mang đến lần sinh thứ ba, Chia tách một đấng toàn năng, Vòm trời lay động,
+                        rồi hợp nhất. </p>
 
                     <a class="button button--active home-banner-btn mt-4" href="#">Tìm hiểu thêm</a>
                 </div>
@@ -316,12 +318,16 @@
                 <div class="col-md-6 col-lg-4 mb-4 mb-lg-0" th:each="r : ${rooms}">
                     <div class="card card-explore">
                         <div class="card-explore__img">
-                            <img class="card-img" th:src="${r.imageRoom != null ? r.imageRoom : '/images/room/room-01.png'}" alt="">
+                            <img class="card-img"
+                                 th:src="${r.imageRoom != null ? r.imageRoom : '/images/room/room-01.png'}" alt="">
                         </div>
                         <div class="card-body">
-                            <h3 class="card-explore__price" th:text="${#numbers.formatInteger(r.price.intValue(), 3, 'POINT')} + ' VNĐ'">350.000 <sub>/ Ngày</sub></h3>
+                            <h3 class="card-explore__price"
+                                th:text="${#numbers.formatInteger(r.price.intValue(), 3, 'POINT')} + ' VNĐ'">350.000
+                                <sub>/ Ngày</sub></h3>
                             <h4 class="card-explore__title">
-                                <a th:text="${r.roomType}" th:href="@{/hotel/room/{id}(id=${r.roomId})}">Classic Bed Room</a>
+                                <a th:text="${r.roomType}" th:href="@{/hotel/room/{id}(id=${r.roomId})}">Classic Bed
+                                    Room</a>
                             </h4>
                             <p th:text="${r.roomDescription}">Room description</p>
                             <a class="card-explore__link" th:href="@{/hotel/room/{id}(id=${r.roomId})}">
@@ -601,7 +607,8 @@
         <div id="welcomeMsg" class="welcome-message">
             <div class="welcome-icon">👋</div>
             <div class="welcome-title">Xin chào!</div>
-            <div class="welcome-text">Tôi là trợ lý AI của khách sạn. Hãy cho tôi biết bạn đang tìm loại phòng nào?</div>
+            <div class="welcome-text">Tôi là trợ lý AI của khách sạn. Hãy cho tôi biết bạn đang tìm loại phòng nào?
+            </div>
             <div class="welcome-examples">
                 <div class="example-chip" onclick="sendExampleMessage('Tôi muốn phòng VIP')">Phòng VIP</div>
                 <div class="example-chip" onclick="sendExampleMessage('Tìm phòng giá rẻ')">Phòng giá rẻ</div>
@@ -976,7 +983,7 @@
     function restoreChatHistory() {
         const chatArea = document.getElementById('chatArea');
         const savedHistory = sessionStorage.getItem('aiChatHistory');
-        
+
         if (savedHistory && chatArea) {
             chatArea.innerHTML = savedHistory;
             chatArea.scrollTop = chatArea.scrollHeight;
@@ -984,7 +991,7 @@
     }
 
     // Khởi tạo khi trang load
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         restoreChatHistory();
     });
 
@@ -1008,7 +1015,7 @@
         msg.innerHTML = '<div class="message-bubble">' + text + '</div>';
         chatArea.appendChild(msg);
         chatArea.scrollTop = chatArea.scrollHeight;
-        
+
         // Lưu lịch sử sau mỗi tin nhắn
         saveChatHistory();
     }
@@ -1041,7 +1048,7 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ query: text })
+            body: JSON.stringify({query: text})
         })
             .then(res => res.json())
             .then(data => {
@@ -1069,7 +1076,7 @@
             });
     }
 
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && isChatOpen) {
             toggleAIChat();
         }
@@ -1113,14 +1120,43 @@
     }
 
     // Initialize animations when document is ready
-    $(document).ready(function() {
+    $(document).ready(function () {
+        // Load cart badge after page is ready (especially after login redirect)
+        console.log('Home page ready - triggering cart badge load...');
+
+        // Wait for loadCartBadge function to be defined
+        var waitForCartBadge = function (attempt) {
+            attempt = attempt || 1;
+            console.log('Waiting for loadCartBadge function... attempt', attempt);
+
+            if (typeof window.loadCartBadge === 'function') {
+                console.log('loadCartBadge found! Calling it...');
+                window.loadCartBadge();
+
+                // Call again after delays
+                setTimeout(window.loadCartBadge, 1000);
+                setTimeout(window.loadCartBadge, 2000);
+            } else if (attempt < 20) {
+                // Retry every 200ms, up to 20 times (4 seconds total)
+                setTimeout(function () {
+                    waitForCartBadge(attempt + 1);
+                }, 200);
+            } else {
+                console.error('loadCartBadge function not found after 20 attempts!');
+                console.log('Available window functions:', Object.keys(window).filter(k => k.toLowerCase().includes('cart')));
+            }
+        };
+
+        // Start waiting
+        waitForCartBadge();
+
         // Intersection Observer for scroll animations
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
         };
 
-        const observer = new IntersectionObserver(function(entries) {
+        const observer = new IntersectionObserver(function (entries) {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('show');
@@ -1129,21 +1165,21 @@
         }, observerOptions);
 
         // Observe all news cards with staggered animation
-        $('.news-card-animate').each(function(index) {
+        $('.news-card-animate').each(function (index) {
             const delay = index * 0.1; // Stagger animation by 0.1s
             $(this).css('transition-delay', delay + 's');
             observer.observe(this);
         });
 
         // Observe all service cards with staggered animation
-        $('.service-card-animate').each(function(index) {
+        $('.service-card-animate').each(function (index) {
             const delay = index * 0.1; // Stagger animation by 0.1s
             $(this).css('transition-delay', delay + 's');
             observer.observe(this);
         });
 
         // Add click handlers for news cards (only on card body, not on links)
-        $('.card-news .card-body').on('click', function(e) {
+        $('.card-news .card-body').on('click', function (e) {
             // Prevent if clicking on actual links
             if (!$(e.target).closest('a').length) {
                 const link = $(this).find('.card-news__title a').attr('href');
@@ -1155,18 +1191,18 @@
 
         // Add hover effect for better UX (only on card body)
         $('.card-news .card-body').hover(
-            function() {
+            function () {
                 $(this).css('cursor', 'pointer');
                 $(this).closest('.card-news').addClass('hover-effect');
             },
-            function() {
+            function () {
                 $(this).css('cursor', 'default');
                 $(this).closest('.card-news').removeClass('hover-effect');
             }
         );
 
         // Add click handlers for service cards (only on card body, not on links)
-        $('.card-service .card-body').on('click', function(e) {
+        $('.card-service .card-body').on('click', function (e) {
             // Prevent if clicking on actual links
             if (!$(e.target).closest('a').length) {
                 const link = $(this).find('.card-service__title a').attr('href');
@@ -1178,11 +1214,11 @@
 
         // Add hover effect for better UX (only on card body)
         $('.card-service .card-body').hover(
-            function() {
+            function () {
                 $(this).css('cursor', 'pointer');
                 $(this).closest('.card-service').addClass('hover-effect');
             },
-            function() {
+            function () {
                 $(this).css('cursor', 'default');
                 $(this).closest('.card-service').removeClass('hover-effect');
             }
