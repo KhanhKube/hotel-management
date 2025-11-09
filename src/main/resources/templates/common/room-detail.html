@@ -184,6 +184,31 @@
         .custom-toast.hiding {
             animation: slideOutRight 0.3s ease-in forwards;
         }
+
+        /* Select dropdown styling */
+        select#checkInTime {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: white;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        select#checkInTime:focus {
+            outline: none;
+            border-color: #ff6600;
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+        }
+
+        .check-in-warning {
+            display: block;
+            margin-top: 5px;
+            color: #dc3545;
+            font-weight: 500;
+        }
     </style>
 </head>
 
@@ -263,9 +288,16 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Giờ check-in:</label>
-                        <input type="time" id="checkInTime" class="form-control" value="14:00" min="06:00" max="23:59"
-                            required>
-                        <small class="text-muted">Giờ tiêu chuẩn: 14:00 (2:00 PM). Check-in sớm có thể phụ phí.</small>
+                        <select id="checkInTime" class="form-control" required>
+                            <option value="14:00" selected>14:00 (Mặc định)</option>
+                            <option value="12:00">12:00</option>
+                            <option value="10:00">10:00</option>
+                            <option value="08:00">08:00</option>
+                            <option value="06:00">06:00</option>
+                            <option value="04:00">04:00</option>
+                            <option value="02:00">02:00</option>
+                            <option value="00:00">00:00</option>
+                        </select>
                     </div>
                 </div>
 
@@ -308,9 +340,11 @@
         // Nhận 2 lists riêng biệt từ Thymeleaf
         const bookedDatesCheckIn = /*[[${bookedDatesCheckIn}]]*/[];
         const bookedDatesCheckOut = /*[[${bookedDatesCheckOut}]]*/[];
+        const disableCheckin = /*[[${disableCheckin}]]*/[];
 
         console.log('Booked dates for check-in:', bookedDatesCheckIn);
         console.log('Booked dates for check-out:', bookedDatesCheckOut);
+        console.log('Dates with checkout restriction (no early check-in):', disableCheckin);
 
         // Tính ngày max = hôm nay + 60 ngày
         const today = new Date();
@@ -372,6 +406,9 @@
                                 checkOutPicker.clear();
                             }
                         }
+
+                        // Xử lý check-in sớm
+                        handleEarlyCheckInOptions(checkInDate);
                     }
                 },
                 locale: {
@@ -410,6 +447,66 @@
 
             console.log('Flatpickr initialized successfully');
         });
+
+        // Hàm xử lý enable/disable check-in sớm
+        function handleEarlyCheckInOptions(selectedDate) {
+            // Format ngày thành yyyy-MM-dd để so sánh
+            const year = selectedDate.getFullYear();
+            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const day = String(selectedDate.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+
+            console.log('Selected check-in date:', dateStr);
+
+            const checkInTimeSelect = document.getElementById('checkInTime');
+
+            // Kiểm tra ngày này có trong danh sách disable không
+            if (disableCheckin.includes(dateStr)) {
+                // Ngày này có khách checkout → DISABLE check-in sớm
+                console.log('This date has checkout → Disable early check-in');
+                disableEarlyCheckIn(checkInTimeSelect);
+            } else {
+                // Ngày này trống → ENABLE check-in sớm
+                console.log('This date is free → Enable early check-in');
+                enableEarlyCheckIn(checkInTimeSelect);
+            }
+        }
+
+        // Disable toàn bộ select và chỉ cho phép 14:00
+        function disableEarlyCheckIn(selectElement) {
+            // Disable tất cả options trừ 14:00
+            const options = selectElement.querySelectorAll('option');
+            options.forEach(option => {
+                if (option.value !== '14:00') {
+                    option.disabled = true;
+                } else {
+                    option.disabled = false;
+                }
+            });
+            
+            // Set về 14:00 mặc định
+            selectElement.value = '14:00';
+            
+            // Disable cả select element (không cho click)
+            selectElement.disabled = true;
+            selectElement.style.backgroundColor = '#f5f5f5';
+            selectElement.style.cursor = 'not-allowed';
+        }
+
+        // Enable toàn bộ select
+        function enableEarlyCheckIn(selectElement) {
+            // Enable tất cả options
+            const options = selectElement.querySelectorAll('option');
+            options.forEach(option => {
+                option.disabled = false;
+            });
+            
+            // Enable select element (cho phép click)
+            selectElement.disabled = false;
+            selectElement.style.backgroundColor = 'white';
+            selectElement.style.cursor = 'pointer';
+        }
+
         /*]]>*/
     </script>
 

@@ -84,4 +84,10 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
             @Param("toDate") LocalDateTime toDate,
             @Param("statuses") List<String> statuses
     );
+
+    @Query(value = "SELECT room_id FROM order_details WHERE start_date < :endDate AND end_date > :startDate",nativeQuery = true)
+    List<Integer> findRoomIdsByFilterEndateAndStatdate(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }
