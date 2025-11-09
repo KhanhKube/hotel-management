@@ -1,5 +1,6 @@
 package hotel.service.common;
 
+import hotel.db.dto.user.ChangePasswordDto;
 import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.dto.user.UserProfileDto;
 import hotel.db.dto.user.VerifyOtpDto;
@@ -30,4 +31,8 @@ public interface CommonService {
     MessageResponse verifyOtp(VerifyOtpDto dto);
 
     MessageResponse resendOtp(String email);
+
+    MessageResponse changePassword(ChangePasswordDto dto);
+
+    MessageResponse forgotPassword(String email);
 }

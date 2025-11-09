@@ -1,11 +1,13 @@
 package hotel.service.common;
 
+import hotel.db.dto.user.ChangePasswordDto;
 import hotel.db.dto.user.UserProfileDto;
 import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.dto.user.VerifyOtpDto;
 import hotel.db.entity.User;
 import hotel.db.repository.user.UserRepository;
 import hotel.util.MessageResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import static ch.qos.logback.core.util.StringUtil.isNullOrEmpty;
@@ -116,6 +119,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
+    @Transactional
     public MessageResponse verifyOtp(VerifyOtpDto dto) {
         User user = userRepository.findByPhone(dto.getPhoneNumber()).orElse(null);
         if(user == null) {
@@ -139,6 +143,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
+    @Transactional
     public MessageResponse resendOtp(String email) {
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
@@ -154,6 +159,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
+    @Transactional
     public MessageResponse editUserProfile(UserProfileDto dto) {
         if (dto == null) {
             return new MessageResponse(false, FILLALLFEILD);
@@ -231,6 +237,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
+    @Transactional
     public MessageResponse updateAvatar(String phone, MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             return new MessageResponse(false, CHOOSEPICTURE);
@@ -300,6 +307,52 @@ public class CommonServiceImpl implements CommonService {
         SecureRandom random = new SecureRandom();
         int number = 100000 + random.nextInt(900000);
         return String.valueOf(number);
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse changePassword(ChangePasswordDto dto){
+        User user = userRepository.findByEmail(dto.getUsername())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        if(dto.getNewPassword().length() < 6) {
+            return new MessageResponse(false, "Mật khẩu cần lớn hơn 6 kí tự!");
+        }
+
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            return new MessageResponse(false, "Mật khẩu hiện tại không đúng!");
+        }
+
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            return new MessageResponse(false, "Mật khẩu xác nhận không khớp!");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+
+        return new MessageResponse(true, "Đổi mật khẩu thành công!");
+    }
+
+    @Override
+    public MessageResponse forgotPassword(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return new MessageResponse(false, "Email không tồn tại trong hệ thống!");
+        }
+
+        User user = userOpt.get();
+        String rawOtp = String.format("%06d", new Random().nextInt(999999));
+
+        String encodedOtp = passwordEncoder.encode(rawOtp);
+        user.setPassword(encodedOtp);
+        userRepository.save(user);
+
+        String subject = "Xác thực quên mật khẩu";
+        String content = "Mật khẩu mới của bạn là: " + rawOtp +
+                "\nVui lòng đăng nhập và đổi mật khẩu ngay sau khi truy cập.";
+        sendOtpEmail(email, subject, content);
+
+        return new MessageResponse(true, "Mật khẩu mới đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư và đăng nhập lại!");
     }
 }
 
