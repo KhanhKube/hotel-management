@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Thanh Toán Thành Công - Hotel</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .success-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-card {
+            background: white;
+            border-radius: 15px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #10b981;
+            margin-bottom: 20px;
+        }
+
+        .success-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .success-message {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+<!-- import header -->
+<div th:replace="~{common/header :: header}"></div>
+
+<section class="success-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="success-card">
+                    <i class="fas fa-check-circle success-icon"></i>
+                    <h1 class="success-title">Thanh Toán Thành Công!</h1>
+                    <p class="success-message">
+                        Cảm ơn bạn đã đặt phòng. Đơn hàng của bạn đã được xác nhận và đang được xử lý.
+                    </p>
+                    <div class="alert alert-info" th:if="${orderCode}">
+                        <strong>Mã đơn hàng:</strong> <span th:text="${orderCode}"></span>
+                    </div>
+                    <div class="mt-4">
+                        <a th:href="@{/hotel/order}" class="btn btn-primary btn-lg mr-3">
+                            <i class="fas fa-list"></i> Xem Đơn Hàng
+                        </a>
+                        <a th:href="@{/hotel}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-home"></i> Về Trang Chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- import footer -->
+<div th:replace="~{common/footer :: footer}"></div>
+
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+</body>
+</html>
