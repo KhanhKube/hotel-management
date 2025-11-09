@@ -1,9 +1,6 @@
 package hotel.rest.common;
 
-import hotel.db.dto.user.UserLoginDto;
-import hotel.db.dto.user.UserProfileDto;
-import hotel.db.dto.user.UserRegisterDto;
-import hotel.db.dto.user.VerifyOtpDto;
+import hotel.db.dto.user.*;
 import hotel.db.entity.User;
 import hotel.service.common.CommonService;
 import hotel.util.MessageResponse;
@@ -61,7 +58,7 @@ public class CommonController {
             return "common/home";
         }
         UserLoginDto userLoginDto = (UserLoginDto) model.getAttribute("userLogin");
-        if(userLoginDto == null) {
+        if (userLoginDto == null) {
             model.addAttribute("userLogin", new UserLoginDto());
             return "common/login";
         }
@@ -75,47 +72,47 @@ public class CommonController {
         return "redirect:/hotel/login";
     }
 
-	@PostMapping("/login")
-	public String login(@ModelAttribute("user") UserLoginDto formUser,
-	                    Model model,
-	                    HttpSession session,
-	                    RedirectAttributes redirectAttrs) {
-		return commonService.login(formUser.getUsername(), formUser.getPassword())
-				.map(user -> {
-					// Lưu user vào session
-					session.setAttribute("user", user);
-					if (!user.getOtpVerified()) {
-						commonService.resendOtp(user.getEmail());
-						VerifyOtpDto verifyOtpDto = new VerifyOtpDto();
-						verifyOtpDto.setEmail(user.getEmail());
-						verifyOtpDto.setUsername(user.getUsername());
-						verifyOtpDto.setPhoneNumber(user.getPhone());
-						verifyOtpDto.setOtp(null);
-						redirectAttrs.addFlashAttribute("verifyDto", verifyOtpDto);
-						return "redirect:/hotel/verify";
-					}
-					if (!user.getRole().equals(CUSTOMER)) {
-						return "redirect:/hotel/dashboard";
-					}
-					session.setAttribute("userId", user.getUserId());
+    @PostMapping("/login")
+    public String login(@ModelAttribute("user") UserLoginDto formUser,
+                        Model model,
+                        HttpSession session,
+                        RedirectAttributes redirectAttrs) {
+        return commonService.login(formUser.getUsername(), formUser.getPassword())
+                .map(user -> {
+                    // Lưu user vào session
+                    session.setAttribute("user", user);
+                    if (!user.getOtpVerified()) {
+                        commonService.resendOtp(user.getEmail());
+                        VerifyOtpDto verifyOtpDto = new VerifyOtpDto();
+                        verifyOtpDto.setEmail(user.getEmail());
+                        verifyOtpDto.setUsername(user.getUsername());
+                        verifyOtpDto.setPhoneNumber(user.getPhone());
+                        verifyOtpDto.setOtp(null);
+                        redirectAttrs.addFlashAttribute("verifyDto", verifyOtpDto);
+                        return "redirect:/hotel/verify";
+                    }
+                    if (!user.getRole().equals(CUSTOMER)) {
+                        return "redirect:/hotel/dashboard";
+                    }
+                    session.setAttribute("userId", user.getUserId());
 
-					// Kiểm tra nếu có trang cần quay lại
-					String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
-					if (redirectUrl != null) {
-						session.removeAttribute("redirectAfterLogin");
-						return "redirect:" + redirectUrl;
-					}
+                    // Kiểm tra nếu có trang cần quay lại
+                    String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
+                    if (redirectUrl != null) {
+                        session.removeAttribute("redirectAfterLogin");
+                        return "redirect:" + redirectUrl;
+                    }
 
-					model.addAttribute("message", "Welcome " + user.getFirstName());
-					redirectAttrs.addFlashAttribute("message", "Xin chào " + user.getFirstName());
-					return "redirect:/hotel";
-				})
-				.orElseGet(() -> {
-					redirectAttrs.addFlashAttribute("error", LOGININVALID);
-					redirectAttrs.addFlashAttribute("userLogin", formUser);
-					return "redirect:/hotel/login";
-				});
-	}
+                    model.addAttribute("message", "Welcome " + user.getFirstName());
+                    redirectAttrs.addFlashAttribute("message", "Xin chào " + user.getFirstName());
+                    return "redirect:/hotel";
+                })
+                .orElseGet(() -> {
+                    redirectAttrs.addFlashAttribute("error", LOGININVALID);
+                    redirectAttrs.addFlashAttribute("userLogin", formUser);
+                    return "redirect:/hotel/login";
+                });
+    }
 
     // Hiển thị form register
     @GetMapping("/register")
@@ -256,15 +253,66 @@ public class CommonController {
         return "redirect:/hotel/profile";
     }
 
-    // Show profile
     @GetMapping("/change-password")
     public String changePassword(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/hotel/login";
         }
-        UserProfileDto userProfileDto = commonService.userToUserProfile(user);
-        model.addAttribute("userProfile", userProfileDto);
+        ChangePasswordDto dto = new ChangePasswordDto();
+        dto.setUsername(user.getEmail());
+        model.addAttribute("changePasswordDto", new ChangePasswordDto());
+        return "common/change-password";
+
+    }
+
+    @PostMapping("/change-password")
+    public String changePasswordConfirm(
+            @ModelAttribute("changePasswordDto") ChangePasswordDto dto,
+            HttpSession session,
+            Model model) {
+
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel/login";
+        }
+
+        MessageResponse response = commonService.changePassword(dto);
+
+        if (!response.isSuccess()) {
+            model.addAttribute("error", response.getMessage());
+            return "common/change-password";
+        }
+
+        model.addAttribute("success", response.getMessage());
         return "common/profile";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPassword(HttpSession session, Model model) {
+        return "common/forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String sendForgotPasswordOtp(@RequestParam("email") String email,
+                                        HttpSession session,
+                                        RedirectAttributes redirectAttributes) {
+        if (email == null || email.isBlank()) {
+            redirectAttributes.addFlashAttribute("error", "Bạn cần nhập email để gửi mật khẩu!");
+            return "redirect:/hotel/forgot-password";
+        }
+
+        MessageResponse response = commonService.forgotPassword(email);
+        if (!response.isSuccess()) {
+            redirectAttributes.addFlashAttribute("error", response.getMessage());
+            return "redirect:/hotel/forgot-password";
+        }
+        UserLoginDto loginDto = new UserLoginDto();
+        loginDto.setUsername(email);
+        session.setAttribute("userLogin", email);
+
+        redirectAttributes.addFlashAttribute("success", response.getMessage());
+
+        return "redirect:/hotel/login";
     }
 }
