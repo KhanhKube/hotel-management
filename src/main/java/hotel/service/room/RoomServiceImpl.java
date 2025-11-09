@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,6 +45,41 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    public Set<String> getBookingDateDisableBookCheckin(Integer roomId) {
+        LocalDateTime fromDate = LocalDateTime.now();
+        LocalDateTime toDate = fromDate.plusMonths(2);
+
+        List<OrderDetail> bookings = orderDetailRepository.findBookingsByRoomAndDateRange(
+                roomId,
+                fromDate,
+                toDate,
+                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
+        );
+        
+        Set<String> disableCheckinDates = new HashSet<>();
+        
+        for (OrderDetail booking : bookings) {
+            LocalDate start = booking.getStartDate().toLocalDate();
+            LocalDate end = booking.getEndDate().toLocalDate();
+            
+            // Disable check-in sớm cho tất cả ngày từ start đến end (BAO GỒM CẢ END)
+            // Vì:
+            // - Các ngày từ start đến (end-1): Đang có khách ở
+            // - Ngày end: Khách checkout (có thể muộn hơn 12:00), không đảm bảo phòng trống từ 00:00
+            //   → Không cho phép check-in sớm, chỉ cho phép check-in 14:00 (sau khi khách checkout chắc chắn)
+            LocalDate current = start;
+            while (!current.isAfter(end)) { // Bao gồm cả ngày end
+                disableCheckinDates.add(current.toString());
+                current = current.plusDays(1);
+            }
+        }
+        
+        System.out.println("Dates with early check-in disabled (room " + roomId + "): " + disableCheckinDates);
+        
+        return disableCheckinDates;
+    }
+
+    @Override
     public List<String> getBookedDatesForBookingRoom(Integer roomId) {
         LocalDateTime fromDate = LocalDateTime.now();
         LocalDateTime toDate = fromDate.plusMonths(2);
@@ -51,7 +88,7 @@ public class RoomServiceImpl implements RoomService {
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("Đã xác nhận", "Đã check-in", "Đã check-out")
+                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
         );
 
         List<String> bookedDates = new ArrayList<>();
@@ -86,7 +123,7 @@ public class RoomServiceImpl implements RoomService {
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("Đã xác nhận", "Đã check-in", "Đã check-out")
+                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
         );
 
         List<String> bookedDates = new ArrayList<>();
@@ -169,6 +206,13 @@ public class RoomServiceImpl implements RoomService {
             String[] dateArr = date.split(" - ");
             String startDate = dateArr[0];
             String endDate = dateArr[1];
+            System.out.println(endDate + "-" + startDate);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDateTime filterStartDate = LocalDate.parse(startDate, formatter).atTime(14,0); //Thêm nghiệp vụ để để filter chuẩn phòng khách có thể book.
+            LocalDateTime filterEndDate = LocalDate.parse(endDate, formatter).atTime(12,0);
+            List<Integer> roomIdList = orderDetailRepository.findRoomIdsByFilterEndateAndStatdate(filterStartDate,filterEndDate);
+            rooms = rooms.stream().filter(x -> roomIdList.contains(x.getRoomId()))
+                    .collect(Collectors.toList());
 
         }
         List<RoomBookListDto> BookList = rooms.stream() //Lấy Listcác phòng đã được lọc field qua Dto

@@ -9,11 +9,17 @@ import org.springframework.data.domain.Page;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public interface RoomService {
 
+    //Lấy các ngày không cho phép khách book check-in sớm
+    Set<String> getBookingDateDisableBookCheckin(Integer roomId);
+
+    //Lấy các ngày cho phép check-in
     List<String> getBookedDatesForBookingRoom(Integer roomId);
-    
+
+    //Lấy các ngày cho phép check-out
     List<String> getBookedDatesForCheckOut(Integer roomId);
 
     //Method filter dùng cho Room-BookingList bên phía customer.

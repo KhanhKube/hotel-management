@@ -263,7 +263,8 @@
                             <!-- Date Range -->
                             <div class="filter-item">
                                 <label>Ngày đi - Ngày về</label>
-                                <input type="text" id="date-range" class="form-control" placeholder="Chọn ngày" name="date">
+                                <input type="text" id="date-range" class="form-control" placeholder="Chọn ngày"
+                                    name="date">
                             </div>
 
                             <!-- Sort -->
@@ -284,7 +285,8 @@
                         <!-- Buttons -->
                         <div class="filter-buttons">
                             <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-                            <button type="button" class="btn btn-secondary" onclick="window.location.href='hotel/rooms'">Đặt
+                            <button type="button" class="btn btn-secondary"
+                                onclick="window.location.href='hotel/rooms'">Đặt
                                 lại
                             </button>
                         </div>
@@ -314,7 +316,7 @@
                                 <span th:text="'Số Phòng: ' + ${r.roomNumber}"></span><br>
                                 <span th:text="'Mổ tả: ' + ${r.roomDescription}"></span><br>
                                 <span th:if="${r.roomViews != null and !r.roomViews.isEmpty()}"
-                                      th:text="'Hướng nhìn: ' + ${#strings.listJoin(r.roomViews, ', ')}"></span>
+                                    th:text="'Hướng nhìn: ' + ${#strings.listJoin(r.roomViews, ', ')}"></span>
 
                             </p>
                             <a class="card-explore__link" th:href="@{/hotel/room/{id}(id=${r.roomId})}">
@@ -393,29 +395,42 @@
     </script>
     <script>
         flatpickr("#date-range", {
-          mode: "range",
-          dateFormat: "Y-m-d", // giá trị raw để xử lý
-          minDate: "today",
-          onClose: function (selectedDates, dateStr, instance) {
-            const [startDate, endDate] = dateStr.split(" to ");
+            mode: "range",
+            dateFormat: "Y-m-d", // giá trị raw để xử lý
+            minDate: "today",
+            onClose: function (selectedDates, dateStr, instance) {
+                // Kiểm tra số lượng ngày được chọn
+                if (selectedDates.length < 2) {
+                    instance.input.value = "";
+                    instance.clear();
+                    return;
+                }
 
-            // Nếu người dùng chưa chọn đủ 2 ngày (chỉ click 1 lần) thì thoát sớm
-            if (!endDate) return;
+                // Lấy 2 ngày từ selectedDates array
+                const startDate = selectedDates[0];
+                const endDate = selectedDates[1];
 
-            // Format ngày sang dd/mm/yyyy
-            const formatDate = (date) => {
-              const d = new Date(date);
-              const day = String(d.getDate()).padStart(2, "0");
-              const month = String(d.getMonth() + 1).padStart(2, "0");
-              const year = d.getFullYear();
-              return `${day}/${month}/${year}`;
-            };
+                // Kiểm tra nếu 2 ngày giống nhau
+                if (startDate.getTime() === endDate.getTime()) {
+                    instance.input.value = "";
+                    instance.clear();
+                    return;
+                }
 
-            const displayText = `${formatDate(startDate)} − ${formatDate(endDate)}`;
+                // Format ngày sang dd/mm/yyyy
+                const formatDate = (date) => {
+                    const d = new Date(date);
+                    const day = String(d.getDate()).padStart(2, "0");
+                    const month = String(d.getMonth() + 1).padStart(2, "0");
+                    const year = d.getFullYear();
+                    return `${day}/${month}/${year}`;
+                };
 
-            // Gán lại lên chính input
-            instance.input.value = displayText;
-          }
+                const displayText = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+
+                // Gán lại lên chính input
+                instance.input.value = displayText;
+            }
         });
     </script>
 </body>
