@@ -131,7 +131,6 @@ public class CommonController {
             model.addAttribute("message", response.getMessage());
             VerifyOtpDto verifyOtpDto = new VerifyOtpDto();
             verifyOtpDto.setEmail(dto.getEmail());
-            verifyOtpDto.setUsername(dto.getUsername());
             verifyOtpDto.setPhoneNumber(dto.getPhone());
             verifyOtpDto.setOtp(null);
             redirectAttrs.addFlashAttribute("verifyDto", verifyOtpDto);
@@ -156,7 +155,7 @@ public class CommonController {
         MessageResponse response = commonService.verifyOtp(dto);
         if (response.isSuccess()) {
             model.addAttribute("message", "Xác thực thành công! Hãy đăng nhập.");
-            UserLoginDto userLoginDto = new UserLoginDto(dto.getUsername(), null);
+            UserLoginDto userLoginDto = new UserLoginDto(dto.getEmail(), null);
             redirectAttrs.addFlashAttribute("userLogin", userLoginDto);
             return "redirect:/hotel/login";
         } else {
