@@ -9,12 +9,8 @@ import org.springframework.data.domain.Page;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 public interface RoomService {
-
-    //Lấy các ngày không cho phép khách book check-in sớm
-    Set<String> getBookingDateDisableBookCheckin(Integer roomId);
 
     //Lấy các ngày cho phép check-in
     List<String> getBookedDatesForBookingRoom(Integer roomId);
@@ -36,7 +32,7 @@ public interface RoomService {
     List<RoomListDto> getRoomList();
     
     // Method filter và pagination cho trang quản lý phòng (admin)
-    Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status, 
+    Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status, String systemstatus,
                                                Integer floor, Double size, BigDecimal minPrice, 
                                                BigDecimal maxPrice, String sortBy, int page, int pageSize);
 

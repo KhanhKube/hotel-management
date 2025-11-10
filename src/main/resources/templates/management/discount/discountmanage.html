@@ -24,10 +24,68 @@
     <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
     <style>
         tbody tr:hover {
-            /*background-color: #e3f2fd;  !* Xanh nhạt *!*/
             cursor: pointer;
             opacity: 0.65;
-            transition: background-color 0.2s;  /* Hiệu ứng mượt */
+            transition: background-color 0.2s;
+        }
+
+        /* Style cho select dropdown */
+        .form-select {
+            width: 100%;
+            background-color: #2c2e33;
+            border: 1px solid #2c2e33;
+            color: #ffffff;
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1;
+            border-radius: 2px;
+            height: calc(1em + 1.5rem + 2px);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+        }
+
+        .form-select:focus {
+            background-color: #2c2e33;
+            border-color: #2196f3;
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .form-select option {
+            background-color: #2c2e33;
+            color: #ffffff;
+        }
+
+        .form-label {
+            display: block;
+            color: #6c7293;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: #2c2e33;
+            border: 1px solid #2c2e33;
+            color: #ffffff;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1;
+            height: calc(1em + 1.5rem + 2px);
+        }
+
+        .form-control:focus {
+            background-color: #2c2e33;
+            border-color: #2196f3;
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .form-control::placeholder {
+            color: #6c7293;
         }
     </style>
 </head>
@@ -51,95 +109,88 @@
         <div class="main-panel">
             <div class="content-wrapper">
                 <div class="row ">
+                    <!--Filter Part-->
                     <div class="col-12 grid-margin">
                         <div class="card">
                             <div class="card-body">
-                                <!-- Search & Filter Bar -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Tìm kiếm nhanh</h4>
+                                </div>
                                 <form th:action="@{/hotel-management/discount}" method="get">
-                                    <div class="filter-section mb-4" style="background: #4a90e2; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
-                                            <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Voucher</h5>
+
+                                    <!-- Hàng 1: Thanh search | Loại giảm giá | Loại phòng | Trạng thái -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Tìm kiếm</label>
+                                            <input name="search" type="text" class="form-control"
+                                                   placeholder="Mã voucher..." th:value="${param.search}">
                                         </div>
-
-                                        <!-- Row 1: Search -->
-                                        <div class="row mb-3">
-                                            <div class="col-md-12">
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-white border-end-0">
-                                                        <i class="mdi mdi-magnify text-primary"></i>
-                                                    </span>
-                                                    <input name="search" type="text" class="form-control border-start-0" 
-                                                           placeholder="Tìm kiếm mã voucher..." th:value="${param.search}">
-                                                </div>
-                                            </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Loại phòng</label>
+                                            <select name="roomType" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option th:each="type : ${roomTypes}" 
+                                                        th:value="${type}" 
+                                                        th:text="${type}"
+                                                        th:selected="${param.roomType != null && param.roomType[0] == type}"></option>
+                                            </select>
                                         </div>
-
-                                        <!-- Row 2: Filters -->
-                                        <div class="row mb-3">
-                                            <div class="col-md-3 col-sm-6 mb-2">
-                                                <select name="discountType" class="form-select">
-                                                    <option value="">-- Tất cả loại giảm giá --</option>
-                                                    <option value="PERCENT" th:selected="${param.discountType != null && param.discountType[0] == 'PERCENT'}">Phần trăm (%)</option>
-                                                    <option value="AMOUNT" th:selected="${param.discountType != null && param.discountType[0] == 'AMOUNT'}">Số tiền cố định</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-md-3 col-sm-6 mb-2">
-                                                <select name="roomType" class="form-select">
-                                                    <option value="">-- Tất cả loại phòng --</option>
-                                                    <option th:each="type : ${roomTypes}" 
-                                                            th:value="${type}" 
-                                                            th:text="${type}"
-                                                            th:selected="${param.roomType != null && param.roomType[0] == type}"></option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-md-3 col-sm-6 mb-2">
-                                                <select name="status" class="form-select">
-                                                    <option value="">-- Tất cả trạng thái --</option>
-                                                    <option value="ACTIVE" th:selected="${param.status != null && param.status[0] == 'ACTIVE'}">Đang hoạt động</option>
-                                                    <option value="PENDING" th:selected="${param.status != null && param.status[0] == 'PENDING'}">Chưa bắt đầu</option>
-                                                    <option value="EXPIRED" th:selected="${param.status != null && param.status[0] == 'EXPIRED'}">Hết hạn</option>
-                                                    <option value="EXHAUSTED" th:selected="${param.status != null && param.status[0] == 'EXHAUSTED'}">Hết số lượng</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-md-3 col-sm-6 mb-2">
-                                                <select name="sortBy" class="form-select">
-                                                    <option value="">-- Sắp xếp --</option>
-                                                    <option value="code,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'code,asc'}">Mã tăng dần</option>
-                                                    <option value="code,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'code,desc'}">Mã giảm dần</option>
-                                                    <option value="value,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'value,asc'}">Giá trị tăng dần</option>
-                                                    <option value="value,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'value,desc'}">Giá trị giảm dần</option>
-                                                    <option value="startDate,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'startDate,asc'}">Ngày bắt đầu tăng dần</option>
-                                                    <option value="startDate,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'startDate,desc'}">Ngày bắt đầu giảm dần</option>
-                                                </select>
-                                            </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Trạng thái</label>
+                                            <select name="status" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option value="ACTIVE" th:selected="${param.status != null && param.status[0] == 'ACTIVE'}">Đang hoạt động</option>
+                                                <option value="PENDING" th:selected="${param.status != null && param.status[0] == 'PENDING'}">Chưa bắt đầu</option>
+                                                <option value="EXPIRED" th:selected="${param.status != null && param.status[0] == 'EXPIRED'}">Hết hạn</option>
+                                                <option value="EXHAUSTED" th:selected="${param.status != null && param.status[0] == 'EXHAUSTED'}">Hết số lượng</option>
+                                            </select>
                                         </div>
-
-                                        <!-- Row 3: Buttons -->
-                                        <div class="row align-items-center">
-                                            <div class="col-md-9 col-sm-12 mb-2">
-                                                <button type="submit" class="btn btn-info me-2">
-                                                    <i class="mdi mdi-magnify"></i> Tìm kiếm
-                                                </button>
-                                                <a th:href="@{/hotel-management/discount}" class="btn btn-light">
-                                                    <i class="mdi mdi-refresh"></i> Reset
-                                                </a>
-                                            </div>
-
-                                            <div class="col-md-3 col-sm-12 mb-2 text-end">
-                                                <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
-                                                    <i class="mdi mdi-ticket-percent"></i>
-                                                    Tổng: <strong th:text="${totalElements != null ? totalElements : #lists.size(listDiscount)}">0</strong> voucher
-                                                </span>
-                                            </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Sắp xếp</label>
+                                            <select name="sortBy" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option value="code,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'code,asc'}">Mã tăng dần</option>
+                                                <option value="code,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'code,desc'}">Mã giảm dần</option>
+                                                <option value="value,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'value,asc'}">Giá trị tăng dần</option>
+                                                <option value="value,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'value,desc'}">Giá trị giảm dần</option>
+                                                <option value="startDate,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'startDate,asc'}">Ngày bắt đầu tăng dần</option>
+                                                <option value="startDate,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'startDate,desc'}">Ngày bắt đầu giảm dần</option>
+                                            </select>
                                         </div>
                                     </div>
+
+                                    <!-- Hàng 2: Tìm kiếm | Đặt lại (căn giữa) -->
+                                    <div class="row justify-content-center">
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                            </button>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a th:href="@{/hotel-management/discount}" class="btn btn-secondary w-100">
+                                                <i class="mdi mdi-refresh"></i> Đặt lại
+                                            </a>
+                                        </div>
+                                    </div>
+
                                 </form>
                             </div>
+                        </div>
+                    </div>
+
+                    <!--Main Part-->
+                    <div class="col-12 grid-margin">
+                        <div class="card">
                             <div class="card-body">
+
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Quản Lý Voucher Giảm Giá</h4>
+                                    <a th:href="@{/hotel-management/discount/create}" class="btn btn-primary">
+                                        <i class="mdi mdi-plus"></i> Thêm Voucher
+                                    </a>
+                                </div>
+
                                 <!-- Error Message -->
                                 <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
                                     <i class="mdi mdi-alert-circle"></i>
@@ -148,25 +199,18 @@
                                         <span>&times;</span>
                                     </button>
                                 </div>
-
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h4 class="card-title mb-0">Discount Voucher Status</h4>
-                                    <a th:href="@{/hotel-management/discount/create}" class="btn btn-primary">
-                                        <i class="mdi mdi-plus"></i> Create New Discount
-                                    </a>
-                                </div>
                                 <div class="table-responsive">
                                     <table class="table" id="discountTable">
                                         <thead>
                                         <tr>
                                             <th> STT </th>
-                                            <th> Discount Code </th>
-                                            <th> Discount Value </th>
-                                            <th> Room Type </th>
-                                            <th> Start Date </th>
-                                            <th> End Date </th>
-                                            <th> Status </th>
-                                            <th> Update </th>
+                                            <th> Mã giảm giá </th>
+                                            <th> Giám giá </th>
+                                            <th> Loại phòng </th>
+                                            <th> Ngày bắt đầu </th>
+                                            <th> Ngày kết thúc </th>
+                                            <th> Trạng thái </th>
+                                            <th> Cập nhật </th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -176,21 +220,21 @@
 
                                             <td th:text="${stat.count}"></td>
                                             <td th:text="${d.code != null ? d.code : 'N/A'}"></td>
-                                            <td th:text="${d.value != null ? (d.value + (d.discountType == 'PERCENT' ? ' %' : ' VND')) : 'N/A'}"></td>
+                                            <td th:text="${d.value != null ? d.value + ' VND' : 'N/A'}"></td>
                                             <td th:text="${d.roomType != null ? d.roomType : 'N/A'}"></td>
                                             <td th:text="${d.startDate != null ? #temporals.format(d.startDate, 'dd/MM/yyyy') : 'N/A'}"></td>
                                             <td th:text="${d.endDate != null ? #temporals.format(d.endDate, 'dd/MM/yyyy') : 'N/A'}"></td>
                                             <td>
                                                 <div th:switch="${d.status}">
-                                                    <span th:case="'EXHAUSTED'" class="badge badge-outline-danger">EXHAUSTED</span>
-                                                    <span th:case="'EXPIRED'" class="badge badge-outline-secondary">EXPIRED</span>
-                                                    <span th:case="'PENDING'" class="badge badge-outline-warning">PENDING</span>
-                                                    <span th:case="'ACTIVE'" class="badge badge-outline-success">ACTIVE</span>
+                                                    <span th:case="'EXHAUSTED'" class="badge badge-outline-danger">Hết số lượng</span>
+                                                    <span th:case="'EXPIRED'" class="badge badge-outline-secondary">Hết hạn</span>
+                                                    <span th:case="'PENDING'" class="badge badge-outline-warning">Chuẩn bị</span>
+                                                    <span th:case="'ACTIVE'" class="badge badge-outline-success">Hoạt động</span>
                                                 </div>
                                             </td>
                                             <td onclick="event.stopPropagation();">
-                                                <a th:href="@{/hotel-management/discount/edit/{id}(id=${d.discountId})}">Edit</a>
-                                                <a th:href="@{/hotel-management/discount/delete/{id}(id=${d.discountId})}">Delete</a>
+                                                <a th:href="@{/hotel-management/discount/edit/{id}(id=${d.discountId})}">Sửa</a>
+                                                <a th:href="@{/hotel-management/discount/delete/{id}(id=${d.discountId})}">Xóa</a>
                                             </td>
                                         </tr>
 

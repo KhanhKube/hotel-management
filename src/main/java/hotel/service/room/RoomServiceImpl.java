@@ -44,40 +44,6 @@ public class RoomServiceImpl implements RoomService {
                 viewRepository.findViewTypeByViewId(viewId)).collect(Collectors.toList());
     }
 
-    @Override
-    public Set<String> getBookingDateDisableBookCheckin(Integer roomId) {
-        LocalDateTime fromDate = LocalDateTime.now();
-        LocalDateTime toDate = fromDate.plusMonths(2);
-
-        List<OrderDetail> bookings = orderDetailRepository.findBookingsByRoomAndDateRange(
-                roomId,
-                fromDate,
-                toDate,
-                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
-        );
-        
-        Set<String> disableCheckinDates = new HashSet<>();
-        
-        for (OrderDetail booking : bookings) {
-            LocalDate start = booking.getStartDate().toLocalDate();
-            LocalDate end = booking.getEndDate().toLocalDate();
-            
-            // Disable check-in sớm cho tất cả ngày từ start đến end (BAO GỒM CẢ END)
-            // Vì:
-            // - Các ngày từ start đến (end-1): Đang có khách ở
-            // - Ngày end: Khách checkout (có thể muộn hơn 12:00), không đảm bảo phòng trống từ 00:00
-            //   → Không cho phép check-in sớm, chỉ cho phép check-in 14:00 (sau khi khách checkout chắc chắn)
-            LocalDate current = start;
-            while (!current.isAfter(end)) { // Bao gồm cả ngày end
-                disableCheckinDates.add(current.toString());
-                current = current.plusDays(1);
-            }
-        }
-        
-        System.out.println("Dates with early check-in disabled (room " + roomId + "): " + disableCheckinDates);
-        
-        return disableCheckinDates;
-    }
 
     @Override
     public List<String> getBookedDatesForBookingRoom(Integer roomId) {
@@ -216,7 +182,7 @@ public class RoomServiceImpl implements RoomService {
 
         }
         List<RoomBookListDto> BookList = rooms.stream() //Lấy Listcác phòng đã được lọc field qua Dto
-                .filter(x -> !"Bảo trì".equals(x.getStatus()))
+                .filter(x -> !"Dừng hoạt động".equals(x.getSystemStatus()))
                 .map(x -> {
                     return toRoomBookDto(x);
                 }).collect(Collectors.toList());
@@ -291,7 +257,7 @@ public class RoomServiceImpl implements RoomService {
     Method filter và pagination cho trang quản lý phòng (admin)
     */
     @Override
-    public Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status,
+    public Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status, String systemstatus,
                                                       Integer floor, Double size, BigDecimal minPrice,
                                                       BigDecimal maxPrice, String sortBy, int page, int pageSize) {
         List<Room> rooms = roomRepository.findAllByIsDeletedFalse();
@@ -303,21 +269,24 @@ public class RoomServiceImpl implements RoomService {
                     .filter(x -> x.getRoomNumber().toLowerCase().contains(searchLower))
                     .collect(Collectors.toList());
         }
-
         // Filter theo loại phòng
         if (roomType != null && !roomType.isEmpty()) {
             rooms = rooms.stream()
                     .filter(x -> x.getRoomType().equals(roomType))
                     .collect(Collectors.toList());
         }
-
+        // Filter theo Tình trạng phòng
+        if (systemstatus != null && !systemstatus.isEmpty()) {
+            rooms = rooms.stream()
+                    .filter(x -> x.getSystemStatus().equals(systemstatus))
+                    .collect(Collectors.toList());
+        }
         // Filter theo trạng thái
         if (status != null && !status.isEmpty()) {
             rooms = rooms.stream()
                     .filter(x -> x.getStatus().equals(status))
                     .collect(Collectors.toList());
         }
-
         // Filter theo tầng
         if (floor != null) {
             rooms = rooms.stream()
@@ -330,7 +299,6 @@ public class RoomServiceImpl implements RoomService {
                     })
                     .collect(Collectors.toList());
         }
-
         // Filter theo diện tích
         if (size != null) {
             rooms = rooms.stream()
@@ -346,21 +314,18 @@ public class RoomServiceImpl implements RoomService {
                     })
                     .collect(Collectors.toList());
         }
-
         // Filter theo giá min
         if (minPrice != null) {
             rooms = rooms.stream()
                     .filter(x -> x.getPrice().compareTo(minPrice) >= 0)
                     .collect(Collectors.toList());
         }
-
         // Filter theo giá max
         if (maxPrice != null) {
             rooms = rooms.stream()
                     .filter(x -> x.getPrice().compareTo(maxPrice) <= 0)
                     .collect(Collectors.toList());
         }
-
         // Sort
         if (sortBy != null && !sortBy.isEmpty()) {
             String[] sortParams = sortBy.split(",");
@@ -382,7 +347,6 @@ public class RoomServiceImpl implements RoomService {
                 rooms.sort(comparator);
             }
         }
-
         // Convert to DTO
         List<RoomListDto> roomDtos = rooms.stream()
                 .map(this::toListDto)
@@ -424,7 +388,8 @@ public class RoomServiceImpl implements RoomService {
                 floorNumber,
                 sizeValue,
                 room.getPrice(),
-                room.getStatus()
+                room.getStatus(),
+                room.getSystemStatus()
         );
     }
 

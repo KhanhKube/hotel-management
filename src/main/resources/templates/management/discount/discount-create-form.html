@@ -34,7 +34,6 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h4 class="card-title mb-4">
-                                        <i class="mdi mdi-ticket-percent"></i>
                                         <span
                                             th:text="${discount.discountId != null ? 'Cập Nhật Mã Giảm Giá' : 'Tạo Mã Giảm Giá Mới'}"></span>
                                     </h4>
@@ -46,7 +45,6 @@
                                         <!-- Error Message -->
                                         <div th:if="${errorMessage}"
                                             class="alert alert-danger alert-dismissible fade show" role="alert">
-                                            <i class="mdi mdi-alert-circle"></i>
                                             <span th:text="${errorMessage}"></span>
                                             <button type="button" class="close" data-dismiss="alert">
                                                 <span>&times;</span>
@@ -56,7 +54,7 @@
                                         <!-- Mã giảm giá -->
                                         <div class="form-group">
                                             <label for="vcode">
-                                                <i class="mdi mdi-barcode"></i> Mã giảm giá: <span
+                                                Mã giảm giá: <span
                                                     class="text-danger">*</span>
                                             </label>
                                             <input id="vcode" type="text" class="form-control" th:field="*{code}"
@@ -66,40 +64,15 @@
                                         <!-- Mô tả -->
                                         <div class="form-group">
                                             <label for="des">
-                                                <i class="mdi mdi-text"></i> Mô tả: <span class="text-danger">*</span>
+                                                Mô tả: <span class="text-danger">*</span>
                                             </label>
                                             <textarea id="des" class="form-control" th:field="*{description}" rows="3"
                                                 placeholder="Nhập mô tả chi tiết về mã giảm giá..." required></textarea>
                                         </div>
-
-                                        <!-- Loại giảm giá -->
-                                        <div class="form-group">
-                                            <label>
-                                                <i class="mdi mdi-format-list-bulleted-type"></i> Loại giảm giá: <span
-                                                    class="text-danger">*</span>
-                                            </label>
-                                            <div class="form-check">
-                                                <label class="form-check-label">
-                                                    <input id="percentRadio" type="radio" class="form-check-input"
-                                                        th:field="*{discountType}" value="PERCENT"
-                                                        onchange="valueValidate()">
-                                                    <i class="mdi mdi-percent"></i> Phần trăm (%)
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <label class="form-check-label">
-                                                    <input id="amountRadio" type="radio" class="form-check-input"
-                                                        th:field="*{discountType}" value="AMOUNT"
-                                                        onchange="valueValidate()">
-                                                    <i class="mdi mdi-cash"></i> Số tiền cố định (VNĐ)
-                                                </label>
-                                            </div>
-                                        </div>
-
                                         <!-- Giá trị giảm -->
                                         <div class="form-group">
                                             <label for="value">
-                                                <i class="mdi mdi-currency-usd"></i> Giá trị giảm: <span
+                                                Giá trị giảm: <span
                                                     class="text-danger">*</span>
                                             </label>
                                             <input id="value" type="number" step="0.01" class="form-control"
@@ -109,11 +82,11 @@
                                         <!-- Loại phòng -->
                                         <div class="form-group">
                                             <label for="roomtype">
-                                                <i class="mdi mdi-home-variant"></i> Loại phòng áp dụng: <span
+                                                Loại phòng áp dụng: <span
                                                     class="text-danger">*</span>
                                             </label>
                                             <select id="roomtype" class="form-control" th:field="*{roomType}" required>
-                                                <option value="">-- Chọn loại phòng --</option>
+                                                <option value="">Tất cả</option>
                                                 <option th:each="type : ${roomTypes}" th:value="${type}"
                                                     th:text="${type}"></option>
                                             </select>
@@ -124,7 +97,7 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="startdate">
-                                                        <i class="mdi mdi-calendar-start"></i> Ngày bắt đầu: <span
+                                                        Ngày bắt đầu: <span
                                                             class="text-danger">*</span>
                                                     </label>
                                                     <input id="startdate" type="date" class="form-control"
@@ -136,7 +109,7 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="enddate">
-                                                        <i class="mdi mdi-calendar-end"></i> Ngày kết thúc: <span
+                                                        Ngày kết thúc: <span
                                                             class="text-danger">*</span>
                                                     </label>
                                                     <input id="enddate" type="date" class="form-control"
@@ -150,20 +123,19 @@
                                         <!-- Số lượng phát hành -->
                                         <div class="form-group">
                                             <label for="limit">
-                                                <i class="mdi mdi-counter"></i> Số lượng phát hành: <span
+                                                Số lượng phát hành: <span
                                                     class="text-danger">*</span>
                                             </label>
                                             <input id="limit" type="number" class="form-control"
                                                 th:field="*{usageLimit}" placeholder="VD: 100" min="1" required>
                                         </div>
-
                                         <!-- Buttons -->
                                         <div class="form-group mt-4">
                                             <button type="submit" class="btn btn-primary btn-lg">
-                                                <i class="mdi mdi-content-save"></i> Lưu mã giảm giá
+                                                Lưu mã giảm giá
                                             </button>
                                             <a th:href="@{/hotel-management/discount}" class="btn btn-secondary btn-lg">
-                                                <i class="mdi mdi-close"></i> Hủy
+                                                Hủy
                                             </a>
                                         </div>
                                     </form>
@@ -176,43 +148,6 @@
             </div>
         </div>
     </div>
-    <!--    validate người dùng chọn DiscountType và Số tiền giảm-->
-    <script>
-        function valueValidate() {
-            const percent = document.getElementById('percentRadio');
-            const valueIn = document.getElementById('value');
-
-            if (percent.checked) {
-                valueIn.min = 0.01;
-                valueIn.max = 100;
-                valueIn.placeholder = "% Số tiền giảm"
-            } else {
-                valueIn.min = 10000;
-                valueIn.removeAttribute('max');
-                valueIn.placeholder = "$ Số tiền giảm"
-            }
-            valueIn.value = '';
-        }
-
-        document.getElementById('value').addEventListener('input', function () {
-            const percent = document.getElementById('percentRadio');
-            const value = parseFloat(this.value);
-
-            if (percent.checked) {
-                if (value <= 0 || value > 100) {
-                    this.setCustomValidity("Giá trị % phải lớn hơn 0 và nhỏ hơn hoặc bằng 100")
-                } else {
-                    this.setCustomValidity("");
-                }
-            } else {
-                if (value <= 0) {
-                    this.setCustomValidity("Số tiền giảm phải hớn hơn 0!");
-                } else {
-                    this.setCustomValidity("");
-                }
-            }
-        });
-    </script>
     <!--        validate ngày tháng bắt đầu và kết thúc-->
     <script>
         function validateEndDate() {

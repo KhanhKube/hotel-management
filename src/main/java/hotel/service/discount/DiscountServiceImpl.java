@@ -36,7 +36,6 @@ public class DiscountServiceImpl implements DiscountService {
         return new DiscountResponseDto(
                 d.getDiscountId(),
                 d.getCode(),
-                d.getDiscountType(),
                 d.getValue(),
                 d.getRoomType(),
                 d.getStartDate(),
@@ -81,7 +80,7 @@ public class DiscountServiceImpl implements DiscountService {
     }
     
     @Override
-    public Page<DiscountResponseDto> getDiscountListForManagement(String search, String discountType, String roomType,
+    public Page<DiscountResponseDto> getDiscountListForManagement(String search, String roomType,
                                                                   String status, String sortBy, int page, int pageSize) {
         List<Discount> discounts = discountRepository.findAllByIsDeletedFalse();
         
@@ -92,13 +91,7 @@ public class DiscountServiceImpl implements DiscountService {
                     .filter(d -> d.getCode().toLowerCase().contains(searchLower))
                     .collect(java.util.stream.Collectors.toList());
         }
-        
-        // Filter theo discount type
-        if (discountType != null && !discountType.isEmpty()) {
-            discounts = discounts.stream()
-                    .filter(d -> d.getDiscountType().equalsIgnoreCase(discountType))
-                    .collect(java.util.stream.Collectors.toList());
-        }
+
         
         // Filter theo room type
         if (roomType != null && !roomType.isEmpty()) {

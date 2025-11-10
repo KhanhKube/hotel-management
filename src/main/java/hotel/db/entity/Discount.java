@@ -25,9 +25,6 @@ public class Discount extends AbstractVersion{
     @Column(name = "description", columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4")
     private String description;
 
-    @Column(name = "discount_type", nullable = false, length = 20)
-    private String discountType;
-
     @Column(name = "value", nullable = false)
     private Double value;
 

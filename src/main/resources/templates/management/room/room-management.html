@@ -9,14 +9,71 @@
     <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
     <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
     <link rel="stylesheet" th:href="@{/assets/css/style.css}">
-    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}"/>
     <style>
         tbody tr:hover {
-            /*background-color: #e3f2fd;  !* Xanh nhạt *!*/
             cursor: pointer;
             opacity: 0.65;
             transition: background-color 0.2s;
-            /* Hiệu ứng mượt */
+        }
+
+        /* Style cho select dropdown */
+        .form-select {
+            width: 100%;
+            background-color: #2c2e33;
+            border: 1px solid #2c2e33;
+            color: #ffffff;
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1;
+            border-radius: 2px;
+            height: calc(1em + 1.5rem + 2px);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+        }
+
+        .form-select:focus {
+            background-color: #2c2e33;
+            border-color: #2196f3;
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .form-select option {
+            background-color: #2c2e33;
+            color: #ffffff;
+        }
+
+        .form-label {
+            display: block;
+            color: #6c7293;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: #2c2e33;
+            border: 1px solid #2c2e33;
+            color: #ffffff;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1;
+            height: calc(1em + 1.5rem + 2px);
+        }
+
+        .form-control:focus {
+            background-color: #2c2e33;
+            border-color: #2196f3;
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .form-control::placeholder {
+            color: #6c7293;
         }
     </style>
 </head>
@@ -30,7 +87,7 @@
         <nav class="navbar p-0 fixed-top d-flex flex-row">
             <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
                 <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
-                                                                               alt="logo" /></a>
+                                                                               alt="logo"/></a>
             </div>
             <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
             </div>
@@ -39,6 +96,133 @@
         <div class="main-panel">
             <div class="content-wrapper">
                 <div class="row">
+
+                    <!--Filter Bar-->
+
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Tìm kiếm nhanh</h4>
+                                </div>
+                                <form th:action="@{/hotel-management/room}" method="get">
+
+                                    <!-- Hàng 1: Thanh search | Giá min | Giá max | Tình trạng | Trạng thái -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-2">
+                                            <label class="form-label">Tìm kiếm</label>
+                                            <input name="search" type="text" class="form-control"
+                                                   placeholder="Số phòng..." th:value="${param.search}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Giá từ</label>
+                                            <input type="number" name="minPrice" class="form-control"
+                                                   placeholder="VNĐ" th:value="${param.minPrice}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Giá đến</label>
+                                            <input type="number" name="maxPrice" class="form-control"
+                                                   placeholder="VNĐ" th:value="${param.maxPrice}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Tình trạng</label>
+                                            <select name="systemstatus" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option th:each="systemstatus : ${systemStatus}"
+                                                        th:value="${systemstatus}"
+                                                        th:text="${systemstatus}"
+                                                        th:selected="${param.systemstatus != null && param.systemstatus[0] == systemstatus}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Trạng thái</label>
+                                            <select name="status" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option th:each="status : ${statuses}" th:value="${status}"
+                                                        th:text="${status}"
+                                                        th:selected="${param.status != null && param.status[0] == status}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hàng 2: Tầng | Diện tích | Phòng | Sort -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Tầng</label>
+                                            <select name="floor" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option th:each="floor : ${floors}" th:value="${floor.floorNumber}"
+                                                        th:text="'Tầng ' + ${floor.floorNumber}"
+                                                        th:selected="${param.floor != null && param.floor[0] == floor.floorNumber.toString()}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Diện tích</label>
+                                            <select name="size" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option th:each="size : ${sizes}" th:value="${size.size}"
+                                                        th:text="${size.size} + 'm²'"
+                                                        th:selected="${param.size != null && param.size[0] == size.size.toString()}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Loại phòng</label>
+                                            <select name="roomType" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option th:each="type : ${roomTypes}" th:value="${type}"
+                                                        th:text="${type}"
+                                                        th:selected="${param.roomType != null && param.roomType[0] == type}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Sắp xếp</label>
+                                            <select name="sortBy" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option value="roomNumber,asc"
+                                                        th:selected="${param.sortBy != null && param.sortBy[0] == 'roomNumber,asc'}">
+                                                    Số phòng tăng dần
+                                                </option>
+                                                <option value="roomNumber,desc"
+                                                        th:selected="${param.sortBy != null && param.sortBy[0] == 'roomNumber,desc'}">
+                                                    Số phòng giảm dần
+                                                </option>
+                                                <option value="price,asc"
+                                                        th:selected="${param.sortBy != null && param.sortBy[0] == 'price,asc'}">
+                                                    Giá tăng dần
+                                                </option>
+                                                <option value="price,desc"
+                                                        th:selected="${param.sortBy != null && param.sortBy[0] == 'price,desc'}">
+                                                    Giá giảm dần
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hàng 3: Tìm kiếm | Đặt lại (căn giữa) -->
+                                    <div class="row justify-content-center">
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                            </button>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a th:href="@{/hotel-management/room}" class="btn btn-secondary w-100">
+                                                <i class="mdi mdi-refresh"></i> Đặt lại
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Main Deteils-->
                     <div class="col-12 grid-margin">
                         <div class="card">
                             <div class="card-body">
@@ -50,123 +234,27 @@
                                 </div>
 
                                 <!-- Error Message -->
-                                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show"
+                                     role="alert">
                                     <i class="mdi mdi-alert-circle"></i>
                                     <strong>Lỗi!</strong> <span th:text="${errorMessage}"></span>
                                     <button type="button" class="close" data-dismiss="alert">
                                         <span>&times;</span>
                                     </button>
                                 </div>
-
-                                <!-- Search & Filter Bar -->
-                                <form th:action="@{/hotel-management/room}" method="get">
-                                    <div class="filter-section mb-4" style="background: #4a90e2; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
-                                            <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Phòng</h5>
-                                        </div>
-
-                                        <!-- Row 1: Search -->
-                                        <div class="row mb-3">
-                                            <div class="col-md-12">
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-white border-end-0">
-                                                        <i class="mdi mdi-magnify text-primary"></i>
-                                                    </span>
-                                                    <input name="search" type="text" class="form-control border-start-0"
-                                                           placeholder="Tìm kiếm số phòng..." th:value="${param.search}">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Row 2: Filters -->
-                                        <div class="row mb-3">
-                                            <div class="col-md-3 col-sm-6 mb-2">
-                                                <select name="roomType" class="form-select">
-                                                    <option value="">-- Tất cả loại phòng --</option>
-                                                    <option th:each="type : ${roomTypes}" th:value="${type}" th:text="${type}"
-                                                            th:selected="${param.roomType != null && param.roomType[0] == type}"></option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-md-3 col-sm-6 mb-2">
-                                                <select name="status" class="form-select">
-                                                    <option value="">-- Tất cả trạng thái --</option>
-                                                    <option th:each="status : ${statuses}" th:value="${status}" th:text="${status}"
-                                                            th:selected="${param.status != null && param.status[0] == status}"></option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-md-3 col-sm-6 mb-2">
-                                                <select name="floor" class="form-select">
-                                                    <option value="">-- Tất cả tầng --</option>
-                                                    <option th:each="floor : ${floors}" th:value="${floor.floorNumber}"
-                                                            th:text="'Tầng ' + ${floor.floorNumber}"
-                                                            th:selected="${param.floor != null && param.floor[0] == floor.floorNumber.toString()}"></option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-md-3 col-sm-6 mb-2">
-                                                <select name="size" class="form-select">
-                                                    <option value="">-- Tất cả diện tích --</option>
-                                                    <option th:each="size : ${sizes}" th:value="${size.size}"
-                                                            th:text="${size.size} + 'm²'"
-                                                            th:selected="${param.size != null && param.size[0] == size.size.toString()}"></option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <!-- Row 3: Price Range + Sort + Buttons -->
-                                        <div class="row align-items-center">
-                                            <div class="col-md-2 col-sm-6 mb-2">
-                                                <input type="number" name="minPrice" class="form-control" placeholder="Giá từ..." th:value="${param.minPrice}">
-                                            </div>
-
-                                            <div class="col-md-2 col-sm-6 mb-2">
-                                                <input type="number" name="maxPrice" class="form-control" placeholder="Giá đến..." th:value="${param.maxPrice}">
-                                            </div>
-
-                                            <div class="col-md-2 col-sm-6 mb-2">
-                                                <select name="sortBy" class="form-select">
-                                                    <option value="">-- Sắp xếp --</option>
-                                                    <option value="roomNumber,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'roomNumber,asc'}">Số phòng tăng dần</option>
-                                                    <option value="roomNumber,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'roomNumber,desc'}">Số phòng giảm dần</option>
-                                                    <option value="price,asc" th:selected="${param.sortBy != null && param.sortBy[0] == 'price,asc'}">Giá tăng dần</option>
-                                                    <option value="price,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'price,desc'}">Giá giảm dần</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-md-3 col-sm-12 mb-2">
-                                                <button type="submit" class="btn btn-info me-2">
-                                                    <i class="mdi mdi-magnify"></i> Tìm kiếm
-                                                </button>
-                                                <a th:href="@{/hotel-management/room}" class="btn btn-light">
-                                                    <i class="mdi mdi-refresh"></i> Reset
-                                                </a>
-                                            </div>
-
-                                            <div class="col-md-3 col-sm-12 mb-2 text-end">
-                                                <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
-                                                    <i class="mdi mdi-home-group"></i>
-                                                    Tổng: <strong th:text="${totalElements != null ? totalElements : #lists.size(listRoom)}">0</strong> phòng
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-
                                 <div class="table-responsive">
                                     <table class="table" id="roomTable">
                                         <thead>
                                         <tr>
-                                            <th> STT </th>
-                                            <th> Số Phòng </th>
-                                            <th> Loại phòng </th>
-                                            <th> Tầng </th>
-                                            <th> Diện tích </th>
-                                            <th> Giá </th>
-                                            <th> Trạng thái </th>
-                                            <th> Hành động </th>
+                                            <th> STT</th>
+                                            <th> Số Phòng</th>
+                                            <th> Loại phòng</th>
+                                            <th> Tầng</th>
+                                            <th> Diện tích</th>
+                                            <th> Giá</th>
+                                            <th> Trạng thái</th>
+                                            <th> Tình trạng</th>
+                                            <th> Hành động</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -182,33 +270,48 @@
                                             <td th:text="${d.price != null ? d.price : 'N/A'}"></td>
                                             <td>
                                                 <div th:switch="${d.status}">
-                                                            <span th:case="'Trống'"
-                                                                  class="badge badge-outline-success">Trống</span>
+                                                            <span th:case="'Đang trống'"
+                                                                  class="btn btn-outline-success">Đang trống</span>
                                                     <span th:case="'Đang thuê'"
-                                                          class="badge badge-outline-danger">Đang thuê</span>
-                                                    <span th:case="'Bảo trì'"
-                                                          class="badge badge-outline-warning">Bảo trì</span>
-                                                    <span th:case="'Đã đặt'" class="badge badge-outline-info">Đã
-                                                                đặt</span>
-                                                    <span th:case="*"
-                                                          class="badge badge-outline-secondary">N/A</span>
+                                                          class="btn btn-outline-primary">Đang thuê</span>
+                                                    <span th:case="'Đang dọn dẹp'"
+                                                          class="btn btn-outline-warning">Đang dọn dẹp</span>
+                                                    <span th:case="*" class="btn btn-inverse-warning">Lỗi</span>
+                                                </div>
+                                            </td>
+                                            <td onclick="event.stopPropagation();">
+                                                <div th:switch="${d.systemStatus}">
+                                                    <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
+                                                       th:case="'Hoạt động'"
+                                                       class="btn btn-inverse-success">Hoạt động</a>
+                                                    <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
+                                                       th:case="'Bảo trì'"
+                                                       class="btn btn-inverse-warning">Bảo trì</a>
+                                                    <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
+                                                       th:case="'Dừng hoạt động'"
+                                                       class="btn-inverse-danger">Dừng hoạt động</a>
+                                                    <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
+                                                       th:case="*" class="btn btn-inverse-warning">Lỗi</a>
                                                 </div>
                                             </td>
 
                                             <td onclick="event.stopPropagation();">
-                                                <a th:href="@{/hotel-management/room/edit/{id}(id=${d.roomId})}">Sửa</a>
-                                                <a th:href="@{/hotel-management/room/delete/{id}(id=${d.roomId})}">Xóa</a>
+                                                <a
+                                                        th:href="@{/hotel-management/room/edit/{id}(id=${d.roomId})}">Sửa</a>
+                                                <a
+                                                        th:href="@{/hotel-management/room/delete/{id}(id=${d.roomId})}">Xóa</a>
                                             </td>
                                         </tr>
 
                                         <tr th:if="${#lists.isEmpty(listRoom)}">
                                             <td colspan="8" class="text-center text-muted">Không có phòng nào
-                                                khả dụng.</td>
+                                                khả dụng.
+                                            </td>
                                         </tr>
                                         </tbody>
                                     </table>
                                 </div>
-                                
+
                                 <!-- Pagination -->
                                 <div class="pagination-wrapper" th:if="${totalPages > 1}">
                                     <nav>
@@ -224,16 +327,19 @@
                                             </li>
 
                                             <!-- Page numbers -->
-                                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                            <li class="page-item"
+                                                th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                                 th:classappend="${i == currentPage} ? 'active'">
                                                 <a class="page-link" th:href="@{/hotel-management/room(page=${i}, pageSize=${pageSize},
                                                 search=${param.search}, roomType=${param.roomType}, status=${param.status},
                                                 floor=${param.floor}, size=${param.size}, minPrice=${param.minPrice},
-                                                maxPrice=${param.maxPrice}, sortBy=${param.sortBy})}" th:text="${i + 1}">1</a>
+                                                maxPrice=${param.maxPrice}, sortBy=${param.sortBy})}"
+                                                   th:text="${i + 1}">1</a>
                                             </li>
 
                                             <!-- Next -->
-                                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                            <li class="page-item"
+                                                th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                                                 <a class="page-link" th:href="@{/hotel-management/room(page=${currentPage + 1}, pageSize=${pageSize},
                                                 search=${param.search}, roomType=${param.roomType}, status=${param.status},
                                                 floor=${param.floor}, size=${param.size}, minPrice=${param.minPrice},
@@ -246,7 +352,8 @@
 
                                     <!-- Info -->
                                     <div class="text-center mt-3">
-                                        <p>Trang [[${currentPage + 1}]] / [[${totalPages}]] - Tổng [[${totalElements}]] phòng</p>
+                                        <p>Trang [[${currentPage + 1}]] / [[${totalPages}]] - Tổng
+                                            [[${totalElements}]] phòng</p>
                                     </div>
                                 </div>
                             </div>
@@ -257,9 +364,6 @@
         </div>
     </div>
 </div>
-
-
-
 
 
 <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
