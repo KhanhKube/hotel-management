@@ -67,8 +67,11 @@ public class HomePageController {
         // Lấy 2 lists riêng biệt cho check-in và check-out calendar
         List<String> bookedDatesCheckIn = roomService.getBookedDatesForBookingRoom(id);
         List<String> bookedDatesCheckOut = roomService.getBookedDatesForCheckOut(id);
+
+        Set<String> getDisableCheckinDate = roomService.getBookingDateDisableBookCheckin(id);
         
         model.addAttribute("room", room);
+        model.addAttribute("disableCheckin",getDisableCheckinDate);
         model.addAttribute("bookedDatesCheckIn", bookedDatesCheckIn);
         model.addAttribute("bookedDatesCheckOut", bookedDatesCheckOut);
         return "common/room-detail";

@@ -46,6 +46,41 @@ public class RoomServiceImpl implements RoomService {
 
 
     @Override
+    public Set<String> getBookingDateDisableBookCheckin(Integer roomId) {
+        LocalDateTime fromDate = LocalDateTime.now();
+        LocalDateTime toDate = fromDate.plusMonths(2);
+
+        List<OrderDetail> bookings = orderDetailRepository.findBookingsByRoomAndDateRange(
+                roomId,
+                fromDate,
+                toDate,
+                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
+        );
+        
+        Set<String> disableCheckinDates = new HashSet<>();
+        
+        for (OrderDetail booking : bookings) {
+            LocalDate start = booking.getStartDate().toLocalDate();
+            LocalDate end = booking.getEndDate().toLocalDate();
+            
+            // Disable check-in sớm cho tất cả ngày từ start đến end (BAO GỒM CẢ END)
+            // Vì:
+            // - Các ngày từ start đến (end-1): Đang có khách ở
+            // - Ngày end: Khách checkout (có thể muộn hơn 12:00), không đảm bảo phòng trống từ 00:00
+            //   → Không cho phép check-in sớm, chỉ cho phép check-in 14:00 (sau khi khách checkout chắc chắn)
+            LocalDate current = start;
+            while (!current.isAfter(end)) { // Bao gồm cả ngày end
+                disableCheckinDates.add(current.toString());
+                current = current.plusDays(1);
+            }
+        }
+        
+        System.out.println("Dates with early check-in disabled (room " + roomId + "): " + disableCheckinDates);
+        
+        return disableCheckinDates;
+    }
+
+    @Override
     public List<String> getBookedDatesForBookingRoom(Integer roomId) {
         LocalDateTime fromDate = LocalDateTime.now();
         LocalDateTime toDate = fromDate.plusMonths(2);
