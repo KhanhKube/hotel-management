@@ -125,7 +125,7 @@
                                                    placeholder="VNĐ" th:value="${param.maxPrice}">
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label">Tình trạng</label>
+                                            <label class="form-label">Trạng thái</label>
                                             <select name="systemstatus" class="form-select">
                                                 <option value="">Tất cả</option>
                                                 <option th:each="systemstatus : ${systemStatus}"
@@ -136,7 +136,7 @@
                                             </select>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label">Trạng thái</label>
+                                            <label class="form-label">Tình trạng</label>
                                             <select name="status" class="form-select">
                                                 <option value="">Tất cả</option>
                                                 <option th:each="status : ${statuses}" th:value="${status}"
