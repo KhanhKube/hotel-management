@@ -33,8 +33,12 @@ public class CartController {
 
 		List<CartItemDto> cartItems = cartService.getCartItems(userId);
 
+		// Get available discounts for room types in cart (max 5)
+		List<hotel.db.entity.Discount> availableDiscounts = cartService.getAvailableDiscountsForCart(userId);
+
 		model.addAttribute("cartItems", cartItems);
 		model.addAttribute("cartCount", cartItems.size());
+		model.addAttribute("availableDiscounts", availableDiscounts);
 
 		return "cart/cart";
 	}
@@ -202,15 +206,15 @@ public class CartController {
 	public ResponseEntity<Map<String, Object>> debugCart(HttpSession session) {
 		Map<String, Object> debug = new HashMap<>();
 		Integer userId = getUserIdFromSession(session);
-		
+
 		debug.put("userId", userId);
 		debug.put("sessionId", session.getId());
-		
+
 		if (userId != null) {
 			List<CartItemDto> items = cartService.getCartItems(userId);
 			debug.put("cartItems", items);
 			debug.put("itemCount", items.size());
-			
+
 			// Show details of each item
 			List<Map<String, Object>> itemDetails = new ArrayList<>();
 			for (CartItemDto item : items) {
@@ -223,7 +227,7 @@ public class CartController {
 			}
 			debug.put("itemDetails", itemDetails);
 		}
-		
+
 		return ResponseEntity.ok(debug);
 	}
 
@@ -232,20 +236,20 @@ public class CartController {
 	public ResponseEntity<Map<String, Object>> fixLegacyCart(HttpSession session) {
 		Map<String, Object> response = new HashMap<>();
 		Integer userId = getUserIdFromSession(session);
-		
+
 		if (userId == null) {
 			response.put("success", false);
 			response.put("message", "Not logged in");
 			return ResponseEntity.ok(response);
 		}
-		
+
 		// This will be implemented in service
 		int fixed = cartService.fixLegacyCartStatus(userId);
-		
+
 		response.put("success", true);
 		response.put("fixed", fixed);
 		response.put("message", "Fixed " + fixed + " cart items");
-		
+
 		return ResponseEntity.ok(response);
 	}
 

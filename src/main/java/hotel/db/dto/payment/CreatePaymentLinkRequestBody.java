@@ -13,4 +13,5 @@ public class CreatePaymentLinkRequestBody {
 	private String returnUrl;
 	private long price;
 	private String cancelUrl;
+	private Long discountId; // ID của voucher được chọn (nullable)
 }

@@ -154,7 +154,7 @@
         </div>
 
         <!-- Orders list -->
-        <div th:each="order : ${orders}" class="order-card">
+        <div th:each="order, iterStat : ${orders}" class="order-card">
             <div class="order-header">
                 <div>
                     <div class="order-id">
@@ -163,6 +163,8 @@
                     <small class="text-muted">
                         Ngày đặt: <span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</span>
                     </small>
+                    <br>
+
                 </div>
                 <div>
                    <span class="status-badge"
@@ -180,7 +182,7 @@
             <!-- Order details -->
             <div th:each="detail : ${order.orderDetails}" class="order-detail-item">
                 <div class="room-info">
-                    <div>
+                    <div style="flex: 1;">
                         <div class="room-name">
                             <i class="fas fa-door-open"></i>
                             <span th:text="${detail.roomType}">Deluxe Room</span> -
@@ -188,16 +190,24 @@
                         </div>
                         <div class="date-info">
                             <i class="fas fa-calendar-check"></i>
-                            Check-in: <span th:text="${#temporals.format(detail.checkIn, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
+                            Check-in: <span
+                                th:text="${#temporals.format(detail.checkIn, 'dd/MM/yyyy')}">01/01/2024</span>
                             <br>
                             <i class="fas fa-calendar-times"></i>
-                            Check-out: <span th:text="${#temporals.format(detail.checkOut, 'dd/MM/yyyy HH:mm')}">05/01/2024</span>
+                            Check-out: <span
+                                th:text="${#temporals.format(detail.checkOut, 'dd/MM/yyyy')}">05/01/2024</span>
                         </div>
                     </div>
-                    <div class="room-price">
-                        <span th:text="${#numbers.formatDecimal(detail.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/đêm'">
-                            350,000 VNĐ/đêm
-                        </span>
+                    <div class="text-right">
+                        <div class="room-price mb-2">
+                            <span th:text="${#numbers.formatDecimal(detail.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/đêm'">
+                                350,000 VNĐ/đêm
+                            </span>
+                        </div>
+                        <a th:href="@{/hotel/room/{id}(id=${detail.roomId})}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-redo"></i> Đặt lại phòng
+                        </a>
                     </div>
                 </div>
                 <div class="mt-2" th:if="${detail.orderDescription}">
@@ -221,5 +231,82 @@
 <script src="/vendors/jquery.ajaxchimp.min.js"></script>
 <script src="/vendors/mail-script.js"></script>
 <script src="/js/main.js"></script>
+
+<script>
+    function copyPaymentCode(code) {
+        // Create temporary input
+        const tempInput = document.createElement('input');
+        tempInput.value = code;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+
+        // Show toast notification
+        showToast('success', 'Đã sao chép mã thanh toán: ' + code);
+    }
+
+    function showToast(type, message) {
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast ' + type;
+        toast.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            min-width: 300px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            animation: slideInRight 0.4s ease-out;
+            border-left: 4px solid ${type === 'success' ? '#10b981' : '#ef4444'};
+        `;
+
+        const icon = type === 'success' ? '✓' : '✕';
+        const iconBg = type === 'success' ? '#d1fae5' : '#fee2e2';
+        const iconColor = type === 'success' ? '#10b981' : '#ef4444';
+
+        toast.innerHTML = `
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: ${iconBg}; 
+                        color: ${iconColor}; display: flex; align-items: center; justify-content: center; 
+                        font-size: 20px; font-weight: bold;">${icon}</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: #1f2937;">
+                    ${type === 'success' ? 'Thành công!' : 'Lỗi!'}
+                </div>
+                <div style="font-size: 13px; color: #6b7280;">${message}</div>
+            </div>
+            <button onclick="this.parentElement.remove()" 
+                    style="background: none; border: none; color: #9ca3af; cursor: pointer; 
+                           font-size: 20px; padding: 0; width: 24px; height: 24px;">×</button>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s ease-in forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // Add animation keyframes
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideOutRight {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100px); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
 </body>
 </html>

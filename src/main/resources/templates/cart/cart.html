@@ -41,6 +41,37 @@
         .remove-btn:hover {
             color: #c82333;
         }
+
+        .discount-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .discount-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .discount-card.selected {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+        }
+
+        .discount-code {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        .discount-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
     </style>
 </head>
 
@@ -124,7 +155,42 @@
                         <span>Số phòng:</span>
                         <span th:text="${cartItems.size()}">0</span>
                     </div>
+                    
+                    <!-- Discount Selection -->
+                    <div class="mb-3" th:if="${!#lists.isEmpty(availableDiscounts)}">
+                        <label for="discountSelect" class="form-label small">
+                            <i class="fas fa-tag"></i> Mã giảm giá (tối đa 5)
+                        </label>
+                        <select id="discountSelect" class="form-control" onchange="applyDiscount()">
+                            <option value="">-- Chọn mã giảm giá --</option>
+                            <option th:each="discount : ${availableDiscounts}" 
+                                    th:value="${discount.discountId}"
+                                    th:attr="data-value=${discount.value},data-room-type=${discount.roomType},data-code=${discount.code}"
+                                    th:text="${discount.code} + ' - Giảm ' + ${discount.value} + '% cho ' + ${discount.roomType}">
+                            </option>
+                        </select>
+                        <small class="text-muted">Chỉ hiển thị voucher phù hợp với loại phòng trong giỏ</small>
+                    </div>
+                    
                     <hr>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tạm tính:</span>
+                        <span id="subtotal">
+                            <span th:if="${!#lists.isEmpty(cartItems)}"
+                                  th:text="${#numbers.formatDecimal(#aggregates.sum(cartItems.![totalPrice]), 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                            </span>
+                            <span th:if="${#lists.isEmpty(cartItems)}">0 VNĐ</span>
+                        </span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-2 text-success" id="discountRow" style="display: none !important;">
+                        <span><i class="fas fa-tag"></i> Giảm giá:</span>
+                        <span id="discountAmount">- 0 VNĐ</span>
+                    </div>
+                    
+                    <hr>
+                    
                     <div class="d-flex justify-content-between mb-3">
                         <strong>Tổng cộng:</strong>
                         <strong class="text-primary" id="totalAmount">
@@ -283,11 +349,29 @@
                 checkoutBtn.disabled = true;
                 checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo link thanh toán...';
 
-                // Calculate total amount
-                const totalAmount = [[${#aggregates.sum(cartItems.![totalPrice]
-            )
-            }]]
-                ;
+                // Get total amount from UI (after discount applied)
+                const totalText = document.getElementById('totalAmount').textContent.trim();
+                const totalAmount = parseFloat(totalText.replace(/[^0-9]/g, ''));
+
+                // Get selected discount ID (if any)
+                const discountSelect = document.getElementById('discountSelect');
+                const discountId = discountSelect ? discountSelect.value : null;
+
+                // Create payment request body
+                const requestBody = {
+                    productName: 'Đặt phòng khách sạn',
+                    description: 'Thanh toán đặt phòng',
+                    price: totalAmount,
+                    returnUrl: window.location.origin + '/payment/success',
+                    cancelUrl: window.location.origin + '/payment/cancel'
+                };
+
+                // Add discountId if selected
+                if (discountId) {
+                    requestBody.discountId = parseInt(discountId);
+                }
+
+                console.log('Checkout request:', requestBody);
 
                 // Create payment link
                 fetch('/payment/create', {
@@ -295,13 +379,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        productName: 'Đặt phòng khách sạn',
-                        description: 'Thanh toán đặt phòng',
-                        price: totalAmount,
-                        returnUrl: window.location.origin + '/payment/success',
-                        cancelUrl: window.location.origin + '/payment/cancel'
-                    })
+                    body: JSON.stringify(requestBody)
                 })
                     .then(res => res.json())
                     .then(data => {
@@ -323,6 +401,42 @@
                     });
             }
         );
+    }
+
+    // Apply discount calculation
+    function applyDiscount() {
+        const select = document.getElementById('discountSelect');
+        const selectedOption = select.options[select.selectedIndex];
+        const discountRow = document.getElementById('discountRow');
+        const discountAmount = document.getElementById('discountAmount');
+        const totalElement = document.getElementById('totalAmount');
+        
+        // Get subtotal
+        const subtotalText = document.getElementById('subtotal').textContent.trim();
+        const subtotal = parseFloat(subtotalText.replace(/[^0-9]/g, ''));
+        
+        if (!selectedOption.value) {
+            // No discount selected - Reset to original
+            discountRow.style.display = 'none';
+            discountAmount.textContent = '- 0 VNĐ';
+            totalElement.textContent = subtotalText;
+            console.log('No discount selected');
+            return;
+        }
+        
+        // Calculate discount
+        const discountPercent = parseFloat(selectedOption.getAttribute('data-value'));
+        const discountValue = Math.round(subtotal * discountPercent / 100);
+        
+        // Ensure final total is not negative
+        const finalTotal = Math.max(0, subtotal - discountValue);
+        
+        // Update UI
+        discountRow.style.setProperty('display', 'flex', 'important');
+        discountAmount.textContent = '- ' + discountValue.toLocaleString('vi-VN') + ' VNĐ';
+        totalElement.textContent = finalTotal.toLocaleString('vi-VN') + ' VNĐ';
+        
+        console.log('Discount applied:', discountPercent + '%', 'Amount:', discountValue, 'Final:', finalTotal);
     }
 
     // Toast notification
