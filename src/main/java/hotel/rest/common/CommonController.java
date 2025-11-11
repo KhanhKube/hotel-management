@@ -68,6 +68,11 @@ public class CommonController {
 
     @PostMapping("/logout")
     public String logout(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "common/home";
+        }
+        commonService.logout(user.getEmail());
         session.invalidate();
         return "redirect:/hotel/login";
     }
@@ -260,7 +265,7 @@ public class CommonController {
         }
         ChangePasswordDto dto = new ChangePasswordDto();
         dto.setUsername(user.getEmail());
-        model.addAttribute("changePasswordDto", new ChangePasswordDto());
+        model.addAttribute("changePasswordDto", dto);
         return "common/change-password";
 
     }
@@ -269,7 +274,8 @@ public class CommonController {
     public String changePasswordConfirm(
             @ModelAttribute("changePasswordDto") ChangePasswordDto dto,
             HttpSession session,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttrs) {
 
         User user = (User) session.getAttribute("user");
         if (user == null) {
@@ -282,9 +288,10 @@ public class CommonController {
             model.addAttribute("error", response.getMessage());
             return "common/change-password";
         }
-
-        model.addAttribute("success", response.getMessage());
-        return "common/profile";
+        User userNew = commonService.getUserByPhoneOrEmail(user.getEmail());
+        session.setAttribute("user", userNew);
+        redirectAttrs.addFlashAttribute("success", response.getMessage());
+        return "redirect:/hotel/profile";
     }
 
     @GetMapping("/forgot-password")

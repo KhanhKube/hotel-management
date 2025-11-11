@@ -18,15 +18,15 @@ public class Constants {
     public static final String FAIL = "Failed!";
 
     //Validate
-    public static final String LOGININVALID = "Invalid username or password";
-    public static final String FILLALLFEILD = "Please fill all the required fields!";
-    public static final String PASSWORDNOTMATCH = "Passwords do not match!";
+    public static final String LOGININVALID = "Sai email hoặc mật khẩu";
+    public static final String FILLALLFEILD = "Vui lòng nhập các trường cần thiết!";
+    public static final String PASSWORDNOTMATCH = "Mật khẩu không giống nhau!";
     public static final String USERNAMEDUPLICATE = "Username already taken!";
-    public static final String DOBINVALID = "User must be at least 18 years old!";
-    public static final String EMAILDUPLICATE = "Email already registered!";
-    public static final String PHONEDUPLICATE = "Phone already registered!";
-    public static final String REGISTERSUCCESS = "User registered successfully!";
-    public static final String UPDATESUCCESS = "Updated information successfully!";
+    public static final String DOBINVALID = "Người dùng cần ít nhât 18 tuổi!";
+    public static final String EMAILDUPLICATE = "Email đã được đặng kí!";
+    public static final String PHONEDUPLICATE = "SĐT đã được đặng kí!";
+    public static final String REGISTERSUCCESS = "Đăng kí thành công!";
+    public static final String UPDATESUCCESS = "Câp nhật thông tin thành công!";
     public static final String PHONEINVALID = "Số điện thoại không hợp lệ!";
     public static final String PHONEEXIST = "Số điện thoại đã tồn tại!";
     public static final String EMAILINVALID = "Email không hợp lệ!";
@@ -34,6 +34,7 @@ public class Constants {
     public static final String USERNOTEXIST = "User không tồn tại!";
     public static final String LOGINFIRST = "Bạn cần đăng nhập trước!";
     public static final String CHOOSEPICTURE = "Vui lòng chọn ảnh!";
-    public static final String FILEINVALID = "Invalid file type. Please upload an image.";
+    public static final String FILEINVALID = "Sai định dạng file. Hãy chọn ảnh.";
     public static final String ROOMNOTEXIST = "Phòng không tồn tại";
+    public static final String NOTCHANGE = "Không có gì thay đổi cả! Hãy nhập thông tin bạn muốn thay đổi";
 }
