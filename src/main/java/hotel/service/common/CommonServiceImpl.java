@@ -16,6 +16,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,6 +27,7 @@ import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -55,14 +57,30 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public Optional<User> login(String request, String rawPassword) {
-        if(request == null || rawPassword == null) {
+        if (request == null || rawPassword == null) {
             return Optional.empty();
         }
         Optional<User> user = userRepository.findByEmail(request);
         if (user.isEmpty()) {
             user = userRepository.findByPhone(request);
         }
-        return user.filter(u -> passwordEncoder.matches(rawPassword, u.getPassword()));
+        user.filter(u -> passwordEncoder.matches(rawPassword, u.getPassword()));
+        User userSet = user.get();
+        userSet.setLastLogin(LocalDateTime.now());
+        userRepository.save(userSet);
+        return user;
+    }
+
+    @Override
+    public void logout(String request) {
+        User user = userRepository.findByEmail(request).orElse(null);
+        if (user == null) {
+            user = userRepository.findByPhone(request).orElse(null);
+        }
+        if (user != null) {
+            user.setLastLogout(LocalDateTime.now());
+            userRepository.save(user);
+        }
     }
 
     @Override
@@ -73,8 +91,7 @@ public class CommonServiceImpl implements CommonService {
         if (isNullOrEmpty(dto.getEmail()) ||
                 isNullOrEmpty(dto.getPassword()) ||
                 isNullOrEmpty(dto.getConfirmPassword()) ||
-                isNullOrEmpty(dto.getPhone()) ||
-                dto.getDob() == null) {
+                isNullOrEmpty(dto.getPhone())) {
             return new MessageResponse(false, FILLALLFEILD);
         }
         if (!dto.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
@@ -95,22 +112,22 @@ public class CommonServiceImpl implements CommonService {
         if (userRepository.existsByPhone(dto.getPhone())) {
             return new MessageResponse(false, PHONEDUPLICATE);
         }
-        LocalDate today = LocalDate.now();
-        if (Period.between(dto.getDob(), today).getYears() < 12) {
-            return new MessageResponse(false, DOBINVALID);
-        }
-        User.Gender gender = Boolean.TRUE.equals(dto.getGender()) ? User.Gender.MALE : User.Gender.FEMALE;
+//        LocalDate today = LocalDate.now();
+//        if (Period.between(dto.getDob(), today).getYears() < 12) {
+//            return new MessageResponse(false, DOBINVALID);
+//        }
+//        User.Gender gender = Boolean.TRUE.equals(dto.getGender()) ? User.Gender.MALE : User.Gender.FEMALE;
 
         User user = new User();
-        user.setUsername(dto.getUsername());
+//        user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setRole(CUSTOMER);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setPhone(dto.getPhone());
         user.setFirstName(dto.getFirstName());
-        user.setLastName(dto.getLastName());
-        user.setGender(gender);
-        user.setDob(dto.getDob());
+//        user.setLastName(dto.getLastName());
+//        user.setGender(gender);
+//        user.setDob(dto.getDob());
         String otp = generateOtp();
         user.setOtp(otp);
         userRepository.save(user);
@@ -122,16 +139,16 @@ public class CommonServiceImpl implements CommonService {
     @Transactional
     public MessageResponse verifyOtp(VerifyOtpDto dto) {
         User user = userRepository.findByPhone(dto.getPhoneNumber()).orElse(null);
-        if(user == null) {
+        if (user == null) {
             user = userRepository.findByEmail(dto.getEmail()).orElse(null);
         }
         if (user == null) {
             return new MessageResponse(false, "Email không tồn tại.");
         }
 
-        if (!user.getUsername().equals(dto.getUsername())) {
-            return new MessageResponse(false, "Tên đăng nhập không khớp với email.");
-        }
+//        if (!user.getUsername().equals(dto.getUsername())) {
+//            return new MessageResponse(false, "Tên đăng nhập không khớp với email.");
+//        }
 
         if (!user.getOtp().equals(dto.getOtp())) {
             return new MessageResponse(false, "Mã OTP không đúng.");
@@ -154,7 +171,7 @@ public class CommonServiceImpl implements CommonService {
         user.setOtp(otp);
         user.setOtpVerified(false);
         userRepository.save(user);
-        sendOtpEmail(user.getEmail(), user.getFirstName() + " " + user.getLastName(), otp);
+        sendOtpEmail(user.getEmail(), user.getFirstName(), otp);
         return new MessageResponse(true, "Mã OTP mới đã được gửi đến email của bạn.");
     }
 
@@ -166,15 +183,15 @@ public class CommonServiceImpl implements CommonService {
         }
         if (isNullOrEmpty(dto.getEmail()) ||
                 isNullOrEmpty(dto.getFirstName()) ||
-                isNullOrEmpty(dto.getLastName()) ||
-                isNullOrEmpty(dto.getPhone()) ||
-                dto.getDob() == null) {
+//                isNullOrEmpty(dto.getLastName()) ||
+//                dto.getDob() == null ||
+                isNullOrEmpty(dto.getPhone())) {
             return new MessageResponse(false, FILLALLFEILD);
         }
         if (!dto.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
             return new MessageResponse(false, EMAILINVALID);
         }
-        if (userRepository.existsByEmailAndPhoneNot(dto.getEmail(), dto.getUsername())) {
+        if (userRepository.existsByEmailAndPhoneNot(dto.getEmail(), dto.getPhone())) {
             return new MessageResponse(false, EMAILEXIST);
         }
         if (!dto.getPhone().matches("^0\\d{9}$")) {
@@ -183,14 +200,30 @@ public class CommonServiceImpl implements CommonService {
         if (userRepository.existsByPhoneAndEmailNot(dto.getPhone(), dto.getEmail())) {
             return new MessageResponse(false, PHONEEXIST);
         }
+
         LocalDate today = LocalDate.now();
-        if (Period.between(dto.getDob(), today).getYears() < 12) {
-            return new MessageResponse(false, DOBINVALID);
+        if(dto.getDob() != null) {
+            if (Period.between(dto.getDob(), today).getYears() < 18) {
+                return new MessageResponse(false, DOBINVALID);
+            }
         }
+
         User.Gender gender = Boolean.TRUE.equals(dto.getGender()) ? User.Gender.MALE : User.Gender.FEMALE;
 
         User user = userRepository.findByPhone(dto.getPhone())
                 .orElseThrow(() -> new RuntimeException(USERNOTEXIST));
+        boolean noChange =
+                Objects.equals(user.getFirstName(), dto.getFirstName()) &&
+                        Objects.equals(user.getLastName(), dto.getLastName()) &&
+                        Objects.equals(user.getEmail(), dto.getEmail()) &&
+                        Objects.equals(user.getPhone(), dto.getPhone()) &&
+                        Objects.equals(user.getDob(), dto.getDob()) &&
+                        Objects.equals(user.getGender(), gender) &&
+                        Objects.equals(user.getAddress(), dto.getAddress());
+
+        if (noChange) {
+            return new MessageResponse(false, NOTCHANGE);
+        }
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
@@ -311,11 +344,11 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     @Transactional
-    public MessageResponse changePassword(ChangePasswordDto dto){
+    public MessageResponse changePassword(ChangePasswordDto dto) {
         User user = userRepository.findByEmail(dto.getUsername())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
-        if(dto.getNewPassword().length() < 6) {
+        if (dto.getNewPassword().length() < 6) {
             return new MessageResponse(false, "Mật khẩu cần lớn hơn 6 kí tự!");
         }
 
