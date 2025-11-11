@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Tạo phòng</title>
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* Style cho input ngày bảo trì giống với input khác */
+        #checkInDate, #checkOutDate {
+            background-color: #2c2e33 !important;
+            border: 1px solid #2c2e33 !important;
+            color: #ffffff !important;
+        }
+        
+        #checkInDate:focus, #checkOutDate:focus {
+            background-color: #2c2e33 !important;
+            border-color: #2196f3 !important;
+            color: #ffffff !important;
+        }
+        
+        #checkInDate::placeholder, #checkOutDate::placeholder {
+            color: #6c7293 !important;
+        }
+        
+        /* Style cho input nội dung bảo trì */
+        input[name="des"].form-control,
+        input[name="des"].form-control:-webkit-autofill,
+        input[name="des"].form-control:-webkit-autofill:hover,
+        input[name="des"].form-control:-webkit-autofill:focus,
+        input[name="des"].form-control:-webkit-autofill:active {
+            background-color: #2c2e33 !important;
+            -webkit-box-shadow: 0 0 0 30px #2c2e33 inset !important;
+            -webkit-text-fill-color: #ffffff !important;
+            border: 1px solid #2c2e33 !important;
+            color: #ffffff !important;
+        }
+        
+        input[name="des"].form-control:focus {
+            background-color: #2c2e33 !important;
+            border-color: #2196f3 !important;
+            color: #ffffff !important;
+            box-shadow: none !important;
+        }
+        
+        input[name="des"].form-control::placeholder {
+            color: #6c7293 !important;
+        }
+        
+        /* Style cho select phân công bảo trì */
+        select[name="userId"] {
+            background-color: #2c2e33 !important;
+            border: 1px solid #2c2e33 !important;
+            color: #ffffff !important;
+        }
+        
+        select[name="userId"]:focus {
+            background-color: #2c2e33 !important;
+            border-color: #2196f3 !important;
+            color: #ffffff !important;
+        }
+        
+        select[name="userId"] option {
+            background-color: #2c2e33 !important;
+            color: #ffffff !important;
+        }
+        
+        /* Custom style cho ngày bị disable trong flatpickr */
+        .flatpickr-day.flatpickr-disabled {
+            color: #d1d5db !important;
+            background-color: #f3f4f6 !important;
+            cursor: not-allowed !important;
+        }
+
+        .flatpickr-day.flatpickr-disabled:hover {
+            background-color: #e5e7eb !important;
+            border-color: transparent !important;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container-scroller">
+    <!-- Include sidebar -->
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                                                                               alt="logo"/></a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            </div>
+        </nav>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <h1>Chỉnh sửa trạng thái phòng</h1>
+                                <!-- Form chọn ngày -->
+                                <form id="updateStatusForm" th:action="@{/hotel-management/room/maintenance}"
+                                      method="post">
+                                    <input type="hidden" name="roomId" th:value="${roomId}">
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Ngày bắt đầu bảo trì:</label>
+                                            <input type="text" id="checkInDate" name="checkInDate" class="form-control"
+                                                   required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Ngày hết hạn bảo trì:</label>
+                                            <input type="text" id="checkOutDate" name="checkOutDate"
+                                                   class="form-control" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <input type="radio" value="maintenance" name="status" id="maintenance"
+                                                   required>
+                                            <label for="maintenance">Bảo trì</label><br>
+
+                                            <label>Nội dung bảo trì:</label>
+                                            <input type="text" name="des" class="form-control"><br>
+
+                                            <label>Phân công bảo trì:</label>
+                                            <select name="userId" class="form-control">
+                                                <option value="">-- Chọn nhân viên --</option>
+                                                <option th:each="staff : ${listStaff}"
+                                                        th:value="${staff.userId}"
+                                                        th:text="${staff.username}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                                    <a th:href="@{/hotel-management/room}" class="btn btn-secondary">Hủy</a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+<script src="/assets/js/off-canvas.js"></script>
+<script src="/assets/js/hoverable-collapse.js"></script>
+<script src="/assets/js/settings.js"></script>
+<script src="/assets/js/todolist.js"></script>
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Nhận 2 lists riêng biệt từ Thymeleaf
+    const bookedDatesCheckIn = /*[[${bookedDatesCheckIn}]]*/[];
+    const bookedDatesCheckOut = /*[[${bookedDatesCheckOut}]]*/[];
+
+    console.log('Booked dates for check-in:', bookedDatesCheckIn);
+    console.log('Booked dates for check-out:', bookedDatesCheckOut);
+
+    // Tính ngày max = hôm nay + 60 ngày
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setDate(today.getDate() + 60);
+
+    // ĐỢI DOM LOAD XONG RỒI MỚI KHỞI TẠO
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Convert sang Date objects
+        const disabledDatesCheckIn = bookedDatesCheckIn.map(dateStr => new Date(dateStr));
+        const disabledDatesCheckOut = bookedDatesCheckOut.map(dateStr => new Date(dateStr));
+
+        console.log('Disabled dates for check-in:', disabledDatesCheckIn);
+        console.log('Disabled dates for check-out:', disabledDatesCheckOut);
+
+        // Initialize check-in date picker
+        const checkInPicker = flatpickr("#checkInDate", {
+            dateFormat: "d/m/Y",
+            minDate: "today",
+            maxDate: maxDate,
+            disable: disabledDatesCheckIn,
+            allowInput: false,
+            clickOpens: true,
+            onChange: function (selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    const checkInDate = selectedDates[0];
+                    const minCheckOut = new Date(checkInDate);
+                    minCheckOut.setDate(minCheckOut.getDate() + 1);
+
+                    // Tìm ngày bị block đầu tiên sau check-in
+                    let maxCheckOut = new Date(maxDate);
+
+                    // Sort disabled dates
+                    const sortedDisabledCheckOut = disabledDatesCheckOut
+                        .map(d => d.getTime())
+                        .sort((a, b) => a - b);
+
+                    // Tìm ngày disabled đầu tiên sau check-in
+                    for (let disabledTime of sortedDisabledCheckOut) {
+                        if (disabledTime > checkInDate.getTime()) {
+                            maxCheckOut = new Date(disabledTime);
+                            break;
+                        }
+                    }
+
+                    console.log('Check-in:', checkInDate);
+                    console.log('Max check-out:', maxCheckOut);
+
+                    checkOutPicker.set('minDate', minCheckOut);
+                    checkOutPicker.set('maxDate', maxCheckOut);
+
+                    // Clear check-out nếu nó nằm ngoài range
+                    if (checkOutPicker.selectedDates.length > 0) {
+                        const currentCheckOut = checkOutPicker.selectedDates[0];
+                        if (currentCheckOut <= checkInDate || currentCheckOut > maxCheckOut) {
+                            checkOutPicker.clear();
+                        }
+                    }
+                }
+            },
+            locale: {
+                firstDayOfWeek: 1,
+                weekdays: {
+                    shorthand: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                    longhand: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']
+                },
+                months: {
+                    shorthand: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
+                    longhand: ['', '', '', '', '', '', '', '', '', '', '', '']
+                }
+            }
+        });
+
+        // Initialize check-out date picker
+        const checkOutPicker = flatpickr("#checkOutDate", {
+            dateFormat: "d/m/Y",
+            minDate: "today",
+            maxDate: maxDate,
+            disable: disabledDatesCheckOut,
+            allowInput: false,
+            clickOpens: true,
+            locale: {
+                firstDayOfWeek: 1,
+                weekdays: {
+                    shorthand: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                    longhand: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']
+                },
+                months: {
+                    shorthand: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
+                    longhand: ['', '', '', '', '', '', '', '', '', '', '', '']
+                }
+            }
+        });
+
+        console.log('Flatpickr initialized successfully');
+    });
+
+    /*]]>*/
+</script>
+</body>
+
+</html>

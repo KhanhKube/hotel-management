@@ -11,7 +11,6 @@ import java.time.LocalDate;
 public class DiscountResponseDto {
     private Long discountId;
     private String code;
-    private String discountType;
     private Double value;
     private String roomType;
     private LocalDate startDate;

@@ -34,10 +34,10 @@
                     <!-- Form binding với userProfileDto -->
                     <form th:action="@{/hotel/edit-profile}" th:object="${userProfileDto}" method="post">
                         <p th:if="${error}" th:text="${error}" style="color:red;"></p>
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" th:field="*{username}" class="form-control" id="username" readonly>
-                        </div>
+<!--                        <div class="mb-3">-->
+<!--                            <label for="username" class="form-label">Username</label>-->
+<!--                            <input type="text" th:field="*{username}" class="form-control" id="username" readonly>-->
+<!--                        </div>-->
 
                         <div class="mb-3">
                             <label for="firstName" class="form-label">Họ</label>

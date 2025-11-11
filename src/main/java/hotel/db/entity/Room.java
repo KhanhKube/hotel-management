@@ -51,5 +51,8 @@ public class Room extends AbstractVersion {
 
     @Column(name = "max_size_people")
     private Integer maxSizePeople;
+
+    @Column(name = "system_status",length = 50)
+    private String systemStatus;
 }
 

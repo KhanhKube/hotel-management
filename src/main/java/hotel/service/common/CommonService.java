@@ -20,6 +20,8 @@ public interface CommonService {
 
     Optional<User> login(String request, String password);
 
+    void logout(String request);
+
     MessageResponse registerUser(UserRegisterDto userRegisterDto);
 
     MessageResponse editUserProfile(UserProfileDto dto);

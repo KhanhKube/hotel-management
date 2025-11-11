@@ -3,7 +3,9 @@ package hotel.service.room;
 import hotel.db.dto.room.*;
 import hotel.db.entity.*;
 import hotel.db.repository.floor.FloorRepository;
+import hotel.db.repository.roommaintenance.RoomMaintenanceRepository;
 import hotel.db.repository.roomview.RoomViewRepository;
+import hotel.db.repository.user.UserRepository;
 import hotel.db.repository.view.ViewRepository;
 import hotel.service.size.SizeService;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
@@ -20,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,10 +40,39 @@ public class RoomServiceImpl implements RoomService {
     private final RoomViewRepository roomViewRepository;
     private final ViewRepository viewRepository;
     private final SizeService sizeService;
+    private final RoomMaintenanceRepository roomMaintenanceRepository;
+    private final UserRepository userRepository;
 
     public List<String> getRoomViewList(Integer roomId) {
         return roomViewRepository.findRoomViewId(roomId).stream().map(viewId ->
                 viewRepository.findViewTypeByViewId(viewId)).collect(Collectors.toList());
+    }
+
+
+    @Override
+    public void saveMaintenance(Integer roomId, String checkInDate, String checkOutDate,
+                                String description, Integer assignedTo, Integer createBy) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate startDate = LocalDate.parse(checkInDate, formatter);
+        LocalDate endDate = LocalDate.parse(checkOutDate, formatter);
+
+        LocalDateTime startDateTime = startDate.atTime(14, 0);
+        LocalDateTime endDateTime = endDate.atTime(12, 0);
+        RoomMaintenance maintenance = new RoomMaintenance();
+        maintenance.setRoomId(roomId);
+        maintenance.setStartDate(startDateTime);
+        maintenance.setEndDate(endDateTime);
+        maintenance.setStatus("Đã giao");
+        maintenance.setDescription(description);
+        maintenance.setAssignedTo(assignedTo);
+        maintenance.setCreateBy(createBy);
+
+        roomMaintenanceRepository.save(maintenance);
+    }
+
+    @Override
+    public List<User> getStaffIds() {
+        return userRepository.getStaffIds();
     }
 
     @Override
@@ -51,7 +84,14 @@ public class RoomServiceImpl implements RoomService {
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("Đã xác nhận", "Đã check-in", "Đã check-out")
+                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
+        );
+
+        List<RoomMaintenance> maintenances = roomMaintenanceRepository.findMaintenancesByRoomAndDateRange(
+                roomId,
+                fromDate,
+                toDate,
+                Arrays.asList("Đã giao")
         );
 
         List<String> bookedDates = new ArrayList<>();
@@ -60,19 +100,21 @@ public class RoomServiceImpl implements RoomService {
             LocalDate start = booking.getStartDate().toLocalDate();
             LocalDate end = booking.getEndDate().toLocalDate();
 
-            // CHO CALENDAR "NGÀY NHẬN PHÒNG"
-            // DISABLE TẤT CẢ NGÀY TỪ START ĐẾN (END - 1)
-            // - Ngày START: Disable vì đã có người checkin 14:00
-            // - Ngày GIỮA: Disable vì phòng đang được thuê
-            // - Ngày END: KHÔNG disable vì khách mới có thể checkin sau khi khách cũ checkout
             LocalDate current = start;
             while (current.isBefore(end)) { // Không bao gồm ngày end
                 bookedDates.add(current.toString()); // Format: yyyy-MM-dd
                 current = current.plusDays(1);
             }
         }
-
-        System.out.println("Booked dates for check-in (room " + roomId + "): " + bookedDates);
+        for (RoomMaintenance maintenance : maintenances) {
+            LocalDate start = maintenance.getStartDate().toLocalDate();
+            LocalDate end = maintenance.getEndDate().toLocalDate();
+            LocalDate current = start;
+            while (current.isBefore(end)) {
+                bookedDates.add(current.toString());
+                current = current.plusDays(1);
+            }
+        }
 
         return bookedDates;
     }
@@ -86,7 +128,14 @@ public class RoomServiceImpl implements RoomService {
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("Đã xác nhận", "Đã check-in", "Đã check-out")
+                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
+        );
+
+        List<RoomMaintenance> maintenances = roomMaintenanceRepository.findMaintenancesByRoomAndDateRange(
+                roomId,
+                fromDate,
+                toDate,
+                Arrays.asList("Đã giao")
         );
 
         List<String> bookedDates = new ArrayList<>();
@@ -95,19 +144,21 @@ public class RoomServiceImpl implements RoomService {
             LocalDate start = booking.getStartDate().toLocalDate();
             LocalDate end = booking.getEndDate().toLocalDate();
 
-            // CHO CALENDAR "NGÀY TRẢ PHÒNG"
-            // CHỈ DISABLE CÁC NGÀY GIỮA (start+1 đến end-1)
-            // - Ngày START: KHÔNG disable vì khách mới có thể checkout 12:00 (trước khi khách cũ checkin 14:00)
-            // - Ngày GIỮA: Disable vì phòng đang được thuê
-            // - Ngày END: KHÔNG disable vì khách mới có thể checkout cùng ngày với khách cũ checkout
             LocalDate current = start.plusDays(1); // Bắt đầu từ ngày sau start
             while (current.isBefore(end)) { // Dừng trước ngày end
                 bookedDates.add(current.toString()); // Format: yyyy-MM-dd
                 current = current.plusDays(1);
             }
         }
-
-        System.out.println("Booked dates for check-out (room " + roomId + "): " + bookedDates);
+        for (RoomMaintenance maintenance : maintenances) {
+            LocalDate start = maintenance.getStartDate().toLocalDate();
+            LocalDate end = maintenance.getEndDate().toLocalDate();
+            LocalDate current = start.plusDays(1);
+            while (current.isBefore(end)) {
+                bookedDates.add(current.toString());
+                current = current.plusDays(1);
+            }
+        }
 
         return bookedDates;
     }
@@ -169,10 +220,17 @@ public class RoomServiceImpl implements RoomService {
             String[] dateArr = date.split(" - ");
             String startDate = dateArr[0];
             String endDate = dateArr[1];
+            System.out.println(endDate + "-" + startDate);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDateTime filterStartDate = LocalDate.parse(startDate, formatter).atTime(14,0); //Thêm nghiệp vụ để để filter chuẩn phòng khách có thể book.
+            LocalDateTime filterEndDate = LocalDate.parse(endDate, formatter).atTime(12,0);
+            List<Integer> roomIdList = orderDetailRepository.findRoomIdsByFilterEndateAndStatdate(filterStartDate,filterEndDate);
+            rooms = rooms.stream().filter(x -> roomIdList.contains(x.getRoomId()))
+                    .collect(Collectors.toList());
 
         }
         List<RoomBookListDto> BookList = rooms.stream() //Lấy Listcác phòng đã được lọc field qua Dto
-                .filter(x -> !"Bảo trì".equals(x.getStatus()))
+                .filter(x -> !"Dừng hoạt động".equals(x.getSystemStatus()))
                 .map(x -> {
                     return toRoomBookDto(x);
                 }).collect(Collectors.toList());
@@ -247,7 +305,7 @@ public class RoomServiceImpl implements RoomService {
     Method filter và pagination cho trang quản lý phòng (admin)
     */
     @Override
-    public Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status,
+    public Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status, String systemstatus,
                                                       Integer floor, Double size, BigDecimal minPrice,
                                                       BigDecimal maxPrice, String sortBy, int page, int pageSize) {
         List<Room> rooms = roomRepository.findAllByIsDeletedFalse();
@@ -259,21 +317,24 @@ public class RoomServiceImpl implements RoomService {
                     .filter(x -> x.getRoomNumber().toLowerCase().contains(searchLower))
                     .collect(Collectors.toList());
         }
-
         // Filter theo loại phòng
         if (roomType != null && !roomType.isEmpty()) {
             rooms = rooms.stream()
                     .filter(x -> x.getRoomType().equals(roomType))
                     .collect(Collectors.toList());
         }
-
+        // Filter theo Tình trạng phòng
+        if (systemstatus != null && !systemstatus.isEmpty()) {
+            rooms = rooms.stream()
+                    .filter(x -> x.getSystemStatus().equals(systemstatus))
+                    .collect(Collectors.toList());
+        }
         // Filter theo trạng thái
         if (status != null && !status.isEmpty()) {
             rooms = rooms.stream()
                     .filter(x -> x.getStatus().equals(status))
                     .collect(Collectors.toList());
         }
-
         // Filter theo tầng
         if (floor != null) {
             rooms = rooms.stream()
@@ -286,7 +347,6 @@ public class RoomServiceImpl implements RoomService {
                     })
                     .collect(Collectors.toList());
         }
-
         // Filter theo diện tích
         if (size != null) {
             rooms = rooms.stream()
@@ -302,21 +362,18 @@ public class RoomServiceImpl implements RoomService {
                     })
                     .collect(Collectors.toList());
         }
-
         // Filter theo giá min
         if (minPrice != null) {
             rooms = rooms.stream()
                     .filter(x -> x.getPrice().compareTo(minPrice) >= 0)
                     .collect(Collectors.toList());
         }
-
         // Filter theo giá max
         if (maxPrice != null) {
             rooms = rooms.stream()
                     .filter(x -> x.getPrice().compareTo(maxPrice) <= 0)
                     .collect(Collectors.toList());
         }
-
         // Sort
         if (sortBy != null && !sortBy.isEmpty()) {
             String[] sortParams = sortBy.split(",");
@@ -338,7 +395,6 @@ public class RoomServiceImpl implements RoomService {
                 rooms.sort(comparator);
             }
         }
-
         // Convert to DTO
         List<RoomListDto> roomDtos = rooms.stream()
                 .map(this::toListDto)
@@ -380,7 +436,8 @@ public class RoomServiceImpl implements RoomService {
                 floorNumber,
                 sizeValue,
                 room.getPrice(),
-                room.getStatus()
+                room.getStatus(),
+                room.getSystemStatus()
         );
     }
 

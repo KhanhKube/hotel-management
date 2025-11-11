@@ -4,16 +4,25 @@ import hotel.db.dto.room.*;
 import hotel.db.entity.Floor;
 import hotel.db.entity.Room;
 import hotel.db.entity.Size;
+import hotel.db.entity.User;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public interface RoomService {
 
+    void saveMaintenance(Integer roomId, String checkInDate, String checkOutDate,
+                         String description, Integer assignedTo, Integer createBy);
+
+    List<User> getStaffIds();
+
+    //Lấy các ngày cho phép check-in
     List<String> getBookedDatesForBookingRoom(Integer roomId);
-    
+
+    //Lấy các ngày cho phép check-out
     List<String> getBookedDatesForCheckOut(Integer roomId);
 
     //Method filter dùng cho Room-BookingList bên phía customer.
@@ -30,7 +39,7 @@ public interface RoomService {
     List<RoomListDto> getRoomList();
     
     // Method filter và pagination cho trang quản lý phòng (admin)
-    Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status, 
+    Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status, String systemstatus,
                                                Integer floor, Double size, BigDecimal minPrice, 
                                                BigDecimal maxPrice, String sortBy, int page, int pageSize);
 
