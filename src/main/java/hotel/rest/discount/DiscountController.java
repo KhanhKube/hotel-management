@@ -51,6 +51,43 @@ public class DiscountController {
     @PostMapping("/create")
     public String createDiscount(@ModelAttribute("discount") Discount discount,
                                  BindingResult result, Model model) {
+        // Validate mã giảm giá
+        if (discount.getCode() == null || discount.getCode().trim().isEmpty()) {
+            model.addAttribute("errorMessage", "Vui lòng nhập mã giảm giá!");
+            model.addAttribute("discount", discount);
+            model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
+            return "management/discount/discount-create-form";
+        }
+        
+        if (discount.getCode().length() > 20) {
+            model.addAttribute("errorMessage", "Mã giảm giá không được vượt quá 20 ký tự!");
+            model.addAttribute("discount", discount);
+            model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
+            return "management/discount/discount-create-form";
+        }
+        
+        // Validate số tiền giảm
+        if (discount.getValue() == null) {
+            model.addAttribute("errorMessage", "Vui lòng nhập số tiền giảm!");
+            model.addAttribute("discount", discount);
+            model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
+            return "management/discount/discount-create-form";
+        }
+        
+        if (discount.getValue() < 10000) {
+            model.addAttribute("errorMessage", "Số tiền giảm tối thiểu là 10.000 VNĐ!");
+            model.addAttribute("discount", discount);
+            model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
+            return "management/discount/discount-create-form";
+        }
+        
+        if (discount.getValue() > 10000000) {
+            model.addAttribute("errorMessage", "Số tiền giảm tối đa là 10.000.000 VNĐ!");
+            model.addAttribute("discount", discount);
+            model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
+            return "management/discount/discount-create-form";
+        }
+        
         if (discount.getDiscountId() == null) {
             // CREATE: check code có tồn tại chưa
             if (discountService.checkVoucherCodeExist(discount.getCode())) {

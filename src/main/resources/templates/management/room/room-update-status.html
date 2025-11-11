@@ -18,17 +18,17 @@
             border: 1px solid #2c2e33 !important;
             color: #ffffff !important;
         }
-        
+
         #checkInDate:focus, #checkOutDate:focus {
             background-color: #2c2e33 !important;
             border-color: #2196f3 !important;
             color: #ffffff !important;
         }
-        
+
         #checkInDate::placeholder, #checkOutDate::placeholder {
             color: #6c7293 !important;
         }
-        
+
         /* Style cho input nội dung bảo trì */
         input[name="des"].form-control,
         input[name="des"].form-control:-webkit-autofill,
@@ -41,36 +41,36 @@
             border: 1px solid #2c2e33 !important;
             color: #ffffff !important;
         }
-        
+
         input[name="des"].form-control:focus {
             background-color: #2c2e33 !important;
             border-color: #2196f3 !important;
             color: #ffffff !important;
             box-shadow: none !important;
         }
-        
+
         input[name="des"].form-control::placeholder {
             color: #6c7293 !important;
         }
-        
+
         /* Style cho select phân công bảo trì */
         select[name="userId"] {
             background-color: #2c2e33 !important;
             border: 1px solid #2c2e33 !important;
             color: #ffffff !important;
         }
-        
+
         select[name="userId"]:focus {
             background-color: #2c2e33 !important;
             border-color: #2196f3 !important;
             color: #ffffff !important;
         }
-        
+
         select[name="userId"] option {
             background-color: #2c2e33 !important;
             color: #ffffff !important;
         }
-        
+
         /* Custom style cho ngày bị disable trong flatpickr */
         .flatpickr-day.flatpickr-disabled {
             color: #d1d5db !important;
@@ -108,48 +108,49 @@
                             <div class="card-body">
                                 <h1>Chỉnh sửa trạng thái phòng</h1>
                                 <!-- Form chọn ngày -->
-                                <form id="updateStatusForm" th:action="@{/hotel-management/room/maintenance}"
-                                      method="post">
-                                    <input type="hidden" name="roomId" th:value="${roomId}">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <form id="updateStatusForm" th:action="@{/hotel-management/room/maintenance}"
+                                              method="post">
+                                            <input type="hidden" name="roomId" th:value="${roomId}">
 
-                                    <div class="row mb-3">
-                                        <div class="col-md-6">
                                             <label class="form-label fw-bold">Ngày bắt đầu bảo trì:</label>
                                             <input type="text" id="checkInDate" name="checkInDate" class="form-control"
-                                                   required>
-                                        </div>
-                                        <div class="col-md-6">
+                                                   required><br>
                                             <label class="form-label fw-bold">Ngày hết hạn bảo trì:</label>
                                             <input type="text" id="checkOutDate" name="checkOutDate"
-                                                   class="form-control" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col-md-6">
-                                            <input type="radio" value="maintenance" name="status" id="maintenance"
-                                                   required>
-                                            <label for="maintenance">Bảo trì</label><br>
+                                                   class="form-control" required><br>
 
                                             <label>Nội dung bảo trì:</label>
                                             <input type="text" name="des" class="form-control"><br>
 
-                                            <label>Phân công bảo trì:</label>
+                                            <label>Phân công bảo trì:</label><br>
                                             <select name="userId" class="form-control">
-                                                <option value="">-- Chọn nhân viên --</option>
+                                                <option value="">Chọn nhân viên</option>
                                                 <option th:each="staff : ${listStaff}"
                                                         th:value="${staff.userId}"
                                                         th:text="${staff.username}">
                                                 </option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6">
-                                        </div>
+                                            </select><br>
+                                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                                            <a th:href="@{/hotel-management/room}" class="btn btn-secondary">Hủy</a>
+                                        </form>
                                     </div>
+                                    <div class="col-md-6">
+                                        <form id="updateStatusForm" th:action="@{/hotel-management/room/maintenance}"
+                                              method="post">
+                                            <input type="hidden" name="roomId" th:value="${roomId}">
 
-                                    <button type="submit" class="btn btn-primary">Cập nhật</button>
-                                    <a th:href="@{/hotel-management/room}" class="btn btn-secondary">Hủy</a>
-                                </form>
+                                            <label class="form-label fw-bold">Ngày bắt đầu dừng hoạt động:</label>
+                                            <input type="text" id="checkInDate" name="checkInDate" class="form-control"
+                                                   required><br>
+                                            <label>Lý do dừng hoạt động:</label>
+                                            <input type="text" name="des" class="form-control"><br>
+                                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                                            <a th:href="@{/hotel-management/room}" class="btn btn-secondary">Hủy</a>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

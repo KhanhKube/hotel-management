@@ -54,8 +54,7 @@
                                         <!-- Mã giảm giá -->
                                         <div class="form-group">
                                             <label for="vcode">
-                                                Mã giảm giá: <span
-                                                    class="text-danger">*</span>
+                                                Mã giảm giá:
                                             </label>
                                             <input id="vcode" type="text" class="form-control" th:field="*{code}"
                                                 placeholder="VD: SUMMER2024" required>
@@ -64,7 +63,7 @@
                                         <!-- Mô tả -->
                                         <div class="form-group">
                                             <label for="des">
-                                                Mô tả: <span class="text-danger">*</span>
+                                                Mô tả:
                                             </label>
                                             <textarea id="des" class="form-control" th:field="*{description}" rows="3"
                                                 placeholder="Nhập mô tả chi tiết về mã giảm giá..." required></textarea>
@@ -72,8 +71,7 @@
                                         <!-- Giá trị giảm -->
                                         <div class="form-group">
                                             <label for="value">
-                                                Giá trị giảm: <span
-                                                    class="text-danger">*</span>
+                                                Giá trị giảm:
                                             </label>
                                             <input id="value" type="number" step="0.01" class="form-control"
                                                 th:field="*{value}" placeholder="Nhập giá trị giảm" required>
@@ -82,8 +80,7 @@
                                         <!-- Loại phòng -->
                                         <div class="form-group">
                                             <label for="roomtype">
-                                                Loại phòng áp dụng: <span
-                                                    class="text-danger">*</span>
+                                                Loại phòng áp dụng:
                                             </label>
                                             <select id="roomtype" class="form-control" th:field="*{roomType}" required>
                                                 <option value="">Tất cả</option>
@@ -97,8 +94,7 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="startdate">
-                                                        Ngày bắt đầu: <span
-                                                            class="text-danger">*</span>
+                                                        Ngày bắt đầu:
                                                     </label>
                                                     <input id="startdate" type="date" class="form-control"
                                                         th:field="*{startDate}"
@@ -109,8 +105,7 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="enddate">
-                                                        Ngày kết thúc: <span
-                                                            class="text-danger">*</span>
+                                                        Ngày kết thúc:
                                                     </label>
                                                     <input id="enddate" type="date" class="form-control"
                                                         th:field="*{endDate}"
@@ -123,8 +118,7 @@
                                         <!-- Số lượng phát hành -->
                                         <div class="form-group">
                                             <label for="limit">
-                                                Số lượng phát hành: <span
-                                                    class="text-danger">*</span>
+                                                Số lượng phát hành:
                                             </label>
                                             <input id="limit" type="number" class="form-control"
                                                 th:field="*{usageLimit}" placeholder="VD: 100" min="1" required>
