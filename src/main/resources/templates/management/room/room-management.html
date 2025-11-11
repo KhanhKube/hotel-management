@@ -276,6 +276,8 @@
                                                           class="btn btn-outline-primary">Đang thuê</span>
                                                     <span th:case="'Đang dọn dẹp'"
                                                           class="btn btn-outline-warning">Đang dọn dẹp</span>
+                                                    <span th:case="'Đang bảo trì'"
+                                                          class="btn btn-outline-danger">Đang bảo trì</span>
                                                     <span th:case="*" class="btn btn-inverse-warning">Lỗi</span>
                                                 </div>
                                             </td>
@@ -286,10 +288,10 @@
                                                        class="btn btn-inverse-success">Hoạt động</a>
                                                     <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
                                                        th:case="'Bảo trì'"
-                                                       class="btn btn-inverse-warning">Bảo trì</a>
+                                                       class="btn btn-inverse-warning">Sắp bảo trì</a>
                                                     <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
                                                        th:case="'Dừng hoạt động'"
-                                                       class="btn-inverse-danger">Dừng hoạt động</a>
+                                                       class="btn-inverse-danger">Sắp dừng hoạt động</a>
                                                     <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
                                                        th:case="*" class="btn btn-inverse-warning">Lỗi</a>
                                                 </div>
