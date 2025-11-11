@@ -64,6 +64,13 @@ public class PaymentController {
 			return "redirect:/hotel/login";
 		}
 
+		// Update cart orders to PENDING status when user returns from payment
+		try {
+			paymentService.updateCartOrdersAfterPayment(userId);
+		} catch (Exception e) {
+			System.err.println("Error updating orders after payment: " + e.getMessage());
+		}
+
 		model.addAttribute("orderCode", orderCode);
 		model.addAttribute("status", status);
 

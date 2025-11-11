@@ -59,9 +59,13 @@
                     <p class="cancel-message">
                         Bạn đã hủy thanh toán. Các phòng vẫn còn trong giỏ hàng của bạn.
                     </p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Bạn sẽ được chuyển về giỏ hàng sau <span id="countdown">5</span> giây...
+                    </div>
                     <div class="mt-4">
                         <a th:href="@{/cart}" class="btn btn-primary btn-lg mr-3">
-                            <i class="fas fa-shopping-cart"></i> Quay Lại Giỏ Hàng
+                            <i class="fas fa-shopping-cart"></i> Quay Lại Giỏ Hàng Ngay
                         </a>
                         <a th:href="@{/hotel}" class="btn btn-outline-secondary btn-lg">
                             <i class="fas fa-home"></i> Về Trang Chủ
@@ -78,5 +82,23 @@
 
 <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
 <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Auto redirect to cart after 5 seconds
+    let countdown = 5;
+    const countdownElement = document.getElementById('countdown');
+
+    const timer = setInterval(function () {
+        countdown--;
+        if (countdownElement) {
+            countdownElement.textContent = countdown;
+        }
+
+        if (countdown <= 0) {
+            clearInterval(timer);
+            window.location.href = '/cart';
+        }
+    }, 1000);
+</script>
 </body>
 </html>
