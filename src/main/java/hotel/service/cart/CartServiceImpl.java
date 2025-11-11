@@ -2,10 +2,8 @@ package hotel.service.cart;
 
 import hotel.db.dto.cart.AddToCartRequest;
 import hotel.db.dto.cart.CartItemDto;
-import hotel.db.entity.Order;
-import hotel.db.entity.OrderDetail;
-import hotel.db.entity.Room;
-import hotel.db.entity.RoomImage;
+import hotel.db.entity.*;
+import hotel.db.repository.discount.DiscountRepository;
 import hotel.db.repository.order.OrderRepository;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
 import hotel.db.repository.room.RoomRepository;
@@ -15,9 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class CartServiceImpl implements CartService {
 	private final RoomImageRepository roomImageRepository;
 	private final OrderRepository orderRepository;
 	private final OrderDetailRepository orderDetailRepository;
+	private final DiscountRepository discountRepository;
 
 	@Override
 	@Transactional
@@ -44,22 +47,54 @@ public class CartServiceImpl implements CartService {
 			throw new RuntimeException("Check-out date is required");
 		}
 
+		// Normalize dates to start of day (remove time component)
+		LocalDateTime checkInDate = request.getCheckIn().toLocalDate().atStartOfDay();
+		LocalDateTime checkOutDate = request.getCheckOut().toLocalDate().atStartOfDay();
+
 		Room room = roomRepository.findById(request.getRoomId())
 				.orElseThrow(() -> new RuntimeException("Room not found with ID: " + request.getRoomId()));
 
 		// Calculate number of days
-		long days = ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut());
+		long days = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
 		if (days <= 0) {
 			throw new RuntimeException("Check-out date must be after check-in date");
+		}
+
+		// Check if room is already in user's cart with overlapping dates
+		List<Order> userCartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
+		for (Order cartOrder : userCartOrders) {
+			List<OrderDetail> cartDetails = orderDetailRepository.findByOrderId(cartOrder.getOrderId());
+			for (OrderDetail detail : cartDetails) {
+				if (detail.getRoomId().equals(request.getRoomId())) {
+					// Check date overlap
+					LocalDateTime existingCheckIn = detail.getCheckIn().toLocalDate().atStartOfDay();
+					LocalDateTime existingCheckOut = detail.getCheckOut().toLocalDate().atStartOfDay();
+
+					if (checkInDate.isBefore(existingCheckOut) && checkOutDate.isAfter(existingCheckIn)) {
+						throw new RuntimeException("Phòng này đã có trong giỏ hàng với ngày trùng lặp");
+					}
+				}
+			}
+		}
+
+		// Check if room is already reserved by others for these dates
+		List<OrderDetail> reservedDetails = orderDetailRepository.findByRoomIdAndStatus(request.getRoomId(), "RESERVED");
+		for (OrderDetail detail : reservedDetails) {
+			LocalDateTime existingCheckIn = detail.getCheckIn().toLocalDate().atStartOfDay();
+			LocalDateTime existingCheckOut = detail.getCheckOut().toLocalDate().atStartOfDay();
+
+			if (checkInDate.isBefore(existingCheckOut) && checkOutDate.isAfter(existingCheckIn)) {
+				throw new RuntimeException("Phòng này đã được đặt cho ngày bạn chọn");
+			}
 		}
 
 		// Create Order with status CART
 		Order order = new Order();
 		order.setUserId(userId);
 		order.setFloorId(room.getFloorId());
-		order.setCheckIn(request.getCheckIn());
-		order.setCheckOut(request.getCheckOut());
-		order.setStatus("CART"); // Status CART for cart items
+		order.setCheckIn(checkInDate);
+		order.setCheckOut(checkOutDate);
+		order.setStatus("CART");
 
 		Order savedOrder = orderRepository.save(order);
 		System.out.println("Created cart order with ID: " + savedOrder.getOrderId());
@@ -70,10 +105,10 @@ public class CartServiceImpl implements CartService {
 		orderDetail.setUserId(userId);
 		orderDetail.setRoomId(room.getRoomId());
 		orderDetail.setFloorId(room.getFloorId());
-		orderDetail.setStartDate(request.getCheckIn());
-		orderDetail.setEndDate(request.getCheckOut());
-		orderDetail.setCheckIn(request.getCheckIn());
-		orderDetail.setCheckOut(request.getCheckOut());
+		orderDetail.setStartDate(checkInDate);
+		orderDetail.setEndDate(checkOutDate);
+		orderDetail.setCheckIn(checkInDate);
+		orderDetail.setCheckOut(checkOutDate);
 		orderDetail.setStatus("CART");
 		orderDetail.setOrderDescription("Giỏ hàng - " + room.getRoomType() + " - Phòng " + room.getRoomNumber());
 
@@ -222,22 +257,22 @@ public class CartServiceImpl implements CartService {
 	@Transactional
 	public int fixLegacyCartStatus(Integer userId) {
 		System.out.println("=== Fixing legacy cart status for userId: " + userId + " ===");
-		
+
 		// Find all PENDING orders that should be CART
 		// (Orders without confirmed status that are still in cart)
 		List<Order> pendingOrders = orderRepository.findByUserIdAndStatus(userId, "PENDING");
-		
+
 		int fixed = 0;
 		for (Order order : pendingOrders) {
 			// Check if order details have CART status
 			List<OrderDetail> details = orderDetailRepository.findByOrderId(order.getOrderId());
 			boolean isCart = details.stream().anyMatch(d -> "CART".equals(d.getStatus()));
-			
+
 			if (isCart || details.isEmpty()) {
 				// This is a cart order, fix the status
 				order.setStatus("CART");
 				orderRepository.save(order);
-				
+
 				// Also fix order details
 				for (OrderDetail detail : details) {
 					if (!"CART".equals(detail.getStatus())) {
@@ -245,13 +280,54 @@ public class CartServiceImpl implements CartService {
 						orderDetailRepository.save(detail);
 					}
 				}
-				
+
 				fixed++;
 				System.out.println("Fixed order " + order.getOrderId() + " to CART status");
 			}
 		}
-		
+
 		System.out.println("Fixed " + fixed + " legacy cart orders");
 		return fixed;
+	}
+
+	@Override
+	public List<Discount> getAvailableDiscounts() {
+		LocalDate today = LocalDate.now();
+
+		// Lấy tất cả discounts còn hạn và còn lượt sử dụng
+		return discountRepository.findAll().stream()
+				.filter(discount -> !discount.getIsDeleted())
+				.filter(discount -> discount.getStartDate().isBefore(today.plusDays(1))
+						&& discount.getEndDate().isAfter(today.minusDays(1)))
+				.filter(discount -> discount.getUsedCount() < discount.getUsageLimit())
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<Discount> getAvailableDiscountsForCart(Integer userId) {
+		// Lấy các loại phòng trong giỏ hàng
+		List<CartItemDto> cartItems = getCartItems(userId);
+		if (cartItems.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		// Lấy danh sách room types
+		Set<String> roomTypesInCart = cartItems.stream()
+				.map(CartItemDto::getRoomType)
+				.collect(Collectors.toSet());
+
+		System.out.println("Room types in cart: " + roomTypesInCart);
+
+		// Lấy discounts khả dụng và lọc theo room type
+		LocalDate today = LocalDate.now();
+
+		return discountRepository.findAll().stream()
+				.filter(discount -> !discount.getIsDeleted())
+				.filter(discount -> discount.getStartDate().isBefore(today.plusDays(1))
+						&& discount.getEndDate().isAfter(today.minusDays(1)))
+				.filter(discount -> discount.getUsedCount() < discount.getUsageLimit())
+				.filter(discount -> roomTypesInCart.contains(discount.getRoomType()))
+				.limit(5) // Giới hạn 5 voucher để giao diện đẹp
+				.collect(Collectors.toList());
 	}
 }

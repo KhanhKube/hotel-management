@@ -5,6 +5,7 @@ import hotel.db.dto.payment.CreatePaymentLinkRequestBody;
 import hotel.db.entity.Order;
 import hotel.db.repository.order.OrderRepository;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
+import hotel.db.repository.room.RoomRepository;
 import hotel.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,10 +37,37 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new RuntimeException("Giỏ hàng trống");
 		}
 
-		// Calculate total amount
-		BigDecimal totalAmount = cartItems.stream()
+		// Calculate subtotal
+		BigDecimal subtotal = cartItems.stream()
 				.map(CartItemDto::getTotalPrice)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		// Apply discount if provided
+		BigDecimal totalAmount = subtotal;
+		if (requestBody.getDiscountId() != null) {
+			// Get discount from database
+			hotel.db.entity.Discount discount = cartService.getAvailableDiscounts().stream()
+					.filter(d -> d.getDiscountId().equals(requestBody.getDiscountId()))
+					.findFirst()
+					.orElse(null);
+
+			if (discount != null) {
+				// Calculate discount amount
+				BigDecimal discountPercent = BigDecimal.valueOf(discount.getValue());
+				BigDecimal discountAmount = subtotal.multiply(discountPercent)
+						.divide(BigDecimal.valueOf(100), 0, java.math.RoundingMode.HALF_UP);
+
+				totalAmount = subtotal.subtract(discountAmount);
+
+				// Ensure total is not negative
+				if (totalAmount.compareTo(BigDecimal.ZERO) < 0) {
+					totalAmount = BigDecimal.ZERO;
+				}
+
+				System.out.println("Applied discount: " + discount.getCode() + " (" + discount.getValue() + "%)");
+				System.out.println("Subtotal: " + subtotal + " -> Total after discount: " + totalAmount);
+			}
+		}
 
 		long orderCode = System.currentTimeMillis() / 1000;
 

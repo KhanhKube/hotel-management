@@ -67,15 +67,6 @@
                         <li class="nav-item"
                             th:if="${user != null and (user.role == 'RECEPTIONIST' || user.role == 'STAFF')}"><a
                                 class="nav-link" th:href="@{/order}">ĐƠN ĐẶT PHÒNG</a></li>
-                        <li class="nav-item submenu dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button"
-                               aria-haspopup="true" aria-expanded="false">AI</a>
-                            <ul class="dropdown-menu">
-                                <li class="nav-item"><a class="nav-link" th:href="@{/ai/chatbot}">AI CHATBOT</a>
-                                </li>
-                                <li class="nav-item"><a class="nav-link" th:href="@{/ai/report}">BÁO CÁO</a></li>
-                            </ul>
-                        </li>
                         <li class="nav-item"><a class="nav-link" th:href="@{/contact}">LIÊN HỆ</a></li>
                     </ul>
                 </div>
