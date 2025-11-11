@@ -164,13 +164,7 @@ public class ManagementController {
         return "redirect:/hotel-management/size";
     }
 
-    // FLOOR MANAGEMENT
-    @GetMapping("/floor")
-    public String floorManagement(Model model) {
-        model.addAttribute("floors", floorService.getAllActiveFloors());
-        return "management/floor-management";
-    }
-
+    // FLOOR MANAGEMENT (redirect to location-room)
     @GetMapping("/floor/new")
     public String newFloorForm(Model model) {
         model.addAttribute("floorRequest", new FloorRequestDto());
@@ -178,14 +172,19 @@ public class ManagementController {
     }
 
     @PostMapping("/floor/save")
-    public String saveFloor(@ModelAttribute("floorRequest") FloorRequestDto floorRequest, RedirectAttributes redirectAttributes) {
+    public String saveFloor(@ModelAttribute("floorRequest") FloorRequestDto floorRequest, 
+                           Model model, 
+                           RedirectAttributes redirectAttributes) {
         try {
             floorService.createFloor(floorRequest);
-            redirectAttributes.addFlashAttribute("success", "add");
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm tầng thành công!");
+            return "redirect:/hotel-management/location-room?type=floor&page=0&size=10";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "add");
+            // Nếu có lỗi, hiển thị lại form với error message
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("floorRequest", floorRequest);
+            return "management/floor-form";
         }
-        return "redirect:/hotel-management/floor";
     }
 
     @GetMapping("/floor/edit/{id}")
@@ -199,25 +198,32 @@ public class ManagementController {
     }
 
     @PostMapping("/floor/update/{id}")
-    public String updateFloor(@PathVariable Integer id, @ModelAttribute("floorRequest") FloorRequestDto floorRequest, RedirectAttributes redirectAttributes) {
+    public String updateFloor(@PathVariable Integer id, 
+                             @ModelAttribute("floorRequest") FloorRequestDto floorRequest, 
+                             Model model,
+                             RedirectAttributes redirectAttributes) {
         try {
             floorService.updateFloor(id, floorRequest);
-            redirectAttributes.addFlashAttribute("success", "edit");
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật tầng thành công!");
+            return "redirect:/hotel-management/location-room?type=floor&page=0&size=10";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "edit");
+            // Nếu có lỗi, hiển thị lại form với error message
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("floorRequest", floorRequest);
+            model.addAttribute("floorId", id);
+            return "management/floor-form";
         }
-        return "redirect:/hotel-management/floor";
     }
 
     @PostMapping("/floor/delete/{id}")
     public String deleteFloor(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             floorService.deleteFloor(id);
-            redirectAttributes.addFlashAttribute("success", "delete");
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa tầng thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "delete");
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
-        return "redirect:/hotel-management/floor";
+        return "redirect:/hotel-management/location-room?type=floor&page=0&size=10";
     }
 
     // ROOM MANAGEMENT
