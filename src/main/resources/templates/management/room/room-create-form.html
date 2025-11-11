@@ -32,11 +32,10 @@
                         <div class="col-12 grid-margin">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="card-title mb-4">
-                                        <i class="mdi mdi-home-plus"></i>
+                                    <h1 class="card-title mb-4">
                                         <span
                                             th:text="${room.roomId != null ? 'Cập Nhật Phòng' : 'Tạo Phòng Mới'}"></span>
-                                    </h4>
+                                    </h1>
 
                                     <form th:action="@{/hotel-management/room/create}" th:object="${room}" method="post"
                                         enctype="multipart/form-data" id="roomForm" novalidate>
@@ -45,7 +44,6 @@
                                         <!-- Error Message -->
                                         <div th:if="${errorMessage}"
                                             class="alert alert-danger alert-dismissible fade show" role="alert">
-                                            <i class="mdi mdi-alert-circle"></i>
                                             <span th:text="${errorMessage}"></span>
                                             <button type="button" class="close" data-dismiss="alert">
                                                 <span>&times;</span>
@@ -55,8 +53,7 @@
                                         <!-- Số phòng -->
                                         <div class="form-group">
                                             <label for="roomNumber">
-                                                <i class="mdi mdi-door"></i> Số phòng: <span
-                                                    class="text-danger">*</span>
+                                                Số phòng:
                                             </label>
                                             <input id="roomNumber" type="text" class="form-control"
                                                 th:field="*{roomNumber}" placeholder="VD: 101, 102..." required>
@@ -67,8 +64,7 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="roomType">
-                                                        <i class="mdi mdi-home-variant"></i> Loại phòng: <span
-                                                            class="text-danger">*</span>
+                                                        Loại phòng:
                                                     </label>
                                                     <select id="roomType" class="form-control" th:field="*{roomType}"
                                                         required>
@@ -81,8 +77,7 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="bedType">
-                                                        <i class="mdi mdi-bed"></i> Loại giường: <span
-                                                            class="text-danger">*</span>
+                                                        Loại giường:
                                                     </label>
                                                     <select id="bedType" class="form-control" th:field="*{bedType}"
                                                         required>
@@ -99,8 +94,7 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="floorId">
-                                                        <i class="mdi mdi-stairs"></i> Tầng: <span
-                                                            class="text-danger">*</span>
+                                                        Tầng:
                                                     </label>
                                                     <select id="floorId" class="form-control" th:field="*{floorId}"
                                                         required>
@@ -113,8 +107,7 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="sizeId">
-                                                        <i class="mdi mdi-ruler-square"></i> Diện tích: <span
-                                                            class="text-danger">*</span>
+                                                        Diện tích:
                                                     </label>
                                                     <select id="sizeId" class="form-control" th:field="*{sizeId}"
                                                         required>
@@ -131,8 +124,7 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="price">
-                                                        <i class="mdi mdi-currency-usd"></i> Giá/đêm (VNĐ): <span
-                                                            class="text-danger">*</span>
+                                                        Giá/đêm (VNĐ):
                                                     </label>
                                                     <input id="price" type="number" class="form-control"
                                                         th:field="*{price}" placeholder="VD: 500000" min="0" required>
@@ -143,7 +135,7 @@
                                         <!-- Mô tả -->
                                         <div class="form-group">
                                             <label for="roomDescription">
-                                                <i class="mdi mdi-text"></i> Mô tả phòng:
+                                                Mô tả phòng:
                                             </label>
                                             <textarea id="roomDescription" class="form-control"
                                                 th:field="*{roomDescription}" rows="4"
@@ -152,12 +144,11 @@
                                         <!-- Upload ảnh -->
                                         <div class="form-group">
                                             <label for="imageFiles">
-                                                <i class="mdi mdi-image-multiple"></i> Ảnh phòng:
+                                                Ảnh phòng:
                                             </label>
                                             <input type="file" id="imageFiles" name="imageFiles"
                                                 class="form-control-file" accept="image/*" multiple>
                                             <small class="form-text text-muted">
-                                                <i class="mdi mdi-information"></i>
                                                 Chọn nhiều ảnh (tối đa 10MB/ảnh). Định dạng: JPG, PNG, GIF
                                             </small>
                                         </div>
@@ -171,7 +162,7 @@
                                         <!-- Ảnh hiện tại (nếu edit) -->
                                         <div th:if="${room.roomId != null}" class="form-group">
                                             <label>
-                                                <i class="mdi mdi-image-album"></i> Ảnh hiện tại:
+                                                Ảnh hiện tại:
                                             </label>
 
                                             <!-- Nếu có ảnh -->

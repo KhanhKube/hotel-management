@@ -457,7 +457,7 @@ public class RoomServiceImpl implements RoomService {
 
         try {
             // Validate - truyền thêm roomId để phân biệt CREATE vs UPDATE
-            String validationError = validateRoomNumber(room.getRoomNumber(), room.getFloorId(), room.getSizeId(), room.getRoomType(), room.getBedType(), room.getRoomId());
+            String validationError = validateRoomNumber(room.getRoomNumber(), room.getFloorId(), room.getSizeId(), room.getRoomType(), room.getBedType(), room.getPrice(), room.getRoomId());
             if (validationError != "") {
                 result.put("error", validationError);
                 return result;
@@ -478,7 +478,7 @@ public class RoomServiceImpl implements RoomService {
         roomRepository.softDeleteById(id);
     }
 
-    private String validateRoomNumber(String roomNumber, Integer floorId, Integer sizeId, String roomType, String bedType, Integer roomId) {
+    private String validateRoomNumber(String roomNumber, Integer floorId, Integer sizeId, String roomType, String bedType, BigDecimal price, Integer roomId) {
         //lấy số tầng và số size.
         Integer floorNumber = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))
@@ -517,25 +517,48 @@ public class RoomServiceImpl implements RoomService {
             }
         }
 
-        // kiểm tra format số phòng
-        if (!roomNumber.matches("\\d{3}")) {
-            return "Số phòng phải có đúng 3 chữ số (VD: 101, 205). Vui lòng nhập lại!";
+        // Kiểm tra format số phòng - phải là số
+        if (!roomNumber.matches("\\d+")) {
+            return "Số phòng chỉ được chứa chữ số. Vui lòng nhập lại!";
         }
 
-        //Lấy chữ số đầu tiên
-        int roomFloorNumber = Integer.parseInt(roomNumber.substring(0, 1));
+        // Số phòng phải có ít nhất 3 chữ số
+        if (roomNumber.length() < 3) {
+            return "Số phòng phải có ít nhất 3 chữ số (VD: 101, 1201). Vui lòng nhập lại!";
+        }
 
-        //lấy các số còn lại
-        int roomNumberInFloor = Integer.parseInt(roomNumber.substring(1));
+        // Lấy 2 số cuối (số phòng trong tầng)
+        String lastTwoDigits = roomNumber.substring(roomNumber.length() - 2);
+        int roomNumberInFloor = Integer.parseInt(lastTwoDigits);
 
-        // Số đâù tiên phải là số tầng
+        // Lấy các số đầu (số tầng)
+        String floorPrefix = roomNumber.substring(0, roomNumber.length() - 2);
+        int roomFloorNumber = Integer.parseInt(floorPrefix);
+
+        // Các số đầu phải trùng với số tầng đã chọn
         if (roomFloorNumber != floorNumber) {
-            return "Chữ số đầu tiên phải trùng với số tầng. Vui lòng nhập lại!";
+            return "Số phòng phải bắt đầu bằng số tầng " + floorNumber + " (VD: " + floorNumber + "01, " + floorNumber + "02). Vui lòng nhập lại!";
         }
 
-        // 2 số cuối từ 1-11
+        // 2 số cuối từ 01-11
         if (roomNumberInFloor < 1 || roomNumberInFloor > 11) {
-            return "Vui lòng nhập số phòng từ 0-10!";
+            return "Số phòng trong tầng (2 số cuối) phải từ 01-11!";
+        }
+
+        // Validate giá tiền
+        if (price == null) {
+            return "Vui lòng nhập giá phòng!";
+        }
+        
+        BigDecimal minPrice = new BigDecimal("100000");
+        BigDecimal maxPrice = new BigDecimal("10000000");
+        
+        if (price.compareTo(minPrice) < 0) {
+            return "Giá phòng tối thiểu là 100.000 VNĐ!";
+        }
+        
+        if (price.compareTo(maxPrice) > 0) {
+            return "Giá phòng tối đa là 10.000.000 VNĐ!";
         }
 
         // Đếm các phòng chưa bị xóa theo tầng

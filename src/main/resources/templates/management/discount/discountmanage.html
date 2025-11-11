@@ -120,12 +120,12 @@
 
                                     <!-- Hàng 1: Thanh search | Loại giảm giá | Loại phòng | Trạng thái -->
                                     <div class="row mb-3">
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label class="form-label">Tìm kiếm</label>
                                             <input name="search" type="text" class="form-control"
                                                    placeholder="Mã voucher..." th:value="${param.search}">
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label class="form-label">Loại phòng</label>
                                             <select name="roomType" class="form-select">
                                                 <option value="">Tất cả</option>
@@ -135,7 +135,7 @@
                                                         th:selected="${param.roomType != null && param.roomType[0] == type}"></option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label class="form-label">Trạng thái</label>
                                             <select name="status" class="form-select">
                                                 <option value="">Tất cả</option>
@@ -145,7 +145,7 @@
                                                 <option value="EXHAUSTED" th:selected="${param.status != null && param.status[0] == 'EXHAUSTED'}">Hết số lượng</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label class="form-label">Sắp xếp</label>
                                             <select name="sortBy" class="form-select">
                                                 <option value="">Tất cả</option>
@@ -157,22 +157,19 @@
                                                 <option value="startDate,desc" th:selected="${param.sortBy != null && param.sortBy[0] == 'startDate,desc'}">Ngày bắt đầu giảm dần</option>
                                             </select>
                                         </div>
-                                    </div>
-
-                                    <!-- Hàng 2: Tìm kiếm | Đặt lại (căn giữa) -->
-                                    <div class="row justify-content-center">
                                         <div class="col-md-2">
-                                            <button type="submit" class="btn btn-primary w-100">
+                                            <label class="form-label">&nbsp;</label>
+                                            <button type="submit" class="btn btn-primary w-100" style="height: calc(1em + 1.5rem + 2px);">
                                                 <i class="mdi mdi-magnify"></i> Tìm kiếm
                                             </button>
                                         </div>
                                         <div class="col-md-2">
-                                            <a th:href="@{/hotel-management/discount}" class="btn btn-secondary w-100">
+                                            <label class="form-label">&nbsp;</label>
+                                            <a th:href="@{/hotel-management/discount}" class="btn btn-secondary w-100" style="height: calc(1em + 1.5rem + 2px); display: flex; align-items: center; justify-content: center;">
                                                 <i class="mdi mdi-refresh"></i> Đặt lại
                                             </a>
                                         </div>
                                     </div>
-
                                 </form>
                             </div>
                         </div>
