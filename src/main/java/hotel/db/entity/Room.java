@@ -43,9 +43,6 @@ public class Room extends AbstractVersion {
     @Column(name = "status", length = 50)
     private String status;
 
-    @Column(name = "use_status", length = 50)
-    private String useStatus;
-
     @Column(name = "sold")
     private Integer sold = 0;
 
