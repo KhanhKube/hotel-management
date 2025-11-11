@@ -62,31 +62,40 @@ public class HotelServiceImpl implements HotelService {
         return hotelRepository.findById(id);
     }
 
-   @Override
-	public Hotel saveHotel(Hotel hotel) {
-		return hotelRepository.save(hotel);
-	}
+    @Override
+    public Hotel saveHotel(Hotel hotel) {
+        return hotelRepository.save(hotel);
+    }
 
-	@Override
-	@Transactional
-	public void deleteHotel(Long id) {
-		hotelRepository.deleteById(id);
-	}
+    @Override
+    @Transactional
+    public void deleteHotel(Long id) {
+        hotelRepository.deleteById(id);
+    }
 
-	@Override
-	@Transactional
-	public Hotel changeStatus(Long id, String status) {
-		Hotel hotel = findById(id);
-		if (hotel != null) {
-			//    hotel.setStatus(status);
-			return hotelRepository.save(hotel);
-		}
-		throw new RuntimeException("Không tìm thấy khách sạn với ID: " + id);
-	}
+    @Override
+    @Transactional
+    public Hotel changeStatus(Long id, String status) {
+        Hotel hotel = findById(id);
+        if (hotel != null) {
+            //    hotel.setStatus(status);
+            return hotelRepository.save(hotel);
+        }
+        throw new RuntimeException("Không tìm thấy khách sạn với ID: " + id);
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public boolean checkAvailableRoom(Long roomId) {
-		// Implementation for checking room availability
-		return true;
-	}}
+    @Override
+    @Transactional(readOnly = true)
+    public boolean checkAvailableRoom(Long roomId) {
+        // Implementation for checking room availability
+        return true;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Hotel getDefaultHotel() {
+        // Get the first hotel in the system (ID = 1 or first available)
+        return hotelRepository.findById(1L)
+                .orElseGet(() -> hotelRepository.findAll().stream().findFirst().orElse(null));
+    }
+}

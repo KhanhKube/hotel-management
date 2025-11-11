@@ -4,11 +4,13 @@ import hotel.db.dto.room.RoomBookListDto;
 import hotel.db.dto.room.RoomDetailResponseDto;
 import hotel.db.dto.room.RoomHomepageResponseDto;
 import hotel.db.entity.News;
+import hotel.db.entity.Service;
 import hotel.db.enums.BedType;
 import hotel.db.enums.RoomType;
 import hotel.db.repository.floor.FloorRepository;
 import hotel.service.room.RoomService;
 import hotel.service.news.NewsService;
+import hotel.service.service.ServiceService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,6 +33,7 @@ public class HomePageController {
     private final RoomService roomService;
     private final NewsService newsService;
     private final FloorRepository floorRepository;
+    private final ServiceService serviceService;
 
     @GetMapping({"/", "", "/home"})
     public String home(HttpSession session, Model model) {
@@ -45,6 +48,10 @@ public class HomePageController {
                 .limit(3)
                 .toList();
         model.addAttribute("latestNews", latestNews);
+
+        // Get featured services for home page
+        List<Service> featuredServices = serviceService.findFeaturedServices();
+        model.addAttribute("featuredServices", featuredServices);
 
         return "common/home";
     }
@@ -66,7 +73,7 @@ public class HomePageController {
         // Lấy 2 lists riêng biệt cho check-in và check-out calendar
         List<String> bookedDatesCheckIn = roomService.getBookedDatesForBookingRoom(id);
         List<String> bookedDatesCheckOut = roomService.getBookedDatesForCheckOut(id);
-        
+
         model.addAttribute("room", room);
         model.addAttribute("bookedDatesCheckIn", bookedDatesCheckIn);
         model.addAttribute("bookedDatesCheckOut", bookedDatesCheckOut);

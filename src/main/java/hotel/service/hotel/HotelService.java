@@ -23,4 +23,7 @@ public interface HotelService {
     Hotel changeStatus(Long id, String status);
 
     boolean checkAvailableRoom(Long roomId);
+
+    // Get default hotel (single hotel for the system)
+    Hotel getDefaultHotel();
 }

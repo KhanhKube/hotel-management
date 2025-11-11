@@ -1,0 +1,249 @@
+<!-- templates/hotels/profile.html -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Thông tin khách sạn</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .profile-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .info-card {
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-box h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-scroller">
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html">
+                    <img src="assets/images/logo-mini.svg" alt="logo" />
+                </a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch"></div>
+        </nav>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- Header -->
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h4 class="card-title mb-0">
+                                        <i class="mdi mdi-hotel"></i> Thông Tin Khách Sạn
+                                    </h4>
+                                    <div>
+                                        <a th:href="@{/management/hotels/edit}"
+                                           class="btn btn-primary btn-sm">
+                                            <i class="mdi mdi-pencil"></i> Chỉnh sửa
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Success/Error Messages -->
+                                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-check-circle"></i> <span th:text="${success}"></span>
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-alert-circle"></i> <span th:text="${error}"></span>
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+
+                                <!-- Profile Header -->
+                                <div class="profile-header">
+                                    <i class="mdi mdi-hotel" style="font-size: 64px;"></i>
+                                    <p th:text="${hotel != null ? hotel.name : 'No data'}"></p>
+                                    <p class="mb-0" style="font-size: 1.1rem;">
+                                        <i class="mdi mdi-map-marker"></i> <span th:text="${hotel.address}"></span>
+                                    </p>
+                                    <div class="mt-3">
+                                        <span th:if="${hotel.status == 'ACTIVE'}" class="badge badge-success" style="font-size: 1rem; padding: 10px 20px;">
+                                            <i class="mdi mdi-check-circle"></i> Đang hoạt động
+                                        </span>
+                                        <span th:if="${hotel.status == 'DRAFT'}" class="badge badge-warning" style="font-size: 1rem; padding: 10px 20px;">
+                                            <i class="mdi mdi-file-document-outline"></i> Bản nháp
+                                        </span>
+                                        <span th:if="${hotel.status == 'INACTIVE'}" class="badge badge-secondary" style="font-size: 1rem; padding: 10px 20px;">
+                                            <i class="mdi mdi-close-circle"></i> Ngưng hoạt động
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Statistics -->
+                                <div class="row mb-4">
+                                    <div class="col-md-4">
+                                        <div class="stat-box">
+                                            <i class="mdi mdi-star" style="font-size: 2rem;"></i>
+                                            <h3 th:text="${hotel.stars}">5</h3>
+                                            <p class="mb-0">Hạng sao</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="stat-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                            <i class="mdi mdi-eye" style="font-size: 2rem;"></i>
+                                            <h3 th:text="${hotel.viewCount != null ? hotel.viewCount : 0}">0</h3>
+                                            <p class="mb-0">Lượt xem</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="stat-box" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                            <i class="mdi mdi-bed" style="font-size: 2rem;"></i>
+                                            <h3>-</h3>
+                                            <p class="mb-0">Số phòng</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Info Sections -->
+                                <div class="row mt-4">
+                                    <!-- Contact Info -->
+                                    <div class="col-md-6">
+                                        <div class="card info-card mb-3">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-phone"></i> Thông Tin Liên Hệ
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td style="width: 40%;"><i class="mdi mdi-phone"></i> <strong>Điện thoại:</strong></td>
+                                                        <td>
+                                                            <a th:href="'tel:' + ${hotel.phone}" th:text="${hotel.phone != null ? hotel.phone : 'N/A'}"></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-email"></i> <strong>Email:</strong></td>
+                                                        <td>
+                                                            <a th:href="'mailto:' + ${hotel.email}" th:text="${hotel.email != null ? hotel.email : 'N/A'}"></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-map-marker"></i> <strong>Địa chỉ:</strong></td>
+                                                        <td th:text="${hotel.address != null ? hotel.address : 'N/A'}"></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- System Info -->
+                                    <div class="col-md-6">
+                                        <div class="card info-card mb-3" style="border-left-color: #f093fb;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-information"></i> Thông Tin Hệ Thống
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td style="width: 40%;"><i class="mdi mdi-identifier"></i> <strong>ID:</strong></td>
+                                                        <td><span class="badge badge-dark" th:text="${hotel.id}"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-star"></i> <strong>Hạng sao:</strong></td>
+                                                        <td>
+                                                            <span class="badge badge-warning">
+                                                                <i class="mdi mdi-star"></i>
+                                                                <span th:text="${hotel.stars}"></span> Sao
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-toggle-switch"></i> <strong>Trạng thái:</strong></td>
+                                                        <td>
+                                                            <span th:if="${hotel.status == 'DRAFT'}" class="badge badge-warning">
+                                                                <i class="mdi mdi-file-document-outline"></i> Bản nháp
+                                                            </span>
+                                                            <span th:if="${hotel.status == 'ACTIVE'}" class="badge badge-success">
+                                                                <i class="mdi mdi-check-circle"></i> Hoạt động
+                                                            </span>
+                                                            <span th:if="${hotel.status == 'INACTIVE'}" class="badge badge-secondary">
+                                                                <i class="mdi mdi-close-circle"></i> Ngưng hoạt động
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="card info-card mt-3" style="border-left-color: #4facfe;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="mdi mdi-text-subject"></i> Mô Tả Chi Tiết
+                                        </h5>
+                                        <p class="mt-2" th:utext="${hotel.description != null ? hotel.description : 'Chưa có mô tả'}"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="mt-4 text-center">
+                                    <a th:href="@{/management/hotels/edit}"
+                                       class="btn btn-primary btn-lg">
+                                        <i class="mdi mdi-pencil"></i> Chỉnh sửa thông tin
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+</body>
+</html>

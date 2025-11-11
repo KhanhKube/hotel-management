@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Quản lý Nội thất</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <style>
+        tbody tr:hover {
+            cursor: pointer;
+            opacity: 0.65;
+            transition: background-color 0.2s;
+        }
+        .table th {
+    color: #ffffff;
+    font-weight: 600;
+    background-color: #1e1e2f;
+}</style>
+</head>
+<body>
+<div class="container-scroller">
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+    
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html">
+                    <img src="assets/images/logo-mini.svg" alt="logo" />
+                </a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch"></div>
+        </nav>
+        
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- Search & Filter Bar -->
+                                <form th:action="@{/management/furnishings}" method="get">
+                                    <div class="filter-section mb-4" style="background: #4a90e2; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
+                                            <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Nội Thất</h5>
+                                        </div>
+
+                                        <!-- Row 1: Search -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-white border-end-0">
+                                                        <i class="mdi mdi-magnify text-primary"></i>
+                                                    </span>
+                                                    <input name="search" type="text" class="form-control border-start-0" 
+                                                           placeholder="Tìm kiếm tên nội thất hoặc mô tả..." th:value="${search}">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 2: Filters -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <input name="minQuantity" type="number" class="form-control" 
+                                                       placeholder="Số lượng tối thiểu" th:value="${minQuantity}" min="0">
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <input name="maxQuantity" type="number" class="form-control" 
+                                                       placeholder="Số lượng tối đa" th:value="${maxQuantity}" min="0">
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select name="sortBy" class="form-select">
+                                                    <option value="">-- Sắp xếp --</option>
+                                                    <option value="name,asc" th:selected="${sortBy == 'name,asc'}">Tên A-Z</option>
+                                                    <option value="name,desc" th:selected="${sortBy == 'name,desc'}">Tên Z-A</option>
+                                                    <option value="quantity,asc" th:selected="${sortBy == 'quantity,asc'}">Số lượng tăng dần</option>
+                                                    <option value="quantity,desc" th:selected="${sortBy == 'quantity,desc'}">Số lượng giảm dần</option>
+                                                    <option value="createdAt,desc" th:selected="${sortBy == 'createdAt,desc'}">Mới nhất</option>
+                                                    <option value="createdAt,asc" th:selected="${sortBy == 'createdAt,asc'}">Cũ nhất</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <select name="pageSize" class="form-select">
+                                                    <option value="10" th:selected="${pageSize == 10}">10 / trang</option>
+                                                    <option value="20" th:selected="${pageSize == 20}">20 / trang</option>
+                                                    <option value="50" th:selected="${pageSize == 50}">50 / trang</option>
+                                                    <option value="100" th:selected="${pageSize == 100}">100 / trang</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 3: Buttons -->
+                                        <div class="row align-items-center">
+                                            <div class="col-md-9 col-sm-12 mb-2">
+                                                <button type="submit" class="btn btn-info me-2">
+                                                    <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                                </button>
+                                                <a th:href="@{/management/furnishings}" class="btn btn-light">
+                                                    <i class="mdi mdi-refresh"></i> Reset
+                                                </a>
+                                            </div>
+
+                                            <div class="col-md-3 col-sm-12 mb-2 text-end">
+                                                <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
+                                                    <i class="mdi mdi-sofa"></i>
+                                                    Tổng: <strong th:text="${totalElements}">0</strong> nội thất
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <div class="card-body">
+                                <!-- Success Message -->
+                                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-check-circle"></i>
+                                    <strong>Thành công!</strong> <span th:text="${successMessage}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <strong>Lỗi!</strong> <span th:text="${errorMessage}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Danh Sách Nội Thất</h4>
+                                    <a th:href="@{/management/furnishings/create}" class="btn btn-primary">
+                                        <i class="mdi mdi-plus"></i> Thêm Nội Thất Mới
+                                    </a>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Tên Nội Thất</th>
+                                            <th>Mô Tả</th>
+                                            <th>Số Lượng</th>
+                                            <th>Ngày Tạo</th>
+                                            <th>Thao Tác</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="f, stat : ${furnishings}"
+                                            th:onclick="|window.location.href='@{/management/furnishings/detail/{id}(id=${f.furnishingId})}';|"
+                                            style="cursor: pointer;">
+                                            <td th:text="${stat.count + (currentPage * pageSize)}"></td>
+                                            <td>
+                                                <strong th:text="${f.name}">Tên nội thất</strong>
+                                            </td>
+                                            <td th:text="${f.furnishingDescription != null ? (f.furnishingDescription.length() > 50 ? f.furnishingDescription.substring(0, 50) + '...' : f.furnishingDescription) : 'N/A'}"></td>
+                                            <td>
+                                                <span class="badge badge-info" th:text="${f.quantity}">0</span>
+                                            </td>
+                                            <td th:text="${f.createdAt != null ? #temporals.format(f.createdAt, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+                                            <td onclick="event.stopPropagation();">
+                                                <a th:href="@{/management/furnishings/edit/{id}(id=${f.furnishingId})}" 
+                                                   class="btn btn-sm btn-warning">
+                                                    <i class="mdi mdi-pencil"></i> Sửa
+                                                </a>
+                                                <a th:href="@{/management/furnishings/delete/{id}(id=${f.furnishingId})}" 
+                                                   class="btn btn-sm btn-danger"
+                                                   onclick="return confirm('Bạn có chắc chắn muốn xóa nội thất này?');">
+                                                    <i class="mdi mdi-delete"></i> Xóa
+                                                </a>
+                                            </td>
+                                        </tr>
+
+                                        <tr th:if="${#lists.isEmpty(furnishings)}">
+                                            <td colspan="6" class="text-center text-muted">Không có nội thất nào</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <div th:if="${totalPages > 1}" class="mt-4">
+                                    <nav>
+                                        <ul class="pagination justify-content-center">
+                                            <!-- Previous -->
+                                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                                <a class="page-link" 
+                                                   th:href="@{/management/furnishings(page=${currentPage - 1}, pageSize=${pageSize}, search=${search}, minQuantity=${minQuantity}, maxQuantity=${maxQuantity}, sortBy=${sortBy})}">
+                                                    Trước
+                                                </a>
+                                            </li>
+
+                                            <!-- Page numbers -->
+                                            <li class="page-item" 
+                                                th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                                th:if="${i >= (currentPage - 2) && i <= (currentPage + 2)}"
+                                                th:classappend="${i == currentPage} ? 'active'">
+                                                <a class="page-link" 
+                                                   th:href="@{/management/furnishings(page=${i}, pageSize=${pageSize}, search=${search}, minQuantity=${minQuantity}, maxQuantity=${maxQuantity}, sortBy=${sortBy})}"
+                                                   th:text="${i + 1}">1</a>
+                                            </li>
+
+                                            <!-- Next -->
+                                            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                                                <a class="page-link" 
+                                                   th:href="@{/management/furnishings(page=${currentPage + 1}, pageSize=${pageSize}, search=${search}, minQuantity=${minQuantity}, maxQuantity=${maxQuantity}, sortBy=${sortBy})}">
+                                                    Sau
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                    <div class="text-center text-muted">
+                                        Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">1</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+</body>
+</html>

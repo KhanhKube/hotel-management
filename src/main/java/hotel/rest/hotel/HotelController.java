@@ -6,15 +6,9 @@ package hotel.rest.hotel;
 import hotel.db.entity.Hotel;
 import hotel.service.hotel.HotelService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/management/hotels")
@@ -23,88 +17,60 @@ public class HotelController {
     @Autowired
     private HotelService hotelService;
 
-    // List all hotels with paging, search, and filters
-    @GetMapping
-    public String listHotels(@RequestParam(required = false) String name,
-                             @RequestParam(required = false) Integer stars,
-                             @RequestParam(required = false) String status,
-                             @RequestParam(defaultValue = "0") int page,
-                             @RequestParam(defaultValue = "10") int size,
-                             @RequestParam(defaultValue = "id") String sortBy,
-                             @RequestParam(defaultValue = "asc") String sortDir,
-                             Model model) {
-
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        Page<Hotel> hotels;
-        if (name != null && !name.isEmpty()) {
-            hotels = hotelService.searchHotelsByName(name, pageable);
-        } else if (stars != null) {
-            hotels = hotelService.filterHotelsByStars(stars, pageable);
-        } else if (status != null && !status.isEmpty()) {
-            hotels = hotelService.filterHotelsByStatus(status, pageable);
-        } else {
-            hotels = hotelService.getHotelsWithFilters(name, stars, status, pageable);
+    // Display hotel profile (single hotel)
+    @GetMapping("/profile")
+    public String hotelProfile(Model model) {
+        Hotel hotel = hotelService.getDefaultHotel();
+        if (hotel == null) {
+            // Create default hotel if not exists
+            hotel = new Hotel();
+            hotel.setName("SeaPalace Hotel");
+            hotel.setAddress("123 Beach Road, Coastal City");
+            hotel.setPhone("+84 6503 3812");
+            hotel.setEmail("info@seapalace.com");
+            hotel.setDescription("Luxury beachfront hotel with modern amenities");
+            hotel.setStars(5);
+            hotel.setStatus("ACTIVE");
+            hotel = hotelService.saveHotel(hotel);
         }
-
-        model.addAttribute("hotels", hotels);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", hotels.getTotalPages());
-        model.addAttribute("name", name);
-        model.addAttribute("stars", stars);
-        model.addAttribute("status", status);
-        model.addAttribute("sortBy", sortBy);
-        model.addAttribute("sortDir", sortDir);
-        return "management/hotels/list";
+        model.addAttribute("hotel", hotel);
+        return "management/hotels/profile";
     }
 
-    // Show form for new hotel
-    @GetMapping("/new")
-    public String newHotelForm(Model model) {
-        model.addAttribute("hotel", new Hotel());
+    // Show form to edit hotel profile
+    @GetMapping("/edit")
+    public String editHotelForm(Model model) {
+        Hotel hotel = hotelService.getDefaultHotel();
+        if (hotel == null) {
+            hotel = new Hotel();
+        }
+        model.addAttribute("hotel", hotel);
         return "management/hotels/form";
     }
 
-    // Show form for edit hotel
-    @GetMapping("/edit/{id}")
-    public String editHotelForm(@PathVariable Long id, Model model) {
-        Optional<Hotel> hotelOpt = hotelService.getHotelById(id);
-        if (hotelOpt.isPresent()) {
-            model.addAttribute("hotel", hotelOpt.get());
-            return "management/hotels/form";
-        } else {
-            return "redirect:/management/hotels";
+    // Update hotel profile
+    @PostMapping("/update")
+    public String updateHotel(@ModelAttribute Hotel hotel, Model model) {
+        try {
+            // Ensure we're updating the default hotel (ID = 1)
+            if (hotel.getId() == null) {
+                Hotel existingHotel = hotelService.getDefaultHotel();
+                if (existingHotel != null) {
+                    hotel.setId(existingHotel.getId());
+                }
+            }
+            hotelService.saveHotel(hotel);
+            model.addAttribute("success", "Cập nhật thông tin khách sạn thành công!");
+        } catch (Exception e) {
+            model.addAttribute("error", "Có lỗi xảy ra khi cập nhật: " + e.getMessage());
         }
+        return "redirect:/management/hotels/profile";
     }
 
-    // Save hotel (create or update)
-    @PostMapping
-    public String saveHotel(@ModelAttribute Hotel hotel) {
-        hotelService.saveHotel(hotel);
-        return "redirect:/management/hotels";
-    }
-
-    // Delete hotel
-    @GetMapping("/delete/{id}")
-    public String deleteHotel(@PathVariable Long id) {
-        hotelService.deleteHotel(id);
-        return "redirect:/management/hotels";
-    }
-
-    // View hotel details
-    @GetMapping("/view/{id}")
-    public String viewHotel(@PathVariable Long id, Model model) {
-        Optional<Hotel> hotelOpt = hotelService.getHotelById(id);
-        if (hotelOpt.isPresent()) {
-            Hotel hotel = hotelOpt.get();
-            // Increment view count
-            //  hotel.setViewCount(hotel.getViewCount() + 1);
-            //   hotelService.saveHotel(hotel);
-            model.addAttribute("hotel", hotel);
-            return "management/hotels/view";
-        } else {
-            return "redirect:/management/hotels";
-        }
+    // Get hotel info as JSON (for API)
+    @GetMapping("/info")
+    @ResponseBody
+    public Hotel getHotelInfo() {
+        return hotelService.getDefaultHotel();
     }
 }

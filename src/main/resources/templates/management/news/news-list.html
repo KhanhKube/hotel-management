@@ -27,8 +27,14 @@
             opacity: 0.65;
             transition: background-color 0.2s;
         }
+    .table th {
+    color: #ffffff;
+    font-weight: 600;
+    background-color: #1e1e2f;
+}
     </style>
 </head>
+
 <body>
 <div class="container-scroller">
     <!-- Include sidebar -->
@@ -73,14 +79,7 @@
 
                                     <!-- Row 2: Filters -->
                                     <div class="row mb-3">
-                                        <div class="col-md-3 col-sm-6 mb-2">
-                                            <select id="filterStatus" class="form-select">
-                                                <option value="">-- Tất cả trạng thái --</option>
-                                                <option value="DRAFT">Bản nháp</option>
-                                                <option value="PUBLISHED">Đã xuất bản</option>
-                                                <option value="ARCHIVED">Đã lưu trữ</option>
-                                            </select>
-                                        </div>
+
 
                                         <div class="col-md-3 col-sm-6 mb-2">
                                             <select id="filterNewsGroup" class="form-select">
@@ -142,9 +141,9 @@
                                 </div>
 
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h4 class="card-title mb-0">News Management</h4>
+                                    <h4 class="card-title mb-0">Quản lý tin tức</h4>
                                     <a th:href="@{/management/news/add}" class="btn btn-primary">
-                                        <i class="mdi mdi-plus"></i> Create New News
+                                        <i class="mdi mdi-plus"></i> Tạo tin tức mới
                                     </a>
                                 </div>
                                 <div class="table-responsive">
@@ -153,18 +152,18 @@
                                         <tr>
                                             <th> STT </th>
                                             <th onclick="sortTable(1, this)" style="cursor: pointer;">
-                                                Title <i class="mdi mdi-sort"></i>
+                                                Tiêu đề <i class="mdi mdi-sort"></i>
                                             </th>
                                             <th onclick="sortTable(2, this)" style="cursor: pointer;">
-                                                Status <i class="mdi mdi-sort"></i>
+                                                Trạng thái <i class="mdi mdi-sort"></i>
                                             </th>
                                             <th onclick="sortTable(3, this)" style="cursor: pointer;">
-                                                Views <i class="mdi mdi-sort"></i>
+                                                Lượt xem <i class="mdi mdi-sort"></i>
                                             </th>
                                             <th onclick="sortTable(4, this)" style="cursor: pointer;">
-                                                Created Date <i class="mdi mdi-sort"></i>
+                                                Ngày tạo <i class="mdi mdi-sort"></i>
                                             </th>
-                                            <th> Actions </th>
+                                            <th> Hành động </th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -176,9 +175,9 @@
                                             <td th:text="${n.title != null ? n.title : 'N/A'}"></td>
                                             <td>
                                                 <div th:switch="${n.status}">
-                                                    <span th:case="'DRAFT'" class="badge badge-outline-warning">DRAFT</span>
-                                                    <span th:case="'PUBLISHED'" class="badge badge-outline-success">PUBLISHED</span>
-                                                    <span th:case="'ARCHIVED'" class="badge badge-outline-secondary">ARCHIVED</span>
+                                                    <span th:case="'DRAFT'" class="badge badge-outline-warning">Bản nháp</span>
+                                                    <span th:case="'PUBLISHED'" class="badge badge-outline-success">Đã xuất bản</span>
+                                                    <span th:case="'ARCHIVED'" class="badge badge-outline-secondary">Lưu trữ</span>
                                                 </div>
                                             </td>
                                             <td th:text="${n.view != null ? n.view : 0}"></td>
@@ -192,7 +191,7 @@
                                                 </a>
                                                 <form th:action="@{/management/news/delete/{id}(id=${n.newsId})}" method="post" style="display:inline">
                                                     <button type="submit" class="btn btn-danger btn-sm"
-                                                            onclick="return confirm('Are you sure you want to delete this news?')">
+                                                            onclick="return confirm('Bạn có chắc muốn xóa tin tức này?')">
                                                         <i class="mdi mdi-delete"></i>
                                                     </button>
                                                 </form>
@@ -200,7 +199,7 @@
                                         </tr>
 
                                         <tr th:if="${#lists.isEmpty(newsPage.content)}">
-                                            <td colspan="6" class="text-center text-muted">No news available</td>
+                                            <td colspan="6" class="text-center text-muted">Không có tin tức nào</td>
                                         </tr>
                                         </tbody>
                                     </table>
@@ -211,7 +210,7 @@
                                     <ul class="pagination justify-content-center">
                                         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                             <a class="page-link" th:href="@{/management/news(page=${currentPage - 1}, search=${search}, status=${status})}">
-                                                <i class="mdi mdi-chevron-left"></i> Previous
+                                                <i class="mdi mdi-chevron-left"></i> Trước
                                             </a>
                                         </li>
                                         <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
@@ -221,7 +220,7 @@
                                         </li>
                                         <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                                             <a class="page-link" th:href="@{/management/news(page=${currentPage + 1}, search=${search}, status=${status})}">
-                                                Next <i class="mdi mdi-chevron-right"></i>
+                                                Sau <i class="mdi mdi-chevron-right"></i>
                                             </a>
                                         </li>
                                     </ul>
@@ -267,6 +266,125 @@
 <!-- Custom js for this page -->
 <script th:src="@{/assets/js/dashboard.js}"></script>
 <!-- End custom js for this page -->
+
+
+
+<script>
+    // Lấy tham chiếu các phần tử
+    const searchInput = document.getElementById('searchInput');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterNewsGroup = document.getElementById('filterNewsGroup');
+    const filterViewsFrom = document.getElementById('filterViewsFrom');
+    const filterViewsTo = document.getElementById('filterViewsTo');
+    const table = document.getElementById('newsTable');
+    const rows = Array.from(table.querySelectorAll('tbody tr')).filter(r => !r.querySelector('td[colspan]'));
+    const resultCount = document.getElementById('resultCount');
+
+    // Lọc khi người dùng bấm "Tìm kiếm"
+    function applyAllFilters() {
+        const text = searchInput.value.toLowerCase().trim();
+        const status = filterStatus.value.toUpperCase();
+        const group = filterNewsGroup.value.toLowerCase().trim();
+        const from = parseInt(filterViewsFrom.value) || 0;
+        const to = parseInt(filterViewsTo.value) || Infinity;
+
+        let visible = 0;
+
+        rows.forEach(row => {
+            const title = row.cells[1]?.textContent.toLowerCase().trim() || "";
+            const statusText = row.cells[2]?.textContent.toUpperCase().trim() || "";
+            const views = parseInt(row.cells[3]?.textContent.trim()) || 0;
+
+            let match = true;
+
+            if (text && !title.includes(text)) match = false;
+            if (status && !statusText.includes(status)) match = false;
+            if (views < from || views > to) match = false;
+            // Nếu sau này bạn thêm cột nhóm tin (columnIndex 6), có thể check tại đây:
+            // if (group && !groupText.includes(group)) match = false;
+
+            row.style.display = match ? "" : "none";
+            if (match) visible++;
+        });
+
+        resultCount.textContent = visible;
+    }
+
+    // Reset toàn bộ filter
+    function resetAllFilters() {
+        searchInput.value = "";
+        filterStatus.value = "";
+        filterNewsGroup.value = "";
+        filterViewsFrom.value = "";
+        filterViewsTo.value = "";
+        rows.forEach(r => r.style.display = "");
+        resultCount.textContent = rows.length;
+    }
+</script>
+
+<!-- Sort Table (3 trạng thái: none → asc → desc) -->
+<script>
+    const sortStates = {}; // { columnIndex: 0|1|2 }
+    let originalRowsOrder = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const tbody = document.querySelector('#newsTable tbody');
+        originalRowsOrder = Array.from(tbody.rows);
+    });
+
+    function sortTable(colIndex, el) {
+        const tbody = document.querySelector('#newsTable tbody');
+        const icon = el.querySelector('i');
+        const allHeaders = el.closest('thead').querySelectorAll('th');
+        const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => r.style.display !== "none");
+
+        // Reset icon màu
+        allHeaders.forEach(th => {
+            const i = th.querySelector('i');
+            if (i) {
+                i.className = 'mdi mdi-sort';
+                i.style.color = '';
+            }
+        });
+
+        // Xoay trạng thái
+        sortStates[colIndex] = (sortStates[colIndex] || 0) + 1;
+        if (sortStates[colIndex] > 2) sortStates[colIndex] = 0;
+
+        // Không sort → khôi phục gốc
+        if (sortStates[colIndex] === 0) {
+            icon.className = 'mdi mdi-sort';
+            tbody.innerHTML = "";
+            originalRowsOrder.forEach(r => tbody.appendChild(r.cloneNode(true)));
+            return;
+        }
+
+        // Chọn icon
+        icon.className = sortStates[colIndex] === 1
+            ? 'mdi mdi-sort-ascending'
+            : 'mdi mdi-sort-descending';
+        icon.style.color = '#667eea';
+
+        // Sort
+        rows.sort((a, b) => {
+            const A = a.cells[colIndex].textContent.trim().toLowerCase();
+            const B = b.cells[colIndex].textContent.trim().toLowerCase();
+            const numA = parseFloat(A.replace(/[^\d.-]/g, ""));
+            const numB = parseFloat(B.replace(/[^\d.-]/g, ""));
+
+            let comp;
+            if (!isNaN(numA) && !isNaN(numB)) comp = numA - numB;
+            else comp = A.localeCompare(B);
+
+            return sortStates[colIndex] === 1 ? comp : -comp;
+        });
+
+        // Render lại
+        tbody.innerHTML = "";
+        rows.forEach(r => tbody.appendChild(r));
+    }
+</script>
+
 <script>
     // Lấy tất cả elements
     const searchInput = document.getElementById('searchInput');
@@ -412,6 +530,9 @@
         rows.forEach(row => tbody.appendChild(row));
     }
 </script>
+
+
+
 </body>
 
 </html>

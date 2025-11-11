@@ -61,6 +61,10 @@
                         <li class="nav-item"><a class="nav-link" href="#news-section"
                                                 onclick="scrollToNews(); return false;">
                             TIN TỨC</a></li>
+
+                        <li class="nav-item"><a class="nav-link"  href="#services-section" onclick="scrollToServices(); return false;">
+                            DỊCH VỤ
+                        </a></li>
                         <li class="nav-item" th:if="${user != null and user.role == 'CUSTOMER'}"><a class="nav-link"
                                                                                                     th:href="@{/sale}">SALE</a>
                         </li>
@@ -81,27 +85,46 @@
                 </div>
 
                 <ul class="social-icons ml-auto">
-                    <!-- Cart icon - Click to go to cart page -->
-                    <li class="nav-item" th:if="${user != null}">
-                        <a class="nav-link position-relative" th:href="@{/cart}"
+                    <!-- Cart with dropdown - Only show if user is logged in -->
+                    <li class="nav-item dropdown" th:if="${user != null}">
+                        <a class="nav-link position-relative" href="#" id="cartDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                            style="cursor: pointer;">
-                            <i class="fas fa-shopping-cart" style="font-size: 1.2rem; color: #333;"></i>
-                            <span class="badge badge-danger" id="cart-badge" style="position: absolute;
-                                             top: -5px; 
-                                             right: -10px; 
-                                             font-size: 10px;
-                                             min-width: 18px;
-                                             height: 18px;
-                                             padding: 2px 5px; 
-                                             border-radius: 50%; 
-                                             display: inline-block !important; 
-                                             background: #ccc; 
-                                             color: white; 
-                                             font-weight: bold;
-                                             line-height: 14px;
-                                             text-align: center;
-                                             box-shadow: 0 2px 4px rgba(0,0,0,0.2);">...</span>
+                            <i class="fas fa-shopping-cart" style="font-size: 1.2rem;"></i>
+                            <span class="badge badge-danger" id="cart-badge" style="position: absolute; top: -8px; right: -8px; font-size: 11px;
+                                         padding: 3px 6px; border-radius: 10px; display: none;
+                                         background: #dc3545; color: white; font-weight: bold;">0</span>
                         </a>
+                        <div class="dropdown-menu dropdown-menu-right cart-dropdown" aria-labelledby="cartDropdown"
+                             style="min-width: 380px; max-height: 500px; overflow-y: auto; border-radius: 8px;
+                                    box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 0;">
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                        color: white; padding: 15px 20px; border-radius: 8px 8px 0 0;">
+                                <h6 class="mb-0" style="font-weight: 600;">
+                                    <i class="fas fa-shopping-cart"></i> Giỏ Hàng
+                                    <span id="cart-count-header" style="font-size: 0.9rem; opacity: 0.9;">(0 sản
+                                            phẩm)</span>
+                                </h6>
+                            </div>
+                            <div id="cart-items-preview" style="max-height: 300px; overflow-y: auto;">
+                                <p class="dropdown-item text-muted text-center py-4">
+                                    <i class="fas fa-shopping-basket" style="font-size: 2rem; opacity: 0.3;"></i>
+                                    <br>Giỏ hàng trống
+                                </p>
+                            </div>
+                            <div class="dropdown-divider" style="margin: 0;"></div>
+                            <div class="px-3 py-3" style="background: #f8f9fa;">
+                                <div class="d-flex justify-content-between mb-2 align-items-center">
+                                    <strong style="font-size: 1.1rem;">Tổng cộng:</strong>
+                                    <strong class="text-primary" id="cart-total-preview"
+                                            style="font-size: 1.2rem; color: #667eea !important;">0 VNĐ</strong>
+                                </div>
+                                <a th:href="@{/cart}" class="btn btn-primary btn-sm btn-block" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                          border: none; padding: 10px; font-weight: 600; border-radius: 6px;">
+                                    <i class="fas fa-arrow-right"></i> Xem Giỏ Hàng
+                                </a>
+                            </div>
+                        </div>
                     </li>
 
                     <!-- If user is logged in -->
@@ -155,113 +178,144 @@
         <div th:if="${message}" class="toast toast-success" th:text="${message}"></div>
         <div th:if="${error}" class="toast toast-error" th:text="${error}"></div>
     </div>
-
-    <!-- Cart badge script - must be inside fragment to be included -->
-    <script>
-        console.log('Defining loadCartBadge function (inside fragment)...');
-
-        // Load cart badge count
-        function loadCartBadge() {
-            console.log('=== Loading cart badge (header.html) ===');
-
-            const badge = document.getElementById('cart-badge');
-            if (!badge) {
-                console.log('Badge element not found - user not logged in');
-                return false; // Return false if badge not found
-            }
-
-            // Check if jQuery is loaded
-            if (typeof $ === 'undefined' || typeof $.ajax === 'undefined') {
-                console.log('jQuery not loaded yet, will retry...');
-                return false;
-            }
-
-            // Show loading state
-            badge.style.display = 'inline-block';
-            badge.style.background = '#ccc';
-            badge.textContent = '...';
-
-            console.log('Fetching cart count from /cart/items...');
-
-            $.ajax({
-                url: '/cart/items',
-                method: 'GET',
-                dataType: 'json',
-                cache: false, // Disable cache to always get fresh data
-                success: function (data) {
-                    console.log('Cart items received:', data);
-                    console.log('Cart items count:', data.length);
-
-                    if (!data || data.length === 0) {
-                        badge.style.setProperty('display', 'inline-block', 'important');
-                        badge.style.setProperty('background', '#999', 'important');
-                        badge.textContent = '0';
-                        console.log('✓ Badge set to 0 (gray)');
-                    } else {
-                        badge.style.setProperty('display', 'inline-block', 'important');
-                        badge.style.setProperty('background', '#ff4444', 'important');
-                        badge.textContent = data.length;
-                        console.log('✓ Badge set to', data.length, '(red)');
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error('Error loading cart badge:', error);
-                    console.error('Status:', status);
-                    console.error('Response:', xhr.responseText);
-
-                    // Show error state
-                    if (badge) {
-                        badge.style.display = 'inline-block';
-                        badge.style.background = '#ffc107';
-                        badge.textContent = '!';
-                    }
-                }
-            });
-
-            return true; // Return true if badge found and request sent
-        }
-
-        // Make function globally available
-        window.loadCartBadge = loadCartBadge;
-        window.loadCartPreview = loadCartBadge; // Alias for compatibility
-
-        // Aggressive loading strategy
-        var cartBadgeLoadAttempts = 0;
-        var maxAttempts = 15;
-
-        function tryLoadCartBadge() {
-            cartBadgeLoadAttempts++;
-            console.log('Cart badge load attempt #' + cartBadgeLoadAttempts);
-
-            var success = loadCartBadge();
-
-            // If badge not found and haven't exceeded max attempts, try again
-            if (!success && cartBadgeLoadAttempts < maxAttempts) {
-                setTimeout(tryLoadCartBadge, 500);
-            }
-        }
-
-        // Start trying immediately
-        tryLoadCartBadge();
-
-        // Use jQuery ready event
-        $(document).ready(function () {
-            console.log('jQuery ready - loading cart badge...');
-            setTimeout(tryLoadCartBadge, 100);
-            setTimeout(tryLoadCartBadge, 500);
-            setTimeout(tryLoadCartBadge, 1000);
-        });
-
-        // Also load on window load event (after all resources loaded)
-        $(window).on('load', function () {
-            console.log('Window loaded - loading cart badge...');
-            setTimeout(tryLoadCartBadge, 100);
-            setTimeout(tryLoadCartBadge, 500);
-            setTimeout(tryLoadCartBadge, 1000);
-        });
-    </script>
 </header>
+<!-- Toast container -->
+
 <!-- ================ header section end ================= -->
+
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
+<script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
+<script src="/vendors/easing.min.js"></script>
+<script src="/vendors/superfish.min.js"></script>
+<script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
+<script src="/vendors/jquery.ajaxchimp.min.js"></script>
+<script src="/vendors/mail-script.js"></script>
+<script src="/js/main.js"></script>
+
+<script>
+    // Load cart preview
+    function loadCartPreview() {
+        console.log('Loading cart preview...');
+
+        // Check if cart elements exist (user must be logged in)
+        const badge = document.getElementById('cart-badge');
+        const itemsContainer = document.getElementById('cart-items-preview');
+        const totalElement = document.getElementById('cart-total-preview');
+
+        if (!badge || !itemsContainer || !totalElement) {
+            console.log('Cart elements not found - user not logged in');
+            return;
+        }
+
+        fetch('/cart/items')
+            .then(res => {
+                console.log('Cart API response status:', res.status);
+
+                // If unauthorized, show login message
+                if (res.status === 401 || res.status === 403) {
+                    itemsContainer.innerHTML = `
+                            <div class="dropdown-item text-center py-4">
+                                <i class="fas fa-lock" style="font-size: 2rem; color: #ffc107;"></i>
+                                <br><strong>Vui lòng đăng nhập</strong>
+                                <br><small class="text-muted">để xem giỏ hàng</small>
+                            </div>
+                        `;
+                    return [];
+                }
+
+                return res.json();
+            })
+            .then(data => {
+                if (!data) return;
+
+                console.log('Cart items:', data);
+
+                const countHeader = document.getElementById('cart-count-header');
+
+                if (!data || data.length === 0) {
+                    badge.style.display = 'none';
+                    if (countHeader) countHeader.textContent = '(0 sản phẩm)';
+                    itemsContainer.innerHTML = `
+                        <p class="dropdown-item text-muted text-center py-4">
+                            <i class="fas fa-shopping-basket" style="font-size: 2rem; opacity: 0.3;"></i>
+                            <br>Giỏ hàng trống
+                        </p>
+                    `;
+                    totalElement.textContent = '0 VNĐ';
+                } else {
+                    badge.style.display = 'inline';
+                    badge.textContent = data.length;
+                    if (countHeader) countHeader.textContent = `(${data.length} sản phẩm)`;
+
+                    let total = 0;
+                    let html = '';
+
+                    data.forEach((item, index) => {
+                        total += item.totalPrice;
+                        html += `
+                            <div class="dropdown-item" style="white-space: normal; padding: 12px 20px;
+                                                              border-bottom: 1px solid #f0f0f0;
+                                                              transition: background 0.2s;"
+                                 onmouseover="this.style.background='#f8f9fa'"
+                                 onmouseout="this.style.background='white'">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; color: #2c3e50; margin-bottom: 4px;">
+                                            <i class="fas fa-bed" style="color: #667eea;"></i> ${item.roomType}
+                                        </div>
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-door-open"></i> Phòng ${item.roomNumber}
+                                        </small>
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-moon"></i> ${item.numberOfDays} đêm
+                                        </small>
+                                    </div>
+                                    <div class="text-right" style="margin-left: 10px;">
+                                        <strong style="color: #667eea; font-size: 1.05rem;">
+                                            ${item.totalPrice.toLocaleString('vi-VN')} VNĐ
+                                        </strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            ${item.price.toLocaleString('vi-VN')} VNĐ/đêm
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    itemsContainer.innerHTML = html;
+                    totalElement.textContent = total.toLocaleString('vi-VN') + ' VNĐ';
+                    console.log('Cart updated successfully. Total items:', data.length);
+                }
+            })
+            .catch(err => {
+                console.error('Error loading cart:', err);
+            });
+    }
+
+    // Load on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM loaded, loading cart...');
+        loadCartPreview();
+    });
+
+    // Reload cart when dropdown is opened
+    document.addEventListener('DOMContentLoaded', function () {
+        const cartDropdown = document.getElementById('cartDropdown');
+        if (cartDropdown) {
+            cartDropdown.addEventListener('click', function (e) {
+                console.log('Cart dropdown clicked');
+                loadCartPreview();
+            });
+        }
+    });
+
+    // Make function globally available
+    window.loadCartPreview = loadCartPreview;
+</script>
 </body>
 
 </html>

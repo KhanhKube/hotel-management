@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Tạo dịch vụ</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+</head>
+<body>
+<div class="container-scroller">
+    <!-- Include sidebar -->
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                                                                               alt="logo" /></a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            </div>
+        </nav>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title mb-4">
+                                    <i class="mdi mdi-room-service"></i>
+                                    <span
+                                            th:text="${service.serviceId != null ? 'Cập Nhật Dịch Vụ' : 'Tạo Dịch Vụ Mới'}"></span>
+                                </h4>
+
+                                <form th:action="@{/management/services/save}" method="post"
+                                      th:object="${service}">
+                                    <input type="hidden" th:field="*{serviceId}" />
+
+                                    <!-- Error Message -->
+                                    <div th:if="${error}"
+                                         class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <i class="mdi mdi-alert-circle"></i>
+                                        <span th:text="${error}"></span>
+                                        <button type="button" class="close" data-dismiss="alert">
+                                            <span>&times;</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Tên dịch vụ -->
+                                    <div class="form-group">
+                                        <label for="serviceName">
+                                            <i class="mdi mdi-tag"></i> Tên dịch vụ: <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <input id="serviceName" type="text" class="form-control" th:field="*{serviceName}"
+                                               placeholder="VD: Spa & Massage" required maxlength="150">
+                                    </div>
+
+                                    <!-- Mô tả dịch vụ -->
+                                    <div class="form-group">
+                                        <label for="serviceDescription">
+                                            <i class="mdi mdi-text"></i> Mô tả dịch vụ: <span class="text-danger">*</span>
+                                        </label>
+                                        <textarea id="serviceDescription" class="form-control" th:field="*{serviceDescription}" rows="4"
+                                                  placeholder="Nhập mô tả chi tiết về dịch vụ..." required maxlength="500"></textarea>
+                                    </div>
+
+                                    <!-- Giá dịch vụ -->
+                                    <div class="form-group">
+                                        <label for="price">
+                                            <i class="mdi mdi-currency-usd"></i> Giá dịch vụ (VNĐ): <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <input id="price" type="number" step="1000" class="form-control"
+                                               th:field="*{price}" placeholder="Nhập giá dịch vụ" min="0" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="status">Trạng thái</label>
+                                        <select id="status" name="status" class="form-control" th:field="*{status}">
+                                            <option value="Active">Hoạt động</option>
+                                            <option value="Inactive">Ngưng hoạt động</option>
+                                            <option value="Pending">Chờ phê duyệt</option>
+                                        </select>
+                                    </div>
+
+
+                                    <!-- Buttons -->
+                                    <div class="form-group mt-4">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="mdi mdi-content-save"></i> Lưu dịch vụ
+                                        </button>
+                                        <a th:href="@{/management/services}" class="btn btn-secondary btn-lg">
+                                            <i class="mdi mdi-close"></i> Hủy
+                                        </a>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+</body>
+
+</html>

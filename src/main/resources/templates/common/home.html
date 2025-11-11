@@ -59,6 +59,7 @@
             position: relative;
             overflow: hidden;
             height: 250px;
+            border-radius: 0px;
         }
 
         .card-news__img img {
@@ -66,10 +67,12 @@
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s ease;
+            border-radius: 0px;
         }
 
         .card-news:hover .card-news__img img {
             transform: scale(1.1);
+            border-radius: 0px;
         }
 
         .card-news .card-body {
@@ -85,16 +88,19 @@
             margin-bottom: 15px;
             color: #2c3e50;
             line-height: 1.4;
+            border-radius: 0px;
         }
 
         .card-news__title a {
             color: #2c3e50;
             text-decoration: none;
             transition: color 0.3s ease;
+            border-radius: 0px;
         }
 
         .card-news__title a:hover {
             color: #667eea;
+            border-radius: 0px;
         }
 
         .card-news__info {
@@ -103,6 +109,7 @@
             margin-bottom: 15px;
             padding: 0;
             list-style: none;
+            border-radius: 0px;
         }
 
         .card-news__info li {
@@ -111,6 +118,7 @@
             gap: 5px;
             color: #6c757d;
             font-size: 0.9rem;
+            border-radius: 0px;
         }
 
         .news-icon {
@@ -133,11 +141,13 @@
             gap: 8px;
             transition: all 0.3s ease;
             margin-top: auto;
+            border-radius: 0px;
         }
 
         .card-news__link:hover {
             color: #764ba2;
             gap: 12px;
+            border-radius: 0px;
         }
 
         /* Smooth scrolling */
@@ -153,6 +163,127 @@
         }
 
         .news-card-animate.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Service cards styling - matching news cards */
+        .card-service {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border-radius: 0px;
+        }
+
+        .card-service:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            border-radius: 0px;
+        }
+
+        .card-service__img {
+            position: relative;
+            overflow: hidden;
+            height: 250px;
+            border-radius: 0px;
+        }
+
+        .card-service__img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            border-radius: 0px;
+        }
+
+        .card-service:hover .card-service__img img {
+            transform: scale(1.1);
+            border-radius: 0px;
+        }
+
+        .card-service .card-body {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-radius: 0px;
+        }
+
+        .card-service__title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            line-height: 1.4;
+            border-radius: 0px;
+        }
+
+        .card-service__title a {
+            color: #2c3e50;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .card-service__title a:hover {
+            color: #667eea;
+        }
+
+        .card-service__info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .card-service__info li {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .service-icon {
+            color: #667eea;
+        }
+
+        .card-service p {
+            color: #6c757d;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .card-service__link {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            margin-top: auto;
+        }
+
+        .card-service__link:hover {
+            color: #764ba2;
+            gap: 12px;
+        }
+
+        /* Animation for service cards */
+        .service-card-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .service-card-animate.show {
             opacity: 1;
             transform: translateY(0);
         }
@@ -361,6 +492,66 @@
     </div>
 </section>
 <!-- ================ video section end ================= -->
+
+<!-- ================ services section start ================= -->
+<section class="section-margin" id="services-section">
+    <div class="container">
+        <div class="section-intro text-center pb-80px">
+            <div class="section-intro__style">
+                <img src="img/home/bed-icon.png" alt="">
+            </div>
+            <h2>Dịch vụ đặc biệt</h2>
+            <p class="mt-3 text-muted">Khám phá những dịch vụ độc đáo và tiện nghi đặc biệt tại khách sạn của chúng tôi</p>
+        </div>
+
+        <div class="row">
+            <!-- Dynamic Services from Database -->
+            <div class="col-md-6 col-lg-4 mb-4 mb-md-0" th:each="service : ${featuredServices}">
+                <div class="card card-service service-card-animate">
+                    <div class="card-service__img">
+                        <img class="card-img"
+                             th:src="${service.image != null ? service.image : '/img/home/explore1.png'}"
+                             th:alt="${service.serviceName}">
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-service__title">
+                            <a th:href="@{/services/{id}(id=${service.serviceId})}" th:text="${service.serviceName}">Tên dịch vụ</a>
+                        </h4>
+                        <ul class="card-service__info">
+                            <li th:if="${service.openingHours != null}">
+                                <span class="service-icon"><i class="ti-time"></i></span>
+                                <span th:text="${service.openingHours}">Giờ mở cửa</span>
+                            </li>
+                            <li th:if="${service.price != null}">
+                                <span class="service-icon"><i class="ti-money"></i></span>
+                                <span th:text="${#numbers.formatInteger(service.price.intValue(), 3, 'POINT')} + ' VNĐ'">0 VNĐ</span>
+                            </li>
+                        </ul>
+                        <p th:text="${service.shortDescription != null ? service.shortDescription : #strings.abbreviate(service.serviceDescription, 100)}">
+                            Mô tả ngắn về dịch vụ...
+                        </p>
+                        <a class="card-service__link" th:href="@{/services/{id}(id=${service.serviceId})}">
+                            Xem chi tiết <i class="ti-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fallback if no services -->
+            <div class="col-12 text-center" th:if="${featuredServices == null or #lists.isEmpty(featuredServices)}">
+                <p class="text-muted">Hiện chưa có dịch vụ nổi bật nào.</p>
+            </div>
+        </div>
+
+        <!-- View All Services Button -->
+        <div class="text-center mt-5" th:if="${featuredServices != null and !#lists.isEmpty(featuredServices)}">
+            <a th:href="@{/services}" class="button button--active">
+                Xem tất cả dịch vụ <i class="ti-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+<!-- ================ services section end ================= -->
 
 <!-- ================ special section start ================= -->
 <section class="section-padding bg-porcelain">

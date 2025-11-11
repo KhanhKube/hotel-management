@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Service Management</title>
+    <base th:href="@{/static}">
+    <!-- CSS plugins -->
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/jvectormap/jquery-jvectormap.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/flag-icon-css/css/flag-icon.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/owl-carousel-2/owl.theme.default.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <style>
+        tbody tr:hover {
+            cursor: pointer;
+            opacity: 0.75;
+            transition: background-color 0.2s;
+        }
+
+        .table th {
+            color: #ffffff;
+            font-weight: 600;
+            background-color: #1e1e2f;
+        }
+
+        /* Badge outline đồng bộ style News */
+        .badge-outline-success {
+            color: #00d25b !important;
+            border: 1px solid #00d25b;
+            background-color: transparent;
+            font-weight: 500;
+        }
+
+        .badge-outline-secondary {
+            color: #b1b1b1 !important;
+            border: 1px solid #b1b1b1;
+            background-color: transparent;
+            font-weight: 500;
+        }
+
+        .badge-outline-warning {
+            color: #ffab00 !important;
+            border: 1px solid #ffab00;
+            background-color: transparent;
+            font-weight: 500;
+        }
+
+        .table td .badge {
+            padding: 6px 10px;
+            border-radius: 6px;
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container-scroller">
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html">
+                    <img src="assets/images/logo-mini.svg" alt="logo" />
+                </a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch"></div>
+        </nav>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row ">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- Search & Filter Section -->
+                                <div class="filter-section mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px;">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="mdi mdi-magnify" style="font-size: 24px; color: white; margin-right: 10px;"></i>
+                                        <h5 class="mb-0" style="color: white; font-weight: 500;">Tìm Kiếm & Lọc Dịch Vụ</h5>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <i class="mdi mdi-magnify text-primary"></i>
+                                                </span>
+                                                <input id="searchInput" type="text" class="form-control border-start-0"
+                                                       placeholder="Tìm kiếm tên dịch vụ...">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-4 mb-2">
+                                            <input type="number" id="filterPriceFrom" class="form-control" placeholder="Giá từ...">
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <input type="number" id="filterPriceTo" class="form-control" placeholder="Giá đến...">
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <input type="date" id="filterDate" class="form-control">
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <select id="filterStatus" class="form-control">
+                                                <option value="">Tất cả trạng thái</option>
+                                                <option value="Active">Hoạt động</option>
+                                                <option value="Inactive">Ngưng hoạt động</option>
+                                                <option value="Pending">Chờ kích hoạt</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6 mb-2">
+                                            <button id="btnSearch" onclick="applyAllFilters()" class="btn btn-info me-2">
+                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                            </button>
+                                            <button onclick="resetAllFilters()" class="btn btn-light">
+                                                <i class="mdi mdi-refresh"></i> Reset
+                                            </button>
+                                        </div>
+                                        <div class="col-md-6 text-end">
+                                            <span class="badge badge-dark" style="font-size: 14px; padding: 10px 15px;">
+                                                <i class="mdi mdi-room-service"></i>
+                                                Tổng: <strong id="resultCount" th:text="${services.totalElements}">0</strong> dịch vụ
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <strong>Lỗi!</strong> <span th:text="${error}"></span>
+                                    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+                                </div>
+
+                                <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-check-circle"></i>
+                                    <strong>Thành công!</strong> <span th:text="${message}"></span>
+                                    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Quản lý Dịch vụ</h4>
+                                    <a th:href="@{/management/services/add}" class="btn btn-primary">
+                                        <i class="mdi mdi-plus"></i> Tạo dịch vụ mới
+                                    </a>
+                                </div>
+
+                                <!-- Table -->
+                                <div class="table-responsive">
+                                    <table class="table" id="serviceTable">
+                                        <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th onclick="sortTable(1, this)" style="cursor: pointer;">Tên dịch vụ <i class="mdi mdi-sort"></i></th>
+                                            <th onclick="sortTable(2, this)" style="cursor: pointer;">Mô tả <i class="mdi mdi-sort"></i></th>
+                                            <th onclick="sortTable(3, this)" style="cursor: pointer;">Giá (VNĐ) <i class="mdi mdi-sort"></i></th>
+                                            <th onclick="sortTable(4, this)" style="cursor: pointer;">Ngày tạo <i class="mdi mdi-sort"></i></th>
+                                            <th onclick="sortTable(5, this)" style="cursor: pointer;">Trạng thái <i class="mdi mdi-sort"></i></th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="service, stat : ${services.content}"
+                                            th:onclick="|window.location.href='@{/management/services/view/{id}(id=${service.serviceId})}';|"
+                                            style="cursor: pointer;">
+                                            <td th:text="${stat.count}"></td>
+                                            <td th:text="${service.serviceName != null ? service.serviceName : 'N/A'}"></td>
+                                            <td th:text="${service.serviceDescription != null ? #strings.abbreviate(service.serviceDescription, 50) : 'N/A'}"></td>
+                                            <td>
+                                                <span class="badge badge-outline-success"
+                                                      th:text="${service.price != null ? #numbers.formatInteger(service.price.intValue(), 3, 'POINT') + ' VNĐ' : 'N/A'}"></span>
+                                            </td>
+                                            <td th:text="${service.createdAt != null ? #temporals.format(service.createdAt, 'dd/MM/yyyy') : 'N/A'}"></td>
+                                            <td>
+                                                <div th:switch="${service.status}">
+                                                    <span th:case="'Active'" class="badge badge-outline-success">Đang hoạt động</span>
+                                                    <span th:case="'Inactive'" class="badge badge-outline-secondary">Ngừng hoạt động</span>
+                                                    <span th:case="'Pending'" class="badge badge-outline-warning">Chờ kích hoạt</span>
+                                                    <span th:case="*">Không xác định</span>
+                                                </div>
+                                            </td>
+                                            <td onclick="event.stopPropagation();">
+                                                <a th:href="@{/management/services/view/{id}(id=${service.serviceId})}" class="btn btn-info btn-sm me-1">
+                                                    <i class="mdi mdi-eye"></i>
+                                                </a>
+                                                <a th:href="@{/management/services/edit/{id}(id=${service.serviceId})}" class="btn btn-warning btn-sm me-1">
+                                                    <i class="mdi mdi-pencil"></i>
+                                                </a>
+                                                <form th:action="@{/management/services/delete/{id}(id=${service.serviceId})}" method="post" style="display:inline">
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('Bạn có muốn xóa dịch vụ này?')">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+
+                                        <tr th:if="${#lists.isEmpty(services.content)}">
+                                            <td colspan="7" class="text-center text-muted">Không có dịch vụ</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <nav th:if="${totalPages > 1}">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/management/services(page=${currentPage - 1})}">
+                                                <i class="mdi mdi-chevron-left"></i> Trước
+                                            </a>
+                                        </li>
+                                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                            th:classappend="${i == currentPage} ? 'active'">
+                                            <a class="page-link" th:href="@{/management/services(page=${i})}" th:text="${i + 1}"></a>
+                                        </li>
+                                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/management/services(page=${currentPage + 1})}">
+                                                Sau <i class="mdi mdi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                    <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">
+                        © FPTU Hotel Management 2025 — Quản lý Dịch vụ
+                    </span>
+                </div>
+            </footer>
+        </div>
+    </div>
+</div>
+<script>
+    // Hàm filter và search
+    function applyAllFilters() {
+        const nameFilter = document.getElementById('searchInput').value.toLowerCase().trim();
+        const priceFrom = parseFloat(document.getElementById('filterPriceFrom').value) || 0;
+        const priceTo = parseFloat(document.getElementById('filterPriceTo').value) || Infinity;
+        const dateFilter = document.getElementById('filterDate').value;
+        const statusFilter = document.getElementById('filterStatus').value;
+
+        const rows = document.querySelectorAll("#serviceTable tbody tr");
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const name = row.children[1]?.innerText.toLowerCase() || "";
+            const desc = row.children[2]?.innerText.toLowerCase() || "";
+            const priceText = row.children[3]?.innerText.replace(/[^\d]/g, "") || "0";
+            const price = parseFloat(priceText);
+            const date = row.children[4]?.innerText.trim();
+            const status = row.children[5]?.innerText.trim();
+
+            let visible = true;
+
+            // Tên / mô tả
+            if (nameFilter && !(name.includes(nameFilter) || desc.includes(nameFilter))) {
+                visible = false;
+            }
+
+            // Giá từ - đến
+            if (price < priceFrom || price > priceTo) {
+                visible = false;
+            }
+
+            // Ngày tạo (so sánh yyyy-MM-dd)
+            if (dateFilter) {
+                const [d, m, y] = date.split('/');
+                const rowDate = new Date(`${y}-${m}-${d}`);
+                const filterDate = new Date(dateFilter);
+                if (rowDate.toDateString() !== filterDate.toDateString()) {
+                    visible = false;
+                }
+            }
+
+            // Trạng thái
+            if (statusFilter && !status.includes(statusFilter)) {
+                visible = false;
+            }
+
+            row.style.display = visible ? "" : "none";
+            if (visible) visibleCount++;
+        });
+
+        // Cập nhật tổng kết quả
+        document.getElementById("resultCount").textContent = visibleCount;
+    }
+
+    // Hàm reset filter
+    function resetAllFilters() {
+        document.getElementById('searchInput').value = "";
+        document.getElementById('filterPriceFrom').value = "";
+        document.getElementById('filterPriceTo').value = "";
+        document.getElementById('filterDate').value = "";
+        document.getElementById('filterStatus').value = "";
+        applyAllFilters();
+    }
+
+    // Hàm sort
+    function sortTable(colIndex, el) {
+        const table = document.getElementById("serviceTable");
+        const tbody = table.tBodies[0];
+        const rows = Array.from(tbody.querySelectorAll("tr")).filter(r => r.style.display !== "none");
+
+        // Kiểm tra hướng sắp xếp
+        const ascending = !el.classList.contains("sorted-asc");
+        document.querySelectorAll(".mdi-sort").forEach(i => i.classList.remove("text-info"));
+        el.querySelector(".mdi-sort").classList.add("text-info");
+
+        // Xóa trạng thái cũ
+        document.querySelectorAll("th").forEach(th => th.classList.remove("sorted-asc", "sorted-desc"));
+        el.classList.add(ascending ? "sorted-asc" : "sorted-desc");
+
+        // Hàm lấy giá trị cell
+        const getCellValue = row => row.children[colIndex].innerText.trim();
+
+        // Sắp xếp
+        rows.sort((a, b) => {
+            let A = getCellValue(a), B = getCellValue(b);
+            const numA = parseFloat(A.replace(/[^\d.-]/g, ""));
+            const numB = parseFloat(B.replace(/[^\d.-]/g, ""));
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return ascending ? numA - numB : numB - numA;
+            }
+            return ascending ? A.localeCompare(B) : B.localeCompare(A);
+        });
+
+        // Gắn lại thứ tự
+        rows.forEach(r => tbody.appendChild(r));
+    }
+</script>
+
+<!-- JS -->
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+</body>
+</html>

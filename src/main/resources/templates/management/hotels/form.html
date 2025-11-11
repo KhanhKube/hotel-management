@@ -37,11 +37,12 @@
                             <div class="card-body">
                                 <h4 class="card-title mb-4">
                                     <i class="mdi mdi-hotel"></i>
-                                    <span th:text="${hotel.id != null} ? 'Cập nhật khách sạn' : 'Tạo khách sạn mới'"></span>
+                                    Cập nhật thông tin khách sạn
                                 </h4>
 
-                                <form th:action="@{/management/hotels}" th:object="${hotel}" method="post">
+                                <form th:action="@{/management/hotels/update}" th:object="${hotel}" method="post">
                                     <input type="hidden" th:field="*{id}">
+                                    <input type="hidden" th:field="*{viewCount}">
 
                                     <div class="form-group">
                                         <label><i class="mdi mdi-home"></i> Tên khách sạn:</label>
@@ -91,9 +92,9 @@
 
                                     <div class="form-group mt-4">
                                         <button type="submit" class="btn btn-primary btn-lg">
-                                            <i class="mdi mdi-content-save"></i> Lưu
+                                            <i class="mdi mdi-content-save"></i> Cập nhật
                                         </button>
-                                        <a th:href="@{/management/hotels}" class="btn btn-secondary btn-lg">
+                                        <a th:href="@{/management/hotels/profile}" class="btn btn-secondary btn-lg">
                                             <i class="mdi mdi-close"></i> Hủy
                                         </a>
                                     </div>

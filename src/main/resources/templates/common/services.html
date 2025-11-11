@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dịch vụ đặc biệt - Hotel</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="/vendors/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendors/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/vendors/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="/vendors/linericon/style.css">
+    <link rel="stylesheet" href="/vendors/magnefic-popup/magnific-popup.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.theme.default.min.css">
+    <link rel="stylesheet" href="/vendors/owl-carousel/owl.carousel.min.css">
+    <link rel="stylesheet" href="/vendors/nice-select/nice-select.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Service cards styling */
+        .card-service {
+            background: white;
+            border-radius: 0px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-service:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        .card-service__img {
+            position: relative;
+            overflow: hidden;
+            height: 250px;
+            border-radius: 0px;
+        }
+        
+        .card-service__img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            border-radius: 0px;
+        }
+        
+        .card-service:hover .card-service__img img {
+            transform: scale(1.1);
+            border-radius: 0px;
+        }
+        
+        .card-service .card-body {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-service__title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        .card-service__title a {
+            color: #2c3e50;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .card-service__title a:hover {
+            color: #667eea;
+        }
+        
+        .card-service__price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        
+        .card-service__info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .card-service__info li {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .service-icon {
+            color: #667eea;
+        }
+        
+        .card-service p {
+            color: #6c757d;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+        
+        .card-service__link {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            margin-top: auto;
+        }
+        
+        .card-service__link:hover {
+            color: #764ba2;
+            gap: 12px;
+        }
+        
+        .add-to-cart-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 0px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .add-to-cart-btn:hover {
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Animation for service cards */
+        .service-card-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .service-card-animate.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Breadcrumb styling */
+        .breadcrumb-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 0;
+            margin-bottom: 50px;
+        }
+        
+        .breadcrumb-custom .breadcrumb {
+            background: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .breadcrumb-custom .breadcrumb-item a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-custom .breadcrumb-item.active {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Filter section styling */
+        .filter-section {
+            background: white;
+            border-radius: 0px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        
+        .filter-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-icon {
+            color: #667eea;
+            font-size: 1.5rem;
+        }
+        
+        .filter-form .form-control {
+            border-radius: 0px;
+            border: 1px solid #e2e8f0;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-form .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .filter-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 0px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .reset-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 0px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .reset-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        /* Pagination styling */
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+            gap: 20px;
+        }
+        
+        .pagination {
+            margin: 0;
+        }
+        
+        .page-item .page-link {
+            color: #667eea;
+            border: 1px solid #e2e8f0;
+            border-radius: 0px;
+            margin: 0 5px;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .page-item.active .page-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+        
+        .page-item .page-link:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .page-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        /* Sort section */
+        .sort-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .sort-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sort-dropdown select {
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .sort-dropdown select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .results-count {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+        
+        .results-count strong {
+            color: #667eea;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+<!-- import header -->
+<div th:replace="~{common/header :: header}"></div>
+
+<!-- Breadcrumb -->
+<section class="breadcrumb-custom">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/hotel}">Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Dịch vụ đặc biệt</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!-- ================ services section start ================= -->
+<section class="section-margin">
+    <div class="container">
+        <div class="section-intro text-center pb-80px">
+            <div class="section-intro__style">
+                <img src="/img/home/bed-icon.png" alt="">
+            </div>
+            <h2>Dịch vụ đặc biệt</h2>
+            <p class="mt-3 text-muted">Khám phá những dịch vụ độc đáo và tiện nghi đặc biệt tại khách sạn của chúng tôi</p>
+        </div>
+        
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <h3 class="filter-title">
+                <i class="ti-filter filter-icon"></i>
+                Bộ lọc tìm kiếm
+            </h3>
+            <form class="filter-form" method="get" action="/services">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Tìm kiếm theo tên</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="search" 
+                               th:value="${search}"
+                               placeholder="Nhập tên dịch vụ...">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Giá tối thiểu (VNĐ)</label>
+                        <input type="number" 
+                               class="form-control" 
+                               name="minPrice" 
+                               th:value="${minPrice}"
+                               placeholder="0">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Giá tối đa (VNĐ)</label>
+                        <input type="number" 
+                               class="form-control" 
+                               name="maxPrice" 
+                               th:value="${maxPrice}"
+                               placeholder="1000000">
+                    </div>
+                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                        <button type="submit" class="filter-btn w-100">
+                            <i class="ti-search"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <a href="/services" class="reset-btn">
+                            <i class="ti-reload"></i> Xóa bộ lọc
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Sort and Results Count -->
+        <div class="sort-section">
+            <div class="results-count">
+                Hiển thị <strong th:text="${services.size()}">0</strong> trong tổng số 
+                <strong th:text="${totalItems}">0</strong> dịch vụ
+            </div>
+            <div class="sort-dropdown">
+                <label>Sắp xếp theo:</label>
+                <select class="form-select" onchange="sortServices(this.value)">
+                    <option value="serviceId,asc" th:selected="${sortBy == 'serviceId' && sortDir == 'asc'}">Mặc định</option>
+                    <option value="serviceName,asc" th:selected="${sortBy == 'serviceName' && sortDir == 'asc'}">Tên A-Z</option>
+                    <option value="serviceName,desc" th:selected="${sortBy == 'serviceName' && sortDir == 'desc'}">Tên Z-A</option>
+                    <option value="price,asc" th:selected="${sortBy == 'price' && sortDir == 'asc'}">Giá thấp đến cao</option>
+                    <option value="price,desc" th:selected="${sortBy == 'price' && sortDir == 'desc'}">Giá cao đến thấp</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Dynamic Services from Database -->
+            <div class="col-md-6 col-lg-4 mb-4" th:each="service : ${services}">
+                <div class="card card-service service-card-animate">
+                    <div class="card-service__img">
+                        <img class="card-img" 
+                             th:src="${service.image != null ? service.image : '/img/home/explore1.png'}" 
+                             th:alt="${service.serviceName}">
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-service__title">
+                            <a th:href="@{/services/{id}(id=${service.serviceId})}" th:text="${service.serviceName}">Tên dịch vụ</a>
+                        </h4>
+                        
+                        <div class="card-service__price" th:if="${service.price != null}">
+                            <span th:text="${#numbers.formatInteger(service.price.intValue(), 3, 'POINT')} + ' VNĐ'">0 VNĐ</span>
+                        </div>
+                        
+                        <ul class="card-service__info" th:if="${service.openingHours != null}">
+                            <li>
+                                <span class="service-icon"><i class="ti-time"></i></span>
+                                <span th:text="${service.openingHours}">Giờ mở cửa</span>
+                            </li>
+                        </ul>
+                        
+                        <p th:text="${service.shortDescription != null ? service.shortDescription : #strings.abbreviate(service.serviceDescription, 100)}">
+                            Mô tả ngắn về dịch vụ...
+                        </p>
+                        
+                        <a class="card-service__link" th:href="@{/services/{id}(id=${service.serviceId})}">
+                            Xem chi tiết <i class="ti-arrow-right"></i>
+                        </a>
+                        
+                        <a class="add-to-cart-btn" th:href="@{/services/{id}(id=${service.serviceId})}">
+                            <i class="ti-shopping-cart"></i> Thêm vào giỏ hàng
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fallback if no services -->
+            <div class="col-12 text-center" th:if="${services == null or #lists.isEmpty(services)}">
+                <div class="alert alert-info" role="alert">
+                    <i class="ti-info-alt"></i> Không tìm thấy dịch vụ nào phù hợp với tiêu chí tìm kiếm.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination-wrapper" th:if="${totalPages > 1}">
+            <div class="page-info">
+                Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">1</strong>
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <!-- Previous Button -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/services(page=${currentPage - 1}, size=9, search=${search}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                           aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Page Numbers -->
+                    <li class="page-item" 
+                        th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:if="${i >= (currentPage - 2) && i <= (currentPage + 2)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" 
+                           th:href="@{/services(page=${i}, size=9, search=${search}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    
+                    <!-- Next Button -->
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/services(page=${currentPage + 1}, size=9, search=${search}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                           aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</section>
+<!-- ================ services section end ================= -->
+
+<!-- import footer -->
+<div th:replace="~{common/footer :: footer}"></div>
+
+<script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
+<script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
+<script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
+<script src="/vendors/easing.min.js"></script>
+<script src="/vendors/superfish.min.js"></script>
+<script src="/vendors/nice-select/jquery.nice-select.min.js"></script>
+<script src="/vendors/jquery.ajaxchimp.min.js"></script>
+<script src="/vendors/mail-script.js"></script>
+<script src="/js/main.js"></script>
+
+<script>
+    // Sort services function
+    function sortServices(value) {
+        const [sortBy, sortDir] = value.split(',');
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('sortBy', sortBy);
+        urlParams.set('sortDir', sortDir);
+        urlParams.set('page', '0'); // Reset to first page when sorting
+        window.location.href = '/services?' + urlParams.toString();
+    }
+    
+    // Initialize animations when document is ready
+    $(document).ready(function() {
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all service cards with staggered animation
+        $('.service-card-animate').each(function(index) {
+            const delay = index * 0.1; // Stagger animation by 0.1s
+            $(this).css('transition-delay', delay + 's');
+            observer.observe(this);
+        });
+        
+        // Add click handlers for service cards (only on card body, not on links)
+        $('.card-service .card-body').on('click', function(e) {
+            // Prevent if clicking on actual links
+            if (!$(e.target).closest('a').length) {
+                const link = $(this).find('.card-service__title a').attr('href');
+                if (link) {
+                    window.location.href = link;
+                }
+            }
+        });
+        
+        // Add hover effect for better UX (only on card body)
+        $('.card-service .card-body').hover(
+            function() {
+                $(this).css('cursor', 'pointer');
+                $(this).closest('.card-service').addClass('hover-effect');
+            },
+            function() {
+                $(this).css('cursor', 'default');
+                $(this).closest('.card-service').removeClass('hover-effect');
+            }
+        );
+    });
+</script>
+</body>
+</html>

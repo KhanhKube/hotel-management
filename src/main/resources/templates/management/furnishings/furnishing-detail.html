@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Chi tiết Nội thất</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <style>
+        .detail-card {
+            border-left: 4px solid #4a90e2;
+            transition: all 0.3s ease;
+        }
+        
+        .detail-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            width: 150px;
+        }
+        
+        .info-value {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+<div class="container-scroller">
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+    
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html">
+                    <img src="assets/images/logo-mini.svg" alt="logo" />
+                </a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch"></div>
+        </nav>
+        
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <!-- Header -->
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h4 class="card-title mb-0">
+                                        <i class="mdi mdi-sofa"></i> Chi Tiết Nội Thất
+                                    </h4>
+                                    <div>
+                                        <a th:href="@{/management/furnishings/edit/{id}(id=${furnishing.furnishingId})}"
+                                           class="btn btn-warning btn-sm">
+                                            <i class="mdi mdi-pencil"></i> Chỉnh sửa
+                                        </a>
+                                        <a th:href="@{/management/furnishings}" class="btn btn-secondary btn-sm">
+                                            <i class="mdi mdi-arrow-left"></i> Quay lại
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Title Banner -->
+                                <div class="alert text-white text-center"
+                                     style="background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%); border:none;">
+                                    <i class="mdi mdi-sofa" style="font-size: 48px;"></i>
+                                    <h2 class="mt-2 mb-1" th:text="${furnishing.name}">Tên nội thất</h2>
+                                    <p class="mb-0">
+                                        <span class="badge badge-light" style="font-size: 1rem; padding: 8px 16px;">
+                                            <i class="mdi mdi-counter"></i> Số lượng: <strong th:text="${furnishing.quantity}">0</strong>
+                                        </span>
+                                    </p>
+                                </div>
+
+                                <!-- Info Sections -->
+                                <div class="row mt-4">
+                                    <!-- Basic Info -->
+                                    <div class="col-md-6">
+                                        <div class="card detail-card mb-3">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-information"></i> Thông Tin Cơ Bản
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <td class="info-label">
+                                                            <i class="mdi mdi-identifier"></i> ID:
+                                                        </td>
+                                                        <td class="info-value">
+                                                            <span class="badge badge-dark" th:text="${furnishing.furnishingId}"></span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="info-label">
+                                                            <i class="mdi mdi-format-title"></i> Tên:
+                                                        </td>
+                                                        <td class="info-value">
+                                                            <strong th:text="${furnishing.name}">N/A</strong>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="info-label">
+                                                            <i class="mdi mdi-counter"></i> Số lượng:
+                                                        </td>
+                                                        <td class="info-value">
+                                                            <span class="badge badge-info" style="font-size: 1rem; padding: 8px 12px;" 
+                                                                  th:text="${furnishing.quantity}">0</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- System Info -->
+                                    <div class="col-md-6">
+                                        <div class="card detail-card mb-3" style="border-left-color: #f093fb;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <i class="mdi mdi-clock"></i> Thông Tin Hệ Thống
+                                                </h5>
+                                                <table class="table table-borderless">
+                                                    <tr th:if="${furnishing.createdAt != null}">
+                                                        <td class="info-label">
+                                                            <i class="mdi mdi-clock-plus"></i> Ngày tạo:
+                                                        </td>
+                                                        <td class="info-value" th:text="${#temporals.format(furnishing.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                                            N/A
+                                                        </td>
+                                                    </tr>
+                                                    <tr th:if="${furnishing.updatedAt != null}">
+                                                        <td class="info-label">
+                                                            <i class="mdi mdi-clock-edit"></i> Cập nhật:
+                                                        </td>
+                                                        <td class="info-value" th:text="${#temporals.format(furnishing.updatedAt, 'dd/MM/yyyy HH:mm')}">
+                                                            N/A
+                                                        </td>
+                                                    </tr>
+                                                    <tr th:if="${furnishing.createdBy != null}">
+                                                        <td class="info-label">
+                                                            <i class="mdi mdi-account"></i> Tạo bởi:
+                                                        </td>
+                                                        <td class="info-value" th:text="${furnishing.createdBy}">
+                                                            N/A
+                                                        </td>
+                                                    </tr>
+                                                    <tr th:if="${furnishing.updatedBy != null}">
+                                                        <td class="info-label">
+                                                            <i class="mdi mdi-account-edit"></i> Cập nhật bởi:
+                                                        </td>
+                                                        <td class="info-value" th:text="${furnishing.updatedBy}">
+                                                            N/A
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="card detail-card mt-3" style="border-left-color: #4facfe;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="mdi mdi-text-subject"></i> Mô Tả Chi Tiết
+                                        </h5>
+                                        <p class="mt-2" th:utext="${furnishing.furnishingDescription != null ? furnishing.furnishingDescription : 'Không có mô tả'}"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="mt-4 text-center">
+                                    <a th:href="@{/management/furnishings}" class="btn btn-secondary btn-lg">
+                                        <i class="mdi mdi-arrow-left"></i> Quay lại danh sách
+                                    </a>
+                                    <a th:href="@{/management/furnishings/edit/{id}(id=${furnishing.furnishingId})}"
+                                       class="btn btn-warning btn-lg">
+                                        <i class="mdi mdi-pencil"></i> Chỉnh sửa
+                                    </a>
+                                    <a th:href="@{/management/furnishings/delete/{id}(id=${furnishing.furnishingId})}"
+                                       class="btn btn-danger btn-lg"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa nội thất này?');">
+                                        <i class="mdi mdi-delete"></i> Xóa
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+</body>
+</html>

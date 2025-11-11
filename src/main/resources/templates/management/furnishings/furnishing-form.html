@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title th:text="${isEdit ? 'Cập nhật Nội thất' : 'Thêm Nội thất Mới'}">Form Nội thất</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+</head>
+<body>
+<div class="container-scroller">
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+    
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html">
+                    <img src="assets/images/logo-mini.svg" alt="logo" />
+                </a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch"></div>
+        </nav>
+        
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title mb-4">
+                                    <i class="mdi mdi-sofa"></i>
+                                    <span th:text="${isEdit ? 'Cập nhật Nội thất' : 'Thêm Nội thất Mới'}"></span>
+                                </h4>
+
+                                <!-- Error Message -->
+                                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <strong>Lỗi!</strong> <span th:text="${errorMessage}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+
+                                <form th:action="@{/management/furnishings/save}" th:object="${furnishing}" method="post">
+                                    <input type="hidden" th:field="*{furnishingId}">
+                                    <input type="hidden" th:field="*{isDeleted}">
+
+                                    <div class="form-group">
+                                        <label for="name">
+                                            <i class="mdi mdi-format-title"></i> Tên Nội thất <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="name"
+                                               th:field="*{name}" 
+                                               placeholder="Nhập tên nội thất (VD: Giường đôi, Tủ quần áo...)"
+                                               required>
+                                        <small class="form-text text-muted">Tên nội thất phải là duy nhất</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="furnishingDescription">
+                                            <i class="mdi mdi-text"></i> Mô Tả
+                                        </label>
+                                        <textarea class="form-control" 
+                                                  id="furnishingDescription"
+                                                  th:field="*{furnishingDescription}" 
+                                                  rows="4"
+                                                  placeholder="Nhập mô tả chi tiết về nội thất..."></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="quantity">
+                                            <i class="mdi mdi-counter"></i> Số Lượng <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="quantity"
+                                               th:field="*{quantity}" 
+                                               min="0"
+                                               placeholder="Nhập số lượng"
+                                               required>
+                                        <small class="form-text text-muted">Số lượng phải lớn hơn hoặc bằng 0</small>
+                                    </div>
+
+                                    <div class="form-group mt-4">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="mdi mdi-content-save"></i> 
+                                            <span th:text="${isEdit ? 'Cập nhật' : 'Thêm mới'}"></span>
+                                        </button>
+                                        <a th:href="@{/management/furnishings}" class="btn btn-secondary btn-lg">
+                                            <i class="mdi mdi-close"></i> Hủy
+                                        </a>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+</body>
+</html>
