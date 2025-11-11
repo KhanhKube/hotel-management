@@ -28,6 +28,60 @@
         #checkInDate::placeholder, #checkOutDate::placeholder {
             color: #6c7293 !important;
         }
+        
+        /* Style cho input nội dung bảo trì */
+        input[name="des"].form-control,
+        input[name="des"].form-control:-webkit-autofill,
+        input[name="des"].form-control:-webkit-autofill:hover,
+        input[name="des"].form-control:-webkit-autofill:focus,
+        input[name="des"].form-control:-webkit-autofill:active {
+            background-color: #2c2e33 !important;
+            -webkit-box-shadow: 0 0 0 30px #2c2e33 inset !important;
+            -webkit-text-fill-color: #ffffff !important;
+            border: 1px solid #2c2e33 !important;
+            color: #ffffff !important;
+        }
+        
+        input[name="des"].form-control:focus {
+            background-color: #2c2e33 !important;
+            border-color: #2196f3 !important;
+            color: #ffffff !important;
+            box-shadow: none !important;
+        }
+        
+        input[name="des"].form-control::placeholder {
+            color: #6c7293 !important;
+        }
+        
+        /* Style cho select phân công bảo trì */
+        select[name="userId"] {
+            background-color: #2c2e33 !important;
+            border: 1px solid #2c2e33 !important;
+            color: #ffffff !important;
+        }
+        
+        select[name="userId"]:focus {
+            background-color: #2c2e33 !important;
+            border-color: #2196f3 !important;
+            color: #ffffff !important;
+        }
+        
+        select[name="userId"] option {
+            background-color: #2c2e33 !important;
+            color: #ffffff !important;
+        }
+        
+        /* Custom style cho ngày bị disable trong flatpickr */
+        .flatpickr-day.flatpickr-disabled {
+            color: #d1d5db !important;
+            background-color: #f3f4f6 !important;
+            cursor: not-allowed !important;
+        }
+
+        .flatpickr-day.flatpickr-disabled:hover {
+            background-color: #e5e7eb !important;
+            border-color: transparent !important;
+        }
     </style>
 </head>
 
