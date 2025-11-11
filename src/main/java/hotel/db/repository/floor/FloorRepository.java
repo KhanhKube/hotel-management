@@ -14,4 +14,8 @@ public interface FloorRepository extends JpaRepository<Floor, Integer> {
 
 	Boolean existsByFloorNumberAndIsDeletedIsFalse(Integer floorNumber);
 
+	/**
+	 * Kiểm tra floorNumber đã tồn tại chưa (trừ floorId hiện tại) - dùng cho update
+	 */
+	Boolean existsByFloorNumberAndIsDeletedIsFalseAndFloorIdNot(Integer floorNumber, Integer excludeFloorId);
 }

@@ -367,31 +367,40 @@ function deleteFloor(floorId, modal) {
     form.submit();
 }
 
-// Check for URL parameters to show success messages
+// Check for flash messages
 document.addEventListener('DOMContentLoaded', function() {
+    // Check for success/error messages from flash attributes
+    const successMessage = /*[[${successMessage}]]*/ null;
+    const errorMessage = /*[[${errorMessage}]]*/ null;
+    
+    if (successMessage) {
+        showToast('success', 'Thành công!', successMessage);
+    }
+    
+    if (errorMessage) {
+        showToast('error', 'Lỗi!', errorMessage);
+    }
+    
+    // Check for URL parameters to show success messages (backward compatibility)
     const urlParams = new URLSearchParams(window.location.search);
     
     if (urlParams.get('success') === 'add') {
         showToast('success', 'Thêm thành công!', 'Tầng mới đã được thêm vào hệ thống.');
-        // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
     }
     
     if (urlParams.get('success') === 'edit') {
         showToast('success', 'Cập nhật thành công!', 'Thông tin tầng đã được cập nhật.');
-        // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
     }
     
     if (urlParams.get('success') === 'delete') {
         showToast('success', 'Xóa thành công!', 'Tầng đã được xóa khỏi hệ thống.');
-        // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
     }
     
     if (urlParams.get('error') === 'delete') {
         showToast('error', 'Lỗi xóa!', 'Không thể xóa tầng. Vui lòng thử lại.');
-        // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 });

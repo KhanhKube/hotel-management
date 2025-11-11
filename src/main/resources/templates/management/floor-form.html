@@ -119,10 +119,70 @@
             margin-bottom: 0;
         }
         
-        .text-danger {
-            color: #dc3545 !important;
-        }
-    </style>
+         .text-danger {
+             color: #dc3545 !important;
+         }
+
+         .is-invalid {
+             border-color: #dc3545 !important;
+         }
+
+         .is-invalid:focus {
+             border-color: #dc3545 !important;
+             box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+         }
+
+         .alert-danger {
+             background: #f8d7da;
+             border: 1px solid #f5c6cb;
+             color: #721c24;
+             padding: 12px 20px;
+             border-radius: 8px;
+             margin-bottom: 20px;
+             display: flex;
+             align-items: center;
+             gap: 10px;
+             animation: slideDown 0.3s ease-out;
+         }
+
+         .alert-danger .close-btn {
+             background: none;
+             border: none;
+             font-size: 24px;
+             color: #721c24;
+             cursor: pointer;
+             margin-left: auto;
+             padding: 0;
+             width: 24px;
+             height: 24px;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             line-height: 1;
+         }
+
+         .alert-danger .close-btn:hover {
+             opacity: 0.7;
+         }
+
+         .invalid-feedback {
+             display: block;
+             color: #dc3545;
+             font-size: 0.875rem;
+             margin-top: 0.25rem;
+         }
+
+         @keyframes slideDown {
+             from {
+                 opacity: 0;
+                 transform: translateY(-10px);
+             }
+             to {
+                 opacity: 1;
+                 transform: translateY(0);
+             }
+         }
+     </style>
 </head>
 
 <body>
@@ -152,11 +212,24 @@
                                         <h2 class="card-title mb-0" th:text="${floorId != null ? 'Floor Management - Edit' : 'Floor Management - Create'}">Floor Management</h2>
                                     </div>
 
-                                    <!-- Create/Edit Form -->
-                                    <div class="discount-form-container">
-                                        <h5 class="form-title" th:text="${floorId != null ? 'Edit Floor' : 'Create New Floor'}">Create/Edit</h5>
+                                     <!-- Create/Edit Form -->
+                                     <div class="discount-form-container">
+                                         <h5 class="form-title" th:text="${floorId != null ? 'Edit Floor' : 'Create New Floor'}">Create/Edit</h5>
 
-                                        <form method="POST" 
+                                         <!-- Error Message -->
+                                         <div th:if="${errorMessage}" 
+                                              class="alert-danger" 
+                                              role="alert">
+                                             <i class="mdi mdi-alert-circle" style="font-size: 20px;"></i>
+                                             <span th:text="${errorMessage}"></span>
+                                             <button type="button" 
+                                                     class="close-btn" 
+                                                     onclick="this.parentElement.remove()">
+                                                 <span>&times;</span>
+                                             </button>
+                                         </div>
+
+                                         <form method="POST"
                                               th:action="${floorId != null ? '/hotel-management/floor/update/' + floorId : '/hotel-management/floor/save'}"
                                               th:object="${floorRequest}">
                                             
@@ -164,15 +237,20 @@
                                             <div class="form-row">
                                                 <div class="form-group">
                                                     <label for="floorNumber">Số Tầng <span class="text-danger">*</span></label>
-                                                    <input type="number" 
-                                                           class="form-control" 
-                                                           id="floorNumber" 
-                                                           th:field="*{floorNumber}" 
-                                                           min="1" 
-                                                           max="100"
-                                                           required
-                                                           placeholder="Nhập số tầng">
-                                                </div>
+                                                     <input type="number" 
+                                                            class="form-control" 
+                                                            th:classappend="${errorMessage != null ? 'is-invalid' : ''}"
+                                                            id="floorNumber" 
+                                                            th:field="*{floorNumber}" 
+                                                            min="1" 
+                                                            max="100"
+                                                            required
+                                                            placeholder="Nhập số tầng">
+                                                     <div th:if="${errorMessage}" class="invalid-feedback">
+                                                         <i class="mdi mdi-alert-circle"></i> 
+                                                         <span th:text="${errorMessage}"></span>
+                                                     </div>
+                                                 </div>
                                             </div>
 
                                             <!-- Save Button -->
@@ -180,7 +258,7 @@
                                                 <i class="mdi mdi-check"></i> 
                                                 <span th:text="${floorId != null ? 'Cập Nhật' : 'Thêm Mới'}">Thêm Mới</span>
                                             </button>
-                                            <a th:href="@{/hotel-management/floor}" class="btn-secondary">
+                                            <a th:href="@{/hotel-management/location-room(type='floor', page=0, size=10)}" class="btn-secondary">
                                                 <i class="mdi mdi-arrow-left"></i> Quay Lại
                                             </a>
                                             <div style="clear: both;"></div>

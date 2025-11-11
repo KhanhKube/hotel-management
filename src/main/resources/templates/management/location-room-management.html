@@ -358,8 +358,73 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
     <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
     <script>
+        // Toast Notification Function
+        function showToast(message, type) {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                padding: 16px 20px;
+                margin-bottom: 10px;
+                min-width: 300px;
+                max-width: 400px;
+                display: flex;
+                align-items: center;
+                animation: slideInRight 0.3s ease-out;
+                border-left: 4px solid ${type === 'success' ? '#28a745' : '#dc3545'};
+            `;
+            
+            const icon = type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle';
+            toast.innerHTML = `
+                <i class="mdi ${icon}" style="font-size: 20px; margin-right: 12px; color: ${type === 'success' ? '#28a745' : '#dc3545'};"></i>
+                <span style="flex: 1;">${message}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 18px; color: #999; cursor: pointer; margin-left: 10px;">×</button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.style.animation = 'slideOutRight 0.3s ease-in forwards';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Check for flash messages
+        document.addEventListener('DOMContentLoaded', function() {
+            const successMessage = /*[[${successMessage}]]*/ null;
+            const errorMessage = /*[[${errorMessage}]]*/ null;
+            
+            if (successMessage) {
+                showToast(successMessage, 'success');
+            }
+            if (errorMessage) {
+                showToast(errorMessage, 'error');
+            }
+        });
+
         // Search functionality
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');

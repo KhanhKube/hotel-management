@@ -67,12 +67,21 @@ public class FloorServiceImpl implements FloorService {
 
 	@Override
 	public FloorResponseDto updateFloor(Integer floorId, FloorRequestDto floorRequestDto) {
-		log.info("Updating floor with ID: {}", floorId);
+		log.info("Updating floor with ID: {} with floor number: {}", floorId, floorRequestDto.getFloorNumber());
 
 		Floor existingFloor = floorRepository.findByFloorIdAndIsDeletedIsFalse(floorId);
 
 		if (existingFloor == null) {
 			throw new RuntimeException("Floor with ID: " + floorId + " not found");
+		}
+
+		// Kiểm tra nếu floorNumber thay đổi, phải validate không trùng với floor khác
+		if (!existingFloor.getFloorNumber().equals(floorRequestDto.getFloorNumber())) {
+			Boolean floorExists = floorRepository.existsByFloorNumberAndIsDeletedIsFalseAndFloorIdNot(
+					floorRequestDto.getFloorNumber(), floorId);
+			if (Boolean.TRUE.equals(floorExists)) {
+				throw new RuntimeException("Số tầng " + floorRequestDto.getFloorNumber() + " đã tồn tại ở tầng khác");
+			}
 		}
 
 		existingFloor.setFloorNumber(floorRequestDto.getFloorNumber());
