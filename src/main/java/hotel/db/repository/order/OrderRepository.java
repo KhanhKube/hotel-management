@@ -38,4 +38,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
 	// Find orders by status and created before a certain time (for cart cleanup)
 	List<Order> findByStatusAndCreatedAtBefore(String status, LocalDateTime createdAt);
+
+	// Find orders by payment order code
+	List<Order> findByPaymentOrderCode(Long paymentOrderCode);
 }

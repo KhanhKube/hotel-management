@@ -22,12 +22,12 @@
             padding: 20px;
             margin-bottom: 20px;
             background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
         }
 
         .order-card:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
             transform: translateY(-2px);
         }
 
@@ -165,15 +165,15 @@
                     </small>
                 </div>
                 <div>
-                    <span class="status-badge" 
-                          th:classappend="${order.status == 'PENDING' ? 'status-pending' : 
-                                          order.status == 'CONFIRMED' ? 'status-confirmed' : 
-                                          order.status == 'COMPLETED' ? 'status-completed' : 'status-cancelled'}"
-                          th:text="${order.status == 'PENDING' ? 'Chờ xử lý' : 
-                                   order.status == 'CONFIRMED' ? 'Đã xác nhận' : 
-                                   order.status == 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy'}">
-                        Chờ xử lý
-                    </span>
+                   <span class="status-badge"
+                         th:classappend="${order.status == 'PENDING' ? 'status-pending' :
+                      (order.status == 'CONFIRMED' ? 'status-confirmed' :
+                      (order.status == 'COMPLETED' ? 'status-completed' : 'status-cancelled'))}"
+                         th:text="${order.status == 'PENDING' ? 'Chờ xử lý' :
+                (order.status == 'CONFIRMED' ? 'Đã xác nhận' :
+                (order.status == 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy'))}">
+                     Chờ xử lý
+                </span>
                 </div>
             </div>
 
@@ -182,15 +182,15 @@
                 <div class="room-info">
                     <div>
                         <div class="room-name">
-                            <i class="fas fa-door-open"></i> 
-                            <span th:text="${detail.roomType}">Deluxe Room</span> - 
+                            <i class="fas fa-door-open"></i>
+                            <span th:text="${detail.roomType}">Deluxe Room</span> -
                             Phòng <span th:text="${detail.roomNumber}">101</span>
                         </div>
                         <div class="date-info">
-                            <i class="fas fa-calendar-check"></i> 
+                            <i class="fas fa-calendar-check"></i>
                             Check-in: <span th:text="${#temporals.format(detail.checkIn, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
                             <br>
-                            <i class="fas fa-calendar-times"></i> 
+                            <i class="fas fa-calendar-times"></i>
                             Check-out: <span th:text="${#temporals.format(detail.checkOut, 'dd/MM/yyyy HH:mm')}">05/01/2024</span>
                         </div>
                     </div>

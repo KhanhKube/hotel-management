@@ -10,4 +10,6 @@ public interface PaymentService {
 	WebhookData verifyWebhook(Object body) throws Exception;
 
 	void handlePaymentWebhook(WebhookData webhookData);
+
+	void updateCartOrdersAfterPayment(Integer userId);
 }

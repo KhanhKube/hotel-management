@@ -35,5 +35,8 @@ public class Order extends AbstractVersion {
 
 	@Column(name = "status")
 	private String status;
+
+	@Column(name = "payment_order_code")
+	private Long paymentOrderCode;
 }
 

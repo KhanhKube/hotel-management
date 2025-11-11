@@ -2,6 +2,9 @@ package hotel.service.payment;
 
 import hotel.db.dto.cart.CartItemDto;
 import hotel.db.dto.payment.CreatePaymentLinkRequestBody;
+import hotel.db.entity.Order;
+import hotel.db.repository.order.OrderRepository;
+import hotel.db.repository.orderdetail.OrderDetailRepository;
 import hotel.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,8 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final PayOS payOS;
 	private final CartService cartService;
+	private final OrderRepository orderRepository;
+	private final OrderDetailRepository orderDetailRepository;
 
 	@Override
 	public CreatePaymentLinkResponse createPaymentLink(Integer userId, CreatePaymentLinkRequestBody requestBody) throws Exception {
@@ -59,8 +64,14 @@ public class PaymentServiceImpl implements PaymentService {
 
 		CreatePaymentLinkResponse response = payOS.paymentRequests().create(paymentData);
 
-		// Store orderCode in session or database for later verification
-		// You might want to create a Payment entity to track this
+		// Store orderCode in all CART orders for this user
+		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
+		for (Order order : cartOrders) {
+			order.setPaymentOrderCode(orderCode);
+			orderRepository.save(order);
+		}
+
+		System.out.println("Stored payment orderCode " + orderCode + " for " + cartOrders.size() + " cart orders");
 
 		return response;
 	}
@@ -93,18 +104,47 @@ public class PaymentServiceImpl implements PaymentService {
 
 			System.out.println("Payment successful!");
 
-			// TODO: Update order status from CART to PENDING
-			// After payment success, you need to:
-			// 1. Get orderCode from webhook (check webhookData structure)
-			// 2. Find orders with that orderCode
-			// 3. Update status from CART to PENDING
-
-			// For now, just log success
-			System.out.println("Payment webhook processed successfully");
+			// Note: Order status is updated when user returns to success page
+			// This webhook is just for logging/verification
+			System.out.println("Payment webhook received and verified successfully");
 
 		} catch (Exception e) {
 			System.err.println("Error handling payment webhook: " + e.getMessage());
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	@Transactional
+	public void updateCartOrdersAfterPayment(Integer userId) {
+		System.out.println("=== Updating cart orders after payment for user: " + userId + " ===");
+
+		// Find all CART orders for this user
+		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
+
+		if (cartOrders.isEmpty()) {
+			System.out.println("No cart orders found for user " + userId);
+			return;
+		}
+
+		System.out.println("Found " + cartOrders.size() + " cart orders to update");
+
+		// Update all orders to COMPLETED status (payment successful)
+		for (Order order : cartOrders) {
+			order.setStatus("COMPLETED");
+			orderRepository.save(order);
+
+			// Update order details to RESERVED status (room is reserved)
+			List<hotel.db.entity.OrderDetail> orderDetails =
+					orderDetailRepository.findByOrderId(order.getOrderId());
+			for (hotel.db.entity.OrderDetail detail : orderDetails) {
+				detail.setStatus("RESERVED");
+				orderDetailRepository.save(detail);
+			}
+
+			System.out.println("Updated order " + order.getOrderId() + " to COMPLETED status with " + orderDetails.size() + " RESERVED rooms");
+		}
+
+		System.out.println("=== Successfully updated " + cartOrders.size() + " orders to COMPLETED ===");
 	}
 }
