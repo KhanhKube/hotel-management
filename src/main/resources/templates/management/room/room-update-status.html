@@ -11,6 +11,24 @@
     <link rel="stylesheet" href="/assets/css/style.css">
     <!-- Flatpickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* Style cho input ngày bảo trì giống với input khác */
+        #checkInDate, #checkOutDate {
+            background-color: #2c2e33 !important;
+            border: 1px solid #2c2e33 !important;
+            color: #ffffff !important;
+        }
+        
+        #checkInDate:focus, #checkOutDate:focus {
+            background-color: #2c2e33 !important;
+            border-color: #2196f3 !important;
+            color: #ffffff !important;
+        }
+        
+        #checkInDate::placeholder, #checkOutDate::placeholder {
+            color: #6c7293 !important;
+        }
+    </style>
 </head>
 
 <body>
