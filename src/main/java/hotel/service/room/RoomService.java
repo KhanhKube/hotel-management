@@ -4,13 +4,20 @@ import hotel.db.dto.room.*;
 import hotel.db.entity.Floor;
 import hotel.db.entity.Room;
 import hotel.db.entity.Size;
+import hotel.db.entity.User;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public interface RoomService {
+
+    void saveMaintenance(Integer roomId, String checkInDate, String checkOutDate,
+                         String description, Integer assignedTo, Integer createBy);
+
+    List<User> getStaffIds();
 
     //Lấy các ngày cho phép check-in
     List<String> getBookedDatesForBookingRoom(Integer roomId);

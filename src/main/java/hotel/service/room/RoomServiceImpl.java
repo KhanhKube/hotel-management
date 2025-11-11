@@ -3,7 +3,9 @@ package hotel.service.room;
 import hotel.db.dto.room.*;
 import hotel.db.entity.*;
 import hotel.db.repository.floor.FloorRepository;
+import hotel.db.repository.roommaintenance.RoomMaintenanceRepository;
 import hotel.db.repository.roomview.RoomViewRepository;
+import hotel.db.repository.user.UserRepository;
 import hotel.db.repository.view.ViewRepository;
 import hotel.service.size.SizeService;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
@@ -38,12 +40,40 @@ public class RoomServiceImpl implements RoomService {
     private final RoomViewRepository roomViewRepository;
     private final ViewRepository viewRepository;
     private final SizeService sizeService;
+    private final RoomMaintenanceRepository roomMaintenanceRepository;
+    private final UserRepository userRepository;
 
     public List<String> getRoomViewList(Integer roomId) {
         return roomViewRepository.findRoomViewId(roomId).stream().map(viewId ->
                 viewRepository.findViewTypeByViewId(viewId)).collect(Collectors.toList());
     }
 
+
+    @Override
+    public void saveMaintenance(Integer roomId, String checkInDate, String checkOutDate,
+                                String description, Integer assignedTo, Integer createBy) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate startDate = LocalDate.parse(checkInDate, formatter);
+        LocalDate endDate = LocalDate.parse(checkOutDate, formatter);
+
+        LocalDateTime startDateTime = startDate.atTime(14, 0);
+        LocalDateTime endDateTime = endDate.atTime(12, 0);
+        RoomMaintenance maintenance = new RoomMaintenance();
+        maintenance.setRoomId(roomId);
+        maintenance.setStartDate(startDateTime);
+        maintenance.setEndDate(endDateTime);
+        maintenance.setStatus("Đã giao");
+        maintenance.setDescription(description);
+        maintenance.setAssignedTo(assignedTo);
+        maintenance.setCreateBy(createBy);
+
+        roomMaintenanceRepository.save(maintenance);
+    }
+
+    @Override
+    public List<User> getStaffIds() {
+        return userRepository.getStaffIds();
+    }
 
     @Override
     public List<String> getBookedDatesForBookingRoom(Integer roomId) {
@@ -57,25 +87,34 @@ public class RoomServiceImpl implements RoomService {
                 Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
         );
 
+        List<RoomMaintenance> maintenances = roomMaintenanceRepository.findMaintenancesByRoomAndDateRange(
+                roomId,
+                fromDate,
+                toDate,
+                Arrays.asList("Đã giao")
+        );
+
         List<String> bookedDates = new ArrayList<>();
 
         for (OrderDetail booking : bookings) {
             LocalDate start = booking.getStartDate().toLocalDate();
             LocalDate end = booking.getEndDate().toLocalDate();
 
-            // CHO CALENDAR "NGÀY NHẬN PHÒNG"
-            // DISABLE TẤT CẢ NGÀY TỪ START ĐẾN (END - 1)
-            // - Ngày START: Disable vì đã có người checkin 14:00
-            // - Ngày GIỮA: Disable vì phòng đang được thuê
-            // - Ngày END: KHÔNG disable vì khách mới có thể checkin sau khi khách cũ checkout
             LocalDate current = start;
             while (current.isBefore(end)) { // Không bao gồm ngày end
                 bookedDates.add(current.toString()); // Format: yyyy-MM-dd
                 current = current.plusDays(1);
             }
         }
-
-        System.out.println("Booked dates for check-in (room " + roomId + "): " + bookedDates);
+        for (RoomMaintenance maintenance : maintenances) {
+            LocalDate start = maintenance.getStartDate().toLocalDate();
+            LocalDate end = maintenance.getEndDate().toLocalDate();
+            LocalDate current = start;
+            while (current.isBefore(end)) {
+                bookedDates.add(current.toString());
+                current = current.plusDays(1);
+            }
+        }
 
         return bookedDates;
     }
@@ -92,25 +131,34 @@ public class RoomServiceImpl implements RoomService {
                 Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
         );
 
+        List<RoomMaintenance> maintenances = roomMaintenanceRepository.findMaintenancesByRoomAndDateRange(
+                roomId,
+                fromDate,
+                toDate,
+                Arrays.asList("Đã giao")
+        );
+
         List<String> bookedDates = new ArrayList<>();
 
         for (OrderDetail booking : bookings) {
             LocalDate start = booking.getStartDate().toLocalDate();
             LocalDate end = booking.getEndDate().toLocalDate();
 
-            // CHO CALENDAR "NGÀY TRẢ PHÒNG"
-            // CHỈ DISABLE CÁC NGÀY GIỮA (start+1 đến end-1)
-            // - Ngày START: KHÔNG disable vì khách mới có thể checkout 12:00 (trước khi khách cũ checkin 14:00)
-            // - Ngày GIỮA: Disable vì phòng đang được thuê
-            // - Ngày END: KHÔNG disable vì khách mới có thể checkout cùng ngày với khách cũ checkout
             LocalDate current = start.plusDays(1); // Bắt đầu từ ngày sau start
             while (current.isBefore(end)) { // Dừng trước ngày end
                 bookedDates.add(current.toString()); // Format: yyyy-MM-dd
                 current = current.plusDays(1);
             }
         }
-
-        System.out.println("Booked dates for check-out (room " + roomId + "): " + bookedDates);
+        for (RoomMaintenance maintenance : maintenances) {
+            LocalDate start = maintenance.getStartDate().toLocalDate();
+            LocalDate end = maintenance.getEndDate().toLocalDate();
+            LocalDate current = start.plusDays(1);
+            while (current.isBefore(end)) {
+                bookedDates.add(current.toString());
+                current = current.plusDays(1);
+            }
+        }
 
         return bookedDates;
     }

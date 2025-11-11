@@ -6,6 +6,8 @@ import hotel.db.dto.room.RoomListDto;
 import hotel.db.dto.room.SearchRoomRequest;
 import hotel.db.entity.Room;
 import hotel.db.entity.RoomImage;
+import hotel.db.entity.RoomMaintenance;
+import hotel.db.entity.User;
 import hotel.db.enums.BedType;
 import hotel.db.enums.RoomStatus;
 import hotel.db.enums.RoomSystemStatus;
@@ -16,6 +18,7 @@ import hotel.service.booking.BookingService;
 import hotel.service.file.RoomImageUploadService;
 import hotel.service.image.ImageService;
 import hotel.service.room.RoomService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -28,6 +31,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +57,7 @@ public class RoomController {
         model.addAttribute("bedTypes", BedType.ALL);
         model.addAttribute("statuses", RoomStatus.ALL);
         model.addAttribute("systemStatus", RoomSystemStatus.ALL);
+        model.addAttribute("listStaff", roomService.getStaffIds());
         model.addAttribute("floors", roomService.getAllFloors());
         model.addAttribute("sizes", roomService.getAllSizes());
     }
@@ -234,10 +242,43 @@ public class RoomController {
         // Lấy 2 lists riêng biệt cho check-in và check-out calendar
         List<String> bookedDatesCheckIn = roomService.getBookedDatesForBookingRoom(id);
         List<String> bookedDatesCheckOut = roomService.getBookedDatesForCheckOut(id);
-
+        model.addAttribute("roomId", id);
         model.addAttribute("bookedDatesCheckIn", bookedDatesCheckIn);
         model.addAttribute("bookedDatesCheckOut", bookedDatesCheckOut);
         return "management/room/room-update-status";
+    }
+    @PostMapping("/maintenance")
+    public String createRoomMaintenance(
+            @RequestParam("roomId") Integer roomId,
+            @RequestParam("checkInDate") String checkInDate,
+            @RequestParam("checkOutDate") String checkOutDate,
+            @RequestParam("status") String status,
+            @RequestParam(value = "des", required = false) String description,
+            @RequestParam(value = "userId", required = false) Integer assignedTo,
+            Model model, HttpSession session) {
+        try {
+            if ("maintenance".equals(status)) {
+                User user = (User) session.getAttribute("user");
+                if (user == null) {
+                    model.addAttribute("errorMessage", "Vui lòng đăng nhập!");
+                    return "redirect:/hotel/login";
+                }
+                
+                Integer createdBy = user.getUserId();
+                roomService.saveMaintenance(roomId, checkInDate, checkOutDate, description, assignedTo, createdBy);
+                
+                Room room = roomService.getRoomById(roomId);
+                room.setSystemStatus("Bảo trì");
+                roomService.saveRoom(room);
+                
+                return "redirect:/hotel-management/room";
+            }
+        }
+        catch (Exception e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "management/room/room-update-status";
+        }
+        return "redirect:/hotel-management/room";
     }
 
 	@PostMapping("/search")
