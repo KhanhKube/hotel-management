@@ -12,8 +12,10 @@ import java.util.List;
 
 public interface RoomService {
 
+    //Lấy các ngày cho phép check-in
     List<String> getBookedDatesForBookingRoom(Integer roomId);
-    
+
+    //Lấy các ngày cho phép check-out
     List<String> getBookedDatesForCheckOut(Integer roomId);
 
     //Method filter dùng cho Room-BookingList bên phía customer.
@@ -30,7 +32,7 @@ public interface RoomService {
     List<RoomListDto> getRoomList();
     
     // Method filter và pagination cho trang quản lý phòng (admin)
-    Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status, 
+    Page<RoomListDto> getRoomListForManagement(String search, String roomType, String status, String systemstatus,
                                                Integer floor, Double size, BigDecimal minPrice, 
                                                BigDecimal maxPrice, String sortBy, int page, int pageSize);
 

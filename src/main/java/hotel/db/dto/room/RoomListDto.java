@@ -17,4 +17,5 @@ public class RoomListDto {
     private Double size;          // Diện tích (25.0, 35.0...)
     private BigDecimal price;
     private String status;
+    private String systemStatus;
 }

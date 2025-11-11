@@ -184,100 +184,115 @@
         .custom-toast.hiding {
             animation: slideOutRight 0.3s ease-in forwards;
         }
+
+        /* Select dropdown styling */
+        select#checkInTime {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: white;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        select#checkInTime:focus {
+            outline: none;
+            border-color: #ff6600;
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+        }
+
+        .check-in-warning {
+            display: block;
+            margin-top: 5px;
+            color: #dc3545;
+            font-weight: 500;
+        }
     </style>
 </head>
 
 <body>
-<!-- import header -->
-<div th:replace="~{common/header :: header}"></div>
-<section class="home-banner-area" id="home">
-    <div class="container h-100">
-        <div class="home-banner">
-            <div class="text-center">
-                <h4>Xem sự khác biệt mà một kỳ nghỉ mang lại!</h4>
-                <h1>Sang trọng <em>và</em> Riêng Tư</h1>
-                <a class="button home-banner-btn" href="#">Đặt ngay</a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="section-margin">
-    <div class="container mt-4 mb-5">
-
-        <!-- Carousel hình ảnh -->
-        <div id="roomCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
-            <div class="carousel-inner" th:if="${room.images != null}">
-                <div class="carousel-item" th:each="img, iterStat : ${room.images}"
-                     th:classappend="${iterStat.index == 0} ? 'active'">
-                    <img th:src="${img}" class="d-block w-100" alt="Hình ảnh phòng">
+    <!-- import header -->
+    <div th:replace="~{common/header :: header}"></div>
+    <section class="home-banner-area" id="home">
+        <div class="container h-100">
+            <div class="home-banner">
+                <div class="text-center">
+                    <h4>Xem sự khác biệt mà một kỳ nghỉ mang lại!</h4>
+                    <h1>Sang trọng <em>và</em> Riêng Tư</h1>
+                    <a class="button home-banner-btn" href="#">Đặt ngay</a>
                 </div>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#roomCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#roomCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon"></span>
-            </button>
         </div>
+    </section>
 
-        <!-- Thông tin phòng -->
-        <div class="room-header mb-3">
-            <h2 th:text="${room.roomType}">Loại phòng</h2>
-            <span class="price"
-                  th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ / đêm'">
-                    350.000 VNĐ / đêm
-                </span>
-        </div>
+    <section class="section-margin">
+        <div class="container mt-4 mb-5">
 
-        <div class="mb-3">
-            <p><strong>Số phòng:</strong> <span th:text="${room.roomNumber}"></span></p>
-            <p><strong>Loại giường:</strong> <span th:text="${room.bedType}"></span></p>
-            <p><strong>Tầng:</strong> <span th:text="${room.floorNumber}"></span></p>
-            <p><strong>Kích thước:</strong> <span th:text="${room.size} + ' m²'"></span></p>
-            <p><strong>Hướng nhìn: </strong> <span th:text="${#strings.listJoin(room.roomViews, ', ')}"></span></p>
-            <p><strong>Mô tả:</strong></p>
-            <p class="room-description" th:text="${room.roomDescription}"></p>
-        </div>
-
-        <!-- Form chọn ngày -->
-        <form id="addToCartForm" class="p-3 border rounded bg-white shadow-sm">
-            <input type="hidden" id="roomId" th:value="${room.roomId}">
-
-            <!-- Ngày nhận phòng và trả phòng -->
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Ngày nhận phòng:</label>
-                    <input type="text" id="checkInDate" class="form-control" placeholder="Chọn ngày nhận phòng"
-                           required>
+            <!-- Carousel hình ảnh -->
+            <div id="roomCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div class="carousel-inner" th:if="${room.images != null}">
+                    <div class="carousel-item" th:each="img, iterStat : ${room.images}"
+                        th:classappend="${iterStat.index == 0} ? 'active'">
+                        <img th:src="${img}" class="d-block w-100" alt="Hình ảnh phòng">
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Ngày trả phòng:</label>
-                    <input type="text" id="checkOutDate" class="form-control" placeholder="Chọn ngày trả phòng"
-                           required>
-                    <small class="text-muted">Giờ check-out: 12:00 (cố định)</small>
-                </div>
-            </div>
-
-            <!-- Giờ check-in -->
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Giờ check-in:</label>
-                    <input type="time" id="checkInTime" class="form-control" value="14:00" min="06:00" max="23:59"
-                           required>
-                    <small class="text-muted">Giờ tiêu chuẩn: 14:00 (2:00 PM). Check-in sớm có thể phụ phí.</small>
-                </div>
-            </div>
-
-            <div class="text-end">
-                <button type="submit" class="btn add-cart-btn px-4 py-2">
-                    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                <button class="carousel-control-prev" type="button" data-bs-target="#roomCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#roomCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
                 </button>
             </div>
-        </form>
+
+            <!-- Thông tin phòng -->
+            <div class="room-header mb-3">
+                <h2 th:text="${room.roomType}">Loại phòng</h2>
+                <span class="price"
+                    th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ / đêm'">
+                    350.000 VNĐ / đêm
+                </span>
+            </div>
+
+            <div class="mb-3">
+                <p><strong>Số phòng:</strong> <span th:text="${room.roomNumber}"></span></p>
+                <p><strong>Loại giường:</strong> <span th:text="${room.bedType}"></span></p>
+                <p><strong>Tầng:</strong> <span th:text="${room.floorNumber}"></span></p>
+                <p><strong>Kích thước:</strong> <span th:text="${room.size} + ' m²'"></span></p>
+                <p><strong>Hướng nhìn: </strong> <span th:text="${#strings.listJoin(room.roomViews, ', ')}"></span></p>
+                <p><strong>Mô tả:</strong></p>
+                <p class="room-description" th:text="${room.roomDescription}"></p>
+            </div>
+
+            <!-- Form chọn ngày -->
+            <form id="addToCartForm" class="p-3 border rounded bg-white shadow-sm">
+                <input type="hidden" id="roomId" th:value="${room.roomId}">
+
+                <!-- Ngày nhận phòng và trả phòng -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Ngày nhận phòng:</label>
+                        <input type="text" id="checkInDate" class="form-control" placeholder="Chọn ngày nhận phòng"
+                            required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Ngày trả phòng:</label>
+                        <input type="text" id="checkOutDate" class="form-control" placeholder="Chọn ngày trả phòng"
+                            required>
+                        <small class="text-muted">Giờ check-out: 12:00 (cố định)</small>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn add-cart-btn px-4 py-2">
+                        <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                    </button>
+                </div>
+            </form>
 
 
-    </div>
+        </div>
 
 </section>
 
@@ -300,137 +315,140 @@
 <script src="/js/main.js"></script>
 <script src="/js/ai-chat.js"></script>
 
-<!-- Flatpickr JS -->
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    // Nhận 2 lists riêng biệt từ Thymeleaf
-    const bookedDatesCheckIn = /*[[${bookedDatesCheckIn}]]*/[];
-    const bookedDatesCheckOut = /*[[${bookedDatesCheckOut}]]*/[];
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Nhận 2 lists riêng biệt từ Thymeleaf
+        const bookedDatesCheckIn = /*[[${bookedDatesCheckIn}]]*/[];
+        const bookedDatesCheckOut = /*[[${bookedDatesCheckOut}]]*/[];
 
-    console.log('Booked dates for check-in:', bookedDatesCheckIn);
-    console.log('Booked dates for check-out:', bookedDatesCheckOut);
+        console.log('Booked dates for check-in:', bookedDatesCheckIn);
+        console.log('Booked dates for check-out:', bookedDatesCheckOut);
 
-    // Tính ngày max = hôm nay + 60 ngày
-    const today = new Date();
-    const maxDate = new Date();
-    maxDate.setDate(today.getDate() + 60);
+        // Tính ngày max = hôm nay + 60 ngày
+        const today = new Date();
+        const maxDate = new Date();
+        maxDate.setDate(today.getDate() + 60);
 
-    // ĐỢI DOM LOAD XONG RỒI MỚI KHỞI TẠO
-    document.addEventListener('DOMContentLoaded', function () {
+        // ĐỢI DOM LOAD XONG RỒI MỚI KHỞI TẠO
+        document.addEventListener('DOMContentLoaded', function () {
 
-        // Convert sang Date objects
-        const disabledDatesCheckIn = bookedDatesCheckIn.map(dateStr => new Date(dateStr));
-        const disabledDatesCheckOut = bookedDatesCheckOut.map(dateStr => new Date(dateStr));
+            // Convert sang Date objects
+            const disabledDatesCheckIn = bookedDatesCheckIn.map(dateStr => new Date(dateStr));
+            const disabledDatesCheckOut = bookedDatesCheckOut.map(dateStr => new Date(dateStr));
 
-        console.log('Disabled dates for check-in:', disabledDatesCheckIn);
-        console.log('Disabled dates for check-out:', disabledDatesCheckOut);
+            console.log('Disabled dates for check-in:', disabledDatesCheckIn);
+            console.log('Disabled dates for check-out:', disabledDatesCheckOut);
 
-        // Initialize check-in date picker
-        const checkInPicker = flatpickr("#checkInDate", {
-            dateFormat: "d/m/Y",
-            minDate: "today",
-            maxDate: maxDate,
-            disable: disabledDatesCheckIn, // Dùng list riêng cho check-in
-            allowInput: false, // Chặn gõ tay
-            clickOpens: true,  // Click mở calendar
-            onChange: function (selectedDates, dateStr, instance) {
-                if (selectedDates.length > 0) {
-                    const checkInDate = selectedDates[0];
-                    const minCheckOut = new Date(checkInDate);
-                    minCheckOut.setDate(minCheckOut.getDate() + 1);
+            // Initialize check-in date picker
+            const checkInPicker = flatpickr("#checkInDate", {
+                dateFormat: "d/m/Y",
+                minDate: "today",
+                maxDate: maxDate,
+                disable: disabledDatesCheckIn, // Dùng list riêng cho check-in
+                allowInput: false, // Chặn gõ tay
+                clickOpens: true,  // Click mở calendar
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        const checkInDate = selectedDates[0];
+                        const minCheckOut = new Date(checkInDate);
+                        minCheckOut.setDate(minCheckOut.getDate() + 1);
 
-                    // Tìm ngày bị block đầu tiên sau check-in
-                    let maxCheckOut = new Date(maxDate);
+                        // Tìm ngày bị block đầu tiên sau check-in
+                        let maxCheckOut = new Date(maxDate);
 
-                    // Sort disabled dates
-                    const sortedDisabledCheckOut = disabledDatesCheckOut
-                        .map(d => d.getTime())
-                        .sort((a, b) => a - b);
+                        // Sort disabled dates
+                        const sortedDisabledCheckOut = disabledDatesCheckOut
+                            .map(d => d.getTime())
+                            .sort((a, b) => a - b);
 
-                    // Tìm ngày disabled đầu tiên sau check-in
-                    for (let disabledTime of sortedDisabledCheckOut) {
-                        if (disabledTime > checkInDate.getTime()) {
-                            // Tìm thấy ngày bị block đầu tiên
-                            // Max checkout = ngày đó (vì có thể checkout cùng ngày)
-                            maxCheckOut = new Date(disabledTime);
-                            break;
+                        // Tìm ngày disabled đầu tiên sau check-in
+                        for (let disabledTime of sortedDisabledCheckOut) {
+                            if (disabledTime > checkInDate.getTime()) {
+                                // Tìm thấy ngày bị block đầu tiên
+                                // Max checkout = ngày đó (vì có thể checkout cùng ngày)
+                                maxCheckOut = new Date(disabledTime);
+                                break;
+                            }
+                        }
+
+                        console.log('Check-in:', checkInDate);
+                        console.log('Max check-out:', maxCheckOut);
+
+                        checkOutPicker.set('minDate', minCheckOut);
+                        checkOutPicker.set('maxDate', maxCheckOut);
+
+                        // Clear check-out nếu nó nằm ngoài range
+                        if (checkOutPicker.selectedDates.length > 0) {
+                            const currentCheckOut = checkOutPicker.selectedDates[0];
+                            if (currentCheckOut <= checkInDate || currentCheckOut > maxCheckOut) {
+                                checkOutPicker.clear();
+                            }
                         }
                     }
-
-                    console.log('Check-in:', checkInDate);
-                    console.log('Max check-out:', maxCheckOut);
-
-                    checkOutPicker.set('minDate', minCheckOut);
-                    checkOutPicker.set('maxDate', maxCheckOut);
-
-                    // Clear check-out nếu nó nằm ngoài range
-                    if (checkOutPicker.selectedDates.length > 0) {
-                        const currentCheckOut = checkOutPicker.selectedDates[0];
-                        if (currentCheckOut <= checkInDate || currentCheckOut > maxCheckOut) {
-                            checkOutPicker.clear();
-                        }
+                },
+                locale: {
+                    firstDayOfWeek: 1,
+                    weekdays: {
+                        shorthand: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                        longhand: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']
+                    },
+                    months: {
+                        shorthand: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
+                        longhand: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12']
                     }
                 }
-            },
-            locale: {
-                firstDayOfWeek: 1,
-                weekdays: {
-                    shorthand: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
-                    longhand: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']
-                },
-                months: {
-                    shorthand: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
-                    longhand: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12']
+            });
+
+            // Initialize check-out date picker
+            const checkOutPicker = flatpickr("#checkOutDate", {
+                dateFormat: "d/m/Y",
+                minDate: "today",
+                maxDate: maxDate,
+                disable: disabledDatesCheckOut, // Dùng list riêng cho check-out
+                allowInput: false, // Chặn gõ tay
+                clickOpens: true,  // Click mở calendar
+                locale: {
+                    firstDayOfWeek: 1,
+                    weekdays: {
+                        shorthand: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                        longhand: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']
+                    },
+                    months: {
+                        shorthand: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
+                        longhand: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12']
+                    }
                 }
-            }
+            });
+
+            console.log('Flatpickr initialized successfully');
         });
 
-        // Initialize check-out date picker
-        const checkOutPicker = flatpickr("#checkOutDate", {
-            dateFormat: "d/m/Y",
-            minDate: "today",
-            maxDate: maxDate,
-            disable: disabledDatesCheckOut, // Dùng list riêng cho check-out
-            allowInput: false, // Chặn gõ tay
-            clickOpens: true,  // Click mở calendar
-            locale: {
-                firstDayOfWeek: 1,
-                weekdays: {
-                    shorthand: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
-                    longhand: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']
-                },
-                months: {
-                    shorthand: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
-                    longhand: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12']
-                }
-            }
-        });
-
-        console.log('Flatpickr initialized successfully');
-    });
-    /*]]>*/
-</script>
+        /*]]>*/
+    </script>
 
 
-<script>
-    // Toast notification functions
-    function showSuccessToast(message) {
-        showToast('success', 'Thành công!', message);
-    }
 
-    function showErrorToast(message) {
-        showToast('error', 'Lỗi!', message);
-    }
 
-    function showToast(type, title, message) {
-        const toast = document.createElement('div');
-        toast.className = `custom-toast ${type}`;
+    <script>
+        // Toast notification functions
+        function showSuccessToast(message) {
+            showToast('success', 'Thành công!', message);
+        }
 
-        const icon = type === 'success' ? '✓' : '✕';
+        function showErrorToast(message) {
+            showToast('error', 'Lỗi!', message);
+        }
 
-        toast.innerHTML = `
+        function showToast(type, title, message) {
+            const toast = document.createElement('div');
+            toast.className = `custom-toast ${type}`;
+
+            const icon = type === 'success' ? '✓' : '✕';
+
+            toast.innerHTML = `
             <div class="custom-toast-icon">${icon}</div>
             <div class="custom-toast-content">
                 <div class="custom-toast-title">${title}</div>
@@ -439,99 +457,94 @@
             <button class="custom-toast-close" onclick="this.parentElement.remove()">×</button>
         `;
 
-        document.body.appendChild(toast);
+            document.body.appendChild(toast);
 
-        setTimeout(() => {
-            toast.classList.add('hiding');
-            setTimeout(() => toast.remove(), 300);
-        }, 4000);
-    }
-
-    // Helper: Convert dd/mm/yyyy -> yyyy-mm-dd
-    function convertToISODate(dateStr) {
-        const parts = dateStr.split('/');
-        return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-    }
-
-    // Handle form submission
-    document.getElementById('addToCartForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const roomId = parseInt(document.getElementById('roomId').value);
-        const checkInDateStr = document.getElementById('checkInDate').value;
-        const checkOutDateStr = document.getElementById('checkOutDate').value;
-
-        if (!checkInDateStr || !checkOutDateStr) {
-            showErrorToast('Vui lòng chọn ngày nhận và trả phòng');
-            return;
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
 
-        // Convert từ dd/mm/yyyy sang yyyy-mm-dd
-        const checkInDate = convertToISODate(checkInDateStr);
-        const checkOutDate = convertToISODate(checkOutDateStr);
+        // Helper: Convert dd/mm/yyyy -> yyyy-mm-dd
+        function convertToISODate(dateStr) {
+            const parts = dateStr.split('/');
+            return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
 
-        const checkInTime = document.getElementById('checkInTime').value + ':00';
-        const checkOutTime = '12:00:00';
+        // Handle form submission
+        document.getElementById('addToCartForm').addEventListener('submit', function (e) {
+            e.preventDefault();
 
-        const data = {
-            roomId: roomId,
-            checkIn: checkInDate + 'T' + checkInTime,
-            checkOut: checkOutDate + 'T' + checkOutTime,
-            earlyCheckIn: checkInTime !== '14:00:00'
-        };
+            const roomId = parseInt(document.getElementById('roomId').value);
+            const checkInDateStr = document.getElementById('checkInDate').value;
+            const checkOutDateStr = document.getElementById('checkOutDate').value;
 
-        console.log('Sending data:', data);
+            if (!checkInDateStr || !checkOutDateStr) {
+                showErrorToast('Vui lòng chọn ngày nhận và trả phòng');
+                return;
+            }
 
-        // Show loading
-        const submitBtn = document.querySelector('#addToCartForm button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            // Convert từ dd/mm/yyyy sang yyyy-mm-dd
+            const checkInDate = convertToISODate(checkInDateStr);
+            const checkOutDate = convertToISODate(checkOutDateStr);
 
-        fetch('/cart/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-            .then(res => res.json())
-            .then(data => {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
+            const checkInTime = '14:00:00'; // Mặc định 14:00
+            const checkOutTime = '12:00:00';
 
-                if (data.success) {
-                    if (typeof window.loadCartBadge === 'function') {
-                        window.loadCartBadge();
-                    } else if (typeof loadCartBadge === 'function') {
-                        loadCartBadge();
-                    } else if (typeof window.loadCartPreview === 'function') {
-                        window.loadCartPreview();
-                    }
+            const data = {
+                roomId: roomId,
+                checkIn: checkInDate + 'T' + checkInTime,
+                checkOut: checkOutDate + 'T' + checkOutTime,
+                earlyCheckIn: false // Không có check-in sớm
+            };
 
-                    showSuccessToast(data.message || 'Đã thêm vào giỏ hàng thành công!');
+            console.log('Sending data:', data);
 
-                    // Reset form
-                    document.getElementById('checkInDate').value = '';
-                    document.getElementById('checkOutDate').value = '';
-                    document.getElementById('checkInTime').value = '14:00';
-                } else {
-                    showErrorToast(data.message || 'Có lỗi xảy ra!');
-                    if (data.message && data.message.includes('đăng nhập')) {
-                        setTimeout(() => {
-                            window.location.href = '/hotel/login';
-                        }, 2000);
-                    }
-                }
+            // Show loading
+            const submitBtn = document.querySelector('#addToCartForm button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
             })
-            .catch(err => {
-                console.error('Error:', err);
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-                showErrorToast('Có lỗi xảy ra! Vui lòng thử lại.');
-            });
-    });
-</script>
+                .then(res => res.json())
+                .then(data => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+
+                    if (data.success) {
+                        if (typeof loadCartPreview === 'function') {
+                            loadCartPreview();
+                        }
+
+                        showSuccessToast(data.message || 'Đã thêm vào giỏ hàng thành công!');
+
+                        // Reset form
+                        document.getElementById('checkInDate').value = '';
+                        document.getElementById('checkOutDate').value = '';
+                    } else {
+                        showErrorToast(data.message || 'Có lỗi xảy ra!');
+                        if (data.message && data.message.includes('đăng nhập')) {
+                            setTimeout(() => {
+                                window.location.href = '/hotel/login';
+                            }, 2000);
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    showErrorToast('Có lỗi xảy ra! Vui lòng thử lại.');
+                });
+        });
+    </script>
 </body>
 
 </html>

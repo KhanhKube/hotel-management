@@ -20,7 +20,6 @@ public class DiscountController {
     @GetMapping
     public String view(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String discountType,
             @RequestParam(required = false) String roomType,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String sortBy,
@@ -29,7 +28,7 @@ public class DiscountController {
             Model model) {
         
         org.springframework.data.domain.Page<hotel.db.dto.discount.DiscountResponseDto> discountPage = 
-                discountService.getDiscountListForManagement(search, discountType, roomType, status, sortBy, page, pageSize);
+                discountService.getDiscountListForManagement(search, roomType, status, sortBy, page, pageSize);
         
         model.addAttribute("listDiscount", discountPage.getContent());
         model.addAttribute("currentPage", page);
@@ -44,7 +43,6 @@ public class DiscountController {
     @GetMapping("/create")
     public String createDiscountForm(Model model) {
         Discount discount = new Discount();
-        discount.setDiscountType("percent");
         model.addAttribute("discount", discount);
         model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
         return "management/discount/discount-create-form";
