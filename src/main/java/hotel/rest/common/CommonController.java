@@ -45,10 +45,14 @@ public class CommonController {
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
-        if (user != null) {
-            return "common/dashboard";
+        if (user == null) {
+            return "redirect:/hotel";
         }
-        return "common/login";
+        if(user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        model.addAllAttributes(commonService.getDashboardData());
+        return "common/dashboard";
     }
 
     @GetMapping("/login")

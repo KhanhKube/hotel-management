@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lí dụng cụ</title>
+  <link rel="icon" href="/img/favicon.png" type="image/png">
+  <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    /* Style cho input readonly */
+    .form-control[readonly] {
+      background-color: #2a3038 !important;
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+
+    /* Style cho select disabled */
+    .form-control:disabled {
+      background-color: #2a3038 !important;
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+  </style>
+
+</head>
+<body>
+
+<div class="container-scroller">
+  <!-- import sidebar -->
+  <div th:replace="common/sidebar"></div>
+  <div id="toast-container" class="toast-container">
+    <div th:if="${success}" class="toast toast-success" th:text="${success}"></div>
+    <div th:if="${message}" class="toast toast-success" th:text="${message}"></div>
+    <div th:if="${error}" class="toast toast-error" th:text="${error}"></div>
+  </div>
+
+  <div class="main-panel">
+    <div class="col-12 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <a th:href="@{/hotel-management/furnishing}" >
+            <i class="mdi mdi-arrow-left"></i> Quay lại
+          </a>
+          <h4 class="card-title">Thông tin dụng cụ</h4>
+          <p class="card-description">Quản lý dụng cụ</p>
+          <form th:action="@{/hotel-management/furnishing/update-stock}" method="post">
+            <table class="table table-bordered">
+              <thead>
+              <tr>
+                <th>Chọn</th>
+                <th>Tên dụng cụ</th>
+                <th>Mô tả</th>
+                <th>Số lượng hiện có</th>
+                <th>Số lượng thay đổi</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="item : ${furnishings}">
+                <td><input type="checkbox" name="selectedIds" th:value="${item.furnishingId}"></td>
+                <td th:text="${item.name}"></td>
+                <td th:text="${item.furnishingDescription}"></td>
+                <td th:text="${item.quantity}"></td>
+                <td><input type="number" name="quantities" min="1"  class="form-control" style="width: 100px;"></td>
+              </tr>
+              </tbody>
+            </table>
+
+            <div class="form-group mt-3">
+              <label>Chọn hành động:</label>
+              <select name="actionType" class="form-control" style="width: 200px;">
+                <option value="ADD">Thêm dụng cụ</option>
+                <option value="TAKE">Lấy dụng cụ</option>
+              </select>
+            </div>
+            <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+            <button type="submit" class="btn btn-success mt-3">Xác nhận</button>
+            <a th:href="@{/hotel-management/furnishing}" class="btn btn-secondary mt-3">Hủy</a>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- main-panel ends -->
+</div>
+<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+<script src="/assets/vendors/chart.js/Chart.min.js"></script>
+<script src="/assets/js/off-canvas.js"></script>
+<script src="/assets/js/hoverable-collapse.js"></script>
+<script src="/assets/js/misc.js"></script>
+<script src="/assets/js/settings.js"></script>
+<script src="/assets/js/todolist.js"></script>
+<script src="/assets/js/chart.js"></script>
+</body>
+</html>

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
@@ -32,6 +33,9 @@ public class Order extends AbstractVersion {
 
 	@Column(name = "check_out")
 	private LocalDateTime checkOut;
+
+	@Column(name = "total_amount")
+	private BigDecimal totalAmount;
 
 	@Column(name = "status")
 	private String status;

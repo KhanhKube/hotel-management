@@ -12,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 import static hotel.db.enums.Constants.*;
 
 @Controller
@@ -148,5 +150,25 @@ public class FurnishingController {
         return "redirect:/hotel-management/furnishing";
     }
 
+    @GetMapping("/update-stock")
+    public String showFurnishingUpdatePage(Model model) {
+        List<Furnishing> list = furnishingService.findAllAndIsDeletedFalse();
+        model.addAttribute("furnishings", list);
+        return "management/furnishing/furnishing-update-stock";
+    }
 
+    @PostMapping("/update-stock")
+    public String updateStock(@RequestParam("selectedIds") List<Integer> selectedIds,
+                              @RequestParam("quantities") List<Integer> quantities,
+                              @RequestParam("actionType") String actionType,
+                              RedirectAttributes redirectAttrs) {
+
+        MessageResponse response = furnishingService.updateFurnishingStock(selectedIds, quantities, actionType);
+        if (response.isSuccess()) {
+            redirectAttrs.addFlashAttribute("message", response.getMessage());
+        } else {
+            redirectAttrs.addFlashAttribute("error", response.getMessage());
+        }
+        return "redirect:/hotel-management/furnishing";
+    }
 }

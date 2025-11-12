@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -37,4 +38,6 @@ public interface CommonService {
     MessageResponse changePassword(ChangePasswordDto dto);
 
     MessageResponse forgotPassword(String email);
+
+    Map<String, Object> getDashboardData();
 }

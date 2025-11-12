@@ -17,7 +17,62 @@
 
         <!-- partial -->
         <div class="main-panel">
+
+
             <div class="content-wrapper">
+                <div class="container mt-4">
+                    <h2> Dashboard khách sạn</h2>
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary tdext-white">
+                                <div class="card-body">
+                                    <h5>Đơn trong tháng</h5>
+                                    <h3 th:text="${ordersThisMonth}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5>Đơn trong tuần</h5>
+                                    <h3 th:text="${ordersThisWeek}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>Nhân viên</h5>
+                                    <h3 th:text="${staffCount}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-dark">
+                                <div class="card-body">
+                                    <h5>Lễ tân</h5>
+                                    <h3 th:text="${receptionistCount}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h5>Doanh thu tháng này</h5>
+                                    <h3 th:text="${#numbers.formatDecimal(totalRevenueThisMonth, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
                 <div class="page-header">
                     <h3 class="page-title"> Chart-js </h3>
                     <nav aria-label="breadcrumb">

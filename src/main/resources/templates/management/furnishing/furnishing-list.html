@@ -82,6 +82,7 @@
 <div class="container-scroller">
   <!-- Include sidebar -->
   <div th:replace="~{common/sidebar :: sidebar}"></div>
+
   <div id="toast-container" class="toast-container">
     <div th:if="${success}" class="toast toast-success" th:text="${success}"></div>
     <div th:if="${message}" class="toast toast-success" th:text="${message}"></div>
@@ -116,7 +117,7 @@
                     <div class="col-md-2">
                       <label class="form-label">Tìm kiếm</label>
                       <input name="search" type="text" class="form-control"
-                             placeholder="Số phòng..." th:value="${param.search}">
+                             placeholder="Tên..." th:value="${param.search}">
                     </div>
                     <!--                                        <div class="col-md-3">-->
                     <!--                                            <label class="form-label">Trạng thái</label>-->
@@ -175,8 +176,8 @@
                   <a th:href="@{/hotel-management/furnishing/add}" class="btn btn-primary">
                     <i class="mdi mdi-plus"></i> Thêm dụng cụ
                   </a>
-                  <a th:href="@{/hotel-management/furnishing/update}" class="btn btn-primary">
-                    <i class="mdi mdi-plus"></i> Lấy dụng cụ
+                  <a th:href="@{/hotel-management/furnishing/update-stock}" class="btn btn-primary">
+                    <i class="mdi mdi-plus"></i> Lấy/Thêm dụng cụ
                   </a>
                   <a th:href="@{/hotel-management/furnishing/create}" class="btn btn-primary">
                     <i class="mdi mdi-plus"></i> Tạo mới dụng cụ
@@ -209,7 +210,12 @@
 
                       <td th:text="${stat.count}"></td>
                       <td th:text="${d.name != null ? d.name : 'N/A'}"></td>
-                      <td th:text="${d.furnishingDescription != null ? d.furnishingDescription : 'N/A'}"></td>
+                      <td th:text="${d.furnishingDescription != null ?
+              (d.furnishingDescription.length() > 20 ?
+              #strings.substring(d.furnishingDescription, 0, 20) + '...' :
+              d.furnishingDescription) :
+              'N/A'}">
+                      </td>
                       <td th:text="${d.quantity != null ? d.quantity : 'N/A'}"></td>
 
 
@@ -276,6 +282,10 @@
     </div>
   </div>
 </div>
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
 </body>
 </html>
 <style>

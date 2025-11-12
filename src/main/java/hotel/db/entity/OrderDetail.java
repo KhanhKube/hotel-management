@@ -3,6 +3,7 @@ package hotel.db.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
@@ -44,6 +45,9 @@ public class OrderDetail extends AbstractVersion{
 
     @Column(name = "check_out")
     private LocalDateTime checkOut;
+
+    @Column(name = "amount")
+    private BigDecimal amount;
 
     @Column(name = "status")
     private String status = "PENDING"; // Trường hợp mà khách hàng hủy đặt phòng, thì status anh nào co
