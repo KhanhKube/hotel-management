@@ -383,8 +383,7 @@ public class CommonServiceImpl implements CommonService {
 		User user = userOpt.get();
 		String rawOtp = String.format("%06d", new Random().nextInt(999999));
 
-		String encodedOtp = passwordEncoder.encode(rawOtp);
-		user.setPassword(encodedOtp);
+		user.setPassword(passwordEncoder.encode(rawOtp));
 		userRepository.save(user);
 
 		String subject = "Xác thực quên mật khẩu";

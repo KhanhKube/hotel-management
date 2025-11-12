@@ -152,8 +152,11 @@ public class CommonController {
     }
 
     @GetMapping("/verify")
-    public String showOtpForm(Model model) {
+    public String showOtpForm(Model model,
+                              HttpSession session) {
         VerifyOtpDto verifyOtpDto = (VerifyOtpDto) model.getAttribute("verifyDto");
+        assert verifyOtpDto != null;
+        session.setAttribute("email", verifyOtpDto.getEmail());
         model.addAttribute("verifyDto", verifyOtpDto);
         return "common/verify-otp";
     }
@@ -175,9 +178,14 @@ public class CommonController {
     }
 
     @GetMapping("/resend-otp")
-    public String resendOtp(@RequestParam String email, Model model) {
+    public String resendOtp(Model model,
+                            HttpSession session) {
+        String email = (String) session.getAttribute("email");
         MessageResponse response = commonService.resendOtp(email);
         model.addAttribute(response.isSuccess() ? "message" : "error", response.getMessage());
+        VerifyOtpDto verifyOtpDto = new VerifyOtpDto();
+        verifyOtpDto.setEmail(email);
+        model.addAttribute("verifyDto", verifyOtpDto);
         return "common/verify-otp";
     }
 
