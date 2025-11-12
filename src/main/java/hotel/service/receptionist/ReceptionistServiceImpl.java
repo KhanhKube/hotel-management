@@ -108,8 +108,7 @@ public class ReceptionistServiceImpl implements ReceptionistService {
         if (user == null) {
             return new MessageResponse(false, FILLALLFEILD);
         }
-        if (isNullOrEmpty(user.getUsername()) ||
-                isNullOrEmpty(user.getEmail()) ||
+        if (isNullOrEmpty(user.getEmail()) ||
                 isNullOrEmpty(user.getPassword()) ||
                 isNullOrEmpty(user.getConfirmPassword()) ||
                 isNullOrEmpty(user.getFirstName()) ||
@@ -173,10 +172,10 @@ public class ReceptionistServiceImpl implements ReceptionistService {
         if (!user.getPhone().matches("^0\\d{9}$")) {
             return new MessageResponse(false, PHONEINVALID);
         }
-        if (userRepository.existsByEmail(user.getEmail())) {
+        if (userRepository.existsByEmailAndPhoneNot(user.getEmail(), user.getPhone())) {
             return new MessageResponse(false, EMAILDUPLICATE);
         }
-        if (userRepository.existsByPhone(user.getPhone())) {
+        if (userRepository.existsByPhoneAndEmailNot(user.getPhone(), user.getEmail())) {
             return new MessageResponse(false, PHONEDUPLICATE);
         }
         LocalDate today = LocalDate.now();
