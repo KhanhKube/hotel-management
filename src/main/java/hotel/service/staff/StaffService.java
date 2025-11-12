@@ -10,7 +10,7 @@ public interface StaffService {
     User getStaff(Integer id);
 
     Page<User> getUserListWithFiltersAndPagination(String search,
-                                                   Boolean gender,
+                                                   String gender,
                                                    String status,
                                                    String sortBy,
                                                    int page,
