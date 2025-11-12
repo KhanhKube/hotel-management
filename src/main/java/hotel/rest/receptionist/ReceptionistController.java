@@ -22,27 +22,6 @@ public class ReceptionistController {
 
     private final ReceptionistService receptionistService;
 
-//    @GetMapping
-//    public String list(HttpSession session, Model model) {
-//        User user = (User) session.getAttribute("user");
-//        if (user == null) {
-//            return "redirect:/hotel";
-//        }
-//        if(user.getRole().equals(CUSTOMER)) {
-//            return "redirect:/hotel";
-//        }
-//        if(user.getRole().equals(STAFF) ||
-//                user.getRole().equals(RECEPTIONIST)) {
-//            return "redirect:/hotel/dashboard";
-//        }
-//        List<User> receptionist = receptionistService.getListReceptionist();
-//        if(receptionist != null) {
-//            model.addAttribute("receptionists", receptionist);
-//            return "management/receptionist/receptionist-list";
-//        }
-//        return "redirect:/hotel";
-//    }
-
     @GetMapping
     public String view(
             @RequestParam(required = false) String search,
