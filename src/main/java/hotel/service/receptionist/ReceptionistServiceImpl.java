@@ -6,10 +6,7 @@ import hotel.db.repository.user.UserRepository;
 import hotel.util.MessageResponse;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,8 +14,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static ch.qos.logback.core.util.StringUtil.isNullOrEmpty;
 import static hotel.db.enums.Constants.*;
@@ -32,7 +31,7 @@ public class ReceptionistServiceImpl implements ReceptionistService {
 
     @Override
     public List<User> getListReceptionist(){
-        List<User> users = userRepository.findByRole(RECEPTIONIST);
+        List<User> users = userRepository.findByRoleAndIsDeletedFalse(RECEPTIONIST);
         if(users.isEmpty()){
             return null;
         }
@@ -94,7 +93,53 @@ public class ReceptionistServiceImpl implements ReceptionistService {
         Pageable pageable = PageRequest.of(page, size, sortConfig);
         return userRepository.findAll(spec, pageable);
     }
+    @Override
+    public Page<User> getReceptionistListWithFiltersAndPagination(String search,
+                                                          Boolean gender,
+                                                          String status,
+                                                          String sortBy,
+                                                          int page,
+                                                          int pageSize) {
 
+        List<User> users = userRepository.findByRoleAndIsDeletedFalse(RECEPTIONIST);
+
+        if (search != null && !search.trim().isEmpty()) {
+            String searchLower = search.trim().toLowerCase();
+            users = users.stream()
+                    .filter(x -> x.getPhone() != null && x.getPhone().toLowerCase().contains(searchLower))
+                    .collect(Collectors.toList());
+        }
+
+        if (gender != null) {
+            User.Gender genderEnum = gender ? User.Gender.MALE : User.Gender.FEMALE;
+            users = users.stream()
+                    .filter(x -> genderEnum.equals(x.getGender()))
+                    .collect(Collectors.toList());
+        }
+
+        if (status != null && !status.isBlank()) {
+            users = users.stream()
+                    .filter(x -> status.equalsIgnoreCase(String.valueOf(x.getStatus())))
+                    .collect(Collectors.toList());
+        }
+
+        Comparator<User> comparator = Comparator.comparing(User::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder()));
+        if ("name".equalsIgnoreCase(sortBy)) {
+            comparator = Comparator.comparing(User::getFirstName, Comparator.nullsLast(String::compareToIgnoreCase));
+        } else if ("email".equalsIgnoreCase(sortBy)) {
+            comparator = Comparator.comparing(User::getEmail, Comparator.nullsLast(String::compareToIgnoreCase));
+        } else if ("salary".equalsIgnoreCase(sortBy)) {
+            comparator = Comparator.comparing(User::getSalary, Comparator.naturalOrder());
+        }
+
+        users.sort(comparator);
+
+        int start = Math.min(page * pageSize, users.size());
+        int end = Math.min(start + pageSize, users.size());
+        List<User> pagedUsers = users.subList(start, end);
+
+        return new PageImpl<>(pagedUsers, PageRequest.of(page, pageSize), users.size());
+    }
     @Override
     public MessageResponse createReceptionist(UserRegisterDto user){
         MessageResponse result = createUserCommon(user, RECEPTIONIST);

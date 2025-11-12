@@ -18,4 +18,11 @@ public interface ReceptionistService {
     Page<User> searchReceptionists(String keyword, String gender, String status, String sort, int page, int size);
 
     MessageResponse updateReceptionist(Integer receptionistId, User user);
+
+    Page<User> getReceptionistListWithFiltersAndPagination(String search,
+                                                           Boolean gender,
+                                                           String status,
+                                                           String sortBy,
+                                                           int page,
+                                                           int pageSize);
 }

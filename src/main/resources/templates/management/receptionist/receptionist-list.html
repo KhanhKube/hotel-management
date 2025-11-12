@@ -1,147 +1,349 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Receptionist</title>
-    <link rel="icon" href="/img/favicon.png" type="image/png">
-    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Quản lí lễ tân</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}"/>
+    <style>
+        tbody tr:hover {
+            cursor: pointer;
+            opacity: 0.65;
+            transition: background-color 0.2s;
+        }
+
+        /* Style cho select dropdown */
+        .form-select {
+            width: 100%;
+            background-color: #2c2e33;
+            border: 1px solid #2c2e33;
+            color: #ffffff;
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1;
+            border-radius: 2px;
+            height: calc(1em + 1.5rem + 2px);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+        }
+
+        .form-select:focus {
+            background-color: #2c2e33;
+            border-color: #2196f3;
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .form-select option {
+            background-color: #2c2e33;
+            color: #ffffff;
+        }
+
+        .form-label {
+            display: block;
+            color: #6c7293;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: #2c2e33;
+            border: 1px solid #2c2e33;
+            color: #ffffff;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1;
+            height: calc(1em + 1.5rem + 2px);
+        }
+
+        .form-control:focus {
+            background-color: #2c2e33;
+            border-color: #2196f3;
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .form-control::placeholder {
+            color: #6c7293;
+        }
+    </style>
 </head>
+
 <body>
-
 <div class="container-scroller">
-    <!-- import sidebar -->
-    <div th:replace="common/sidebar"></div>
+    <!-- Include sidebar -->
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
 
-    <!-- Main content -->
-    <div class="main-panel">
-        <div class="content-wrapper">
-            <div class="page-header">
-                <h3 class="page-title">
-                    <i class="mdi mdi-account-multiple-outline"></i> Quản lý lễ tân
-                </h3>
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                                                                               alt="logo"/></a>
             </div>
-
-            <!-- Filter + Search Form -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <form class="form-inline d-flex justify-content-between align-items-center flex-wrap"
-                          th:action="@{/hotel-management/receptionist/search}" method="get">
-
-                        <!-- 🔍 Search -->
-                        <div class="form-group mb-2">
-                            <input type="text" class="form-control" name="keyword"
-                                   placeholder="Tìm kiếm theo tên hoặc số điện thoại..."
-                                   th:value="${param.keyword}">
-                        </div>
-
-                        <!-- ⚧ Gender Filter -->
-                        <div class="form-group mx-sm-3 mb-2">
-                            <select class="form-control" name="gender">
-                                <option value="">Tất cả giới tính</option>
-                                <option value="MALE" th:selected="${param.gender == 'MALE'}">Nam</option>
-                                <option value="FEMALE" th:selected="${param.gender == 'FEMALE'}">Nữ</option>
-                                <option value="OTHER" th:selected="${param.gender == 'OTHER'}">Khác</option>
-                            </select>
-                        </div>
-
-                        <!-- 🟢 Status Filter -->
-                        <div class="form-group mx-sm-3 mb-2">
-                            <select class="form-control" name="status">
-                                <option value="">Tất cả trạng thái</option>
-                                <option value="ACTIVE" th:selected="${param.status == 'ACTIVE'}">Đang hoạt động</option>
-                                <option value="INACTIVE" th:selected="${param.status == 'INACTIVE'}">Ngừng hoạt động
-                                </option>
-                                <option value="SUSPENDED" th:selected="${param.status == 'SUSPENDED'}">Tạm khóa</option>
-                            </select>
-                        </div>
-
-                        <!-- ↕️ Sort Options -->
-                        <div class="form-group mx-sm-3 mb-2">
-                            <select class="form-control" name="sort">
-                                <option value="">Sắp xếp</option>
-                                <option value="nameAsc" th:selected="${param.sort == 'nameAsc'}">Tên (A-Z)</option>
-                                <option value="nameDesc" th:selected="${param.sort == 'nameDesc'}">Tên (Z-A)</option>
-                                <option value="dobAsc" th:selected="${param.sort == 'dobAsc'}">Ngày sinh ↑</option>
-                                <option value="dobDesc" th:selected="${param.sort == 'dobDesc'}">Ngày sinh ↓</option>
-                                <option value="createdAsc" th:selected="${param.sort == 'createdAsc'}">Ngày tạo ↑
-                                </option>
-                                <option value="createdDesc" th:selected="${param.sort == 'createdDesc'}">Ngày tạo ↓
-                                </option>
-                            </select>
-                        </div>
-
-                        <!-- 🔘 Submit -->
-                        <button type="submit" class="btn btn-primary mb-2">
-                            <i class="mdi mdi-magnify"></i> Tìm kiếm
-                        </button>
-                    </form>
-                </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
             </div>
+        </nav>
 
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
 
-            <!-- Receptionist Table -->
-            <div class="col-lg-12 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Danh sách lễ tân</h4>
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead class="thead-light">
-                                <tr>
-                                    <th>Ảnh</th>
-                                    <th>Tên</th>
-                                    <th>Email</th>
-                                    <th>SĐT</th>
-                                    <th>Ngày sinh</th>
-                                    <th>Địa chỉ</th>
-                                    <th>Giới tính</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="r : ${receptionists}">
-                                    <td class="py-1 text-center">
-                                        <img th:src="${r.avatarUrl != null ? r.avatarUrl : '/assets/images/faces-clipart/pic-1.png'}"
-                                             alt="image" style="width: 50px; height: 50px; border-radius: 50%;"/>
-                                    </td>
-                                    <td th:text="${r.firstName } + ${r.lastName}">Văn Hiếu</td>
-                                    <td th:text="${r.email}">hieubuivan64@gmail.com</td>
-                                    <td th:text="${r.phone}">0123456789</td>
-                                    <td th:text="${#temporals.format(r.dob, 'dd/MM/yyyy')}">23/10/2003</td>
-                                    <td th:text="${r.address}">Hà Nội</td>
-                                    <td th:text="${r.gender}">Nam</td>
-                                    <td>
-                                        <a th:href="@{/hotel-management/receptionist/{id}(id=${r.userId})}"
-                                           class="btn btn-sm btn-warning">Sửa</a>
-                                        <a th:href="@{/hotel-management/receptionist/delete/{id}(id=${r.userId})}"
-                                           class="btn btn-sm btn-danger"
-                                           onclick="return confirm('Bạn có chắc muốn xóa lễ tân này?')">Xóa</a>
-                                    </td>
-                                </tr>
+                    <!--Filter Bar-->
 
-                                <tr th:if="${#lists.isEmpty(receptionists)}">
-                                    <td colspan="8" class="text-center text-muted">Không có dữ liệu lễ tân</td>
-                                </tr>
-                                </tbody>
-                            </table>
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Tìm kiếm nhanh</h4>
+                                </div>
+                                <form th:action="@{/hotel-management/recetionist}" method="get">
 
+                                    <!-- Hàng 1: Thanh search | Tình trạng | Trạng thái -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-2">
+                                            <label class="form-label">Tìm kiếm</label>
+                                            <input name="search" type="text" class="form-control"
+                                                   placeholder="Số phòng..." th:value="${param.search}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Trạng thái</label>
+                                            <select name="status" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option th:each="status : ${status}"
+                                                        th:value="${status}"
+                                                        th:text="${status}"
+                                                        th:selected="${param.status != null && param.status[0] == status}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Giới Tính</label>
+                                            <select name="gender" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option th:each="gender : ${gender}" th:value="${gender}"
+                                                        th:text="${gender}"
+                                                        th:selected="${param.gender != null && param.gender[0] == gender}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hàng 2: Tầng | Diện tích | Phòng | Sort -->
+                                    <div class="row mb-3">
+                                        <!--                                        <div class="col-md-3">-->
+                                        <!--                                            <label class="form-label">Tầng</label>-->
+                                        <!--                                            <select name="floor" class="form-select">-->
+                                        <!--                                                <option value="">Tất cả</option>-->
+                                        <!--                                                <option th:each="floor : ${floors}" th:value="${floor.floorNumber}"-->
+                                        <!--                                                        th:text="'Tầng ' + ${floor.floorNumber}"-->
+                                        <!--                                                        th:selected="${param.floor != null && param.floor[0] == floor.floorNumber.toString()}">-->
+                                        <!--                                                </option>-->
+                                        <!--                                            </select>-->
+                                        <!--                                        </div>-->
+                                        <!--                                        <div class="col-md-3">-->
+                                        <!--                                            <label class="form-label">Diện tích</label>-->
+                                        <!--                                            <select name="size" class="form-select">-->
+                                        <!--                                                <option value="">Tất cả</option>-->
+                                        <!--                                                <option th:each="size : ${sizes}" th:value="${size.size}"-->
+                                        <!--                                                        th:text="${size.size} + 'm²'"-->
+                                        <!--                                                        th:selected="${param.size != null && param.size[0] == size.size.toString()}">-->
+                                        <!--                                                </option>-->
+                                        <!--                                            </select>-->
+                                        <!--                                        </div>-->
+                                        <!--                                        <div class="col-md-3">-->
+                                        <!--                                            <label class="form-label">Loại phòng</label>-->
+                                        <!--                                            <select name="roomType" class="form-select">-->
+                                        <!--                                                <option value="">Tất cả</option>-->
+                                        <!--                                                <option th:each="type : ${roomTypes}" th:value="${type}"-->
+                                        <!--                                                        th:text="${type}"-->
+                                        <!--                                                        th:selected="${param.roomType != null && param.roomType[0] == type}">-->
+                                        <!--                                                </option>-->
+                                        <!--                                            </select>-->
+                                        <!--                                        </div>-->
+                                        <div class="col-md-3">
+                                            <label class="form-label">Sắp xếp</label>
+                                            <select name="sortBy" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option value="name,asc"
+                                                        th:selected="${param.sortBy != null && param.sortBy[0] == 'name,asc'}">
+                                                    Tên tăng dần
+                                                </option>
+                                                <option value="name,desc"
+                                                        th:selected="${param.sortBy != null && param.sortBy[0] == 'name,desc'}">
+                                                    Tên giảm dần
+                                                </option>
+                                                <option value="salary,asc"
+                                                        th:selected="${param.sortBy != null && param.sortBy[0] == 'salary,asc'}">
+                                                    Lương tăng dần
+                                                </option>
+                                                <option value="salary,desc"
+                                                        th:selected="${param.sortBy != null && param.sortBy[0] == 'salary,desc'}">
+                                                    Lương giảm dần
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hàng 3: Tìm kiếm | Đặt lại (căn giữa) -->
+                                    <div class="row justify-content-center">
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                            </button>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a th:href="@{/hotel-management/receptionist}"
+                                               class="btn btn-secondary w-100">
+                                                <i class="mdi mdi-refresh"></i> Đặt lại
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Main Deteils-->
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Quản Lý Lễ tân</h4>
+                                    <a th:href="@{/hotel-management/receptionist/create}" class="btn btn-primary">
+                                        <i class="mdi mdi-plus"></i> Thêm lễ tân
+                                    </a>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show"
+                                     role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <strong>Lỗi!</strong> <span th:text="${errorMessage}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table" id="roomTable">
+                                        <thead>
+                                        <tr>
+                                            <th> STT</th>
+                                            <th> Tên</th>
+                                            <th> Mã</th>
+                                            <th> SĐT</th>
+                                            <th> Email</th>
+                                            <th> Giới tính</th>
+                                            <th> Lương</th>
+                                            <th> Trạng thái</th>
+                                            <th> Hành động</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="d, stat : ${listUser}"
+                                            th:onclick="|window.location.href='@{/hotel-management/staff/detail/{id}(id=${d.userId})}';|"
+                                            style="cursor: pointer;">
+
+                                            <td th:text="${stat.count}"></td>
+                                            <td th:text="${d.firstName != null ? d.firstName : 'N/A'}"></td>
+                                            <td th:text="${d.codeStaff != null ? d.codeStaff : 'N/A'}"></td>
+                                            <td th:text="${d.phone != null ? d.phone : 'N/A'}"></td>
+                                            <td th:text="${d.email != null ? d.email : 'N/A'}"></td>
+                                            <td th:text="${d.gender != null ? d.gender : 'N/A'}"></td>
+                                            <td th:text="${d.salary != null ? d.salary + 'VNĐ' : 'N/A'}"></td>
+                                            <td th:text="${d.status != null ? d.status : 'N/A'}"></td>
+                                            <!--                                            <td>-->
+                                            <!--                                                <div th:switch="${d.status}">-->
+                                            <!--                                                            <span th:case="'ACTIVE'"-->
+                                            <!--                                                                  class="btn btn-outline-success">Hoạt động</span>-->
+                                            <!--                                                    <span th:case="'INACTIVE'"-->
+                                            <!--                                                          class="btn btn-outline-primary">Ngừng hoạt động</span>-->
+                                            <!--                                                    <span th:case="'SUSPENDED'"-->
+                                            <!--                                                          class="btn btn-outline-warning">Đang chờ</span>-->
+                                            <!--                                                    <span th:case="*" class="btn btn-inverse-warning">Lỗi</span>-->
+                                            <!--                                                </div>-->
+                                            <!--                                            </td>-->
+                                            </td>
+
+                                            <td onclick="event.stopPropagation();">
+                                                <a
+                                                        th:href="@{/hotel-management/receptionist/edit/{id}(id=${d.userId})}">Sửa</a>
+                                                <a
+                                                        th:href="@{/hotel-management/receptionist/delete/{id}(id=${d.userId})}">Xóa</a>
+                                            </td>
+                                        </tr>
+
+                                        <tr th:if="${#lists.isEmpty(listUser)}">
+                                            <td colspan="8" class="text-center text-muted">Không có nhân viên nào
+                                                khả dụng.
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <div class="pagination-wrapper" th:if="${totalPages > 1}">
+                                    <nav>
+                                        <ul class="pagination justify-content-center">
+                                            <!-- Previous -->
+                                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                                <a class="page-link" th:href="@{/hotel-management/receptionist(page=${currentPage - 1}, pageSize=${pageSize},
+                                                search=${param.search}, roomType=${param.gender}, status=${param.status}, sortBy=${param.sortBy})}">
+                                                    Trước
+                                                </a>
+                                            </li>
+
+                                            <!-- Page numbers -->
+                                            <li class="page-item"
+                                                th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                                th:classappend="${i == currentPage} ? 'active'">
+                                                <a class="page-link" th:href="@{/hotel-management/receptionist(page=${i}, pageSize=${pageSize},
+                                                search=${param.search}, roomType=${param.gender}, status=${param.status}, sortBy=${param.sortBy})}"
+                                                   th:text="${i + 1}">1</a>
+                                            </li>
+
+                                            <!-- Next -->
+                                            <li class="page-item"
+                                                th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                                <a class="page-link" th:href="@{/hotel-management/receptionist(page=${currentPage + 1}, pageSize=${pageSize},
+                                                search=${param.search}, roomType=${param.gender}, status=${param.status}, sortBy=${param.sortBy})}">
+                                                    Sau
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+
+                                    <!-- Info -->
+                                    <div class="text-center mt-3">
+                                        <p>Trang [[${currentPage + 1}]] / [[${totalPages}]] - Tổng
+                                            [[${totalElements}]] nhân viên</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-        </div> <!-- content-wrapper end -->
-    </div> <!-- main-panel end -->
+        </div>
+    </div>
 </div>
-<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
-<script src="/assets/vendors/chart.js/Chart.min.js"></script>
-<script src="/assets/js/off-canvas.js"></script>
-<script src="/assets/js/hoverable-collapse.js"></script>
-<script src="/assets/js/misc.js"></script>
-<script src="/assets/js/settings.js"></script>
-<script src="/assets/js/todolist.js"></script>
-<script src="/assets/js/chart.js"></script>
+
+
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+</body>
+
 </body>
 </html>

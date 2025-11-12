@@ -24,8 +24,37 @@ public class ReceptionistController {
 
     private final ReceptionistService receptionistService;
 
+//    @GetMapping
+//    public String list(HttpSession session, Model model) {
+//        User user = (User) session.getAttribute("user");
+//        if (user == null) {
+//            return "redirect:/hotel";
+//        }
+//        if(user.getRole().equals(CUSTOMER)) {
+//            return "redirect:/hotel";
+//        }
+//        if(user.getRole().equals(STAFF) ||
+//                user.getRole().equals(RECEPTIONIST)) {
+//            return "redirect:/hotel/dashboard";
+//        }
+//        List<User> receptionist = receptionistService.getListReceptionist();
+//        if(receptionist != null) {
+//            model.addAttribute("receptionists", receptionist);
+//            return "management/receptionist/receptionist-list";
+//        }
+//        return "redirect:/hotel";
+//    }
+
     @GetMapping
-    public String list(HttpSession session, Model model) {
+    public String view(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean gender,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpSession session,
+            Model model) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/hotel";
@@ -37,43 +66,15 @@ public class ReceptionistController {
                 user.getRole().equals(RECEPTIONIST)) {
             return "redirect:/hotel/dashboard";
         }
-        List<User> receptionist = receptionistService.getListReceptionist();
+        Page<User> receptionist = receptionistService.getReceptionistListWithFiltersAndPagination(search, gender, status, sortBy, page, pageSize);
         if(receptionist != null) {
-            model.addAttribute("receptionists", receptionist);
+            model.addAttribute("listUser", receptionist);
             return "management/receptionist/receptionist-list";
         }
         return "redirect:/hotel";
     }
 
-    @GetMapping("/search")
-    public String listSearch(@RequestParam(required = false) String keyword,
-                             @RequestParam(required = false) String gender,
-                             @RequestParam(required = false) String status,
-                             @RequestParam(required = false) String sort,
-                             @RequestParam(required = false, defaultValue = "1") int page,
-                             @RequestParam(required = false, defaultValue = "10") int size,
-                             HttpSession session,
-                             Model model) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "redirect:/hotel";
-        }
-        if(user.getRole().equals(CUSTOMER)) {
-            return "redirect:/hotel";
-        }
-        if(user.getRole().equals(STAFF) ||
-                user.getRole().equals(RECEPTIONIST)) {
-            return "redirect:/hotel/dashboard";
-        }
-        Page<User> receptionist = receptionistService.searchReceptionists(keyword, gender, status, sort, page, size);
-        if(receptionist != null) {
-            model.addAttribute("receptionists", receptionist);
-            return "management/receptionist/receptionist-list";
-        }
-        return "redirect:/hotel";
-    }
-
-    @GetMapping("/{id}")
+    @GetMapping("/edit/{id}")
     public String receptionistDetail(@PathVariable("id") Integer id,
                                      HttpSession session,
                                      Model model) {
@@ -96,7 +97,7 @@ public class ReceptionistController {
         return "redirect:/hotel";
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/edit/{id}")
     public String updateReceptionist(@PathVariable("id") Integer id,
                                      @ModelAttribute("receptionist") User dto,
                                      HttpSession session,
