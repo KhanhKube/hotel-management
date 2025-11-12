@@ -31,13 +31,15 @@ public class StaffController {
     @GetMapping
     public String view(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Boolean gender,
+            @RequestParam(required = false) String gender,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String sortBy,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize,
             Model model) {
-
+        System.out.println(gender);
+        System.out.println(status);
+        System.out.println(sortBy);
         Page<User> users = staffService.getUserListWithFiltersAndPagination(search, gender, status, sortBy, page, pageSize);
 
 
