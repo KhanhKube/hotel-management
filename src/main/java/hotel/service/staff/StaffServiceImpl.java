@@ -298,6 +298,75 @@ public class StaffServiceImpl implements StaffService {
         }
     }
 
+    @Override
+    public String updateStaffFromForm(User user) {
+        try {
+            // Lấy user hiện tại từ database
+            User existingUser = userRepository.findById(user.getUserId()).orElse(null);
+            if (existingUser == null) {
+                return "Không tìm thấy nhân viên";
+            }
+
+            // Validate firstName (tên) - max 50 ký tự
+            if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) {
+                return "Tên không được để trống";
+            }
+            if (user.getFirstName().length() > 50) {
+                return "Tên không được vượt quá 50 ký tự";
+            }
+
+            // Validate lastName (họ) - max 50 ký tự
+            if (user.getLastName() == null || user.getLastName().trim().isEmpty()) {
+                return "Họ không được để trống";
+            }
+            if (user.getLastName().length() > 50) {
+                return "Họ không được vượt quá 50 ký tự";
+            }
+
+            // Validate address - max 150 ký tự
+            if (user.getAddress() != null && user.getAddress().length() > 150) {
+                return "Địa chỉ không được vượt quá 150 ký tự";
+            }
+
+            // Validate gender
+            if (user.getGender() == null) {
+                return "Giới tính không được để trống";
+            }
+
+            // Validate dob
+            if (user.getDob() == null) {
+                return "Ngày sinh không được để trống";
+            }
+
+            // Validate contract end date - tối thiểu 7 ngày từ hôm nay
+            if (user.getContractEndDate() == null) {
+                return "Ngày hết hạn hợp đồng không được để trống";
+            }
+            java.time.LocalDate today = java.time.LocalDate.now();
+            java.time.LocalDate minEndDate = today.plusDays(7);
+            if (user.getContractEndDate().isBefore(minEndDate)) {
+                return "Ngày hết hạn hợp đồng phải cách ngày hôm nay ít nhất 7 ngày";
+            }
+
+            // Update các trường được phép thay đổi
+            existingUser.setFirstName(user.getFirstName());
+            existingUser.setLastName(user.getLastName());
+            existingUser.setGender(user.getGender());
+            existingUser.setDob(user.getDob());
+            existingUser.setAddress(user.getAddress());
+            existingUser.setContractEndDate(user.getContractEndDate());
+
+            // Giữ nguyên các trường không được phép thay đổi: email, phone, role, username, password, contractStartDate, codeStaff
+
+            // Save user
+            userRepository.save(existingUser);
+
+            return null; // null = success, no error
+        } catch (Exception e) {
+            return "Có lỗi xảy ra: " + e.getMessage();
+        }
+    }
+
     private String generateStaffCode() {
         String prefix = "NV";
         long count = userRepository.count() + 1;

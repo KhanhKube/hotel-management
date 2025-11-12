@@ -76,10 +76,11 @@
                                 <div class="card-body">
                                     <h4 class="card-title mb-4">
                                         <i class="mdi mdi-account-plus"></i>
-                                        <span th:text="${user.userId != null ? 'Cập Nhật Nhân Viên' : 'Tạo Tài Khoản Nhân Viên'}"></span>
+                                        <span th:text="${isEdit != null && isEdit ? 'Cập Nhật Nhân Viên' : 'Tạo Tài Khoản Nhân Viên'}"></span>
                                     </h4>
 
-                                    <form th:action="@{/hotel-management/staff/create}" method="post" th:object="${user}">
+                                    <form th:action="${isEdit != null && isEdit ? '/hotel-management/staff/edit/' + user.userId : '/hotel-management/staff/create'}" 
+                                          method="post" th:object="${user}">
                                         <input type="hidden" th:field="*{userId}" />
 
                                         <!-- Error Message -->
@@ -96,20 +97,22 @@
                                                 <div class="form-group">
                                                     <label for="email">Email</label>
                                                     <input id="email" type="email" class="form-control" th:field="*{email}" 
-                                                           placeholder="example@email.com" maxlength="100" required>
+                                                           placeholder="example@email.com" maxlength="100" 
+                                                           th:readonly="${isEdit != null && isEdit}" required>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="phone">Số điện thoại</label>
                                                     <input id="phone" type="text" class="form-control" th:field="*{phone}" 
-                                                           placeholder="0123456789" maxlength="10" required>
+                                                           placeholder="0123456789" maxlength="10" 
+                                                           th:readonly="${isEdit != null && isEdit}" required>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- Row 2: Password -->
-                                        <div class="row">
+                                        <!-- Row 2: Password (chỉ hiện khi tạo mới) -->
+                                        <div class="row" th:if="${isEdit == null || !isEdit}">
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label for="password">Mật khẩu</label>
@@ -153,7 +156,9 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="dob">Ngày sinh</label>
-                                                    <input id="dob" type="date" class="form-control" th:field="*{dob}" required>
+                                                    <input id="dob" type="date" class="form-control" 
+                                                           th:value="${user.dob != null ? #temporals.format(user.dob, 'yyyy-MM-dd') : ''}"
+                                                           name="dob" required>
                                                 </div>
                                             </div>
                                         </div>
@@ -163,17 +168,21 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="role">Vai trò</label>
-                                                    <select id="role" class="form-control" th:field="*{role}" required>
+                                                    <select id="role" class="form-control" th:field="*{role}" 
+                                                            th:disabled="${isEdit != null && isEdit}" required>
                                                         <option value="">-- Chọn vai trò --</option>
                                                         <option value="RECEPTIONIST">Lễ tân</option>
                                                         <option value="STAFF">Nhân viên</option>
                                                     </select>
+                                                    <input type="hidden" th:if="${isEdit != null && isEdit}" th:field="*{role}" />
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="contractEndDate">Ngày hết hạn hợp đồng</label>
-                                                    <input id="contractEndDate" type="date" class="form-control" th:field="*{contractEndDate}" required>
+                                                    <input id="contractEndDate" type="date" class="form-control" 
+                                                           th:value="${user.contractEndDate != null ? #temporals.format(user.contractEndDate, 'yyyy-MM-dd') : ''}"
+                                                           name="contractEndDate" required>
                                                 </div>
                                             </div>
                                         </div>

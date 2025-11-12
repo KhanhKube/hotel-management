@@ -29,4 +29,6 @@ public interface StaffService {
 
     String createStaffFromForm(User user);
 
+    String updateStaffFromForm(User user);
+
 }
