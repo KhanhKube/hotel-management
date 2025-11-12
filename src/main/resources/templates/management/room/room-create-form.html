@@ -178,6 +178,15 @@
                                                         th:field="*{price}" placeholder="VD: 500000" min="0" required>
                                                 </div>
                                             </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="maxSizePeople">
+                                                        Số lượng người ở tối đa:
+                                                    </label>
+                                                    <input id="maxSizePeople" type="number" class="form-control"
+                                                           th:field="*{maxSizePeople}" placeholder="Số người tối đa" min="1" max="10" required>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <!-- Mô tả -->
@@ -188,6 +197,38 @@
                                             <textarea id="roomDescription" class="form-control"
                                                 th:field="*{roomDescription}" rows="4"
                                                 placeholder="Nhập mô tả chi tiết về phòng..."></textarea>
+                                        </div>
+
+                                        <!-- Vật dụng phòng -->
+                                        <div class="form-group">
+                                            <label>Vật dụng phòng:</label>
+                                            <table class="table table-bordered table-sm" style="width: auto;">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 250px;">Tên vật dụng</th>
+                                                        <th style="width: 120px;" class="text-center">Số lượng</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr th:each="furnishing, iterStat : ${furnishings}">
+                                                        <td th:text="${furnishing.name}"></td>
+                                                        <td>
+                                                            <input type="hidden" 
+                                                                   name="furnishingIds" 
+                                                                   th:value="${furnishing.furnishingId}">
+                                                            <input type="number" 
+                                                                   class="form-control form-control-sm" 
+                                                                   name="furnishingQuantities"
+                                                                   th:value="${furnishing.roomQuantity}"
+                                                                   min="0" 
+                                                                   placeholder="0">
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <small class="form-text text-muted">
+                                                Nhập số lượng vật dụng mặc định cho phòng này.
+                                            </small>
                                         </div>
                                         <!-- Upload ảnh -->
                                         <div class="form-group">
@@ -319,6 +360,7 @@
         });
 
     </script>
+
     <!-- Tạm comment các scripts có thể gây xung đột -->
     <!-- <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
     <script src="/assets/js/off-canvas.js"></script>

@@ -1,8 +1,11 @@
 package hotel.service.room;
 
+import hotel.db.dto.furnishing.FurnishingFormDto;
 import hotel.db.dto.room.*;
 import hotel.db.entity.*;
 import hotel.db.repository.floor.FloorRepository;
+import hotel.db.repository.furnishing.FurnishingRepository;
+import hotel.db.repository.roomfurnishing.RoomFurnishingRepository;
 import hotel.db.repository.roommaintenance.RoomMaintenanceRepository;
 import hotel.db.repository.roomview.RoomViewRepository;
 import hotel.db.repository.user.UserRepository;
@@ -41,6 +44,8 @@ public class RoomServiceImpl implements RoomService {
     private final ViewRepository viewRepository;
     private final SizeService sizeService;
     private final RoomMaintenanceRepository roomMaintenanceRepository;
+    private final RoomFurnishingRepository roomFurnishingRepository;
+    private final FurnishingRepository furnishingRepository;
     private final UserRepository userRepository;
 
     public List<String> getRoomViewList(Integer roomId) {
@@ -48,6 +53,64 @@ public class RoomServiceImpl implements RoomService {
                 viewRepository.findViewTypeByViewId(viewId)).collect(Collectors.toList());
     }
 
+
+    
+    @Override
+    public List<FurnishingFormDto> getFurnishingsForForm(Integer roomId) {
+        // Lấy tất cả vật dụng trong khách sạn (chỉ để hiển thị tên)
+        List<Furnishing> allFurnishings = furnishingRepository.findFurnishingsByIsDeletedFalse();
+        
+        // Lấy vật dụng hiện có của phòng (nếu đang edit)
+        Map<Integer, Integer> roomFurnishingMap = new HashMap<>();
+        if (roomId != null) {
+            List<RoomFurnishing> roomFurnishings = roomFurnishingRepository.findByRoomIdAndIsDeletedFalse(roomId);
+            roomFurnishingMap = roomFurnishings.stream()
+                .collect(Collectors.toMap(
+                    RoomFurnishing::getFurnishingId,
+                    RoomFurnishing::getQuantity
+                ));
+        }
+        
+        // Tạo DTO cho form
+        List<FurnishingFormDto> result = new ArrayList<>();
+        for (Furnishing furnishing : allFurnishings) {
+            FurnishingFormDto dto = new FurnishingFormDto();
+            dto.setFurnishingId(furnishing.getFurnishingId());
+            dto.setName(furnishing.getName());
+            // Số lượng vật dụng của phòng (mặc định 0 nếu chưa có)
+            dto.setRoomQuantity(roomFurnishingMap.getOrDefault(furnishing.getFurnishingId(), 0));
+            result.add(dto);
+        }
+        
+        return result;
+    }
+    
+    @Override
+    @Transactional
+    public void saveRoomFurnishings(Integer roomId, List<Integer> furnishingIds, List<Integer> quantities) {
+        if (furnishingIds == null || quantities == null || furnishingIds.size() != quantities.size()) {
+            return;
+        }
+        
+        // Xóa tất cả vật dụng cũ của phòng
+        List<RoomFurnishing> oldRoomFurnishings = roomFurnishingRepository.findByRoomIdAndIsDeletedFalse(roomId);
+        roomFurnishingRepository.deleteAll(oldRoomFurnishings);
+        
+        // Thêm vật dụng mới theo cấu hình
+        for (int i = 0; i < furnishingIds.size(); i++) {
+            Integer furnishingId = furnishingIds.get(i);
+            Integer quantity = quantities.get(i);
+            
+            // Chỉ lưu nếu quantity > 0
+            if (quantity != null && quantity > 0) {
+                RoomFurnishing roomFurnishing = new RoomFurnishing();
+                roomFurnishing.setRoomId(roomId);
+                roomFurnishing.setFurnishingId(furnishingId);
+                roomFurnishing.setQuantity(quantity);
+                roomFurnishingRepository.save(roomFurnishing);
+            }
+        }
+    }
 
     @Override
     public void saveMaintenance(Integer roomId, String checkInDate, String checkOutDate,
@@ -250,6 +313,15 @@ public class RoomServiceImpl implements RoomService {
         dto.setPrice(x.getPrice());
         dto.setRoomDescription(x.getRoomDescription());
         dto.setRoomViews(getRoomViewList(x.getRoomId()));
+        
+        // Lấy ảnh đầu tiên từ database (URL từ Cloudinary)
+        List<RoomImage> images = roomImageRepository.findByRoomId(x.getRoomId());
+        if (images != null && !images.isEmpty()) {
+            dto.setImageRoom(images.get(0).getRoomImageUrl());
+        } else {
+            dto.setImageRoom(null); // Sẽ dùng ảnh mặc định trong HTML
+        }
+        
         return dto;
     }
     /*
@@ -799,6 +871,7 @@ public class RoomServiceImpl implements RoomService {
         dto.setSold(room.getSold());
         dto.setView(room.getView());
         dto.setRoomDescription(room.getRoomDescription());
+        dto.setMaxSizePeople(room.getMaxSizePeople());
 
         List<RoomImage> roomImages = roomImageRepository.findByRoomId(room.getRoomId());
         List<String> imageUrls = new ArrayList<>();

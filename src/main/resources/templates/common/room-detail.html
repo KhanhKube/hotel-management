@@ -59,6 +59,38 @@
             border-radius: 10px;
         }
 
+        /* Style cho nút carousel */
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 50px;
+            height: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        .carousel-control-prev:hover,
+        .carousel-control-next:hover {
+            opacity: 1;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .carousel-control-prev {
+            left: 20px;
+        }
+
+        .carousel-control-next {
+            right: 20px;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            width: 20px;
+            height: 20px;
+        }
+
         .room-description {
             white-space: pre-line;
         }
@@ -231,19 +263,27 @@
     <div class="container mt-4 mb-5">
 
         <!-- Carousel hình ảnh -->
-        <div id="roomCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
-            <div class="carousel-inner" th:if="${room.images != null}">
+        <div id="roomCarousel" class="carousel slide mb-4" data-ride="carousel">
+            <div class="carousel-inner" th:if="${room.images != null && !room.images.isEmpty()}">
                 <div class="carousel-item" th:each="img, iterStat : ${room.images}"
                      th:classappend="${iterStat.index == 0} ? 'active'">
                     <img th:src="${img}" class="d-block w-100" alt="Hình ảnh phòng">
                 </div>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#roomCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#roomCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon"></span>
-            </button>
+            <!-- Fallback nếu không có ảnh -->
+            <div class="carousel-inner" th:if="${room.images == null || room.images.isEmpty()}">
+                <div class="carousel-item active">
+                    <img src="/images/room/room-01.png" class="d-block w-100" alt="Ảnh mặc định">
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#roomCarousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#roomCarousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
         </div>
 
         <!-- Thông tin phòng -->
@@ -260,6 +300,9 @@
             <p><strong>Loại giường:</strong> <span th:text="${room.bedType}"></span></p>
             <p><strong>Tầng:</strong> <span th:text="${room.floorNumber}"></span></p>
             <p><strong>Kích thước:</strong> <span th:text="${room.size} + ' m²'"></span></p>
+            <p th:if="${room.maxSizePeople}"><strong>Số người ở tối đa:</strong> 
+                <span th:text="${room.maxSizePeople} + ' người'"></span>
+            </p>
             <p><strong>Hướng nhìn: </strong> <span th:text="${#strings.listJoin(room.roomViews, ', ')}"></span></p>
             <p><strong>Mô tả:</strong></p>
             <p class="room-description" th:text="${room.roomDescription}"></p>
@@ -300,12 +343,20 @@
 <!-- import AI Chat Widget -->
 <div th:replace="~{ai/ai-chat-widget :: aiChatWidget}"></div>
 
-<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 <!-- import footer -->
 <div th:replace="~{common/footer :: footer}"></div>
 
 <script src="/vendors/jquery/jquery-3.2.1.min.js"></script>
 <script src="/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+
+<!-- Initialize carousel -->
+<script>
+    $(document).ready(function() {
+        $('#roomCarousel').carousel({
+            interval: false // Tắt auto-slide, chỉ slide khi click
+        });
+    });
+</script>
 <script src="/vendors/magnefic-popup/jquery.magnific-popup.min.js"></script>
 <script src="/vendors/owl-carousel/owl.carousel.min.js"></script>
 <script src="/vendors/easing.min.js"></script>
