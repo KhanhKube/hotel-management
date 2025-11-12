@@ -140,15 +140,6 @@
                         <a class="nav-link" href="#">Dụng cụ</a>
                     </li>
 
-                    <!-- Only MANAGER can see -->
-                    <li class="nav-item" th:if="${user != null and user.role == 'MANAGER'}">
-                        <a class="nav-link" th:href="@{/hotel-management/receptionist}">Lễ tân</a>
-                    </li>
-                    <li class="nav-item" th:if="${user != null and user.role == 'MANAGER'}">
-                        <!--                        <a class="nav-link" th:href="@{/hotel-management/staff}">Nhân viên</a>-->
-                        <a class="nav-link"  href="#">Nhân viên</a>
-                    </li>
-
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/hotel-management/discount}">Mã giảm giá</a>
                     </li>
@@ -169,7 +160,7 @@
         </li>
 
         <!-- Quản lí người dùng -->
-        <li class="nav-item menu-items">
+        <li class="nav-item menu-items" th:if="${user != null and (user.role == 'MANAGER' || user.role == 'ADMIN')}">
             <a class="nav-link" data-toggle="collapse" href="#auth"
                aria-expanded="false" aria-controls="auth">
                 <span class="menu-icon"><i class="mdi mdi-security"></i></span>
@@ -178,8 +169,15 @@
             </a>
             <div class="collapse" id="auth">
                 <ul class="nav flex-column sub-menu">
-                    <li class="nav-item">
+                    <li class="nav-item"  th:if="${user != null and user.role == 'ADMIN'}">
                         <a class="nav-link" th:href="@{/hotel-management/accounts}">Tài khoản</a>
+                    </li>
+                    <!-- Only MANAGER can see -->
+                    <li class="nav-item" th:if="${user != null and user.role == 'MANAGER'}">
+                        <a class="nav-link" th:href="@{/hotel-management/receptionist}">Lễ tân</a>
+                    </li>
+                    <li class="nav-item" th:if="${user != null and user.role == 'MANAGER'}">
+                        <a class="nav-link" th:href="@{/hotel-management/staff}">Nhân viên</a>
                     </li>
                     <li class="nav-item">
                         <!--                        <a class="nav-link" th:href="@{/hotel-management/customer}">Khách hàng</a>-->
@@ -192,33 +190,6 @@
                     <!-- Check-in và Check-out đã được thêm vào phần "Quản lí khách sạn" -->
                 </ul>
             </div>
-        </li>
-
-        <!-- Other pages -->
-        <li class="nav-item menu-items">
-            <a class="nav-link" th:href="@{/hotel/dashboard}">
-                <span class="menu-icon"><i class="mdi mdi-table-large"></i></span>
-                <span class="menu-title">Tables</span>
-            </a>
-        </li>
-        <li class="nav-item menu-items">
-            <a class="nav-link" th:href="@{/hotel/dashboard}">
-                <span class="menu-icon"><i class="mdi mdi-chart-bar"></i></span>
-                <span class="menu-title">Charts</span>
-            </a>
-        </li>
-        <li class="nav-item menu-items">
-            <a class="nav-link" th:href="@{/hotel/dashboard}">
-                <span class="menu-icon"><i class="mdi mdi-contacts"></i></span>
-                <span class="menu-title">Icons</span>
-            </a>
-        </li>
-
-        <li class="nav-item menu-items">
-            <a class="nav-link" href="http://www.bootstrapdash.com/demo/corona-free/jquery/documentation/documentation.html">
-                <span class="menu-icon"><i class="mdi mdi-file-document-box"></i></span>
-                <span class="menu-title">Thông tin</span>
-            </a>
         </li>
     </ul>
 </nav>
