@@ -310,7 +310,9 @@ public class RoomController {
         // Lấy 2 lists riêng biệt cho check-in và check-out calendar
         List<String> bookedDatesCheckIn = roomService.getBookedDatesForBookingRoom(id);
         List<String> bookedDatesCheckOut = roomService.getBookedDatesForCheckOut(id);
+        List<String> disableDate = roomService.getDateToDisableRoom(id);
         model.addAttribute("roomId", id);
+        model.addAttribute("disableDate", disableDate);
         model.addAttribute("bookedDatesCheckIn", bookedDatesCheckIn);
         model.addAttribute("bookedDatesCheckOut", bookedDatesCheckOut);
         return "management/room/room-update-status";
@@ -341,6 +343,31 @@ public class RoomController {
         } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "management/room/room-update-status";
+        }
+    }
+    
+    @PostMapping("/disable")
+    public String disableRoom(
+            @RequestParam("roomId") Integer roomId,
+            @RequestParam("checkInDate") String checkInDate,
+            @RequestParam(value = "des", required = false) String description,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập!");
+                return "redirect:/hotel/login";
+            }
+
+            Integer createdBy = user.getUserId();
+            roomService.disableRoom(roomId, checkInDate, description, createdBy);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Đã dừng hoạt động phòng và hủy các booking liên quan!");
+            return "redirect:/hotel-management/room";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/hotel-management/room/status/" + roomId;
         }
     }
 

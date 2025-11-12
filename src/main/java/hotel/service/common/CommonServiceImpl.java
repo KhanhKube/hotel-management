@@ -410,5 +410,40 @@ public class CommonServiceImpl implements CommonService {
 
 		return data;
 	}
+	
+	@Override
+	public void sendCancellationEmail(String toEmail, String fullName, String roomNumber, 
+	                                  String startDate, String endDate, String reason) {
+		try {
+			MimeMessage message = mailSender.createMimeMessage();
+			MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+			helper.setTo(toEmail);
+			helper.setSubject("⚠️ Thông báo hủy đặt phòng - " + roomNumber);
+			helper.setText(
+					"<div style='font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;'>" +
+					"<div style='max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;'>" +
+					"<h2 style='color: #dc3545;'>Xin lỗi quý khách!</h2>" +
+					"<p>Kính gửi <strong>" + fullName + "</strong>,</p>" +
+					"<p>Chúng tôi rất tiếc phải thông báo rằng đặt phòng của quý khách đã bị hủy:</p>" +
+					"<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;'>" +
+					"<p style='margin: 5px 0;'><strong>Phòng:</strong> " + roomNumber + "</p>" +
+					"<p style='margin: 5px 0;'><strong>Từ ngày:</strong> " + startDate + "</p>" +
+					"<p style='margin: 5px 0;'><strong>Đến ngày:</strong> " + endDate + "</p>" +
+					"<p style='margin: 5px 0;'><strong>Lý do:</strong> " + reason + "</p>" +
+					"</div>" +
+					"<p>Chúng tôi sẽ liên hệ lại với quý khách trong thời gian sớm nhất để thực hiện <strong>hoàn tiền và đền bù</strong>.</p>" +
+					"<p>Chúng tôi chân thành xin lỗi vì sự bất tiện này!</p>" +
+					"<p style='margin-top: 30px;'>Trân trọng,<br><strong>Hotel Booking Team</strong></p>" +
+					"</div>" +
+					"</div>",
+					true
+			);
+
+			mailSender.send(message);
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		}
+	}
 }
 

@@ -40,4 +40,7 @@ public interface CommonService {
     MessageResponse forgotPassword(String email);
 
     Map<String, Object> getDashboardData();
+    
+    void sendCancellationEmail(String toEmail, String fullName, String roomNumber, 
+                               String startDate, String endDate, String reason);
 }
