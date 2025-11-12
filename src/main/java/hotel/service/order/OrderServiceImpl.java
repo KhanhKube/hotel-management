@@ -41,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
 					dto.setStatus(order.getStatus());
 					dto.setCreatedAt(order.getCreatedAt());
 					dto.setPaymentOrderCode(order.getPaymentOrderCode());
+					dto.setTotalAmount(order.getTotalAmount());
 
 					// Get order details
 					List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
@@ -53,6 +54,7 @@ public class OrderServiceImpl implements OrderService {
 						detailDto.setCheckOut(detail.getCheckOut());
 						detailDto.setStatus(detail.getStatus());
 						detailDto.setOrderDescription(detail.getOrderDescription());
+						detailDto.setAmount(detail.getAmount());
 
 						// Get room info
 						roomRepository.findById(detail.getRoomId()).ifPresent(room -> {
@@ -81,7 +83,6 @@ public class OrderServiceImpl implements OrderService {
 		List<Object[]> results = orderRepository.findAllBookingInfo();
 		return mapToBookingInfoDto(results);
 	}
-
 
 
 	private List<BookingInfoDto> mapToBookingInfoDto(List<Object[]> results) {

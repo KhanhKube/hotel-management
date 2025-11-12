@@ -158,13 +158,19 @@
             <div class="order-header">
                 <div>
                     <div class="order-id">
-                        <i class="fas fa-file-invoice"></i> Đơn hàng #<span th:text="${order.orderId}">001</span>
+                        <i class="fas fa-file-invoice"></i> Đơn hàng <span th:text="${iterStat.count}">1</span>
                     </div>
                     <small class="text-muted">
                         Ngày đặt: <span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</span>
                     </small>
                     <br>
-
+                    <div th:if="${order.totalAmount != null}" class="mt-2">
+                        <strong style="color: #667eea; font-size: 1.2rem;">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Tổng tiền: <span
+                                th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">1,000,000 VNĐ</span>
+                        </strong>
+                    </div>
                 </div>
                 <div>
                    <span class="status-badge"
