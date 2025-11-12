@@ -1,5 +1,6 @@
 package hotel.service.room;
 
+import hotel.db.dto.furnishing.FurnishingFormDto;
 import hotel.db.dto.room.*;
 import hotel.db.entity.*;
 import org.springframework.data.domain.Page;
@@ -11,12 +12,14 @@ import java.util.Objects;
 
 public interface RoomService {
     
-    List<hotel.db.dto.furnishing.FurnishingFormDto> getFurnishingsForForm(Integer roomId);
+    List<FurnishingFormDto> getFurnishingsForForm(Integer roomId);
     
     void saveRoomFurnishings(Integer roomId, List<Integer> furnishingIds, List<Integer> quantities);
 
     void saveMaintenance(Integer roomId, String checkInDate, String checkOutDate,
                          String description, Integer createBy);
+
+    List<String> getDateToDisableRoom(Integer roomId);
 
     //Lấy các ngày cho phép check-in
     List<String> getBookedDatesForBookingRoom(Integer roomId);
@@ -70,4 +73,6 @@ public interface RoomService {
 	List<RoomHomepageResponseDto> getTop3Rooms();
 
 	RoomDetailResponseDto getRoomDetailById(Integer roomId);
+	
+	void disableRoom(Integer roomId, String disableDate, String description, Integer createdBy);
 }
