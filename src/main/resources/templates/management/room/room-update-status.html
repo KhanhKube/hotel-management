@@ -124,14 +124,6 @@
                                             <label>Nội dung bảo trì:</label>
                                             <input type="text" name="des" class="form-control"><br>
 
-                                            <label>Phân công bảo trì:</label><br>
-                                            <select name="userId" class="form-control">
-                                                <option value="">Chọn nhân viên</option>
-                                                <option th:each="staff : ${listStaff}"
-                                                        th:value="${staff.userId}"
-                                                        th:text="${staff.username}">
-                                                </option>
-                                            </select><br>
                                             <button type="submit" class="btn btn-primary">Cập nhật</button>
                                             <a th:href="@{/hotel-management/room}" class="btn btn-secondary">Hủy</a>
                                         </form>

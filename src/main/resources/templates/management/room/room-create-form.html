@@ -148,6 +148,8 @@
                                                             th:text="'Tầng ' + ${floor.floorNumber}">
                                                         </option>
                                                     </select>
+                                                    <!-- Hidden input để giữ giá trị khi disabled -->
+                                                    <input type="hidden" th:if="${room.roomId != null}" th:field="*{floorId}" />
                                                 </div>
                                             </div>
                                             <div class="col-md-6">

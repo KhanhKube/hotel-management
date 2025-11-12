@@ -75,10 +75,77 @@
         .form-control::placeholder {
             color: #6c7293;
         }
+
+        /* Toast notification styles */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast-notification.error {
+            background-color: #dc3545;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast-notification.hiding {
+            animation: slideOut 0.3s ease-out;
+        }
+
+        .toast-notification .toast-close {
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 1;
+            color: white;
+            opacity: 0.8;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .toast-notification .toast-close:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 
 <body>
+<!-- Toast Notification -->
+<div th:if="${successMessage}" class="toast-notification">
+    <span class="toast-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300);">&times;</span>
+    <i class="mdi mdi-check-circle"></i>
+    <span th:text="${successMessage}"></span>
+</div>
+
 <div class="container-scroller">
     <!-- Include sidebar -->
     <div th:replace="~{common/sidebar :: sidebar}"></div>
@@ -109,12 +176,12 @@
 
                                     <!-- Hàng 1: Thanh search | Giá min | Giá max | Tình trạng | Trạng thái -->
                                     <div class="row mb-3">
-                                        <div class="col-md-2">
+                                        <div class="col-md-4">
                                             <label class="form-label">Tìm kiếm</label>
                                             <input name="search" type="text" class="form-control"
                                                    placeholder="Tìm kiếm tên nhân viên" th:value="${param.search}">
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label class="form-label">Trạng thái</label>
                                             <select name="status" class="form-select">
                                                 <option value="">Tất cả</option>
@@ -125,7 +192,7 @@
                                                 </option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label class="form-label">Giới Tính</label>
                                             <select name="gender" class="form-select">
                                                 <option value="">Tất cả</option>
@@ -135,11 +202,15 @@
                                                 </option>
                                             </select>
                                         </div>
-                                    </div>
-
-                                    <!-- Hàng 2: Tầng | Diện tích | Phòng | Sort -->
-                                    <div class="row mb-3">
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
+                                            <label class="form-label">Vai trò</label>
+                                            <select name="role" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option value="RECEPTIONIST" th:selected="${param.role != null && param.role[0] == 'RECEPTIONIST'}">Lễ tân</option>
+                                                <option value="STAFF" th:selected="${param.role != null && param.role[0] == 'STAFF'}">Nhân viên</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
                                             <label class="form-label">Sắp xếp</label>
                                             <select name="sortBy" class="form-select">
                                                 <option value="">Tất cả</option>
@@ -167,12 +238,12 @@
                                     <div class="row justify-content-center">
                                         <div class="col-md-2">
                                             <button type="submit" class="btn btn-primary w-100">
-                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                                Tìm kiếm
                                             </button>
                                         </div>
                                         <div class="col-md-2">
                                             <a th:href="@{/hotel-management/staff}" class="btn btn-secondary w-100">
-                                                <i class="mdi mdi-refresh"></i> Đặt lại
+                                                Đặt lại
                                             </a>
                                         </div>
                                     </div>
@@ -207,12 +278,12 @@
                                         <thead>
                                         <tr>
                                             <th> STT</th>
-                                            <th> Tên</th>
+                                            <th> Họ và tên</th>
                                             <th> Mã</th>
                                             <th> SĐT</th>
                                             <th> Email</th>
                                             <th> Giới tính</th>
-                                            <th> Lương</th>
+                                            <th> Vai trò</th>
                                             <th> Trạng thái</th>
                                             <th> Hành động</th>
                                         </tr>
@@ -223,24 +294,17 @@
                                             style="cursor: pointer;">
 
                                             <td th:text="${stat.count}"></td>
-                                            <td th:text="${d.firstName != null ? d.firstName : 'N/A'}"></td>
+                                            <td th:text="${d.fullName != null && !d.fullName.isEmpty() ? d.fullName : 'N/A'}"></td>
                                             <td th:text="${d.codeStaff != null ? d.codeStaff : 'N/A'}"></td>
                                             <td th:text="${d.phone != null ? d.phone : 'N/A'}"></td>
                                             <td th:text="${d.email != null ? d.email : 'N/A'}"></td>
                                             <td th:text="${d.gender != null ? d.gender : 'N/A'}"></td>
-                                            <td th:text="${d.salary != null ? d.salary + 'VNĐ' : 'N/A'}"></td>
+                                            <td>
+                                                <span th:if="${d.role == 'RECEPTIONIST'}">Lễ tân</span>
+                                                <span th:if="${d.role == 'STAFF'}">Nhân viên</span>
+                                                <span th:if="${d.role != 'RECEPTIONIST' && d.role != 'STAFF'}">N/A</span>
+                                            </td>
                                             <td th:text="${d.status != null ? d.status : 'N/A'}"></td>
-<!--                                            <td>-->
-<!--                                                <div th:switch="${d.status}">-->
-<!--                                                            <span th:case="'ACTIVE'"-->
-<!--                                                                  class="btn btn-outline-success">Hoạt động</span>-->
-<!--                                                    <span th:case="'INACTIVE'"-->
-<!--                                                          class="btn btn-outline-primary">Ngừng hoạt động</span>-->
-<!--                                                    <span th:case="'SUSPENDED'"-->
-<!--                                                          class="btn btn-outline-warning">Đang chờ</span>-->
-<!--                                                    <span th:case="*" class="btn btn-inverse-warning">Lỗi</span>-->
-<!--                                                </div>-->
-<!--                                            </td>-->
                                             </td>
 
                                             <td onclick="event.stopPropagation();">
@@ -252,7 +316,7 @@
                                         </tr>
 
                                         <tr th:if="${#lists.isEmpty(listUser)}">
-                                            <td colspan="8" class="text-center text-muted">Không có nhân viên nào
+                                            <td colspan="9" class="text-center text-muted">Không có nhân viên nào
                                                 khả dụng.
                                             </td>
                                         </tr>
@@ -267,7 +331,7 @@
                                             <!-- Previous -->
                                             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                                 <a class="page-link" th:href="@{/hotel-management/staff(page=${currentPage - 1}, pageSize=${pageSize},
-                                                search=${param.search}, roomType=${param.gender}, status=${param.status}, sortBy=${param.sortBy})}">
+                                                search=${param.search}, role=${param.role}, gender=${param.gender}, status=${param.status}, sortBy=${param.sortBy})}">
                                                     Trước
                                                 </a>
                                             </li>
@@ -277,7 +341,7 @@
                                                 th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                                 th:classappend="${i == currentPage} ? 'active'">
                                                 <a class="page-link" th:href="@{/hotel-management/staff(page=${i}, pageSize=${pageSize},
-                                                search=${param.search}, roomType=${param.gender}, status=${param.status}, sortBy=${param.sortBy})}"
+                                                search=${param.search}, role=${param.role}, gender=${param.gender}, status=${param.status}, sortBy=${param.sortBy})}"
                                                    th:text="${i + 1}">1</a>
                                             </li>
 
@@ -285,7 +349,7 @@
                                             <li class="page-item"
                                                 th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                                                 <a class="page-link" th:href="@{/hotel-management/staff(page=${currentPage + 1}, pageSize=${pageSize},
-                                                search=${param.search}, roomType=${param.gender}, status=${param.status}, sortBy=${param.sortBy})}">
+                                                search=${param.search}, role=${param.role}, gender=${param.gender}, status=${param.status}, sortBy=${param.sortBy})}">
                                                     Sau
                                                 </a>
                                             </li>
@@ -312,6 +376,21 @@
 <script th:src="@{/assets/js/off-canvas.js}"></script>
 <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
 <script th:src="@{/assets/js/misc.js}"></script>
+
+<script>
+    // Auto hide toast notification after 3 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const toast = document.querySelector('.toast-notification');
+        if (toast) {
+            setTimeout(function() {
+                toast.classList.add('hiding');
+                setTimeout(function() {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+    });
+</script>
 </body>
 
 </body>

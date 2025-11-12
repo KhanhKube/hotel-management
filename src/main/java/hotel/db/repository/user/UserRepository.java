@@ -16,6 +16,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByEmail(String email);
+    Optional<User> findByUsername(String username);
     Optional<User> findByPhone(String phone);
     Boolean existsByEmail(String email);
     Boolean existsByUsername(String username);
@@ -29,7 +30,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByIsDeletedFalse();
     List<User> findByRoleAndIsDeletedFalse(String role);
 
-    @Query(value = "SELECT * FROM users WHERE role = 'STAFF' AND is_deleted = 0", nativeQuery = true)
-    List<User> getStaffIds();
+    @Query(value = "SELECT * FROM users WHERE role = 'STAFF' OR role = 'RECEPTIONIST'", nativeQuery = true)
+    List<User> findByRoleStaffOrReceptionist();
 
 }

@@ -15,9 +15,7 @@ import java.util.Objects;
 public interface RoomService {
 
     void saveMaintenance(Integer roomId, String checkInDate, String checkOutDate,
-                         String description, Integer assignedTo, Integer createBy);
-
-    List<User> getStaffIds();
+                         String description, Integer createBy);
 
     //Lấy các ngày cho phép check-in
     List<String> getBookedDatesForBookingRoom(Integer roomId);

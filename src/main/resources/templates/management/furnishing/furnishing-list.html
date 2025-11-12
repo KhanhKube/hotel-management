@@ -205,7 +205,6 @@
                     </thead>
                     <tbody>
                     <tr th:each="d, stat : ${listFurnishings}"
-                        th:onclick="|window.location.href='@{/hotel-management/furnishing/detail/{id}(id=${d.furnishingId})}';|"
                         style="cursor: pointer;">
 
                       <td th:text="${stat.count}"></td>

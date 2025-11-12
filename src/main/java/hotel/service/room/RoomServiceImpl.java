@@ -51,7 +51,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public void saveMaintenance(Integer roomId, String checkInDate, String checkOutDate,
-                                String description, Integer assignedTo, Integer createBy) {
+                                String description, Integer createBy) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate startDate = LocalDate.parse(checkInDate, formatter);
         LocalDate endDate = LocalDate.parse(checkOutDate, formatter);
@@ -64,16 +64,11 @@ public class RoomServiceImpl implements RoomService {
         maintenance.setEndDate(endDateTime);
         maintenance.setStatus("Đã giao");
         maintenance.setDescription(description);
-        maintenance.setAssignedTo(assignedTo);
         maintenance.setCreateBy(createBy);
 
         roomMaintenanceRepository.save(maintenance);
     }
 
-    @Override
-    public List<User> getStaffIds() {
-        return userRepository.getStaffIds();
-    }
 
     @Override
     public List<String> getBookedDatesForBookingRoom(Integer roomId) {
@@ -479,6 +474,14 @@ public class RoomServiceImpl implements RoomService {
     }
 
     private String validateRoomNumber(String roomNumber, Integer floorId, Integer sizeId, String roomType, String bedType, BigDecimal price, Integer roomId) {
+        // Validate floorId và sizeId không null
+        if (floorId == null) {
+            return "Vui lòng chọn tầng!";
+        }
+        if (sizeId == null) {
+            return "Vui lòng chọn diện tích!";
+        }
+        
         //lấy số tầng và số size.
         Integer floorNumber = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))

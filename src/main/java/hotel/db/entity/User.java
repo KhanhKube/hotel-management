@@ -60,6 +60,12 @@ public class User extends AbstractVersion{
     @Column(name = "salary")
     private BigDecimal salary;
 
+    @Column(name = "contract_start_date")
+    private LocalDate contractStartDate;
+
+    @Column(name = "contract_end_date")
+    private LocalDate contractEndDate;
+
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
