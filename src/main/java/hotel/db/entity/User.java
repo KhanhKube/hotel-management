@@ -2,6 +2,8 @@ package hotel.db.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -51,6 +53,12 @@ public class User extends AbstractVersion{
 
     @Column(name = "avatar_url", length = 255)
     private String avatarUrl;
+
+    @Column(name = "code_staff")
+    private String codeStaff;
+
+    @Column(name = "salary")
+    private BigDecimal salary;
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
