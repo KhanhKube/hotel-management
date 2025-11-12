@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Receptionist</title>
+  <title>Quản lí nhân viên</title>
   <link rel="icon" href="/img/favicon.png" type="image/png">
   <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
   <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
@@ -133,7 +133,7 @@
             <!-- Submit Buttons -->
             <p th:if="${error}" th:text="${error}" style="color:red;"></p>
             <button type="submit" class="btn btn-primary mr-2">Lưu thay đổi</button>
-            <a th:href="@{/hotel-management/receptionist/list}" class="btn btn-dark">Hủy</a>
+            <a th:href="@{/hotel-management/receptionist}" class="btn btn-dark">Hủy</a>
           </form>
         </div>
       </div>

@@ -45,7 +45,11 @@ public class ReceptionistController {
         }
         Page<User> receptionist = receptionistService.getReceptionistListWithFiltersAndPagination(search, gender, status, sortBy, page, pageSize);
         if(receptionist != null) {
-            model.addAttribute("listUser", receptionist);
+            model.addAttribute("listUser", receptionist.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", receptionist.getTotalPages());
+            model.addAttribute("totalElements", receptionist.getTotalElements());
+            model.addAttribute("pageSize", pageSize);
             return "management/receptionist/receptionist-list";
         }
         return "redirect:/hotel";
@@ -71,7 +75,7 @@ public class ReceptionistController {
             model.addAttribute("receptionist", receptionist);
             return "management/receptionist/receptionist-detail";
         }
-        return "redirect:/hotel";
+        return "redirect:/hotel/dashboard";
     }
 
     @PostMapping("/edit/{id}")
@@ -101,6 +105,28 @@ public class ReceptionistController {
             redirectAttrs.addFlashAttribute("error", response.getMessage());
             return "redirect:/hotel-management/receptionist/edit/"+id;
         }
+    }
+
+    @GetMapping("/create")
+    public String createReceptionist(HttpSession session,
+                                     Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if(user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if(user.getRole().equals(STAFF) ||
+                user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel/dashboard";
+        }
+
+//        if(receptionist != null) {
+//            model.addAttribute("receptionist", receptionist);
+//            return "management/receptionist/receptionist-detail";
+//        }
+        return "redirect:/hotel/dashboard";
     }
 
 }

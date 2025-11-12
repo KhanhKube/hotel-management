@@ -392,7 +392,7 @@ public class CommonServiceImpl implements CommonService {
 				"\nVui lòng đăng nhập và đổi mật khẩu ngay sau khi truy cập.";
 		sendOtpEmail(email, subject, content);
 
-		return new MessageResponse(true, "Mật khẩu mới đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư và đăng nhập lại!");
+		return new MessageResponse(true, "Mật khẩu mới đã được gửi đến email của bạn!");
 	}
 }
 

@@ -1,0 +1,13 @@
+package hotel.service.furnishing;
+
+import hotel.db.entity.Furnishing;
+import org.springframework.data.domain.Page;
+
+public interface FurnishingService {
+    Page<Furnishing> findFurnishingFilter(String search,
+                                          String sortBy,
+                                          int page,
+                                          int pageSize);
+
+    Furnishing findFurnishingById(int id);
+}
