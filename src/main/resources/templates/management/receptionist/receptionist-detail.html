@@ -7,6 +7,22 @@
   <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
   <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
   <link rel="stylesheet" href="/assets/css/style.css">
+<style>
+  /* Style cho input readonly */
+  .form-control[readonly] {
+    background-color: #2a3038 !important;
+    opacity: 0.8;
+    cursor: not-allowed;
+  }
+
+  /* Style cho select disabled */
+  .form-control:disabled {
+    background-color: #2a3038 !important;
+    opacity: 0.8;
+    cursor: not-allowed;
+  }
+</style>
+
 </head>
 <body>
 
@@ -25,8 +41,11 @@
           <h4 class="card-title">Thông tin lễ tân</h4>
           <p class="card-description">Chỉnh sửa thông tin cá nhân lễ tân</p>
 
-          <form class="forms-sample" th:action="@{/hotel-management/receptionist/update}"
-                th:object="${receptionist}" method="post" enctype="multipart/form-data">
+          <form class="forms-sample"
+                th:action="@{/hotel-management/receptionist/edit/{userId}(userId=${receptionist.userId})}"
+                th:object="${receptionist}"
+                method="post"
+                enctype="multipart/form-data">
 
             <!-- Hidden ID -->
             <input type="hidden" th:field="*{userId}" />
@@ -112,6 +131,7 @@
             </div>
 
             <!-- Submit Buttons -->
+            <p th:if="${error}" th:text="${error}" style="color:red;"></p>
             <button type="submit" class="btn btn-primary mr-2">Lưu thay đổi</button>
             <a th:href="@{/hotel-management/receptionist/list}" class="btn btn-dark">Hủy</a>
           </form>
