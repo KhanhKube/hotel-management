@@ -1,74 +1,101 @@
 package hotel.service.checking;
 
-import hotel.db.dto.checking.AfterCheckOutRequestDto;
-import hotel.db.dto.checking.BookingDto;
-import hotel.db.dto.checking.CheckInRequestDto;
-import hotel.db.dto.checking.CheckOutRequestDto;
+import hotel.db.dto.checking.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-/**
- * Service xử lý check-in, check-out và after check-out
- * 
- * Flow chuẩn:
- * 1. PENDING/CART → Check-in → CHECKED_IN (Room: OCCUPIED)
- * 2. CHECKED_IN → Check-out → CHECKED_OUT (Room: CLEANING)
- * 3. CHECKED_OUT → After check-out → COMPLETED (Room: AVAILABLE hoặc MAINTENANCE)
- */
+import java.util.List;
+
 public interface CheckingService {
     
-    // ===== CHECK-IN =====
+    // ===== CHECK-IN FLOW =====
     
     /**
-     * Xử lý check-in: PENDING/CART → CHECKED_IN
-     * Room: AVAILABLE → OCCUPIED
+     * Lấy danh sách order detail với status RESERVED (màn check-in) - CHỈ LỄ TÂN
      */
-    void checkIn(CheckInRequestDto request);
+    Page<OrderDetailResponse> getReservedOrders(Pageable pageable);
     
     /**
-     * Lấy danh sách booking chờ check-in (PENDING, CART) và đã check-in (CHECKED_IN)
+     * Lấy danh sách order detail với status CHECKING_IN (khách chờ xác nhận) - CHỈ KHÁCH HÀNG
      */
-    Page<BookingDto> getCheckInList(Pageable pageable);
+    Page<OrderDetailResponse> getCheckingInOrders(Pageable pageable);
     
     /**
-     * Đếm số lượng booking chờ check-in và đã check-in
+     * Lấy danh sách order detail với status CUSTOMER_CONFIRMED (chờ staff xác nhận) - CHỈ NHÂN VIÊN
      */
-    long countCheckInItems();
-    
-    // ===== CHECK-OUT =====
+    Page<OrderDetailResponse> getCustomerConfirmedOrders(Pageable pageable);
     
     /**
-     * Xử lý check-out: CHECKED_IN → CHECKED_OUT
-     * Room: OCCUPIED → CLEANING
+     * Nhấn check-in: RESERVED -> CHECKING_IN
      */
-    void checkOut(CheckOutRequestDto request);
+    OrderDetailResponse startCheckIn(CheckInRequest request);
     
     /**
-     * Lấy danh sách booking chờ check-out (CHECKED_IN)
+     * Khách hàng hoặc staff xác nhận: CHECKING_IN -> CUSTOMER_CONFIRMED hoặc OCCUPIED
      */
-    Page<BookingDto> getCheckOutList(Pageable pageable);
+    OrderDetailResponse confirmCheckIn(CheckInConfirmRequest request);
+    
+    // ===== CHECK-OUT FLOW =====
     
     /**
-     * Đếm số lượng booking chờ check-out
+     * Lấy danh sách phòng đang ở (OCCUPIED) cho màn check-out
      */
-    long countCheckOutItems();
-    
-    // ===== AFTER CHECK-OUT =====
+    Page<OrderDetailResponse> getOccupiedOrders(Pageable pageable);
     
     /**
-     * Xử lý after check-out: CHECKED_OUT → COMPLETED
-     * Room: CLEANING → AVAILABLE (nếu readyForNextGuest = true) hoặc MAINTENANCE (nếu false)
+     * Lễ tân nhấn check-out: OCCUPIED -> NEED_CHECKOUT
      */
-    void afterCheckOut(AfterCheckOutRequestDto request);
+    OrderDetailResponse startCheckOut(CheckOutRequest request);
     
     /**
-     * Lấy danh sách phòng cần dọn dẹp (Room: CLEANING, OrderDetail: CHECKED_OUT)
+     * Lấy danh sách phòng NEED_CHECKOUT cho nhân viên - CHỈ NHÂN VIÊN
      */
-    Page<BookingDto> getAfterCheckOutList(Pageable pageable);
+    Page<OrderDetailResponse> getNeedCheckOutOrders(Pageable pageable);
     
     /**
-     * Đếm số lượng phòng cần dọn dẹp
+     * Lấy danh sách phòng NEED_CLEAN cho nhân viên - CHỈ NHÂN VIÊN
      */
-    long countAfterCheckOutItems();
+    Page<OrderDetailResponse> getNeedCleanOrdersForStaff(Pageable pageable);
+    
+    /**
+     * Lấy danh sách phòng CLEANING (đang dọn) - CHỈ NHÂN VIÊN
+     */
+    Page<OrderDetailResponse> getCleaningOrders(Pageable pageable);
+    
+    /**
+     * Nhân viên kiểm tra và gửi form: NEED_CHECKOUT -> CHECKED_OUT
+     */
+    OrderDetailResponse staffCheckOut(StaffCheckOutRequest request);
+    
+    /**
+     * Lấy danh sách phòng CHECKING_OUT (đang kiểm tra)
+     */
+    Page<OrderDetailResponse> getCheckingOutOrders(Pageable pageable);
+    
+    /**
+     * Lấy danh sách phòng CHECKED_OUT cho lễ tân xác nhận
+     */
+    Page<OrderDetailResponse> getCheckedOutOrders(Pageable pageable);
+    
+    /**
+     * Lễ tân xác nhận sau khi nhân viên check: CHECKED_OUT -> NEED_CLEAN
+     */
+    OrderDetailResponse receptionistConfirmCheckOut(AfterCheckOutConfirmRequest request);
+    
+    // ===== AFTER CHECK-OUT FLOW =====
+    
+    /**
+     * Lấy danh sách phòng NEED_CLEAN cho màn after check-out
+     */
+    Page<OrderDetailResponse> getNeedCleanOrders(Pageable pageable);
+    
+    /**
+     * Nhân viên bắt đầu dọn dẹp: NEED_CLEAN -> CLEANING
+     */
+    OrderDetailResponse startCleaning(CleaningRequest request);
+    
+    /**
+     * Nhân viên hoàn thành dọn dẹp: CLEANING -> COMPLETED, Room -> AVAILABLE
+     */
+    OrderDetailResponse completeCleaning(CleaningRequest request);
 }
-
