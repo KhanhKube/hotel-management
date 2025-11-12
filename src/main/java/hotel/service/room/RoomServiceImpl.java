@@ -474,6 +474,14 @@ public class RoomServiceImpl implements RoomService {
     }
 
     private String validateRoomNumber(String roomNumber, Integer floorId, Integer sizeId, String roomType, String bedType, BigDecimal price, Integer roomId) {
+        // Validate floorId và sizeId không null
+        if (floorId == null) {
+            return "Vui lòng chọn tầng!";
+        }
+        if (sizeId == null) {
+            return "Vui lòng chọn diện tích!";
+        }
+        
         //lấy số tầng và số size.
         Integer floorNumber = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))

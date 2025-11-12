@@ -46,7 +46,7 @@ public class RoomController {
 
     private final BookingService bookingService;
     private final RoomService roomService;
-    private final RoomImageUploadService fileUploadService;
+    private final hotel.service.cloudinary.CloudinaryService cloudinaryService;
     private final ImageService roomImageService;
     private final RoomImageRepository roomImageRepository;
 
@@ -101,7 +101,11 @@ public class RoomController {
                          @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
                          BindingResult result, Model model) {
         try {
-            // Lưu số phòng cũ và status cũ (để đổi tên folder nếu update)
+            System.out.println("=== CREATE/UPDATE ROOM ===");
+            System.out.println("Room ID from form: " + room.getRoomId());
+            System.out.println("Room Number: " + room.getRoomNumber());
+            
+            // Lưu số phòng cũ và status cũ
             String oldRoomNumber = null;
             String oldStatus = null;
             String oldSystemStatus = null;
@@ -110,9 +114,16 @@ public class RoomController {
                 // Tạo mới: Set status và systemStatus mặc định
                 room.setStatus("Đang trống");
                 room.setSystemStatus("Hoạt động");
+                System.out.println("Creating new room");
             } else {
                 // Update: Giữ nguyên status và systemStatus cũ
                 Room existingRoom = roomService.getRoomById(room.getRoomId());
+                if (existingRoom == null) {
+                    model.addAttribute("room", room);
+                    model.addAttribute("errorMessage", "Không tìm thấy phòng cần cập nhật!");
+                    return "management/room/room-create-form";
+                }
+                
                 oldRoomNumber = existingRoom.getRoomNumber();
                 oldStatus = existingRoom.getStatus();
                 oldSystemStatus = existingRoom.getSystemStatus();
@@ -121,6 +132,7 @@ public class RoomController {
                 room.setStatus(oldStatus);
                 room.setSystemStatus(oldSystemStatus);
                 
+                System.out.println("Updating room ID: " + room.getRoomId());
                 System.out.println("Old Room Number: " + oldRoomNumber);
             }
 
@@ -147,41 +159,29 @@ public class RoomController {
                 return "management/room/room-create-form";
             }
 
-            // Nếu đổi số phòng → đổi tên folder
-            if (oldRoomNumber != null && !oldRoomNumber.equals(room.getRoomNumber())) {
-                fileUploadService.renameRoomFolder(oldRoomNumber, room.getRoomNumber());
-
-                // Update URL trong DB
-                List<RoomImage> images = roomImageService.getImagesByRoomId(room.getRoomId());
-                for (RoomImage image : images) {
-                    String oldUrl = image.getRoomImageUrl();
-                    String newUrl = oldUrl.replace("/room/" + oldRoomNumber + "/", "/room/" + room.getRoomNumber() + "/");
-                    image.setRoomImageUrl(newUrl);
-                    roomImageRepository.save(image);
-                }
-            }
-
-            // Upload ảnh mới nếu có
+            // Upload ảnh mới nếu có (dùng Cloudinary)
             if (imageFiles != null && !imageFiles.isEmpty()) {
-                System.out.println("=== UPLOADING IMAGES ===");
-                // Upload với số phòng làm tên folder
-                List<String> imageUrls = fileUploadService.uploadRoomImages(room.getRoomNumber(), imageFiles);
-                System.out.println("Uploaded " + imageUrls.size() + " images");
-
-                // Lưu vào DB
-                for (String imageUrl : imageUrls) {
-                    roomImageService.saveRoomImage(room.getRoomId(), imageUrl);
-                    System.out.println("Saved image URL: " + imageUrl);
+                System.out.println("=== UPLOADING IMAGES TO CLOUDINARY ===");
+                for (MultipartFile file : imageFiles) {
+                    if (!file.isEmpty()) {
+                        try {
+                            // Upload lên Cloudinary và lấy URL
+                            String imageUrl = cloudinaryService.getImageUrlAfterUpload(file);
+                            System.out.println("Uploaded image URL: " + imageUrl);
+                            
+                            // Lưu URL vào DB
+                            roomImageService.saveRoomImage(room.getRoomId(), imageUrl);
+                        } catch (Exception e) {
+                            System.err.println("Error uploading file: " + file.getOriginalFilename());
+                            e.printStackTrace();
+                            // Không throw exception, tiếp tục upload các file khác
+                        }
+                    }
                 }
+                System.out.println("=== UPLOAD COMPLETED ===");
             }
             return "redirect:/hotel-management/room";
 
-        } catch (IOException e) {
-            System.err.println("=== IOException: " + e.getMessage());
-            e.printStackTrace();
-            model.addAttribute("room", room);
-            model.addAttribute("errorMessage", "Lỗi upload ảnh: " + e.getMessage());
-            return "management/room/room-create-form";
         } catch (RuntimeException e) {
             System.err.println("=== RuntimeException: " + e.getMessage());
             e.printStackTrace();
@@ -189,10 +189,10 @@ public class RoomController {
             model.addAttribute("errorMessage", e.getMessage());
             return "management/room/room-create-form";
         } catch (Exception e) {
-            System.err.println("=== Unexpected Exception: " + e.getMessage());
+            System.err.println("=== Exception: " + e.getMessage());
             e.printStackTrace();
             model.addAttribute("room", room);
-            model.addAttribute("errorMessage", "Lỗi không xác định: " + e.getMessage());
+            model.addAttribute("errorMessage", "Lỗi: " + e.getMessage());
             return "management/room/room-create-form";
         }
     }

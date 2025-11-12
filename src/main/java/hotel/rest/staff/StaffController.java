@@ -70,6 +70,8 @@ public class StaffController {
         return "redirect:/hotel-management/staff";
     }
 
+    
+
     @GetMapping("/detail/{id}")
     public String showDetail(@PathVariable Integer id, Model model) {
         User user = staffService.getStaff(id);
@@ -78,6 +80,32 @@ public class StaffController {
         }
         model.addAttribute("user", user);
         return "management/staff/staff-detail";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable Integer id, Model model) {
+        User user = staffService.getStaff(id);
+        if (user == null) {
+            return "redirect:/hotel-management/staff";
+        }
+        model.addAttribute("user", user);
+        model.addAttribute("isEdit", true);
+        return "management/staff/staff-create";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String updateStaff(@PathVariable Integer id, @ModelAttribute User user, Model model,
+                              org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        user.setUserId(id);
+        String errorMessage = staffService.updateStaffFromForm(user);
+        if (errorMessage != null) {
+            model.addAttribute("errorMessage", errorMessage);
+            model.addAttribute("user", user);
+            model.addAttribute("isEdit", true);
+            return "management/staff/staff-create";
+        }
+        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật nhân viên thành công!");
+        return "redirect:/hotel-management/staff";
     }
 
 }
