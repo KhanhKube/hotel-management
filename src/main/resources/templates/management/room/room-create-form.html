@@ -9,6 +9,50 @@
     <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
     <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        /* Style cho tất cả input và select */
+        .form-control {
+            background-color: #2a3038 !important;
+            border: 1px solid #3e4551 !important;
+            color: #ffffff !important;
+        }
+
+        .form-control:focus {
+            background-color: #2a3038 !important;
+            border-color: #4b9ce2 !important;
+            color: #ffffff !important;
+        }
+
+        .form-control::placeholder {
+            color: #6c757d !important;
+        }
+
+        /* Style cho input readonly */
+        .form-control[readonly] {
+            background-color: #2a3038 !important;
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        /* Style cho select disabled */
+        .form-control:disabled {
+            background-color: #2a3038 !important;
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        /* Style cho textarea */
+        textarea.form-control {
+            background-color: #2a3038 !important;
+            border: 1px solid #3e4551 !important;
+            color: #ffffff !important;
+        }
+
+        /* Style cho label */
+        label {
+            color: #ffffff !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -56,7 +100,8 @@
                                                 Số phòng:
                                             </label>
                                             <input id="roomNumber" type="text" class="form-control"
-                                                th:field="*{roomNumber}" placeholder="VD: 101, 102..." required>
+                                                th:field="*{roomNumber}" placeholder="VD: 101, 102..."
+                                                th:attr="readonly=${room.roomId != null ? 'readonly' : null}" required>
                                         </div>
 
                                         <!-- Row 1: Loại phòng & Loại giường -->
@@ -97,10 +142,11 @@
                                                         Tầng:
                                                     </label>
                                                     <select id="floorId" class="form-control" th:field="*{floorId}"
-                                                        required>
+                                                        th:disabled="${room.roomId != null}" required>
                                                         <option value="">-- Chọn tầng --</option>
                                                         <option th:each="floor : ${floors}" th:value="${floor.floorId}"
-                                                            th:text="'Tầng ' + ${floor.floorNumber}"></option>
+                                                            th:text="'Tầng ' + ${floor.floorNumber}">
+                                                        </option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -279,37 +325,37 @@
     <script src="/assets/js/todolist.js"></script> -->
     <script>
         // Debug form submit - chạy sau khi tất cả scripts đã load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('roomForm');
             const submitBtn = document.getElementById('submitBtn');
-            
+
             if (form) {
                 console.log('Form found, attaching submit listener...');
                 console.log('Form element:', form);
                 console.log('Submit button:', submitBtn);
-                
+
                 // Test 1: Click event trên button
                 if (submitBtn) {
-                    submitBtn.addEventListener('click', function(e) {
+                    submitBtn.addEventListener('click', function (e) {
                         console.log('Submit button click event triggered!');
                         console.log('Button disabled?', this.disabled);
                         console.log('Button type:', this.type);
                         console.log('Event default prevented?', e.defaultPrevented);
                         console.log('Form element from button:', this.form);
-                        
+
                         // Thử submit form thủ công
                         console.log('Attempting manual form submit...');
                         form.submit();
                     });
                 }
-                
+
                 // Test 2: Submit event trên form
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
                     console.log('=== FORM SUBMIT EVENT TRIGGERED ===');
                     console.log('Form action:', this.action);
                     console.log('Form method:', this.method);
                     console.log('Form valid?', this.checkValidity());
-                    
+
                     // Không chặn submit, để xem có gì xảy ra
                     // if (!this.checkValidity()) {
                     //     console.log('Form validation failed!');

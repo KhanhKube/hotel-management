@@ -38,7 +38,7 @@ public class StaffServiceImpl implements StaffService {
 
     @Override
     public Page<User> getUserListWithFiltersAndPagination(String search,
-                                                          Boolean gender,
+                                                          String gender,
                                                           String status,
                                                           String sortBy,
                                                           int page,
@@ -52,17 +52,15 @@ public class StaffServiceImpl implements StaffService {
                     .filter(x -> x.getPhone() != null && x.getPhone().toLowerCase().contains(searchLower))
                     .collect(Collectors.toList());
         }
-
         if (gender != null) {
-            User.Gender genderEnum = gender ? User.Gender.MALE : User.Gender.FEMALE;
             users = users.stream()
-                    .filter(x -> genderEnum.equals(x.getGender()))
+                    .filter(x -> x.getGender().name().equalsIgnoreCase(gender))
                     .collect(Collectors.toList());
         }
 
         if (status != null && !status.isBlank()) {
             users = users.stream()
-                    .filter(x -> status.equalsIgnoreCase(String.valueOf(x.getStatus())))
+                    .filter(x -> x.getStatus().name().equalsIgnoreCase(status))
                     .collect(Collectors.toList());
         }
 

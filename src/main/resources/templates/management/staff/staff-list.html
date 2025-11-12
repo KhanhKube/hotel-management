@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Quản lí phòng</title>
+    <title>Quản lí nhân viên</title>
     <base th:href="@{/static}">
     <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
     <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
@@ -112,11 +112,11 @@
                                         <div class="col-md-2">
                                             <label class="form-label">Tìm kiếm</label>
                                             <input name="search" type="text" class="form-control"
-                                                   placeholder="Số phòng..." th:value="${param.search}">
+                                                   placeholder="Tìm kiếm tên nhân viên" th:value="${param.search}">
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Trạng thái</label>
-                                            <select name="systemstatus" class="form-select">
+                                            <select name="status" class="form-select">
                                                 <option value="">Tất cả</option>
                                                 <option th:each="status : ${status}"
                                                         th:value="${status}"
@@ -127,7 +127,7 @@
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Giới Tính</label>
-                                            <select name="status" class="form-select">
+                                            <select name="gender" class="form-select">
                                                 <option value="">Tất cả</option>
                                                 <option th:each="gender : ${gender}" th:value="${gender}"
                                                         th:text="${gender}"
@@ -139,36 +139,6 @@
 
                                     <!-- Hàng 2: Tầng | Diện tích | Phòng | Sort -->
                                     <div class="row mb-3">
-<!--                                        <div class="col-md-3">-->
-<!--                                            <label class="form-label">Tầng</label>-->
-<!--                                            <select name="floor" class="form-select">-->
-<!--                                                <option value="">Tất cả</option>-->
-<!--                                                <option th:each="floor : ${floors}" th:value="${floor.floorNumber}"-->
-<!--                                                        th:text="'Tầng ' + ${floor.floorNumber}"-->
-<!--                                                        th:selected="${param.floor != null && param.floor[0] == floor.floorNumber.toString()}">-->
-<!--                                                </option>-->
-<!--                                            </select>-->
-<!--                                        </div>-->
-<!--                                        <div class="col-md-3">-->
-<!--                                            <label class="form-label">Diện tích</label>-->
-<!--                                            <select name="size" class="form-select">-->
-<!--                                                <option value="">Tất cả</option>-->
-<!--                                                <option th:each="size : ${sizes}" th:value="${size.size}"-->
-<!--                                                        th:text="${size.size} + 'm²'"-->
-<!--                                                        th:selected="${param.size != null && param.size[0] == size.size.toString()}">-->
-<!--                                                </option>-->
-<!--                                            </select>-->
-<!--                                        </div>-->
-<!--                                        <div class="col-md-3">-->
-<!--                                            <label class="form-label">Loại phòng</label>-->
-<!--                                            <select name="roomType" class="form-select">-->
-<!--                                                <option value="">Tất cả</option>-->
-<!--                                                <option th:each="type : ${roomTypes}" th:value="${type}"-->
-<!--                                                        th:text="${type}"-->
-<!--                                                        th:selected="${param.roomType != null && param.roomType[0] == type}">-->
-<!--                                                </option>-->
-<!--                                            </select>-->
-<!--                                        </div>-->
                                         <div class="col-md-3">
                                             <label class="form-label">Sắp xếp</label>
                                             <select name="sortBy" class="form-select">
