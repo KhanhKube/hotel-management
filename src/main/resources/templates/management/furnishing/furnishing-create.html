@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lí dụng cụ</title>
+  <link rel="icon" href="/img/favicon.png" type="image/png">
+  <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    /* Style cho input readonly */
+    .form-control[readonly] {
+      background-color: #2a3038 !important;
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+
+    /* Style cho select disabled */
+    .form-control:disabled {
+      background-color: #2a3038 !important;
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+  </style>
+
+</head>
+<body>
+
+<div class="container-scroller">
+  <!-- import sidebar -->
+  <div th:replace="common/sidebar"></div>
+
+
+  <div class="main-panel">
+    <div class="col-12 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <a th:href="@{/hotel-management/furnishing}" >
+            <i class="mdi mdi-arrow-left"></i> Quay lại
+          </a>
+          <h4 class="card-title">Thông tin dụng cụ</h4>
+          <p class="card-description">Tạo mới dụng cụ</p>
+
+          <form class="forms-sample"
+                th:action="@{/hotel-management/furnishing/create/{userId}(userId=${furnishing.furnishingId})}"
+                th:object="${furnishing}"
+                method="post"
+                enctype="multipart/form-data">
+
+            <!-- Name -->
+            <div class="form-group">
+              <label for="name">Tên dụng cụ</label>
+              <input type="text" class="form-control" id="name"
+                     placeholder="Nhập tên" th:field="*{name}">
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label for="furnishingDescription">Chi tiết</label>
+              <input type="text" class="form-control" id="furnishingDescription"
+                     placeholder="Nhập chi tiết" th:field="*{furnishingDescription}">
+            </div>
+
+            <!-- Quantity -->
+            <div class="form-group">
+              <label for="quantity">Số lượng</label>
+              <input type="email" class="form-control" id="quantity"
+                     placeholder="Số lượng" th:field="*{quantity}">
+            </div>
+
+
+            <!-- Submit Buttons -->
+            <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+            <button type="submit" class="btn btn-primary mr-2">Lưu thay đổi</button>
+            <a th:href="@{/hotel-management/furnishing}" class="btn btn-dark">Hủy</a>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- main-panel ends -->
+</div>
+<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+<script src="/assets/vendors/chart.js/Chart.min.js"></script>
+<script src="/assets/js/off-canvas.js"></script>
+<script src="/assets/js/hoverable-collapse.js"></script>
+<script src="/assets/js/misc.js"></script>
+<script src="/assets/js/settings.js"></script>
+<script src="/assets/js/todolist.js"></script>
+<script src="/assets/js/chart.js"></script>
+</body>
+</html>

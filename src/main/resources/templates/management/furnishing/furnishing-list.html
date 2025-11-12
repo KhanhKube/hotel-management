@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Quản lí dụng cụ</title>
+  <base th:href="@{/static}">
+  <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+  <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+  <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}"/>
+  <style>
+    tbody tr:hover {
+      cursor: pointer;
+      opacity: 0.65;
+      transition: background-color 0.2s;
+    }
+
+    /* Style cho select dropdown */
+    .form-select {
+      width: 100%;
+      background-color: #2c2e33;
+      border: 1px solid #2c2e33;
+      color: #ffffff;
+      padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1;
+      border-radius: 2px;
+      height: calc(1em + 1.5rem + 2px);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 16px 12px;
+    }
+
+    .form-select:focus {
+      background-color: #2c2e33;
+      border-color: #2196f3;
+      color: #ffffff;
+      box-shadow: none;
+    }
+
+    .form-select option {
+      background-color: #2c2e33;
+      color: #ffffff;
+    }
+
+    .form-label {
+      display: block;
+      color: #6c7293;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+      width: 100%;
+      background-color: #2c2e33;
+      border: 1px solid #2c2e33;
+      color: #ffffff;
+      padding: 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1;
+      height: calc(1em + 1.5rem + 2px);
+    }
+
+    .form-control:focus {
+      background-color: #2c2e33;
+      border-color: #2196f3;
+      color: #ffffff;
+      box-shadow: none;
+    }
+
+    .form-control::placeholder {
+      color: #6c7293;
+    }
+  </style>
+</head>
+
+<body>
+<div class="container-scroller">
+  <!-- Include sidebar -->
+  <div th:replace="~{common/sidebar :: sidebar}"></div>
+  <div class="container-fluid page-body-wrapper">
+    <nav class="navbar p-0 fixed-top d-flex flex-row">
+      <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+        <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                                                                       alt="logo"/></a>
+      </div>
+      <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+      </div>
+    </nav>
+
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="row">
+
+          <!--Filter Bar-->
+
+          <div class="col-12 grid-margin">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4 class="card-title mb-0">Tìm kiếm nhanh</h4>
+                </div>
+                <form th:action="@{/hotel-management/furnishing}" method="get">
+
+                  <!-- Hàng 1: Thanh search | Tình trạng | Trạng thái -->
+                  <div class="row mb-3">
+                    <div class="col-md-2">
+                      <label class="form-label">Tìm kiếm</label>
+                      <input name="search" type="text" class="form-control"
+                             placeholder="Số phòng..." th:value="${param.search}">
+                    </div>
+                    <!--                                        <div class="col-md-3">-->
+                    <!--                                            <label class="form-label">Trạng thái</label>-->
+                    <!--                                            <select name="status" class="form-select">-->
+                    <!--                                                <option value="">Tất cả</option>-->
+                    <!--                                                <option th:each="status : ${status}"-->
+                    <!--                                                        th:value="${status}"-->
+                    <!--                                                        th:text="${status}"-->
+                    <!--                                                        th:selected="${param.status != null && param.status[0] == status}">-->
+                    <!--                                                </option>-->
+                    <!--                                            </select>-->
+                    <!--                                        </div>-->
+                    <div class="col-md-3">
+                      <label class="form-label">Sắp xếp</label>
+                      <select name="sortBy" class="form-select">
+                        <option value="">Tất cả</option>
+                        <option value="quantity,asc"
+                                th:selected="${param.sortBy != null && param.sortBy[0] == 'quantity,asc'}">
+                          Số lượng tăng dần
+                        </option>
+                        <option value="quantity,desc"
+                                th:selected="${param.sortBy != null && param.sortBy[0] == 'quantity,desc'}">
+                          Số lượng giảm dần
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+
+
+                  <!-- Hàng 3: Tìm kiếm | Đặt lại (căn giữa) -->
+                  <div class="row justify-content-center">
+                    <div class="col-md-2">
+                      <button type="submit" class="btn btn-primary w-100">
+                        <i class="mdi mdi-magnify"></i> Tìm kiếm
+                      </button>
+                    </div>
+                    <div class="col-md-2">
+                      <a th:href="@{/hotel-management/furnishing}"
+                         class="btn btn-secondary w-100">
+                        <i class="mdi mdi-refresh"></i> Đặt lại
+                      </a>
+                    </div>
+                  </div>
+
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!--Main Deteils-->
+          <div class="col-12 grid-margin">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4 class="card-title mb-0">Quản Lý Dụng cụ</h4>
+                  <a th:href="@{/hotel-management/furnishing/add}" class="btn btn-primary">
+                    <i class="mdi mdi-plus"></i> Thêm dụng cụ
+                  </a>
+                  <a th:href="@{/hotel-management/furnishing/update}" class="btn btn-primary">
+                    <i class="mdi mdi-plus"></i> Lấy dụng cụ
+                  </a>
+                  <a th:href="@{/hotel-management/furnishing/create}" class="btn btn-primary">
+                    <i class="mdi mdi-plus"></i> Tạo mới dụng cụ
+                  </a>
+                </div>
+
+                <!-- Error Message -->
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show"
+                     role="alert">
+                  <i class="mdi mdi-alert-circle"></i>
+                  <strong>Lỗi!</strong> <span th:text="${error}"></span>
+                  <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                  </button>
+                </div>
+                <div class="table-responsive">
+                  <table class="table" id="roomTable">
+                    <thead>
+                    <tr>
+                      <th> STT</th>
+                      <th> Tên</th>
+                      <th> Chi tiết</th>
+                      <th> Số lượng</th>
+                      <th> Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d, stat : ${listFurnishings}"
+                        th:onclick="|window.location.href='@{/hotel-management/furnishing/detail/{id}(id=${d.furnishingId})}';|"
+                        style="cursor: pointer;">
+
+                      <td th:text="${stat.count}"></td>
+                      <td th:text="${d.name != null ? d.name : 'N/A'}"></td>
+                      <td th:text="${d.furnishingDescription != null ? d.furnishingDescription : 'N/A'}"></td>
+                      <td th:text="${d.quantity != null ? d.quantity : 'N/A'}"></td>
+
+
+                      <td onclick="event.stopPropagation();">
+                        <a
+                                th:href="@{/hotel-management/furnishing/edit/{id}(id=${d.furnishingId})}">Sửa</a>
+                        <a
+                                th:href="@{/hotel-management/furnishing/delete/{id}(id=${d.furnishingId})}">Xóa</a>
+                      </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(listFurnishings)}">
+                      <td colspan="8" class="text-center text-muted">Không có nhân viên nào
+                        khả dụng.
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-wrapper" th:if="${totalPages > 1}">
+                  <nav>
+                    <ul class="pagination justify-content-center">
+                      <!-- Previous -->
+                      <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/hotel-management/furnishing(page=${currentPage - 1}, pageSize=${pageSize},
+                                                search=${param.search}, roomType=${param.gender}, status=${param.status}, sortBy=${param.sortBy})}">
+                          Trước
+                        </a>
+                      </li>
+
+                      <!-- Page numbers -->
+                      <li class="page-item"
+                          th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                          th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/hotel-management/furnishing(page=${i}, pageSize=${pageSize},
+                                                search=${param.search}, sortBy=${param.sortBy})}"
+                           th:text="${i + 1}">1</a>
+                      </li>
+
+                      <!-- Next -->
+                      <li class="page-item"
+                          th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/hotel-management/furnishing(page=${currentPage + 1}, pageSize=${pageSize},
+                                                search=${param.search}, sortBy=${param.sortBy})}">
+                          Sau
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+
+                  <!-- Info -->
+                  <div class="text-center mt-3">
+                    <p>Trang [[${currentPage + 1}]] / [[${totalPages}]] - Tổng
+                      [[${totalElements}]] dụng cụ</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
