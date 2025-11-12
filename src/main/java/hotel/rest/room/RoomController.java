@@ -57,7 +57,6 @@ public class RoomController {
         model.addAttribute("bedTypes", BedType.ALL);
         model.addAttribute("statuses", RoomStatus.ALL);
         model.addAttribute("systemStatus", RoomSystemStatus.ALL);
-        model.addAttribute("listStaff", roomService.getStaffIds());
         model.addAttribute("floors", roomService.getAllFloors());
         model.addAttribute("sizes", roomService.getAllSizes());
     }
@@ -262,7 +261,6 @@ public class RoomController {
             @RequestParam("checkInDate") String checkInDate,
             @RequestParam("checkOutDate") String checkOutDate,
             @RequestParam(value = "des", required = false) String description,
-            @RequestParam(value = "userId", required = false) Integer assignedTo,
             Model model, HttpSession session) {
         try {
             User user = (User) session.getAttribute("user");
@@ -272,7 +270,7 @@ public class RoomController {
             }
 
             Integer createdBy = user.getUserId();
-            roomService.saveMaintenance(roomId, checkInDate, checkOutDate, description, assignedTo, createdBy);
+            roomService.saveMaintenance(roomId, checkInDate, checkOutDate, description, createdBy);
 
             Room room = roomService.getRoomById(roomId);
             room.setSystemStatus("Bảo trì");

@@ -51,7 +51,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public void saveMaintenance(Integer roomId, String checkInDate, String checkOutDate,
-                                String description, Integer assignedTo, Integer createBy) {
+                                String description, Integer createBy) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate startDate = LocalDate.parse(checkInDate, formatter);
         LocalDate endDate = LocalDate.parse(checkOutDate, formatter);
@@ -64,16 +64,11 @@ public class RoomServiceImpl implements RoomService {
         maintenance.setEndDate(endDateTime);
         maintenance.setStatus("Đã giao");
         maintenance.setDescription(description);
-        maintenance.setAssignedTo(assignedTo);
         maintenance.setCreateBy(createBy);
 
         roomMaintenanceRepository.save(maintenance);
     }
 
-    @Override
-    public List<User> getStaffIds() {
-        return userRepository.getStaffIds();
-    }
 
     @Override
     public List<String> getBookedDatesForBookingRoom(Integer roomId) {

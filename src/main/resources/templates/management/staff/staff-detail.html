@@ -1,10 +1,179 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Chi tiết nhân viên</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+</head>
+
+<body>
+    <div class="container-scroller">
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="container-fluid page-body-wrapper">
+            <nav class="navbar p-0 fixed-top d-flex flex-row">
+                <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                    <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg" alt="logo" /></a>
+                </div>
+                <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch"></div>
+            </nav>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="row">
+                        <div class="col-12 grid-margin">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h4 class="card-title mb-0">
+                                            <i class="mdi mdi-account-details"></i>
+                                            Chi Tiết Nhân Viên
+                                        </h4>
+                                        <a th:href="@{/hotel-management/staff}" class="btn btn-secondary">
+                                            <i class="mdi mdi-arrow-left"></i> Quay lại
+                                        </a>
+                                    </div>
+
+                                    <!-- Thông tin cá nhân -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Mã nhân viên</label>
+                                                <p class="form-control-static" th:text="${user.codeStaff != null ? user.codeStaff : 'N/A'}"></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Vai trò</label>
+                                                <p class="form-control-static">
+                                                    <span th:if="${user.role == 'RECEPTIONIST'}">Lễ tân</span>
+                                                    <span th:if="${user.role == 'STAFF'}">Nhân viên</span>
+                                                    <span th:if="${user.role != 'RECEPTIONIST' && user.role != 'STAFF'}" th:text="${user.role}"></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Họ</label>
+                                                <p class="form-control-static" th:text="${user.lastName != null ? user.lastName : 'N/A'}"></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Tên</label>
+                                                <p class="form-control-static" th:text="${user.firstName != null ? user.firstName : 'N/A'}"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Email</label>
+                                                <p class="form-control-static" th:text="${user.email != null ? user.email : 'N/A'}"></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Số điện thoại</label>
+                                                <p class="form-control-static" th:text="${user.phone != null ? user.phone : 'N/A'}"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Giới tính</label>
+                                                <p class="form-control-static">
+                                                    <span th:if="${user.gender == T(hotel.db.entity.User.Gender).MALE}">Nam</span>
+                                                    <span th:if="${user.gender == T(hotel.db.entity.User.Gender).FEMALE}">Nữ</span>
+                                                    <span th:if="${user.gender == T(hotel.db.entity.User.Gender).OTHER}">Khác</span>
+                                                    <span th:if="${user.gender == null}">N/A</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Ngày sinh</label>
+                                                <p class="form-control-static" th:text="${user.dob != null ? #temporals.format(user.dob, 'dd/MM/yyyy') : 'N/A'}"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Địa chỉ</label>
+                                                <p class="form-control-static" th:text="${user.address != null && !user.address.isEmpty() ? user.address : 'N/A'}"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Thông tin hợp đồng -->
+                                    <h5 class="mb-3 mt-4">Thông tin hợp đồng</h5>
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Ngày bắt đầu hợp đồng</label>
+                                                <p class="form-control-static" th:text="${user.contractStartDate != null ? #temporals.format(user.contractStartDate, 'dd/MM/yyyy') : 'N/A'}"></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Ngày hết hạn hợp đồng</label>
+                                                <p class="form-control-static" th:text="${user.contractEndDate != null ? #temporals.format(user.contractEndDate, 'dd/MM/yyyy') : 'N/A'}"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Trạng thái -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Trạng thái</label>
+                                                <p class="form-control-static">
+                                                    <span th:if="${user.status == T(hotel.db.entity.User.Status).ACTIVE}" class="badge badge-success">Hoạt động</span>
+                                                    <span th:if="${user.status == T(hotel.db.entity.User.Status).INACTIVE}" class="badge badge-warning">Không hoạt động</span>
+                                                    <span th:if="${user.status == T(hotel.db.entity.User.Status).SUSPENDED}" class="badge badge-danger">Tạm ngưng</span>
+                                                    <span th:if="${user.status == null}">N/A</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Buttons -->
+                                    <div class="form-group mt-4">
+                                        <a th:href="@{/hotel-management/staff/edit/{id}(id=${user.userId})}" class="btn btn-primary btn-lg">
+                                            <i class="mdi mdi-pencil"></i> Chỉnh sửa
+                                        </a>
+                                        <a th:href="@{/hotel-management/staff}" class="btn btn-secondary btn-lg">
+                                            <i class="mdi mdi-arrow-left"></i> Quay lại
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/assets/js/misc.js}"></script>
 </body>
+
 </html>

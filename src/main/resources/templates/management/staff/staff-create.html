@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Tạo tài khoản nhân viên</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}" />
+    <style>
+        /* Style cho tất cả input và select */
+        .form-control {
+            background-color: #2a3038 !important;
+            border: 1px solid #3e4551 !important;
+            color: #ffffff !important;
+        }
+
+        .form-control:focus {
+            background-color: #2a3038 !important;
+            border-color: #4b9ce2 !important;
+            color: #ffffff !important;
+        }
+
+        .form-control::placeholder {
+            color: #6c757d !important;
+        }
+
+        /* Style cho input readonly */
+        .form-control[readonly] {
+            background-color: #2a3038 !important;
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        /* Style cho select disabled */
+        .form-control:disabled {
+            background-color: #2a3038 !important;
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        /* Style cho textarea */
+        textarea.form-control {
+            background-color: #2a3038 !important;
+            border: 1px solid #3e4551 !important;
+            color: #ffffff !important;
+        }
+
+        /* Style cho label */
+        label {
+            color: #ffffff !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-scroller">
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="container-fluid page-body-wrapper">
+            <nav class="navbar p-0 fixed-top d-flex flex-row">
+                <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                    <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg" alt="logo" /></a>
+                </div>
+                <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch"></div>
+            </nav>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    <div class="row">
+                        <div class="col-12 grid-margin">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title mb-4">
+                                        <i class="mdi mdi-account-plus"></i>
+                                        <span th:text="${user.userId != null ? 'Cập Nhật Nhân Viên' : 'Tạo Tài Khoản Nhân Viên'}"></span>
+                                    </h4>
+
+                                    <form th:action="@{/hotel-management/staff/create}" method="post" th:object="${user}">
+                                        <input type="hidden" th:field="*{userId}" />
+
+                                        <!-- Error Message -->
+                                        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            <span th:text="${errorMessage}"></span>
+                                            <button type="button" class="close" data-dismiss="alert">
+                                                <span>&times;</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- Row 1: Email & Phone -->
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="email">Email</label>
+                                                    <input id="email" type="email" class="form-control" th:field="*{email}" 
+                                                           placeholder="example@email.com" maxlength="100" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="phone">Số điện thoại</label>
+                                                    <input id="phone" type="text" class="form-control" th:field="*{phone}" 
+                                                           placeholder="0123456789" maxlength="10" required>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 2: Password -->
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label for="password">Mật khẩu</label>
+                                                    <input id="password" type="password" class="form-control" th:field="*{password}" 
+                                                           placeholder="Nhập mật khẩu" required>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 3: FirstName & LastName -->
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="firstName">Tên</label>
+                                                    <input id="firstName" type="text" class="form-control" th:field="*{firstName}" 
+                                                           placeholder="Nhập tên" maxlength="50" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="lastName">Họ</label>
+                                                    <input id="lastName" type="text" class="form-control" th:field="*{lastName}" 
+                                                           placeholder="Nhập họ" maxlength="50" required>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 4: Gender & DOB -->
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="gender">Giới tính</label>
+                                                    <select id="gender" class="form-control" th:field="*{gender}" required>
+                                                        <option value="">-- Chọn giới tính --</option>
+                                                        <option value="MALE">Nam</option>
+                                                        <option value="FEMALE">Nữ</option>
+                                                        <option value="OTHER">Khác</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="dob">Ngày sinh</label>
+                                                    <input id="dob" type="date" class="form-control" th:field="*{dob}" required>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 5: Role & Contract End Date -->
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="role">Vai trò</label>
+                                                    <select id="role" class="form-control" th:field="*{role}" required>
+                                                        <option value="">-- Chọn vai trò --</option>
+                                                        <option value="RECEPTIONIST">Lễ tân</option>
+                                                        <option value="STAFF">Nhân viên</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="contractEndDate">Ngày hết hạn hợp đồng</label>
+                                                    <input id="contractEndDate" type="date" class="form-control" th:field="*{contractEndDate}" required>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Address -->
+                                        <div class="form-group">
+                                            <label for="address">Địa chỉ</label>
+                                            <textarea id="address" class="form-control" th:field="*{address}" rows="3"
+                                                placeholder="Nhập địa chỉ..." maxlength="150"></textarea>
+                                        </div>
+
+                                        <!-- Buttons -->
+                                        <div class="form-group mt-4">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="mdi mdi-content-save"></i> Lưu
+                                            </button>
+                                            <a th:href="@{/hotel-management/staff}" class="btn btn-secondary btn-lg">
+                                                <i class="mdi mdi-close"></i> Hủy
+                                            </a>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+    <script th:src="@{/assets/js/off-canvas.js}"></script>
+    <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+    <script th:src="@{/assets/js/misc.js}"></script>
+</body>
+
+</html>
