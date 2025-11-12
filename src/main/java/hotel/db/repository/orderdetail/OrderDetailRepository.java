@@ -84,6 +84,17 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
 			@Param("toDate") LocalDateTime toDate,
 			@Param("statuses") List<String> statuses
 	);
+	
+	// Query tìm bookings từ ngày disable trở đi để hủy
+	@Query("SELECT od FROM OrderDetail od " +
+			"WHERE od.roomId = :roomId " +
+			"AND od.status IN ('CONFIRMED', 'CHECKED_IN') " +
+			"AND od.startDate >= :disableDate " +
+			"ORDER BY od.startDate ASC")
+	List<OrderDetail> findBookingsToCancel(
+			@Param("roomId") Integer roomId,
+			@Param("disableDate") LocalDateTime disableDate
+	);
 
 	@Query(value = "SELECT room_id FROM order_details WHERE start_date < :endDate AND end_date > :startDate", nativeQuery = true)
 	List<Integer> findRoomIdsByFilterEndateAndStatdate(

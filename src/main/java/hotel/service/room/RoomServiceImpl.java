@@ -47,6 +47,7 @@ public class RoomServiceImpl implements RoomService {
     private final RoomFurnishingRepository roomFurnishingRepository;
     private final FurnishingRepository furnishingRepository;
     private final UserRepository userRepository;
+    private final hotel.service.common.CommonService commonService;
 
     public List<String> getRoomViewList(Integer roomId) {
         return roomViewRepository.findRoomViewId(roomId).stream().map(viewId ->
@@ -132,6 +133,34 @@ public class RoomServiceImpl implements RoomService {
         roomMaintenanceRepository.save(maintenance);
     }
 
+    @Override
+    public List<String> getDateToDisableRoom(Integer roomId) {
+        LocalDateTime fromDate = LocalDateTime.now();
+        LocalDateTime toDate = fromDate.plusMonths(2);
+
+        List<OrderDetail> bookings = orderDetailRepository.findBookingsByRoomAndDateRange(
+                roomId,
+                fromDate,
+                toDate,
+                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
+        );
+
+        List<String> disableDates = new ArrayList<>();
+
+        for (OrderDetail booking : bookings) {
+            LocalDate start = booking.getStartDate().toLocalDate();
+            LocalDate end = booking.getEndDate().toLocalDate();
+
+            LocalDate current = start;
+            while (current.isBefore(end)) { // Không bao gồm ngày end
+                disableDates.add(current.toString()); // Format: yyyy-MM-dd
+                current = current.plusDays(1);
+            }
+        }
+
+        return disableDates;
+    }
+
 
     @Override
     public List<String> getBookedDatesForBookingRoom(Integer roomId) {
@@ -159,7 +188,7 @@ public class RoomServiceImpl implements RoomService {
             LocalDate end = booking.getEndDate().toLocalDate();
 
             LocalDate current = start;
-            while (current.isBefore(end)) { // Không bao gồm ngày end
+            while (!current.isAfter(end)) { // BAO GỒM cả ngày end (vì checkout 12:00, không thể checkin cùng ngày)
                 bookedDates.add(current.toString()); // Format: yyyy-MM-dd
                 current = current.plusDays(1);
             }
@@ -168,7 +197,7 @@ public class RoomServiceImpl implements RoomService {
             LocalDate start = maintenance.getStartDate().toLocalDate();
             LocalDate end = maintenance.getEndDate().toLocalDate();
             LocalDate current = start;
-            while (current.isBefore(end)) {
+            while (!current.isAfter(end)) { // BAO GỒM cả ngày end
                 bookedDates.add(current.toString());
                 current = current.plusDays(1);
             }
@@ -889,5 +918,74 @@ public class RoomServiceImpl implements RoomService {
         dto.setRoomViews(roomViews);
 
         return dto;
+    }
+    
+    @Override
+    @Transactional
+    public void disableRoom(Integer roomId, String disableDate, String description, Integer createdBy) {
+        log.info("=== Disabling room {} from date: {} ===", roomId, disableDate);
+        
+        // Parse ngày disable
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate disableDateParsed = LocalDate.parse(disableDate, formatter);
+        LocalDateTime disableDateTime = disableDateParsed.atTime(14, 0); // 14:00
+        
+        // Tìm tất cả bookings từ ngày disable trở đi
+        List<OrderDetail> bookingsToCancel = orderDetailRepository.findBookingsToCancel(roomId, disableDateTime);
+        
+        log.info("Found {} bookings to cancel", bookingsToCancel.size());
+        
+        // Lấy thông tin phòng
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng"));
+        
+        // Hủy từng booking và gửi email
+        for (OrderDetail booking : bookingsToCancel) {
+            log.info("Cancelling booking ID: {}, User ID: {}", booking.getOrderDetailId(), booking.getUserId());
+            
+            // Update status sang CANCELLED
+            booking.setStatus("CANCELLED");
+            booking.setUpdatedAt(LocalDateTime.now());
+            orderDetailRepository.save(booking);
+            
+            // Lấy thông tin user
+            User user = userRepository.findById(booking.getUserId()).orElse(null);
+            if (user != null && user.getEmail() != null) {
+                // Format ngày cho email
+                DateTimeFormatter emailFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                String startDateStr = booking.getStartDate().format(emailFormatter);
+                String endDateStr = booking.getEndDate().format(emailFormatter);
+                
+                // Gửi email thông báo
+                String fullName = user.getFirstName() + (user.getLastName() != null ? " " + user.getLastName() : "");
+                commonService.sendCancellationEmail(
+                    user.getEmail(),
+                    fullName,
+                    room.getRoomNumber(),
+                    startDateStr,
+                    endDateStr,
+                    description != null ? description : "Phòng tạm ngừng hoạt động"
+                );
+                
+                log.info("Sent cancellation email to: {}", user.getEmail());
+            }
+        }
+        
+        // Lưu vào room_maintenance với endDate = 10/10/2099
+        LocalDateTime endDateTime = LocalDate.of(2099, 10, 10).atTime(12, 0);
+        RoomMaintenance maintenance = new RoomMaintenance();
+        maintenance.setRoomId(roomId);
+        maintenance.setStartDate(disableDateTime);
+        maintenance.setEndDate(endDateTime);
+        maintenance.setStatus("Đã giao");
+        maintenance.setDescription(description != null ? description : "Phòng dừng hoạt động");
+        maintenance.setCreateBy(createdBy);
+        roomMaintenanceRepository.save(maintenance);
+        
+        // Update room systemStatus
+        room.setSystemStatus("Dừng hoạt động");
+        roomRepository.save(room);
+        
+        log.info("Room {} disabled successfully. Cancelled {} bookings", roomId, bookingsToCancel.size());
     }
 }
