@@ -87,7 +87,7 @@
           </tr>
           </tbody>
         </table>
-        <a th:href="@{/hotel/edit-profile}" class="btn btn-info btn-sm">Sửa thông tin</a>
+        <a th:href="@{/hotel/edit-profile}" th:with="user1=${session.user}" th:if="${user1 != null and user1.role == 'CUSTOMER'}" class="btn btn-info btn-sm">Sửa thông tin</a>
         <a th:href="@{/hotel/change-password}" class="btn btn-info btn-sm">Đổi mật khẩu</a>
       </div>
     </div>

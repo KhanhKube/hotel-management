@@ -71,7 +71,7 @@
 
                 <ul class="social-icons ml-auto">
                     <!-- Cart icon - Click to go to cart page -->
-                    <li class="nav-item" th:if="${user != null}">
+                    <li class="nav-item" th:if="${user != null and (user.role == 'RECEPTIONIST' || user.role == 'CUSTOMER')}">
                         <a class="nav-link position-relative" th:href="@{/cart}"
                            style="cursor: pointer;">
                             <i class="fas fa-shopping-cart" style="font-size: 1.2rem; color: #333;"></i>
