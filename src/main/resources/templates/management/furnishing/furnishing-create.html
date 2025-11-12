@@ -29,7 +29,11 @@
 <div class="container-scroller">
   <!-- import sidebar -->
   <div th:replace="common/sidebar"></div>
-
+  <div id="toast-container" class="toast-container">
+    <div th:if="${success}" class="toast toast-success" th:text="${success}"></div>
+    <div th:if="${message}" class="toast toast-success" th:text="${message}"></div>
+    <div th:if="${error}" class="toast toast-error" th:text="${error}"></div>
+  </div>
 
   <div class="main-panel">
     <div class="col-12 grid-margin stretch-card">
@@ -42,7 +46,7 @@
           <p class="card-description">Tạo mới dụng cụ</p>
 
           <form class="forms-sample"
-                th:action="@{/hotel-management/furnishing/create/{userId}(userId=${furnishing.furnishingId})}"
+                th:action="@{/hotel-management/furnishing/create}"
                 th:object="${furnishing}"
                 method="post"
                 enctype="multipart/form-data">
@@ -64,7 +68,7 @@
             <!-- Quantity -->
             <div class="form-group">
               <label for="quantity">Số lượng</label>
-              <input type="email" class="form-control" id="quantity"
+              <input type="number" min="1" max="500" class="form-control" id="quantity"
                      placeholder="Số lượng" th:field="*{quantity}">
             </div>
 

@@ -1,6 +1,7 @@
 package hotel.service.furnishing;
 
 import hotel.db.entity.Furnishing;
+import hotel.util.MessageResponse;
 import org.springframework.data.domain.Page;
 
 public interface FurnishingService {
@@ -10,4 +11,8 @@ public interface FurnishingService {
                                           int pageSize);
 
     Furnishing findFurnishingById(int id);
+
+    MessageResponse updateFurnishing(int id, Furnishing furnishing);
+
+    MessageResponse createFurnishing(Furnishing furnishing);
 }

@@ -3,12 +3,14 @@ package hotel.rest.furnishing;
 import hotel.db.entity.Furnishing;
 import hotel.db.entity.User;
 import hotel.service.furnishing.FurnishingService;
+import hotel.util.MessageResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import static hotel.db.enums.Constants.*;
 
@@ -71,11 +73,12 @@ public class FurnishingController {
         return "redirect:/hotel-management/furnishing";
     }
 
-    @GetMapping("/edit/{id}")
+    @PostMapping("/edit/{id}")
     public String edit(@PathVariable("id") Integer furnishingId,
                        @ModelAttribute("furnishing") Furnishing dto,
                        HttpSession session,
-                       Model model){
+                       Model model,
+                       RedirectAttributes redirectAttrs){
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/hotel";
@@ -86,13 +89,16 @@ public class FurnishingController {
         if(user.getRole().equals(RECEPTIONIST) ) {
             return "redirect:/hotel/dashboard";
         }
-        Furnishing furnishing = furnishingService.findFurnishingById(furnishingId);
-        if(furnishing != null) {
-            model.addAttribute("furnishing", furnishing);
-            return "management/furnishing/furnishing-detail";
+        MessageResponse response = furnishingService.updateFurnishing(furnishingId, dto);
+        if(!response.isSuccess()) {
+            redirectAttrs.addFlashAttribute("furnishing", dto);
+            redirectAttrs.addFlashAttribute("error", response.getMessage());
+            return "redirect:/hotel-management/furnishing/edit/" + furnishingId;
         }
+        redirectAttrs.addFlashAttribute("message", response.getMessage());
         return "redirect:/hotel-management/furnishing";
     }
+
     @GetMapping("/create")
     public String createReceptionist(HttpSession session,
                                      Model model) {
@@ -106,7 +112,7 @@ public class FurnishingController {
         if(user.getRole().equals(RECEPTIONIST) ) {
             return "redirect:/hotel/dashboard";
         }
-        Furnishing furnishing = (Furnishing) session.getAttribute("furnishing");
+        Furnishing furnishing = (Furnishing) model.getAttribute("furnishing");
         if(furnishing == null) {
             model.addAttribute("furnishing", new Furnishing());
             return "management/furnishing/furnishing-create";
@@ -114,10 +120,12 @@ public class FurnishingController {
         model.addAttribute("furnishing", furnishing);
         return "management/furnishing/furnishing-create";
     }
+
     @PostMapping("/create")
     public String createReceptionist(@ModelAttribute("furnishing") Furnishing dto,
                                      HttpSession session,
-                                     Model model) {
+                                     Model model,
+                                     RedirectAttributes redirectAttrs) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/hotel";
@@ -128,13 +136,16 @@ public class FurnishingController {
         if(user.getRole().equals(RECEPTIONIST) ) {
             return "redirect:/hotel/dashboard";
         }
-        Furnishing furnishing = (Furnishing) session.getAttribute("furnishing");
-        if(furnishing == null) {
-            model.addAttribute("furnishing", new Furnishing());
-            return "management/furnishing/furnishing-create";
+
+        MessageResponse response = furnishingService.createFurnishing(dto);
+
+        if(!response.isSuccess()) {
+            redirectAttrs.addFlashAttribute("furnishing", dto);
+            redirectAttrs.addFlashAttribute("error", response.getMessage());
+            return "redirect:/hotel-management/furnishing/create";
         }
-        model.addAttribute("furnishing", furnishing);
-        return "management/furnishing/furnishing-create";
+        redirectAttrs.addFlashAttribute("message", response.getMessage());
+        return "redirect:/hotel-management/furnishing";
     }
 
 
