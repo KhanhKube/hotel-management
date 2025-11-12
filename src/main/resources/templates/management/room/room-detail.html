@@ -78,11 +78,23 @@
                                                     </tr>
                                                     <tr>
                                                         <td><i class="mdi mdi-stairs"></i> <strong>Tầng:</strong></td>
-                                                        <td th:text="${room.floorId}"></td>
+                                                        <td>
+                                                            <span th:if="${floorNumber != null}" th:text="'Tầng ' + ${floorNumber}"></span>
+                                                            <span th:if="${floorNumber == null}" class="text-muted">Chưa cập nhật</span>
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td><i class="mdi mdi-ruler-square"></i> <strong>Diện tích:</strong></td>
-                                                        <td><span th:text="${room.sizeId}"></span> m²</td>
+                                                        <td>
+                                                            <span th:if="${sizeValue != null}" th:text="${sizeValue} + ' m²'"></span>
+                                                            <span th:if="${sizeValue == null}" class="text-muted">Chưa cập nhật</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><i class="mdi mdi-account-multiple"></i> <strong>Số người tối đa:</strong></td>
+                                                        <td>
+                                                            <span class="badge badge-info" th:text="${room.maxSizePeople != null ? room.maxSizePeople + ' người' : 'Chưa cập nhật'}"></span>
+                                                        </td>
                                                     </tr>
                                                 </table>
                                             </div>
@@ -134,6 +146,49 @@
                                             <i class="mdi mdi-text"></i> Mô Tả Phòng
                                         </h5>
                                         <p class="mb-0" th:text="${room.roomDescription != null ? room.roomDescription : 'Chưa có mô tả'}"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Room Furnishings -->
+                                <div class="card mb-3" style="border-left: 4px solid #feca57;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <i class="mdi mdi-sofa"></i> Vật Dụng Phòng
+                                            <span class="badge badge-primary ml-2" th:text="${furnishings != null ? furnishings.size() : 0}"></span>
+                                        </h5>
+                                        
+                                        <!-- Nếu có vật dụng -->
+                                        <div th:if="${furnishings != null and !furnishings.empty}">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 60px;">#</th>
+                                                            <th>Tên vật dụng</th>
+                                                            <th style="width: 150px;" class="text-center">Số lượng</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr th:each="furnishing, iterStat : ${furnishings}">
+                                                            <td th:text="${iterStat.count}"></td>
+                                                            <td>
+                                                                <i class="mdi mdi-checkbox-marked-circle text-success"></i>
+                                                                <span th:text="${furnishing.name}"></span>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <span class="badge badge-primary" th:text="${furnishing.roomQuantity}"></span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Nếu không có vật dụng -->
+                                        <div th:if="${furnishings == null or furnishings.empty}" class="text-center text-muted py-4">
+                                            <i class="mdi mdi-package-variant" style="font-size: 48px;"></i>
+                                            <p class="mt-2">Chưa có vật dụng cho phòng này</p>
+                                        </div>
                                     </div>
                                 </div>
 
