@@ -82,48 +82,7 @@ public class OrderServiceImpl implements OrderService {
 		return mapToBookingInfoDto(results);
 	}
 
-	@Override
-	public List<OrderDto> getOrdersByPaymentCode(Long paymentOrderCode) {
-		List<Order> orders = orderRepository.findByPaymentOrderCode(paymentOrderCode);
 
-		return orders.stream()
-				.map(order -> {
-					OrderDto dto = new OrderDto();
-					dto.setOrderId(order.getOrderId());
-					dto.setUserId(order.getUserId());
-					dto.setCheckIn(order.getCheckIn());
-					dto.setCheckOut(order.getCheckOut());
-					dto.setStatus(order.getStatus());
-					dto.setCreatedAt(order.getCreatedAt());
-					dto.setPaymentOrderCode(order.getPaymentOrderCode());
-
-					// Get order details
-					List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
-					List<OrderDetailDto> detailDtos = orderDetails.stream().map(detail -> {
-						OrderDetailDto detailDto = new OrderDetailDto();
-						detailDto.setOrderDetailId(detail.getOrderDetailId());
-						detailDto.setOrderId(detail.getOrderId());
-						detailDto.setRoomId(detail.getRoomId());
-						detailDto.setCheckIn(detail.getCheckIn());
-						detailDto.setCheckOut(detail.getCheckOut());
-						detailDto.setStatus(detail.getStatus());
-						detailDto.setOrderDescription(detail.getOrderDescription());
-
-						// Get room info
-						roomRepository.findById(detail.getRoomId()).ifPresent(room -> {
-							detailDto.setRoomNumber(room.getRoomNumber());
-							detailDto.setRoomType(room.getRoomType());
-							detailDto.setPrice(room.getPrice());
-						});
-
-						return detailDto;
-					}).collect(Collectors.toList());
-
-					dto.setOrderDetails(detailDtos);
-
-					return dto;
-				}).collect(Collectors.toList());
-	}
 
 	private List<BookingInfoDto> mapToBookingInfoDto(List<Object[]> results) {
 		List<BookingInfoDto> bookingInfoList = new ArrayList<>();
