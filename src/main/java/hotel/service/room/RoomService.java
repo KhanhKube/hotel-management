@@ -1,10 +1,7 @@
 package hotel.service.room;
 
 import hotel.db.dto.room.*;
-import hotel.db.entity.Floor;
-import hotel.db.entity.Room;
-import hotel.db.entity.Size;
-import hotel.db.entity.User;
+import hotel.db.entity.*;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
@@ -13,6 +10,10 @@ import java.util.List;
 import java.util.Objects;
 
 public interface RoomService {
+    
+    List<hotel.db.dto.furnishing.FurnishingFormDto> getFurnishingsForForm(Integer roomId);
+    
+    void saveRoomFurnishings(Integer roomId, List<Integer> furnishingIds, List<Integer> quantities);
 
     void saveMaintenance(Integer roomId, String checkInDate, String checkOutDate,
                          String description, Integer createBy);

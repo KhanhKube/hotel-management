@@ -75,10 +75,83 @@
         .form-control::placeholder {
             color: #6c7293;
         }
+
+        /* Toast notification styles */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast-notification.error {
+            background-color: #dc3545;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast-notification.hiding {
+            animation: slideOut 0.3s ease-out;
+        }
+
+        .toast-notification .toast-close {
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 1;
+            color: white;
+            opacity: 0.8;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .toast-notification .toast-close:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 
 <body>
+<!-- Toast Notification -->
+<div th:if="${successMessage}" class="toast-notification">
+    <span class="toast-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300);">&times;</span>
+    <i class="mdi mdi-check-circle"></i>
+    <span th:text="${successMessage}"></span>
+</div>
+
+<div th:if="${errorMessage}" class="toast-notification error">
+    <span class="toast-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300);">&times;</span>
+    <i class="mdi mdi-alert-circle"></i>
+    <span th:text="${errorMessage}"></span>
+</div>
+
 <div class="container-scroller">
     <!-- Include sidebar -->
     <div th:replace="~{common/sidebar :: sidebar}"></div>
@@ -372,6 +445,21 @@
 <script th:src="@{/assets/js/off-canvas.js}"></script>
 <script th:src="@{/assets/js/hoverable-collapse.js}"></script>
 <script th:src="@{/assets/js/misc.js}"></script>
+
+<script>
+    // Auto hide toast notification after 3 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const toast = document.querySelector('.toast-notification');
+        if (toast) {
+            setTimeout(function() {
+                toast.classList.add('hiding');
+                setTimeout(function() {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+    });
+</script>
 </body>
 
 </html>
