@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,4 +42,14 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
 	// Find orders by payment order code
 	List<Order> findByPaymentOrderCode(Long paymentOrderCode);
+
+	@Query("SELECT COUNT(o) FROM Order o WHERE MONTH(o.createdAt) = MONTH(CURRENT_DATE) AND YEAR(o.createdAt) = YEAR(CURRENT_DATE)")
+	Long countOrdersInCurrentMonth();
+
+	@Query("SELECT COUNT(o) FROM Order o WHERE o.createdAt BETWEEN :startOfWeek AND :endOfWeek")
+	Long countOrdersInCurrentWeek(@Param("startOfWeek") LocalDateTime startOfWeek,
+								  @Param("endOfWeek") LocalDateTime endOfWeek);
+
+	@Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE MONTH(o.createdAt) = MONTH(CURRENT_DATE) AND YEAR(o.createdAt) = YEAR(CURRENT_DATE)")
+	BigDecimal totalRevenueThisMonth();
 }

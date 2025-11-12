@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -33,4 +32,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query(value = "SELECT * FROM users WHERE role = 'STAFF' OR role = 'RECEPTIONIST'", nativeQuery = true)
     List<User> findByRoleStaffOrReceptionist();
 
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role = 'STAFF' AND u.isDeleted = false ")
+    Long countStaff();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role = 'RECEPTIONIST' AND u.isDeleted = false ")
+    Long countReceptionists();
 }

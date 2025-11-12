@@ -3,6 +3,7 @@ package hotel.service.furnishing;
 import hotel.db.entity.Furnishing;
 import hotel.db.repository.furnishing.FurnishingRepository;
 import hotel.util.MessageResponse;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -10,9 +11,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -25,12 +28,27 @@ public class FurnishingServiceImpl implements FurnishingService {
                                          int page,
                                          int pageSize) {
         List<Furnishing> furnishings = furnishingRepository.findFurnishingsByIsDeletedFalse();
-
+        if (search != null && !search.trim().isEmpty()) {
+            String searchLower = search.trim().toLowerCase();
+            furnishings = furnishings.stream()
+                    .filter(x -> x.getName() != null && x.getName().toLowerCase().contains(searchLower))
+                    .collect(Collectors.toList());
+        }
+        Comparator<Furnishing> comparator = Comparator.comparing(Furnishing::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder()));
+        if ("quantity".equalsIgnoreCase(sortBy)) {
+            comparator = Comparator.comparing(Furnishing::getQuantity, Comparator.naturalOrder());
+        }
+        furnishings.sort(comparator);
 
         int start = Math.min(page * pageSize, furnishings.size());
         int end = Math.min(start + pageSize, furnishings.size());
         List<Furnishing> pagedFurnishings = furnishings.subList(start, end);
         return new PageImpl<>(pagedFurnishings, PageRequest.of(page, pageSize), furnishings.size());
+    }
+
+    @Override
+    public List<Furnishing>findAllAndIsDeletedFalse(){
+        return furnishingRepository.findFurnishingsByIsDeletedFalse();
     }
 
     @Override
@@ -44,6 +62,7 @@ public class FurnishingServiceImpl implements FurnishingService {
     }
 
     @Override
+    @Transactional
     public MessageResponse updateFurnishing(int id, Furnishing furnishing) {
         if (furnishing == null) {
             return new MessageResponse(false, "Hãy nhập trường cần thiết");
@@ -51,6 +70,9 @@ public class FurnishingServiceImpl implements FurnishingService {
 
         if (furnishing.getName() == null || furnishing.getFurnishingDescription() == null) {
             return new MessageResponse(false, "Hãy nhập trường cần thiết");
+        }
+        if(furnishing.getName().length() > 30 || furnishing.getFurnishingDescription().length() > 255){
+            return new MessageResponse(false, "Quá số lượng kí tự tên < 30, chi tiết < 255 ");
         }
 
         if(furnishing.getQuantity() < 0){
@@ -102,5 +124,36 @@ public class FurnishingServiceImpl implements FurnishingService {
         }
         furnishingRepository.save(furnishing);
         return new MessageResponse(true, "Tạo mới dụng cụ thành công");
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse updateFurnishingStock(List<Integer> selectedIds, List<Integer> quantities, String actionType) {
+        if (selectedIds == null || selectedIds.isEmpty()) {
+            return new MessageResponse(false, "Vui lòng chọn ít nhất một dụng cụ.");
+        }
+
+        for (int i = 0; i < selectedIds.size(); i++) {
+            int id = selectedIds.get(i);
+            int qty = quantities.get(i);
+
+            Furnishing item = furnishingRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy dụng cụ ID: " + id));
+
+            if ("ADD".equalsIgnoreCase(actionType)) {
+                item.setQuantity(item.getQuantity() + qty);
+            } else if ("TAKE".equalsIgnoreCase(actionType)) {
+                if (item.getQuantity() < qty) {
+                    return new MessageResponse(false, "Không đủ số lượng trong kho cho: " + item.getName());
+                }
+                item.setQuantity(item.getQuantity() - qty);
+            }
+            furnishingRepository.save(item);
+        }
+
+        String msg = "ADD".equalsIgnoreCase(actionType)
+                ? "Thêm dụng cụ thành công!"
+                : "Lấy dụng cụ thành công!";
+        return new MessageResponse(true, msg);
     }
 }

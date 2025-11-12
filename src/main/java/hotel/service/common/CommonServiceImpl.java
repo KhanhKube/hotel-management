@@ -5,6 +5,7 @@ import hotel.db.dto.user.UserProfileDto;
 import hotel.db.dto.user.UserRegisterDto;
 import hotel.db.dto.user.VerifyOtpDto;
 import hotel.db.entity.User;
+import hotel.db.repository.order.OrderRepository;
 import hotel.db.repository.user.UserRepository;
 import hotel.util.MessageResponse;
 import jakarta.mail.MessagingException;
@@ -24,13 +25,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import static ch.qos.logback.core.util.StringUtil.isNullOrEmpty;
 import static hotel.db.enums.Constants.*;
@@ -43,6 +42,7 @@ public class CommonServiceImpl implements CommonService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JavaMailSender mailSender;
+	private final OrderRepository orderRepository;
 
 	@Override
 	public User getUserByPhoneOrEmail(String request) {
@@ -393,6 +393,23 @@ public class CommonServiceImpl implements CommonService {
 		sendOtpEmail(email, subject, content);
 
 		return new MessageResponse(true, "Mật khẩu mới đã được gửi đến email của bạn!");
+	}
+
+	@Override
+	public Map<String, Object> getDashboardData() {
+		Map<String, Object> data = new HashMap<>();
+
+		LocalDate today = LocalDate.now();
+		LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);
+		LocalDate endOfWeek = today.with(DayOfWeek.SUNDAY);
+
+		data.put("ordersThisMonth", orderRepository.countOrdersInCurrentMonth());
+		data.put("ordersThisWeek", orderRepository.countOrdersInCurrentWeek(startOfWeek.atStartOfDay(), endOfWeek.atTime(23, 59, 59)));
+		data.put("staffCount", userRepository.countStaff());
+		data.put("receptionistCount", userRepository.countReceptionists());
+		data.put("totalRevenueThisMonth", orderRepository.totalRevenueThisMonth());
+
+		return data;
 	}
 }
 
