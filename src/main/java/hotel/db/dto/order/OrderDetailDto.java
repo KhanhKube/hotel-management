@@ -11,14 +11,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDetailDto {
-    private Integer orderDetailId;
-    private Integer orderId;
-    private Integer roomId;
-    private String roomNumber;
-    private String roomType;
-    private BigDecimal price;
-    private LocalDateTime checkIn;
-    private LocalDateTime checkOut;
-    private String status;
-    private String orderDescription;
+	private Integer orderDetailId;
+	private Integer orderId;
+	private Integer roomId;
+	private String roomNumber;
+	private String roomType;
+	private BigDecimal price;
+	private BigDecimal amount;
+	private LocalDateTime checkIn;
+	private LocalDateTime checkOut;
+	private String status;
+	private String orderDescription;
 }
