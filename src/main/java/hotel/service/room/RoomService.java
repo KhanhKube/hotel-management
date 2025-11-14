@@ -47,11 +47,12 @@ public interface RoomService {
 
 	List<Room> getAllRooms();
 
-    boolean checkForCreateRoomNumber(String roomNumber);
 
-    boolean checkForEditRoomNumber(String roomNumber, Long roomId);
 
     HashMap<String, String> saveRoom(Room room);
+    
+    HashMap<String, String> createOrUpdateRoom(Room room, List<org.springframework.web.multipart.MultipartFile> imageFiles,
+                                               List<Integer> furnishingIds, List<Integer> furnishingQuantities);
 
     void DeleteRoom(Integer id);
 

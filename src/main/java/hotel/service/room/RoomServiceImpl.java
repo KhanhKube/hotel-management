@@ -48,6 +48,8 @@ public class RoomServiceImpl implements RoomService {
     private final FurnishingRepository furnishingRepository;
     private final UserRepository userRepository;
     private final hotel.service.common.CommonService commonService;
+    private final hotel.service.cloudinary.CloudinaryService cloudinaryService;
+    private final hotel.service.image.ImageService imageService;
 
     public List<String> getRoomViewList(Integer roomId) {
         return roomViewRepository.findRoomViewId(roomId).stream().map(viewId ->
@@ -145,6 +147,13 @@ public class RoomServiceImpl implements RoomService {
                 Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
         );
 
+        List<RoomMaintenance> maintenances = roomMaintenanceRepository.findMaintenancesByRoomAndDateRange(
+                roomId,
+                fromDate,
+                toDate,
+                Arrays.asList("Dừng hoạt động")
+        );
+
         List<String> disableDates = new ArrayList<>();
 
         for (OrderDetail booking : bookings) {
@@ -154,6 +163,15 @@ public class RoomServiceImpl implements RoomService {
             LocalDate current = start;
             while (current.isBefore(end)) { // Không bao gồm ngày end
                 disableDates.add(current.toString()); // Format: yyyy-MM-dd
+                current = current.plusDays(1);
+            }
+        }
+        for (RoomMaintenance disableDate : maintenances) {
+            LocalDate start = disableDate.getStartDate().toLocalDate();
+            LocalDate end = disableDate.getEndDate().toLocalDate();
+            LocalDate current = start;
+            while (current.isBefore(end)) {
+                disableDates.add(current.toString());
                 current = current.plusDays(1);
             }
         }
@@ -295,10 +313,12 @@ public class RoomServiceImpl implements RoomService {
                     rooms.sort(Comparator.comparing(Room::getPrice).reversed());
                     break;
                 case "room-asc":
-                    rooms.sort(Comparator.comparing(Room::getRoomNumber));
+                    // So sánh theo số, không phải String
+                    rooms.sort(Comparator.comparingInt(r -> Integer.parseInt(r.getRoomNumber())));
                     break;
                 case "room-desc":
-                    rooms.sort(Comparator.comparing(Room::getRoomNumber).reversed());
+                    // So sánh theo số, không phải String
+                    rooms.sort(Comparator.comparingInt((Room r) -> Integer.parseInt(r.getRoomNumber())).reversed());
                     break;
             }
         }
@@ -479,7 +499,8 @@ public class RoomServiceImpl implements RoomService {
             Comparator<Room> comparator = null;
 
             if ("roomNumber".equals(field)) {
-                comparator = Comparator.comparing(Room::getRoomNumber);
+                // So sánh theo số, không phải String
+                comparator = Comparator.comparingInt(r -> Integer.parseInt(r.getRoomNumber()));
             } else if ("price".equals(field)) {
                 comparator = Comparator.comparing(Room::getPrice);
             }
@@ -537,15 +558,7 @@ public class RoomServiceImpl implements RoomService {
         );
     }
 
-    @Override
-    public boolean checkForCreateRoomNumber(String roomNumber) {
-        return roomRepository.existsByRoomNumber(roomNumber);
-    }
 
-    @Override
-    public boolean checkForEditRoomNumber(String roomNumber, Long roomId) {
-        return roomRepository.existsByRoomNumberAndRoomId(roomNumber, roomId);
-    }
 
     @Override
     public HashMap<String, String> saveRoom(Room room) {
@@ -569,6 +582,114 @@ public class RoomServiceImpl implements RoomService {
             return result;
         }
     }
+    
+    @Override
+    @Transactional
+    public HashMap<String, String> createOrUpdateRoom(Room room, List<org.springframework.web.multipart.MultipartFile> imageFiles,
+                                                      List<Integer> furnishingIds, List<Integer> furnishingQuantities) {
+        HashMap<String, String> result = new HashMap<>();
+        
+        try {
+            log.info("=== CREATE/UPDATE ROOM ===");
+            log.info("Room ID: {}, Room Number: {}", room.getRoomId(), room.getRoomNumber());
+            
+            boolean isUpdate = room.getRoomId() != null;
+            
+            // Xử lý status cho create/update
+            if (!isUpdate) {
+                // Tạo mới: Set status mặc định
+                room.setStatus("Đang trống");
+                room.setSystemStatus("Hoạt động");
+            } else {
+                // Update: Giữ nguyên status và systemStatus từ DB
+                Room existingRoom = roomRepository.findById(room.getRoomId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng cần cập nhật!"));
+                
+                room.setStatus(existingRoom.getStatus());
+                room.setSystemStatus(existingRoom.getSystemStatus());
+                
+                log.info("Updating room - keeping status: {}, systemStatus: {}", 
+                    existingRoom.getStatus(), existingRoom.getSystemStatus());
+            }
+            
+            // Validate số phòng (chỉ khi tạo mới, vì frontend đã disable khi update)
+            if (!isUpdate) {
+                if (roomRepository.existsByRoomNumber(room.getRoomNumber())) {
+                    result.put("error", "Số phòng này đã tồn tại!");
+                    return result;
+                }
+            }
+            
+            // Validate các trường khác
+            String validationError = validateRoomNumber(
+                room.getRoomNumber(), 
+                room.getFloorId(), 
+                room.getSizeId(), 
+                room.getRoomType(), 
+                room.getBedType(), 
+                room.getPrice(), 
+                room.getRoomId()
+            );
+            
+            if (!validationError.isEmpty()) {
+                result.put("error", validationError);
+                return result;
+            }
+            
+            // Lưu phòng
+            Room savedRoom = roomRepository.save(room);
+            log.info("Saved room with ID: {}", savedRoom.getRoomId());
+            
+            // Upload ảnh mới (nếu có)
+            if (imageFiles != null && !imageFiles.isEmpty()) {
+                log.info("=== UPLOADING {} IMAGES ===", imageFiles.size());
+                int successCount = 0;
+                int failCount = 0;
+                
+                for (org.springframework.web.multipart.MultipartFile file : imageFiles) {
+                    if (!file.isEmpty()) {
+                        try {
+                            // Upload lên Cloudinary
+                            String imageUrl = cloudinaryService.getImageUrlAfterUpload(file);
+                            
+                            // Lưu URL vào DB
+                            imageService.saveRoomImage(savedRoom.getRoomId(), imageUrl);
+                            
+                            successCount++;
+                            log.info("Uploaded image: {}", file.getOriginalFilename());
+                        } catch (Exception e) {
+                            failCount++;
+                            log.error("Failed to upload image: {}", file.getOriginalFilename(), e);
+                        }
+                    }
+                }
+                
+                log.info("Image upload completed: {} success, {} failed", successCount, failCount);
+            }
+            
+            // Lưu vật dụng của phòng
+            if (furnishingIds != null && !furnishingIds.isEmpty()) {
+                try {
+                    saveRoomFurnishings(savedRoom.getRoomId(), furnishingIds, furnishingQuantities);
+                    log.info("Saved {} furnishings for room", furnishingIds.size());
+                } catch (Exception e) {
+                    log.error("Error saving furnishings: {}", e.getMessage());
+                    result.put("error", "Lỗi khi lưu vật dụng: " + e.getMessage());
+                    return result;
+                }
+            }
+            
+            String successMessage = isUpdate ? 
+                "Đã cập nhật phòng thành công!" : "Đã tạo phòng thành công!";
+            result.put("success", successMessage);
+            return result;
+            
+        } catch (Exception e) {
+            log.error("Error in createOrUpdateRoom: {}", e.getMessage(), e);
+            result.put("error", "Lỗi: " + e.getMessage());
+            return result;
+        }
+    }
     @Override
     public void DeleteRoom(Integer id) {
         roomRepository.softDeleteById(id);
@@ -583,7 +704,7 @@ public class RoomServiceImpl implements RoomService {
             return "Vui lòng chọn diện tích!";
         }
         
-        //lấy số tầng và số size.
+        // Lấy số tầng và size
         Integer floorNumber = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))
                 .getFloorNumber();
@@ -595,22 +716,21 @@ public class RoomServiceImpl implements RoomService {
             sizeNumber = null;
         }
 
+        // Validate theo loại phòng
         if (roomType.equals("Tiêu chuẩn")) {
             if (sizeNumber != null && sizeNumber > 40) {
                 return "Phòng Tiêu chuẩn diện tích vui lòng nhỏ hơn hoặc bằng 40 mét vuông!";
             }
             if (bedType.equals("Giường King") || bedType.equals("Giường Queen")) {
-                return "Phong tiêu chuẩn chỉ được chọn giường Đơn hoặc Đôi!";
+                return "Phòng tiêu chuẩn chỉ được chọn giường Đơn hoặc Đôi!";
             }
         } else if (roomType.equals("Cao cấp") || roomType.equals("Hạng sang")) {
             if (sizeNumber != null && (sizeNumber > 50 || sizeNumber <= 40)) {
-                return "Phòng " + roomType + " diện tích vui lòng nhỏ hơn hoặc bằng " +
-                        "50 và lớn hơn 40 mét vuông!";
+                return "Phòng " + roomType + " diện tích vui lòng nhỏ hơn hoặc bằng 50 và lớn hơn 40 mét vuông!";
             }
         } else if (roomType.equals("VIP")) {
             if (sizeNumber != null && (sizeNumber > 70 || sizeNumber <= 50)) {
-                return "Phòng " + roomType + " diện tích vui lòng nhỏ hơn hoặc bằng " +
-                        "70 và lớn hơn 50 mét vuông!";
+                return "Phòng " + roomType + " diện tích vui lòng nhỏ hơn hoặc bằng 70 và lớn hơn 50 mét vuông!";
             }
         } else {
             if (sizeNumber != null && sizeNumber < 80) {
@@ -621,32 +741,44 @@ public class RoomServiceImpl implements RoomService {
             }
         }
 
-        // Kiểm tra format số phòng - phải là số
-        if (!roomNumber.matches("\\d+")) {
-            return "Số phòng chỉ được chứa chữ số. Vui lòng nhập lại!";
-        }
+        // Validate format số phòng (chỉ khi tạo mới, vì frontend đã disable khi update)
+        if (roomId == null) {
+            // Kiểm tra format số phòng - phải là số
+            if (!roomNumber.matches("\\d+")) {
+                return "Số phòng chỉ được chứa chữ số. Vui lòng nhập lại!";
+            }
 
-        // Số phòng phải có ít nhất 3 chữ số
-        if (roomNumber.length() < 3) {
-            return "Số phòng phải có ít nhất 3 chữ số (VD: 101, 1201). Vui lòng nhập lại!";
-        }
+            // Số phòng phải có ít nhất 3 chữ số
+            if (roomNumber.length() < 3) {
+                return "Số phòng phải có ít nhất 3 chữ số (VD: 101, 1201). Vui lòng nhập lại!";
+            }
 
-        // Lấy 2 số cuối (số phòng trong tầng)
-        String lastTwoDigits = roomNumber.substring(roomNumber.length() - 2);
-        int roomNumberInFloor = Integer.parseInt(lastTwoDigits);
+            // Lấy 2 số cuối (số phòng trong tầng)
+            String lastTwoDigits = roomNumber.substring(roomNumber.length() - 2);
+            int roomNumberInFloor = Integer.parseInt(lastTwoDigits);
 
-        // Lấy các số đầu (số tầng)
-        String floorPrefix = roomNumber.substring(0, roomNumber.length() - 2);
-        int roomFloorNumber = Integer.parseInt(floorPrefix);
+            // Lấy các số đầu (số tầng)
+            String floorPrefix = roomNumber.substring(0, roomNumber.length() - 2);
+            int roomFloorNumber = Integer.parseInt(floorPrefix);
 
-        // Các số đầu phải trùng với số tầng đã chọn
-        if (roomFloorNumber != floorNumber) {
-            return "Số phòng phải bắt đầu bằng số tầng " + floorNumber + " (VD: " + floorNumber + "01, " + floorNumber + "02). Vui lòng nhập lại!";
-        }
+            // Các số đầu phải trùng với số tầng đã chọn
+            if (roomFloorNumber != floorNumber) {
+                return "Số phòng phải bắt đầu bằng số tầng " + floorNumber + " (VD: " + floorNumber + "01, " + floorNumber + "02). Vui lòng nhập lại!";
+            }
 
-        // 2 số cuối từ 01-11
-        if (roomNumberInFloor < 1 || roomNumberInFloor > 11) {
-            return "Số phòng trong tầng (2 số cuối) phải từ 01-11!";
+            // 2 số cuối từ 01-11
+            if (roomNumberInFloor < 1 || roomNumberInFloor > 11) {
+                return "Số phòng trong tầng (2 số cuối) phải từ 01-11!";
+            }
+
+            // Đếm các phòng chưa bị xóa theo tầng
+            long roomCountOnFloor = roomRepository.findAllByIsDeletedFalse().stream()
+                    .filter(r -> r.getFloorId().equals(floorId))
+                    .count();
+            
+            if (roomCountOnFloor >= 11) {
+                return "Số lượng phòng trên tầng " + floorNumber + " đã đầy!";
+            }
         }
 
         // Validate giá tiền
@@ -665,17 +797,6 @@ public class RoomServiceImpl implements RoomService {
             return "Giá phòng tối đa là 10.000.000 VNĐ!";
         }
 
-        // Đếm các phòng chưa bị xóa theo tầng
-        // Nếu là UPDATE (roomId != null), loại trừ phòng hiện tại khỏi count
-        long roomCountOnFloor = roomRepository.findAllByIsDeletedFalse().stream()
-                .filter(r -> r.getFloorId().equals(floorId))
-                .filter(r -> roomId == null || !r.getRoomId().equals(roomId)) // Loại trừ phòng đang update
-                .count();
-        // Lớn hơn 11 trả về message error
-        if (roomCountOnFloor >= 11) {
-            return "Số lượng phòng trên tầng "
-                    + floorNumber + " đã đầy!";
-        }
         return "";
     }
 
@@ -977,7 +1098,7 @@ public class RoomServiceImpl implements RoomService {
         maintenance.setRoomId(roomId);
         maintenance.setStartDate(disableDateTime);
         maintenance.setEndDate(endDateTime);
-        maintenance.setStatus("Đã giao");
+        maintenance.setStatus("Dừng hoạt động");
         maintenance.setDescription(description != null ? description : "Phòng dừng hoạt động");
         maintenance.setCreateBy(createdBy);
         roomMaintenanceRepository.save(maintenance);

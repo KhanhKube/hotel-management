@@ -6,16 +6,13 @@ import hotel.db.dto.room.RoomListDto;
 import hotel.db.dto.room.SearchRoomRequest;
 import hotel.db.entity.Room;
 import hotel.db.entity.RoomImage;
-import hotel.db.entity.RoomMaintenance;
 import hotel.db.entity.User;
 import hotel.db.enums.BedType;
 import hotel.db.enums.RoomStatus;
 import hotel.db.enums.RoomSystemStatus;
 import hotel.db.enums.RoomType;
-import hotel.db.repository.floor.FloorRepository;
 import hotel.db.repository.roomimage.RoomImageRepository;
 import hotel.service.booking.BookingService;
-import hotel.service.file.RoomImageUploadService;
 import hotel.service.image.ImageService;
 import hotel.service.room.RoomService;
 import jakarta.servlet.http.HttpSession;
@@ -107,123 +104,23 @@ public class RoomController {
                          @RequestParam(value = "furnishingIds", required = false) List<Integer> furnishingIds,
                          @RequestParam(value = "furnishingQuantities", required = false) List<Integer> furnishingQuantities,
                          BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-        try {
-            System.out.println("=== CREATE/UPDATE ROOM ===");
-            System.out.println("Room ID from form: " + room.getRoomId());
-            System.out.println("Room Number: " + room.getRoomNumber());
-            
-            // Lưu trạng thái để biết là tạo mới hay cập nhật
-            boolean isUpdate = room.getRoomId() != null;
-            
-            // Lưu số phòng cũ và status cũ
-            String oldRoomNumber = null;
-            String oldStatus = null;
-            String oldSystemStatus = null;
-            
-            if (!isUpdate) {
-                // Tạo mới: Set status và systemStatus mặc định
-                room.setStatus("Đang trống");
-                room.setSystemStatus("Hoạt động");
-                System.out.println("Creating new room");
-            } else {
-                // Update: Giữ nguyên status và systemStatus cũ
-                Room existingRoom = roomService.getRoomById(room.getRoomId());
-                if (existingRoom == null) {
-                    model.addAttribute("room", room);
-                    model.addAttribute("errorMessage", "Không tìm thấy phòng cần cập nhật!");
-                    return "management/room/room-create-form";
-                }
-                
-                oldRoomNumber = existingRoom.getRoomNumber();
-                oldStatus = existingRoom.getStatus();
-                oldSystemStatus = existingRoom.getSystemStatus();
-                
-                // Set lại status và systemStatus từ DB (không lấy từ form)
-                room.setStatus(oldStatus);
-                room.setSystemStatus(oldSystemStatus);
-                
-                System.out.println("Updating room ID: " + room.getRoomId());
-                System.out.println("Old Room Number: " + oldRoomNumber);
-            }
-
-            // Validate room number
-            if (room.getRoomId() == null) {
-                if (roomService.checkForCreateRoomNumber(room.getRoomNumber())) {
-                    model.addAttribute("room", room);
-                    model.addAttribute("errorMessage", "Số phòng này đã tồn tại!");
-                    return "management/room/room-create-form";
-                }
-            } else {
-                if (!roomService.checkForEditRoomNumber(room.getRoomNumber(), Long.valueOf(room.getRoomId()))) {
-                    model.addAttribute("room", room);
-                    model.addAttribute("errorMessage", "Số phòng này đã tồn tại!");
-                    return "management/room/room-create-form";
-                }
-            }
-
-            // Save room
-            HashMap<String, String> saveResult = roomService.saveRoom(room);
-            if (saveResult.containsKey("error")) {
-                model.addAttribute("room", room);
-                model.addAttribute("errorMessage", saveResult.get("error"));
-                return "management/room/room-create-form";
-            }
-
-            // Upload ảnh mới nếu có (dùng Cloudinary)
-            if (imageFiles != null && !imageFiles.isEmpty()) {
-                System.out.println("=== UPLOADING IMAGES TO CLOUDINARY ===");
-                for (MultipartFile file : imageFiles) {
-                    if (!file.isEmpty()) {
-                        try {
-                            // Upload lên Cloudinary và lấy URL
-                            String imageUrl = cloudinaryService.getImageUrlAfterUpload(file);
-                            System.out.println("Uploaded image URL: " + imageUrl);
-                            
-                            // Lưu URL vào DB
-                            roomImageService.saveRoomImage(room.getRoomId(), imageUrl);
-                        } catch (Exception e) {
-                            System.err.println("Error uploading file: " + file.getOriginalFilename());
-                            e.printStackTrace();
-                            // Không throw exception, tiếp tục upload các file khác
-                        }
-                    }
-                }
-            }
-            
-            // Lưu vật dụng của phòng
-            try {
-                if (furnishingIds != null && !furnishingIds.isEmpty()) {
-                    roomService.saveRoomFurnishings(room.getRoomId(), furnishingIds, furnishingQuantities);
-                }
-            } catch (RuntimeException e) {
-                System.err.println("Error saving furnishings: " + e.getMessage());
-                model.addAttribute("room", room);
-                model.addAttribute("furnishings", roomService.getFurnishingsForForm(room.getRoomId()));
-                model.addAttribute("errorMessage", e.getMessage());
-                return "management/room/room-create-form";
-            }
-            
-            // Thêm success message
-            String successMessage = isUpdate ? 
-                "Đã cập nhật phòng thành công!" : "Đã tạo phòng thành công!";
-            redirectAttributes.addFlashAttribute("successMessage", successMessage);
-            return "redirect:/hotel-management/room";
-
-        } catch (RuntimeException e) {
-            System.err.println("=== RuntimeException: " + e.getMessage());
-            e.printStackTrace();
+        
+        // Gọi service xử lý toàn bộ logic
+        HashMap<String, String> saveResult = roomService.createOrUpdateRoom(
+            room, imageFiles, furnishingIds, furnishingQuantities
+        );
+        
+        // Xử lý kết quả
+        if (saveResult.containsKey("error")) {
             model.addAttribute("room", room);
             model.addAttribute("furnishings", roomService.getFurnishingsForForm(room.getRoomId()));
-            model.addAttribute("errorMessage", e.getMessage());
-            return "management/room/room-create-form";
-        } catch (Exception e) {
-            System.err.println("=== Exception: " + e.getMessage());
-            e.printStackTrace();
-            model.addAttribute("room", room);
-            model.addAttribute("furnishings", roomService.getFurnishingsForForm(room.getRoomId()));
-            model.addAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            model.addAttribute("errorMessage", saveResult.get("error"));
             return "management/room/room-create-form";
         }
+        
+        // Thành công
+        redirectAttributes.addFlashAttribute("successMessage", saveResult.get("success"));
+        return "redirect:/hotel-management/room";
     }
 
     @GetMapping("/edit/{id}")
