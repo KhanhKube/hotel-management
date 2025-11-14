@@ -1,173 +1,348 @@
 package hotel.rest.checking;
 
-import hotel.db.dto.checking.AfterCheckOutRequestDto;
-import hotel.db.dto.checking.BookingDto;
-import hotel.db.dto.checking.CheckInRequestDto;
-import hotel.db.dto.checking.CheckOutRequestDto;
-import hotel.db.entity.User;
+import hotel.db.dto.checking.*;
 import hotel.service.checking.CheckingService;
-import jakarta.servlet.http.HttpSession;
+import hotel.util.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/**
- * Controller xử lý check-in, check-out và after check-out
- * Đơn giản, mượt mà, load nhanh
- */
-@Controller
-@RequestMapping("/hotel-management")
+@RestController
+@RequestMapping("/api/checking")
 @RequiredArgsConstructor
 public class CheckingController {
 
     private final CheckingService checkingService;
 
-    /**
-     * Trang quản lý check-in, check-out và after check-out
-     * Một trang duy nhất với 3 tabs
-     */
-    @GetMapping("/checking")
-    public String checkingManagement(
-            @RequestParam(value = "type", defaultValue = "checkin") String type,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            HttpSession session,
-            Model model) {
-        
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "redirect:/hotel/login";
-        }
-
-        model.addAttribute("currentType", type);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("pageSize", size);
-
-        // Đếm số lượng cho badges (nhanh)
-        model.addAttribute("checkInCount", checkingService.countCheckInItems());
-        model.addAttribute("checkOutCount", checkingService.countCheckOutItems());
-        model.addAttribute("afterCheckOutCount", checkingService.countAfterCheckOutItems());
-
-        // Load dữ liệu với pagination (chỉ load tab hiện tại)
-        Pageable pageable = PageRequest.of(page, size);
-        Page<BookingDto> bookingPage;
-
-        switch (type) {
-            case "checkin":
-                bookingPage = checkingService.getCheckInList(pageable);
-                model.addAttribute("bookings", bookingPage.getContent());
-                break;
-            case "checkout":
-                bookingPage = checkingService.getCheckOutList(pageable);
-                model.addAttribute("bookings", bookingPage.getContent());
-                break;
-            case "after-checkout":
-                bookingPage = checkingService.getAfterCheckOutList(pageable);
-                model.addAttribute("bookings", bookingPage.getContent());
-                break;
-            default:
-                bookingPage = checkingService.getCheckInList(pageable);
-                model.addAttribute("bookings", bookingPage.getContent());
-        }
-
-        model.addAttribute("totalItems", bookingPage.getTotalElements());
-        model.addAttribute("totalPages", bookingPage.getTotalPages());
-        model.addAttribute("isFirst", bookingPage.isFirst());
-        model.addAttribute("isLast", bookingPage.isLast());
-        
-        // Tính toán hiển thị phân trang
-        long totalElements = bookingPage.getTotalElements();
-        int currentPageNum = bookingPage.getNumber();
-        int pageSizeNum = bookingPage.getSize();
-        long startItem = totalElements > 0 ? ((long) currentPageNum * pageSizeNum + 1) : 0;
-        long endItem = totalElements > 0 ? Math.min((long) (currentPageNum + 1) * pageSizeNum, totalElements) : 0;
-        model.addAttribute("startItem", startItem);
-        model.addAttribute("endItem", endItem);
-
-        return "checking/checking";
-    }
+    // ===== CHECK-IN ENDPOINTS =====
 
     /**
-     * Xử lý check-in
+     * Lấy danh sách order detail với status RESERVED (màn check-in) - CHỈ LỄ TÂN
      */
-    @PostMapping("/checking/checkin")
-    public String checkIn(
-            @ModelAttribute CheckInRequestDto request,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-        
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "redirect:/hotel/login";
-        }
-
+    @GetMapping("/reserved")
+    public ResponseEntity<?> getReservedOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         try {
-            checkingService.checkIn(request);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                    "Check-in thành công cho booking #" + request.getOrderDetailId());
-            return "redirect:/hotel-management/checking?type=checkout&page=0&size=10";
+            Pageable pageable = PageRequest.of(page, size);
+            Page<OrderDetailResponse> orders = checkingService.getReservedOrders(pageable);
+            return ResponseEntity.ok(orders);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/hotel-management/checking?type=checkin&page=0&size=10";
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi lấy danh sách đặt phòng: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Lấy danh sách order detail với status CHECKING_IN (khách chờ xác nhận) - CHỈ KHÁCH HÀNG
+     */
+    @GetMapping("/checking-in")
+    public ResponseEntity<?> getCheckingInOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<OrderDetailResponse> orders = checkingService.getCheckingInOrders(pageable);
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi lấy danh sách đang check-in: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Lấy danh sách order detail với status CUSTOMER_CONFIRMED (chờ staff xác nhận) - CHỈ NHÂN VIÊN
+     */
+    @GetMapping("/customer-confirmed")
+    public ResponseEntity<?> getCustomerConfirmedOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<OrderDetailResponse> orders = checkingService.getCustomerConfirmedOrders(pageable);
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi lấy danh sách chờ xác nhận: " + e.getMessage()));
         }
     }
 
     /**
-     * Xử lý check-out
+     * Bước 1: Lễ tân bắt đầu check-in: RESERVED -> CHECKING_IN
      */
-    @PostMapping("/checking/checkout")
-    public String checkOut(
-            @ModelAttribute CheckOutRequestDto request,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-        
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "redirect:/hotel/login";
-        }
-
+    @PostMapping("/start-checkin")
+    public ResponseEntity<?> startCheckIn(@RequestBody CheckInRequest request) {
         try {
-            checkingService.checkOut(request);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                    "Check-out thành công cho booking #" + request.getOrderDetailId());
-            return "redirect:/hotel-management/checking?type=after-checkout&page=0&size=10";
+            OrderDetailResponse response = checkingService.startCheckIn(request);
+            
+            // Kiểm tra xem còn phòng RESERVED không
+            long remainingReserved = checkingService.getReservedOrders(PageRequest.of(0, 1)).getTotalElements();
+            
+            return ResponseEntity.ok()
+                    .header("X-Redirect-Tab", remainingReserved > 0 ? "checkin-receptionist" : "checkin-customer")
+                    .body(response);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/hotel-management/checking?type=checkout&page=0&size=10";
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi bắt đầu check-in: " + e.getMessage()));
         }
     }
 
     /**
-     * Xử lý after check-out
+     * Bước 2: Khách hàng xác nhận: CHECKING_IN -> CUSTOMER_CONFIRM
      */
-    @PostMapping("/checking/after-checkout")
-    public String afterCheckOut(
-            @ModelAttribute AfterCheckOutRequestDto request,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-        
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "redirect:/hotel/login";
-        }
-
+    @PostMapping("/customer-confirm")
+    public ResponseEntity<?> customerConfirmCheckIn(@RequestBody CheckInConfirmRequest request) {
         try {
-            checkingService.afterCheckOut(request);
-            String message = request.getReadyForNextGuest() 
-                    ? "Phòng đã sẵn sàng cho khách mới" 
-                    : "Phòng đã chuyển sang bảo trì";
-            redirectAttributes.addFlashAttribute("successMessage", 
-                    "Xử lý thành công. " + message);
-            return "redirect:/hotel-management/checking?type=after-checkout&page=0&size=10";
+            request.setConfirmedBy("CUSTOMER");
+            OrderDetailResponse response = checkingService.confirmCheckIn(request);
+            
+            // Kiểm tra xem còn phòng CHECKING_IN không
+            long remainingCheckingIn = checkingService.getCheckingInOrders(PageRequest.of(0, 1)).getTotalElements();
+            
+            return ResponseEntity.ok()
+                    .header("X-Redirect-Tab", remainingCheckingIn > 0 ? "checkin-customer" : "checkin-staff")
+                    .body(response);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/hotel-management/checking?type=after-checkout&page=0&size=10";
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi khách xác nhận check-in: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Bước 3: Nhân viên xác nhận: CUSTOMER_CONFIRM -> OCCUPIED
+     */
+    @PostMapping("/staff-confirm")
+    public ResponseEntity<?> staffConfirmCheckIn(@RequestBody CheckInConfirmRequest request) {
+        try {
+            request.setConfirmedBy("STAFF");
+            OrderDetailResponse response = checkingService.confirmCheckIn(request);
+            
+            // Kiểm tra xem còn phòng CUSTOMER_CONFIRMED không
+            long remainingCustomerConfirmed = checkingService.getCustomerConfirmedOrders(PageRequest.of(0, 1)).getTotalElements();
+            
+            // Nếu hết check-in, chuyển sang check-out
+            if (remainingCustomerConfirmed == 0) {
+                long occupiedCount = checkingService.getOccupiedOrders(PageRequest.of(0, 1)).getTotalElements();
+                return ResponseEntity.ok()
+                        .header("X-Redirect-Tab", occupiedCount > 0 ? "checkout-receptionist" : "checkin-staff")
+                        .body(response);
+            }
+            
+            return ResponseEntity.ok()
+                    .header("X-Redirect-Tab", "checkin-staff")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi nhân viên xác nhận check-in: " + e.getMessage()));
+        }
+    }
+
+    // ===== CHECK-OUT ENDPOINTS =====
+
+    /**
+     * Lấy danh sách phòng đang ở (OCCUPIED)
+     */
+    @GetMapping("/occupied")
+    public ResponseEntity<?> getOccupiedOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<OrderDetailResponse> orders = checkingService.getOccupiedOrders(pageable);
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi lấy danh sách phòng đang ở: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Bước 1: Lễ tân khởi tạo checkout: OCCUPIED -> NEED_CHECKOUT
+     */
+    @PostMapping("/initiate-checkout")
+    public ResponseEntity<?> startCheckOut(@RequestBody CheckOutRequest request) {
+        try {
+            OrderDetailResponse response = checkingService.startCheckOut(request);
+            
+            // Kiểm tra xem còn phòng OCCUPIED không
+            long remainingOccupied = checkingService.getOccupiedOrders(PageRequest.of(0, 1)).getTotalElements();
+            
+            return ResponseEntity.ok()
+                    .header("X-Redirect-Tab", remainingOccupied > 0 ? "checkout-receptionist" : "checkout-staff")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi bắt đầu check-out: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Lấy danh sách phòng NEED_CHECKOUT cho nhân viên
+     */
+    @GetMapping("/need-checkout")
+    public ResponseEntity<?> getNeedCheckOutOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<OrderDetailResponse> orders = checkingService.getNeedCheckOutOrders(pageable);
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi lấy danh sách cần check-out: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Bước 2: Nhân viên kiểm tra phòng: NEED_CHECKOUT -> CHECKING_OUT -> CHECKED_OUT
+     */
+    @PostMapping("/staff-check-room")
+    public ResponseEntity<?> staffCheckOut(@RequestBody StaffCheckOutRequest request) {
+        try {
+            OrderDetailResponse response = checkingService.staffCheckOut(request);
+            
+            // Kiểm tra xem còn phòng NEED_CHECKOUT không
+            long remainingNeedCheckout = checkingService.getNeedCheckOutOrders(PageRequest.of(0, 1)).getTotalElements();
+            
+            return ResponseEntity.ok()
+                    .header("X-Redirect-Tab", remainingNeedCheckout > 0 ? "checkout-staff" : "checkout-receptionist-confirm")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi nhân viên kiểm tra check-out: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Lấy danh sách phòng CHECKED_OUT cho lễ tân xác nhận
+     */
+    @GetMapping("/checked-out")
+    public ResponseEntity<?> getCheckedOutOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<OrderDetailResponse> orders = checkingService.getCheckedOutOrders(pageable);
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi lấy danh sách đã check-out: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Bước 3: Lễ tân xác nhận checkout: CHECKED_OUT -> NEED_CLEAN
+     */
+    @PostMapping("/confirm-checkout")
+    public ResponseEntity<?> receptionistConfirmCheckOut(@RequestBody AfterCheckOutConfirmRequest request) {
+        try {
+            OrderDetailResponse response = checkingService.receptionistConfirmCheckOut(request);
+            
+            // Kiểm tra xem còn phòng CHECKED_OUT không
+            long remainingCheckedOut = checkingService.getCheckedOutOrders(PageRequest.of(0, 1)).getTotalElements();
+            
+            // Nếu hết, chuyển sang after-checkout (cleaning)
+            if (remainingCheckedOut == 0) {
+                long needCleanCount = checkingService.getNeedCleanOrders(PageRequest.of(0, 1)).getTotalElements();
+                return ResponseEntity.ok()
+                        .header("X-Redirect-Tab", needCleanCount > 0 ? "aftercheckout-staff" : "checkout-receptionist-confirm")
+                        .body(response);
+            }
+            
+            return ResponseEntity.ok()
+                    .header("X-Redirect-Tab", "checkout-receptionist-confirm")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi lễ tân xác nhận: " + e.getMessage()));
+        }
+    }
+
+    // ===== AFTER CHECK-OUT ENDPOINTS =====
+
+    /**
+     * Lấy danh sách phòng NEED_CLEAN - CHỈ NHÂN VIÊN
+     */
+    @GetMapping("/need-clean")
+    public ResponseEntity<?> getNeedCleanOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<OrderDetailResponse> orders = checkingService.getNeedCleanOrders(pageable);
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi lấy danh sách cần dọn dẹp: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Lấy danh sách phòng CLEANING (đang dọn) - CHỈ NHÂN VIÊN
+     */
+    @GetMapping("/cleaning")
+    public ResponseEntity<?> getCleaningOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<OrderDetailResponse> orders = checkingService.getCleaningOrders(pageable);
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi lấy danh sách đang dọn dẹp: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Bước 4: Nhân viên bắt đầu dọn phòng: NEED_CLEAN -> CLEANING
+     */
+    @PostMapping("/start-cleaning")
+    public ResponseEntity<?> startCleaning(@RequestBody CleaningRequest request) {
+        try {
+            OrderDetailResponse response = checkingService.startCleaning(request);
+            
+            // Kiểm tra xem còn phòng NEED_CLEAN không
+            long remainingNeedClean = checkingService.getNeedCleanOrders(PageRequest.of(0, 1)).getTotalElements();
+            
+            return ResponseEntity.ok()
+                    .header("X-Redirect-Tab", remainingNeedClean > 0 ? "aftercheckout-staff" : "aftercheckout-cleaning")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi bắt đầu dọn dẹp: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Bước 5: Nhân viên hoàn thành dọn phòng: CLEANING -> COMPLETED, Room -> AVAILABLE
+     */
+    @PostMapping("/complete-cleaning")
+    public ResponseEntity<?> completeCleaning(@RequestBody CleaningRequest request) {
+        try {
+            OrderDetailResponse response = checkingService.completeCleaning(request);
+            
+            // Kiểm tra xem còn phòng CLEANING không
+            long remainingCleaning = checkingService.getCleaningOrders(PageRequest.of(0, 1)).getTotalElements();
+            
+            // Nếu hết cleaning, kiểm tra xem còn need clean không
+            if (remainingCleaning == 0) {
+                long needCleanCount = checkingService.getNeedCleanOrders(PageRequest.of(0, 1)).getTotalElements();
+                return ResponseEntity.ok()
+                        .header("X-Redirect-Tab", needCleanCount > 0 ? "aftercheckout-staff" : "completed")
+                        .body(response);
+            }
+            
+            return ResponseEntity.ok()
+                    .header("X-Redirect-Tab", "aftercheckout-cleaning")
+                    .body(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(false, "Lỗi khi hoàn thành dọn dẹp: " + e.getMessage()));
         }
     }
 }
-

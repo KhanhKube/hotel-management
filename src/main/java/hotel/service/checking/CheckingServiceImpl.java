@@ -1,360 +1,303 @@
 package hotel.service.checking;
 
-import hotel.db.dto.checking.AfterCheckOutRequestDto;
-import hotel.db.dto.checking.BookingDto;
-import hotel.db.dto.checking.CheckInRequestDto;
-import hotel.db.dto.checking.CheckOutRequestDto;
-import hotel.db.entity.Order;
+import hotel.db.dto.checking.*;
 import hotel.db.entity.OrderDetail;
 import hotel.db.entity.Room;
-import hotel.db.entity.User;
+import hotel.db.enums.OrderDetailStatus;
 import hotel.db.enums.RoomStatus;
-import hotel.db.repository.order.OrderRepository;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
 import hotel.db.repository.room.RoomRepository;
-import hotel.db.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
-/**
- * Service implementation xử lý check-in, check-out và after check-out
- * Logic đơn giản, rõ ràng, tối ưu performance - tránh N+1 query
- */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CheckingServiceImpl implements CheckingService {
 
     private final OrderDetailRepository orderDetailRepository;
-    private final OrderRepository orderRepository;
     private final RoomRepository roomRepository;
-    private final UserRepository userRepository;
+    private final hotel.db.repository.user.UserRepository userRepository;
 
-    // Các trạng thái
-    private static final String STATUS_PENDING = "PENDING";
-    private static final String STATUS_CART = "CART";
-    private static final String STATUS_CHECKED_IN = "CHECKED_IN";
-    private static final String STATUS_CHECKED_OUT = "CHECKED_OUT";
-    private static final String STATUS_COMPLETED = "COMPLETED";
-
-    // ===== CHECK-IN =====
+    @Override
+    public Page<OrderDetailResponse> getReservedOrders(Pageable pageable) {
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByStatusOrderByCreatedAtDesc(
+                OrderDetailStatus.RESERVED, pageable);
+        return orderDetails.map(this::convertToResponse);
+    }
 
     @Override
     @Transactional
-    public void checkIn(CheckInRequestDto request) {
-        // Lấy booking
+    public OrderDetailResponse startCheckIn(CheckInRequest request) {
         OrderDetail orderDetail = orderDetailRepository.findById(request.getOrderDetailId())
-                .orElseThrow(() -> new RuntimeException("Booking không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Order detail not found"));
 
-        // Kiểm tra status: chỉ check-in được PENDING hoặc CART
-        String currentStatus = orderDetail.getStatus();
-        if (!STATUS_PENDING.equals(currentStatus) && !STATUS_CART.equals(currentStatus)) {
-            throw new RuntimeException("Chỉ có thể check-in booking ở trạng thái PENDING hoặc CART");
+        if (!OrderDetailStatus.RESERVED.equals(orderDetail.getStatus())) {
+            throw new RuntimeException("Order detail must be in RESERVED status");
         }
 
-        // Lấy phòng
-        Room room = roomRepository.findById(orderDetail.getRoomId())
-                .orElseThrow(() -> new RuntimeException("Phòng không tồn tại"));
-
-        // Kiểm tra phòng: cho phép check-in nếu phòng ở trạng thái AVAILABLE hoặc RESERVED
-        // - AVAILABLE: phòng trống, có thể check-in ngay
-        // - RESERVED: phòng đã được đặt (PENDING/CART), có thể check-in
-        String roomStatus = room.getStatus();
-        if (!RoomStatus.AVAILABLE.equals(roomStatus) && !RoomStatus.RESERVED.equals(roomStatus)) {
-            throw new RuntimeException("Phòng không sẵn sàng để check-in. Trạng thái hiện tại: " + roomStatus);
-        }
-
-        // Cập nhật check-in
-        orderDetail.setCheckIn(LocalDateTime.now());
-        orderDetail.setStatus(STATUS_CHECKED_IN);
+        // Chỉ update OrderDetail, KHÔNG update Room
+        orderDetail.setStatus(OrderDetailStatus.CHECKING_IN);
         orderDetailRepository.save(orderDetail);
 
-        // Cập nhật phòng → OCCUPIED
-        room.setStatus(RoomStatus.OCCUPIED);
+        log.info("Started check-in for order detail: {}", orderDetail.getOrderDetailId());
+        return convertToResponse(orderDetail);
+    }
+
+    @Override
+    @Transactional
+    public OrderDetailResponse confirmCheckIn(CheckInConfirmRequest request) {
+        OrderDetail orderDetail = orderDetailRepository.findById(request.getOrderDetailId())
+                .orElseThrow(() -> new RuntimeException("Order detail not found"));
+
+        if (!OrderDetailStatus.CHECKING_IN.equals(orderDetail.getStatus()) 
+                && !OrderDetailStatus.CUSTOMER_CONFIRM.equals(orderDetail.getStatus())) {
+            throw new RuntimeException("Invalid status for check-in confirmation");
+        }
+
+        if ("CUSTOMER".equals(request.getConfirmedBy())) {
+            // Khách xác nhận: chỉ update OrderDetail
+            orderDetail.setStatus(OrderDetailStatus.CUSTOMER_CONFIRM);
+            orderDetailRepository.save(orderDetail);
+            log.info("Customer confirmed check-in for order detail: {}", orderDetail.getOrderDetailId());
+        } else if ("STAFF".equals(request.getConfirmedBy())) {
+            // Staff xác nhận: phải có customer confirm trước
+            if (OrderDetailStatus.CUSTOMER_CONFIRM.equals(orderDetail.getStatus())) {
+                orderDetail.setStatus(OrderDetailStatus.OCCUPIED);
+                orderDetail.setCheckIn(LocalDateTime.now()); // Set thời gian check-in thực tế
+                orderDetailRepository.save(orderDetail);
+
+                // Update Room status
+                Room room = roomRepository.findById(orderDetail.getRoomId())
+                        .orElseThrow(() -> new RuntimeException("Room not found"));
+                room.setStatus(RoomStatus.OCCUPIED);
+                roomRepository.save(room);
+
+                log.info("Completed check-in for order detail: {}", orderDetail.getOrderDetailId());
+            } else {
+                throw new RuntimeException("Customer must confirm first");
+            }
+        }
+
+        return convertToResponse(orderDetail);
+    }
+
+    @Override
+    public Page<OrderDetailResponse> getOccupiedOrders(Pageable pageable) {
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByStatusOrderByCreatedAtDesc(
+                OrderDetailStatus.OCCUPIED, pageable);
+        return orderDetails.map(this::convertToResponse);
+    }
+
+    @Override
+    @Transactional
+    public OrderDetailResponse startCheckOut(CheckOutRequest request) {
+        OrderDetail orderDetail = orderDetailRepository.findById(request.getOrderDetailId())
+                .orElseThrow(() -> new RuntimeException("Order detail not found"));
+
+        if (!OrderDetailStatus.OCCUPIED.equals(orderDetail.getStatus())) {
+            throw new RuntimeException("Order detail must be in OCCUPIED status");
+        }
+
+        // Chỉ update OrderDetail, Room vẫn OCCUPIED
+        orderDetail.setStatus(OrderDetailStatus.NEED_CHECKOUT);
+        orderDetailRepository.save(orderDetail);
+
+        log.info("Started check-out for order detail: {}", orderDetail.getOrderDetailId());
+        return convertToResponse(orderDetail);
+    }
+
+    @Override
+    public Page<OrderDetailResponse> getNeedCheckOutOrders(Pageable pageable) {
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByStatusOrderByCreatedAtDesc(
+                OrderDetailStatus.NEED_CHECKOUT, pageable);
+        return orderDetails.map(this::convertToResponse);
+    }
+
+    @Override
+    @Transactional
+    public OrderDetailResponse staffCheckOut(StaffCheckOutRequest request) {
+        OrderDetail orderDetail = orderDetailRepository.findById(request.getOrderDetailId())
+                .orElseThrow(() -> new RuntimeException("Order detail not found"));
+
+        if (!OrderDetailStatus.NEED_CHECKOUT.equals(orderDetail.getStatus())) {
+            throw new RuntimeException("Order detail must be in NEED_CHECKOUT status");
+        }
+
+        // Bước 1: Chuyển sang CHECKING_OUT (tạm thời để LT biết đang kiểm tra)
+        orderDetail.setStatus(OrderDetailStatus.CHECKING_OUT);
+        orderDetailRepository.save(orderDetail);
+        
+        // Bước 2: Nhân viên kiểm tra và gửi form
+        orderDetail.setStatus(OrderDetailStatus.CHECKED_OUT);
+        orderDetail.setCheckOut(LocalDateTime.now());
+        
+        // Lưu ghi chú nếu có vấn đề
+        if (request.getHasIssue() != null && request.getHasIssue()) {
+            String currentDesc = orderDetail.getOrderDescription() != null ? orderDetail.getOrderDescription() : "";
+            orderDetail.setOrderDescription(currentDesc + "\n[STAFF REPORT] " + request.getReportNote());
+        }
+        
+        orderDetailRepository.save(orderDetail);
+
+        // KHÔNG update Room - Room vẫn OCCUPIED cho đến khi lễ tân confirm
+        log.info("Staff completed check-out for order detail: {}", orderDetail.getOrderDetailId());
+        return convertToResponse(orderDetail);
+    }
+
+    @Override
+    public Page<OrderDetailResponse> getCheckingInOrders(Pageable pageable) {
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByStatusOrderByCreatedAtDesc(
+                OrderDetailStatus.CHECKING_IN, pageable);
+        return orderDetails.map(this::convertToResponse);
+    }
+
+    @Override
+    public Page<OrderDetailResponse> getCustomerConfirmedOrders(Pageable pageable) {
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByStatusOrderByCreatedAtDesc(
+                OrderDetailStatus.CUSTOMER_CONFIRM, pageable);
+        return orderDetails.map(this::convertToResponse);
+    }
+
+    @Override
+    public Page<OrderDetailResponse> getCheckingOutOrders(Pageable pageable) {
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByStatusOrderByCreatedAtDesc(
+                OrderDetailStatus.CHECKING_OUT, pageable);
+        return orderDetails.map(this::convertToResponse);
+    }
+
+    @Override
+    public Page<OrderDetailResponse> getCheckedOutOrders(Pageable pageable) {
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByStatusOrderByCreatedAtDesc(
+                OrderDetailStatus.CHECKED_OUT, pageable);
+        return orderDetails.map(this::convertToResponse);
+    }
+
+    @Override
+    public Page<OrderDetailResponse> getNeedCleanOrdersForStaff(Pageable pageable) {
+        return getNeedCleanOrders(pageable);
+    }
+
+    @Override
+    public Page<OrderDetailResponse> getCleaningOrders(Pageable pageable) {
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByStatusOrderByCreatedAtDesc(
+                OrderDetailStatus.CLEANING, pageable);
+        return orderDetails.map(this::convertToResponse);
+    }
+
+    @Override
+    @Transactional
+    public OrderDetailResponse receptionistConfirmCheckOut(AfterCheckOutConfirmRequest request) {
+        OrderDetail orderDetail = orderDetailRepository.findById(request.getOrderDetailId())
+                .orElseThrow(() -> new RuntimeException("Order detail not found"));
+
+        if (!OrderDetailStatus.CHECKED_OUT.equals(orderDetail.getStatus())) {
+            throw new RuntimeException("Order detail must be in CHECKED_OUT status");
+        }
+
+        orderDetail.setStatus(OrderDetailStatus.NEED_CLEAN);
+        orderDetailRepository.save(orderDetail);
+
+        // Cập nhật trạng thái phòng
+        Room room = roomRepository.findById(orderDetail.getRoomId())
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+        room.setStatus(RoomStatus.NEED_CLEAN);
         roomRepository.save(room);
 
-        // Cập nhật Order
-        Order order = orderRepository.findById(orderDetail.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order không tồn tại"));
-        order.setStatus(STATUS_CHECKED_IN);
-        orderRepository.save(order);
+        log.info("Receptionist confirmed check-out for order detail: {}", orderDetail.getOrderDetailId());
+        return convertToResponse(orderDetail);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<BookingDto> getCheckInList(Pageable pageable) {
-        // Query với pagination ở database level
-        Page<OrderDetail> orderDetailPage = orderDetailRepository.findCheckInList(pageable);
-
-        // Batch load Room và User để tránh N+1 query (NHANH HƠN)
-        List<OrderDetail> orderDetails = orderDetailPage.getContent();
-        if (orderDetails.isEmpty()) {
-            return new PageImpl<>(Collections.emptyList(), pageable, 0);
-        }
-
-        // Lấy tất cả roomIds và userIds
-        Set<Integer> roomIds = orderDetails.stream()
-                .map(OrderDetail::getRoomId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        
-        Set<Integer> userIds = orderDetails.stream()
-                .map(OrderDetail::getUserId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        // Batch load tất cả Room và User (CHỈ 2 QUERIES THAY VÌ N*2 QUERIES)
-        Map<Integer, Room> roomMap = roomRepository.findAllById(roomIds).stream()
-                .collect(Collectors.toMap(Room::getRoomId, room -> room));
-        
-        Map<Integer, User> userMap = userRepository.findAllById(userIds).stream()
-                .collect(Collectors.toMap(User::getUserId, user -> user));
-
-        // Convert sang DTO sử dụng Map (NHANH)
-        List<BookingDto> dtos = orderDetails.stream()
-                .map(od -> convertToBookingDtoWithMaps(od, roomMap, userMap))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(dtos, pageable, orderDetailPage.getTotalElements());
+    public Page<OrderDetailResponse> getNeedCleanOrders(Pageable pageable) {
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByStatusOrderByCreatedAtDesc(
+                OrderDetailStatus.NEED_CLEAN, pageable);
+        return orderDetails.map(this::convertToResponse);
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public long countCheckInItems() {
-        // Dùng repository method với count ở database level (NHANH HƠN)
-        return orderDetailRepository.countByStatusIn(Arrays.asList(STATUS_PENDING, STATUS_CART, STATUS_CHECKED_IN));
-    }
-
-    // ===== CHECK-OUT =====
 
     @Override
     @Transactional
-    public void checkOut(CheckOutRequestDto request) {
-        // Lấy booking
+    public OrderDetailResponse startCleaning(CleaningRequest request) {
         OrderDetail orderDetail = orderDetailRepository.findById(request.getOrderDetailId())
-                .orElseThrow(() -> new RuntimeException("Booking không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Order detail not found"));
 
-        // Kiểm tra status: chỉ check-out được CHECKED_IN
-        if (!STATUS_CHECKED_IN.equals(orderDetail.getStatus())) {
-            throw new RuntimeException("Chỉ có thể check-out booking ở trạng thái CHECKED_IN");
+        if (!OrderDetailStatus.NEED_CLEAN.equals(orderDetail.getStatus())) {
+            throw new RuntimeException("Order detail must be in NEED_CLEAN status");
         }
 
-        // Lấy phòng
-        Room room = roomRepository.findById(orderDetail.getRoomId())
-                .orElseThrow(() -> new RuntimeException("Phòng không tồn tại"));
-
-        // Cập nhật check-out
-        orderDetail.setCheckOut(LocalDateTime.now());
-        orderDetail.setStatus(STATUS_CHECKED_OUT);
+        orderDetail.setStatus(OrderDetailStatus.CLEANING);
         orderDetailRepository.save(orderDetail);
 
-        // Cập nhật phòng → CLEANING
+        // Cập nhật trạng thái phòng
+        Room room = roomRepository.findById(orderDetail.getRoomId())
+                .orElseThrow(() -> new RuntimeException("Room not found"));
         room.setStatus(RoomStatus.CLEANING);
         roomRepository.save(room);
 
-        // Cập nhật Order
-        Order order = orderRepository.findById(orderDetail.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order không tồn tại"));
-        order.setStatus(STATUS_CHECKED_OUT);
-        orderRepository.save(order);
+        log.info("Started cleaning for order detail: {}", orderDetail.getOrderDetailId());
+        return convertToResponse(orderDetail);
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<BookingDto> getCheckOutList(Pageable pageable) {
-        // Query với pagination ở database level
-        Page<OrderDetail> orderDetailPage = orderDetailRepository.findByStatusOrderByCreatedAtDesc(STATUS_CHECKED_IN, pageable);
-
-        // Batch load Room và User để tránh N+1 query (NHANH HƠN)
-        List<OrderDetail> orderDetails = orderDetailPage.getContent();
-        if (orderDetails.isEmpty()) {
-            return new PageImpl<>(Collections.emptyList(), pageable, 0);
-        }
-
-        // Lấy tất cả roomIds và userIds
-        Set<Integer> roomIds = orderDetails.stream()
-                .map(OrderDetail::getRoomId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        
-        Set<Integer> userIds = orderDetails.stream()
-                .map(OrderDetail::getUserId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        // Batch load tất cả Room và User (CHỈ 2 QUERIES THAY VÌ N*2 QUERIES)
-        Map<Integer, Room> roomMap = roomRepository.findAllById(roomIds).stream()
-                .collect(Collectors.toMap(Room::getRoomId, room -> room));
-        
-        Map<Integer, User> userMap = userRepository.findAllById(userIds).stream()
-                .collect(Collectors.toMap(User::getUserId, user -> user));
-
-        // Convert sang DTO sử dụng Map (NHANH)
-        List<BookingDto> dtos = orderDetails.stream()
-                .map(od -> convertToBookingDtoWithMaps(od, roomMap, userMap))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(dtos, pageable, orderDetailPage.getTotalElements());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public long countCheckOutItems() {
-        // Dùng repository method với count ở database level (NHANH HƠN)
-        return orderDetailRepository.countByStatus(STATUS_CHECKED_IN);
-    }
-
-    // ===== AFTER CHECK-OUT =====
 
     @Override
     @Transactional
-    public void afterCheckOut(AfterCheckOutRequestDto request) {
-        // Lấy booking
+    public OrderDetailResponse completeCleaning(CleaningRequest request) {
         OrderDetail orderDetail = orderDetailRepository.findById(request.getOrderDetailId())
-                .orElseThrow(() -> new RuntimeException("Booking không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Order detail not found"));
 
-        // Kiểm tra status: chỉ xử lý được CHECKED_OUT
-        if (!STATUS_CHECKED_OUT.equals(orderDetail.getStatus())) {
-            throw new RuntimeException("Chỉ có thể xử lý after check-out cho booking ở trạng thái CHECKED_OUT");
+        if (!OrderDetailStatus.CLEANING.equals(orderDetail.getStatus())) {
+            throw new RuntimeException("Order detail must be in CLEANING status");
         }
 
-        // Lấy phòng
-        Room room = roomRepository.findById(orderDetail.getRoomId())
-                .orElseThrow(() -> new RuntimeException("Phòng không tồn tại"));
-
-        // Kiểm tra phòng phải CLEANING
-        if (!RoomStatus.CLEANING.equals(room.getStatus())) {
-            throw new RuntimeException("Phòng không ở trạng thái cần dọn dẹp. Trạng thái: " + room.getStatus());
-        }
-
-        // Cập nhật booking → COMPLETED
-        orderDetail.setStatus(STATUS_COMPLETED);
+        orderDetail.setStatus(OrderDetailStatus.COMPLETED);
         orderDetailRepository.save(orderDetail);
 
-        // Cập nhật phòng
-        if (request.getReadyForNextGuest()) {
-            // Phòng sẵn sàng → AVAILABLE
-            room.setStatus(RoomStatus.AVAILABLE);
-        } else {
-            // Phòng cần bảo trì → MAINTENANCE
-            room.setStatus(RoomStatus.MAINTENANCE);
-        }
+        // Cập nhật trạng thái phòng về AVAILABLE
+        Room room = roomRepository.findById(orderDetail.getRoomId())
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+        room.setStatus(RoomStatus.AVAILABLE);
         roomRepository.save(room);
 
-        // Cập nhật Order
-        Order order = orderRepository.findById(orderDetail.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order không tồn tại"));
-        order.setStatus(STATUS_COMPLETED);
-        orderRepository.save(order);
+        log.info("Completed cleaning for order detail: {}", orderDetail.getOrderDetailId());
+        return convertToResponse(orderDetail);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<BookingDto> getAfterCheckOutList(Pageable pageable) {
-        // Query với pagination ở database level
-        Page<Room> cleaningRoomsPage = roomRepository.findByStatusAndIsDeletedFalse(RoomStatus.CLEANING, pageable);
+    private OrderDetailResponse convertToResponse(OrderDetail orderDetail) {
+        OrderDetailResponse response = new OrderDetailResponse();
+        response.setOrderDetailId(orderDetail.getOrderDetailId());
+        response.setOrderId(orderDetail.getOrderId());
+        response.setUserId(orderDetail.getUserId());
+        response.setRoomId(orderDetail.getRoomId());
+        response.setFloorId(orderDetail.getFloorId());
+        response.setStartDate(orderDetail.getStartDate());
+        response.setEndDate(orderDetail.getEndDate());
+        response.setOrderDescription(orderDetail.getOrderDescription());
+        response.setCheckIn(orderDetail.getCheckIn());
+        response.setCheckOut(orderDetail.getCheckOut());
+        response.setStatus(orderDetail.getStatus());
 
-        // Batch load OrderDetail và User để tránh N+1 query (NHANH HƠN)
-        List<Room> cleaningRooms = cleaningRoomsPage.getContent();
-        if (cleaningRooms.isEmpty()) {
-            return new PageImpl<>(Collections.emptyList(), pageable, 0);
+        // Get room info
+        Room room = roomRepository.findById(orderDetail.getRoomId()).orElse(null);
+        if (room != null) {
+            response.setRoomNumber(room.getRoomNumber());
+            response.setRoomType(room.getRoomType());
+            response.setRoomStatus(room.getStatus());
         }
 
-        // Lấy tất cả roomIds
-        List<Integer> roomIds = cleaningRooms.stream()
-                .map(Room::getRoomId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        // Batch load OrderDetail cho tất cả rooms (TỐI ƯU: query 1 lần với IN clause)
-        List<OrderDetail> allCheckedOut = orderDetailRepository.findCheckedOutByRoomIds(roomIds);
-
-        // Group OrderDetail theo roomId, lấy cái mới nhất
-        Map<Integer, OrderDetail> latestOrderDetailMap = allCheckedOut.stream()
-                .collect(Collectors.toMap(
-                        OrderDetail::getRoomId,
-                        od -> od,
-                        (od1, od2) -> {
-                            LocalDateTime checkOut1 = od1.getCheckOut() != null ? od1.getCheckOut() : LocalDateTime.MIN;
-                            LocalDateTime checkOut2 = od2.getCheckOut() != null ? od2.getCheckOut() : LocalDateTime.MIN;
-                            return checkOut1.compareTo(checkOut2) > 0 ? od1 : od2;
-                        }
-                ));
-
-        // Lấy tất cả userIds
-        Set<Integer> userIds = latestOrderDetailMap.values().stream()
-                .map(OrderDetail::getUserId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        // Batch load tất cả User (CHỈ 1 QUERY)
-        Map<Integer, User> userMap = userRepository.findAllById(userIds).stream()
-                .collect(Collectors.toMap(User::getUserId, user -> user));
-
-        // Convert sang DTO sử dụng Map (NHANH)
-        List<BookingDto> dtos = cleaningRooms.stream()
-                .map(room -> {
-                    OrderDetail orderDetail = latestOrderDetailMap.get(room.getRoomId());
-                    if (orderDetail == null) {
-                        return null;
-                    }
-                    return convertToBookingDtoWithMaps(orderDetail, Map.of(room.getRoomId(), room), userMap);
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(dtos, pageable, cleaningRoomsPage.getTotalElements());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public long countAfterCheckOutItems() {
-        // Dùng repository method với count ở database level (NHANH HƠN)
-        return roomRepository.countByStatusAndIsDeletedFalse(RoomStatus.CLEANING);
-    }
-
-    // ===== HELPER METHODS =====
-
-    /**
-     * Convert OrderDetail sang BookingDto với Map (TRÁNH N+1 QUERY)
-     */
-    private BookingDto convertToBookingDtoWithMaps(OrderDetail orderDetail, 
-                                                   Map<Integer, Room> roomMap, 
-                                                   Map<Integer, User> userMap) {
-        Room room = roomMap.get(orderDetail.getRoomId());
-        User customer = userMap.get(orderDetail.getUserId());
-
-        if (room == null || customer == null) {
-            return null;
+        // Get customer info
+        if (orderDetail.getUserId() != null) {
+            hotel.db.entity.User user = userRepository.findById(orderDetail.getUserId()).orElse(null);
+            if (user != null) {
+                response.setCustomerName(user.getFirstName() + " " + user.getLastName());
+                response.setCustomerPhone(user.getPhone());
+            }
         }
 
-        return BookingDto.builder()
-                .orderDetailId(orderDetail.getOrderDetailId())
-                .roomId(room.getRoomId())
-                .roomNumber(room.getRoomNumber())
-                .roomType(room.getRoomType())
-                .customerId(customer.getUserId())
-                .customerName(customer.getFirstName() + " " + customer.getLastName())
-                .customerPhone(customer.getPhone())
-                .customerEmail(customer.getEmail())
-                .checkInDate(orderDetail.getCheckIn() != null ? 
-                            orderDetail.getCheckIn().toLocalDate() : null)
-                .expectedCheckOutDate(orderDetail.getEndDate() != null ? 
-                                     orderDetail.getEndDate().toLocalDate() : null)
-                .actualCheckOutDate(orderDetail.getCheckOut() != null ? 
-                                   orderDetail.getCheckOut().toLocalDate() : null)
-                .status(orderDetail.getStatus())
-                .roomStatus(room.getStatus())
-                .createdAt(orderDetail.getCreatedAt())
-                .build();
+        return response;
     }
 }
