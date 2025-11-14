@@ -1,7 +1,6 @@
 package hotel.service.image;
 import hotel.db.entity.RoomImage;
 import hotel.db.repository.roomimage.RoomImageRepository;
-import hotel.service.file.RoomImageUploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,6 @@ import java.util.List;
 public class ImageServiceImpl implements  ImageService {
 
     private final RoomImageRepository roomImageRepository;
-    private final RoomImageUploadService fileUploadService;
 
     @Override
     public List<RoomImage> getImagesByRoomId(Integer roomId) {
