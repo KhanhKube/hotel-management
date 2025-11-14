@@ -11,5 +11,5 @@ public interface PaymentService {
 
 	void handlePaymentWebhook(WebhookData webhookData);
 
-	void updateCartOrdersAfterPayment(Integer userId);
+	void updateCartOrdersAfterPayment(Integer userId, Long paymentOrderCode);
 }

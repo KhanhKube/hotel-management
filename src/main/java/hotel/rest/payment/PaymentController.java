@@ -64,9 +64,11 @@ public class PaymentController {
 			return "redirect:/hotel/login";
 		}
 
-		// Update cart orders to PENDING status when user returns from payment
+		// Update cart orders to COMPLETED status when user returns from payment
 		try {
-			paymentService.updateCartOrdersAfterPayment(userId);
+			// Parse orderCode to Long
+			Long paymentOrderCode = orderCode != null ? Long.parseLong(orderCode) : null;
+			paymentService.updateCartOrdersAfterPayment(userId, paymentOrderCode);
 		} catch (Exception e) {
 			System.err.println("Error updating orders after payment: " + e.getMessage());
 		}

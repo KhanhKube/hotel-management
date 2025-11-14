@@ -148,6 +148,7 @@ public class CartServiceImpl implements CartService {
 
 				// Create CartItemDto
 				CartItemDto cartItem = new CartItemDto();
+				cartItem.setOrderId(order.getOrderId());
 				cartItem.setRoomId(room.getRoomId());
 				cartItem.setRoomType(room.getRoomType());
 				cartItem.setRoomNumber(room.getRoomNumber());
