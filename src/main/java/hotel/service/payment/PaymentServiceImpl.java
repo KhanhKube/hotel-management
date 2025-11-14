@@ -41,6 +41,19 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new RuntimeException("Giỏ hàng trống");
 		}
 
+		// Filter cart items by selected order IDs if provided
+		if (requestBody.getSelectedOrderIds() != null && !requestBody.getSelectedOrderIds().isEmpty()) {
+			cartItems = cartItems.stream()
+					.filter(item -> requestBody.getSelectedOrderIds().contains(item.getOrderId()))
+					.collect(java.util.stream.Collectors.toList());
+			
+			if (cartItems.isEmpty()) {
+				throw new RuntimeException("Không có đơn hàng nào được chọn");
+			}
+			
+			System.out.println("Processing payment for " + cartItems.size() + " selected orders");
+		}
+
 		// Calculate subtotal
 		BigDecimal subtotal = cartItems.stream()
 				.map(CartItemDto::getTotalPrice)
@@ -96,8 +109,18 @@ public class PaymentServiceImpl implements PaymentService {
 
 		CreatePaymentLinkResponse response = payOS.paymentRequests().create(paymentData);
 
-		// Store orderCode in all CART orders for this user
-		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
+		// Store orderCode in selected CART orders
+		List<Order> cartOrders;
+		if (requestBody.getSelectedOrderIds() != null && !requestBody.getSelectedOrderIds().isEmpty()) {
+			// Only update selected orders
+			cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART").stream()
+					.filter(order -> requestBody.getSelectedOrderIds().contains(order.getOrderId()))
+					.collect(java.util.stream.Collectors.toList());
+		} else {
+			// Update all cart orders (backward compatibility)
+			cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
+		}
+		
 		for (Order order : cartOrders) {
 			order.setPaymentOrderCode(orderCode);
 			orderRepository.save(order);
@@ -148,8 +171,8 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	@Transactional
-	public void updateCartOrdersAfterPayment(Integer userId) {
-		System.out.println("=== Updating cart orders after payment for user: " + userId + " ===");
+	public void updateCartOrdersAfterPayment(Integer userId, Long paymentOrderCode) {
+		System.out.println("=== Updating cart orders after payment for user: " + userId + ", orderCode: " + paymentOrderCode + " ===");
 
 		// Find all CART orders for this user
 		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
@@ -159,9 +182,21 @@ public class PaymentServiceImpl implements PaymentService {
 			return;
 		}
 
+		// Filter orders by paymentOrderCode if provided
+		if (paymentOrderCode != null) {
+			cartOrders = cartOrders.stream()
+					.filter(order -> paymentOrderCode.equals(order.getPaymentOrderCode()))
+					.collect(java.util.stream.Collectors.toList());
+			
+			if (cartOrders.isEmpty()) {
+				System.out.println("No cart orders found with paymentOrderCode: " + paymentOrderCode);
+				return;
+			}
+		}
+
 		System.out.println("Found " + cartOrders.size() + " cart orders to update");
 
-		// Update all orders to COMPLETED status (payment successful)
+		// Update selected orders to COMPLETED status (payment successful)
 		for (Order order : cartOrders) {
 			order.setStatus("COMPLETED");
 

@@ -112,9 +112,24 @@
                     <a th:href="@{/hotel/rooms}">Tiếp tục mua sắm</a>
                 </div>
 
-                <div th:each="item : ${cartItems}" class="cart-item">
+                <div th:each="item, iterStat : ${cartItems}" class="cart-item">
                     <div class="row align-items-center">
-                        <div class="col-md-8">
+                        <div class="col-md-1 text-center">
+                            <input type="checkbox" 
+                                   class="form-check-input order-checkbox" 
+                                   th:id="'order-' + ${item.orderId}"
+                                   th:value="${item.orderId}"
+                                   th:attr="data-total=${item.totalPrice}"
+                                   onchange="updateTotal()"
+                                   checked
+                                   style="width: 20px; height: 20px; cursor: pointer;">
+                        </div>
+                        <div class="col-md-7">
+                            <div class="d-flex align-items-center mb-2">
+                                <h6 class="mb-0 me-2" style="color: #667eea;">
+                                    <i class="fas fa-receipt"></i> Đơn hàng <span th:text="${iterStat.count}">1</span>
+                                </h6>
+                            </div>
                             <h5 th:text="${item.roomType}">Room Type</h5>
                             <p class="text-muted mb-1">Phòng số: <span th:text="${item.roomNumber}">101</span></p>
                             <p class="text-muted mb-1">
@@ -152,8 +167,12 @@
                 <div class="cart-summary">
                     <h4 class="mb-3">Tổng Quan Đơn Hàng</h4>
                     <div class="d-flex justify-content-between mb-2">
-                        <span>Số phòng:</span>
+                        <span>Tổng số đơn:</span>
                         <span th:text="${cartItems.size()}">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Đơn được chọn:</span>
+                        <span id="selectedCount" th:text="${cartItems.size()}">0</span>
                     </div>
                     
                     <!-- Discount Selection -->
@@ -339,9 +358,19 @@
     }
 
     function checkout() {
+        // Get selected orders
+        const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+        
+        if (checkboxes.length === 0) {
+            showToast('error', 'Vui lòng chọn ít nhất một đơn hàng để thanh toán!');
+            return;
+        }
+        
+        const selectedOrderIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+        
         showConfirmModal(
             'Xác nhận thanh toán',
-            'Bạn sẽ được chuyển đến trang thanh toán PayOS để hoàn tất đặt phòng.',
+            'Bạn đã chọn ' + checkboxes.length + ' đơn hàng. Bạn sẽ được chuyển đến trang thanh toán PayOS để hoàn tất đặt phòng.',
             function () {
                 // Show loading
                 const checkoutBtn = document.querySelector('.btn-primary');
@@ -363,7 +392,8 @@
                     description: 'Thanh toán đặt phòng',
                     price: totalAmount,
                     returnUrl: window.location.origin + '/payment/success',
-                    cancelUrl: window.location.origin + '/payment/cancel'
+                    cancelUrl: window.location.origin + '/payment/cancel',
+                    selectedOrderIds: selectedOrderIds
                 };
 
                 // Add discountId if selected
@@ -403,6 +433,25 @@
         );
     }
 
+    // Update total based on selected orders
+    function updateTotal() {
+        const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+        let subtotal = 0;
+        
+        checkboxes.forEach(cb => {
+            subtotal += parseFloat(cb.getAttribute('data-total'));
+        });
+        
+        // Update selected count
+        document.getElementById('selectedCount').textContent = checkboxes.length;
+        
+        // Update subtotal
+        document.getElementById('subtotal').textContent = subtotal.toLocaleString('vi-VN') + ' VNĐ';
+        
+        // Reapply discount if any
+        applyDiscount();
+    }
+
     // Apply discount calculation
     function applyDiscount() {
         const select = document.getElementById('discountSelect');
@@ -411,7 +460,7 @@
         const discountAmount = document.getElementById('discountAmount');
         const totalElement = document.getElementById('totalAmount');
         
-        // Get subtotal
+        // Get subtotal from selected orders
         const subtotalText = document.getElementById('subtotal').textContent.trim();
         const subtotal = parseFloat(subtotalText.replace(/[^0-9]/g, ''));
         

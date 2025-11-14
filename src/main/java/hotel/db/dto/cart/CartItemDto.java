@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartItemDto {
+    private Integer orderId;
     private Integer roomId;
     private String roomType;
     private String roomNumber;
