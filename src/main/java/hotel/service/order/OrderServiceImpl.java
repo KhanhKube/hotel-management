@@ -1,5 +1,6 @@
 package hotel.service.order;
 
+import hotel.db.dto.checking.OrderMaintenanceResponse;
 import hotel.db.dto.order.BookingInfoDto;
 import hotel.db.dto.order.OrderDetailDto;
 import hotel.db.dto.order.OrderDto;
@@ -8,7 +9,10 @@ import hotel.db.entity.OrderDetail;
 import hotel.db.repository.order.OrderRepository;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
 import hotel.db.repository.room.RoomRepository;
+import hotel.util.MessageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -84,6 +88,30 @@ public class OrderServiceImpl implements OrderService {
 		return mapToBookingInfoDto(results);
 	}
 
+	@Override
+	public Page<OrderMaintenanceResponse> findFutureOrdersByRoomId(int id, LocalDateTime today, Pageable pageable) {
+		Page<OrderMaintenanceResponse> orderDetailPageable = orderDetailRepository.findRoomMaintenanceOrders(id, today, pageable);
+		if(orderDetailPageable.getTotalElements() > 0) {
+			return orderDetailPageable;
+		}
+		return null;
+	}
+
+	@Override
+	public MessageResponse cancelOrderDetail(Integer orderId){
+		OrderDetail orderDetail = orderDetailRepository.findById(orderId).orElse(null);
+		if(orderDetail == null) {
+			return new MessageResponse(false, "Không tìm thấy đơn!");
+		}
+		orderDetail.setStatus("CANCEL");
+		orderDetail.setIsDeleted(true);
+		orderDetailRepository.save(orderDetail);
+		return new MessageResponse(true, "Xứ lí thành công, huỷ đơn đặt phòng!");
+	}
+	@Override
+	public OrderDetail getOrderDetail(Integer orderId) {
+		return orderDetailRepository.findById(orderId).orElse(null);
+	}
 
 	private List<BookingInfoDto> mapToBookingInfoDto(List<Object[]> results) {
 		List<BookingInfoDto> bookingInfoList = new ArrayList<>();

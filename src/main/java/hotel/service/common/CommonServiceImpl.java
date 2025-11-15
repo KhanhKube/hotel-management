@@ -7,6 +7,7 @@ import hotel.db.dto.user.VerifyOtpDto;
 import hotel.db.entity.User;
 import hotel.db.repository.order.OrderRepository;
 import hotel.db.repository.user.UserRepository;
+import hotel.service.cloudinary.CloudinaryService;
 import hotel.util.MessageResponse;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -43,6 +44,7 @@ public class CommonServiceImpl implements CommonService {
 	private final PasswordEncoder passwordEncoder;
 	private final JavaMailSender mailSender;
 	private final OrderRepository orderRepository;
+	private final CloudinaryService cloudinaryService;
 
 	@Override
 	public User getUserByPhoneOrEmail(String request) {
@@ -282,6 +284,34 @@ public class CommonServiceImpl implements CommonService {
 	@Override
 	@Transactional
 	public MessageResponse updateAvatar(String phone, MultipartFile file) throws IOException {
+		if (file.isEmpty()) {
+			return new MessageResponse(false, CHOOSEPICTURE);
+		}
+
+		if (file.getSize() > 10 * 1024 * 1024) { // 10MB
+			return new MessageResponse(false, "File quá lớn. Tối đa 5MB");
+		}
+
+		String contentType = file.getContentType();
+		List<String> validTypes = Arrays.asList("image/jpeg", "image/png", "image/jpg");
+
+		if (contentType == null || !validTypes.contains(contentType)) {
+			return new MessageResponse(false, FILEINVALID);
+		}
+
+		User user = userRepository.findByPhone(phone).orElse(null);
+		if(user == null) {
+			return new MessageResponse(false, USERNOTEXIST);
+		}
+		String resource = cloudinaryService.getImageUrlAfterUpload(file);
+		user.setAvatarUrl(resource);
+		userRepository.save(user);
+
+		return new MessageResponse(true, UPDATESUCCESS);
+	}
+
+	@Transactional
+	public MessageResponse updateAvatar1(String phone, MultipartFile file) throws IOException {
 		if (file.isEmpty()) {
 			return new MessageResponse(false, CHOOSEPICTURE);
 		}

@@ -279,8 +279,10 @@ public class CommonController {
                 session.setAttribute("user", updatedUser);
 
                 redirectAttributes.addFlashAttribute("success", response.getMessage());
+                return "redirect:/hotel/profile";
             } else {
                 redirectAttributes.addFlashAttribute("error", response.getMessage());
+                return "redirect:/hotel/profile";
             }
 
         } catch (Exception e) {

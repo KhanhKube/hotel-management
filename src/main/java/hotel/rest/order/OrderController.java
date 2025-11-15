@@ -2,6 +2,7 @@ package hotel.rest.order;
 
 import hotel.db.dto.order.BookingInfoDto;
 import hotel.db.dto.order.OrderDto;
+import hotel.db.repository.orderdetail.OrderDetailRepository;
 import hotel.service.order.OrderService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.List;
 public class OrderController {
 
 	private final OrderService orderService;
+	private final OrderDetailRepository orderDetailRepository;
 
 	@GetMapping("/order")
 	public String viewOrders(Model model, HttpSession session) {
