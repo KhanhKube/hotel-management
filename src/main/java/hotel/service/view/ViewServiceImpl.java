@@ -46,9 +46,14 @@ public class ViewServiceImpl implements  ViewService{
         
         // For existing views, check if the new name conflicts with other views
         if (view.getViewId() != null) {
-            List<View> existingViews = viewRepository.findByViewTypeIgnoreCaseAndViewIdNot(trimmed, view.getViewId());
-            if (!existingViews.isEmpty()) {
-                throw new IllegalArgumentException("Loại view '" + trimmed + "' đã tồn tại!");
+            // Get the current view from DB to check if viewType actually changed
+            View currentView = viewRepository.findById(view.getViewId()).orElse(null);
+            if (currentView != null && !currentView.getViewType().equalsIgnoreCase(trimmed)) {
+                // Only check for duplicates if viewType is actually changing
+                List<View> existingViews = viewRepository.findByViewTypeIgnoreCaseAndViewIdNot(trimmed, view.getViewId());
+                if (!existingViews.isEmpty()) {
+                    throw new IllegalArgumentException("Loại view '" + trimmed + "' đã tồn tại!");
+                }
             }
         }
         
