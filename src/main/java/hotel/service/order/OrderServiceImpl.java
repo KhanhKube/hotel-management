@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -103,11 +104,25 @@ public class OrderServiceImpl implements OrderService {
 		if(orderDetail == null) {
 			return new MessageResponse(false, "Không tìm thấy đơn!");
 		}
-		orderDetail.setStatus("CANCEL");
+		orderDetail.setStatus("CANCELLED");
 		orderDetail.setIsDeleted(true);
 		orderDetailRepository.save(orderDetail);
+		Order order = orderRepository.findById(orderId).orElse(null);
+		if(order == null) {
+			return new MessageResponse(false, "Không tìm thấy đơn!");
+		}
+		BigDecimal amount = orderDetail.getAmount() != null ? orderDetail.getAmount() : BigDecimal.ZERO;
+		BigDecimal totalAmount = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+
+		BigDecimal newTotal = totalAmount.subtract(amount);
+		if(newTotal.compareTo(BigDecimal.ZERO) < 0) {
+			newTotal = BigDecimal.ZERO;
+		}
+		order.setTotalAmount(newTotal);
+		orderRepository.save(order);
 		return new MessageResponse(true, "Xứ lí thành công, huỷ đơn đặt phòng!");
 	}
+
 	@Override
 	public OrderDetail getOrderDetail(Integer orderId) {
 		return orderDetailRepository.findById(orderId).orElse(null);

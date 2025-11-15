@@ -2,8 +2,9 @@ package hotel.rest.news;
 
 import hotel.db.entity.News;
 import hotel.db.entity.NewsGroup;
+import hotel.db.entity.User;
 import hotel.service.news.NewsService;
-import hotel.util.RenderBuilder;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+
+import static hotel.db.enums.Constants.*;
 
 @Controller
 @RequestMapping("/management/news")
@@ -32,8 +35,12 @@ public class NewsController {
             @RequestParam(defaultValue = "desc") String sortDir,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String search,
+            HttpSession session,
             Model model) {
-
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(STAFF)) return "redirect:/hotel/dashboard";
         Sort sort = sortDir.equalsIgnoreCase("desc") ?
                 Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
@@ -63,7 +70,11 @@ public class NewsController {
     }
 
     @GetMapping("/add")
-    public String addNewsForm(Model model) {
+    public String addNewsForm(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(STAFF)) return "redirect:/hotel/dashboard";
         List<NewsGroup> newsGroups = newsService.findAllNewsGroups();
         model.addAttribute("news", new News());
         model.addAttribute("newsGroups", newsGroups);
@@ -71,7 +82,11 @@ public class NewsController {
     }
 
     @PostMapping("/save")
-    public String saveNews(@ModelAttribute News news, RedirectAttributes redirectAttributes) {
+    public String saveNews(@ModelAttribute News news, HttpSession session, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(STAFF)) return "redirect:/hotel/dashboard";
         try {
             newsService.saveNews(news);
             redirectAttributes.addFlashAttribute("message",
@@ -84,7 +99,11 @@ public class NewsController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editNewsForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
+    public String editNewsForm(@PathVariable Integer id, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(STAFF)) return "redirect:/hotel/dashboard";
         try {
             News news = newsService.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy tin tức với ID: " + id));
@@ -100,7 +119,11 @@ public class NewsController {
     }
 
     @GetMapping("/view/{id}")
-    public String viewNews(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
+    public String viewNews(@PathVariable Integer id, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(STAFF)) return "redirect:/hotel/dashboard";
         try {
             News news = newsService.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy tin tức với ID: " + id));
@@ -118,7 +141,11 @@ public class NewsController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteNews(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String deleteNews(@PathVariable Integer id, HttpSession session, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(STAFF)) return "redirect:/hotel/dashboard";
         try {
             newsService.deleteNews(id);
             redirectAttributes.addFlashAttribute("message", "Xóa tin tức thành công!");
@@ -133,7 +160,12 @@ public class NewsController {
     public String changeNewsStatus(
             @PathVariable Integer id,
             @RequestParam String status,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(STAFF)) return "redirect:/hotel/dashboard";
         try {
             newsService.changeNewsStatus(id, status);
             String statusText = getStatusText(status);
@@ -147,14 +179,22 @@ public class NewsController {
 
     // News Groups Management
     @GetMapping("/groups")
-    public String newsGroupsList(Model model) {
+    public String newsGroupsList(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(STAFF)) return "redirect:/hotel/dashboard";
         List<NewsGroup> newsGroups = newsService.findAllNewsGroups();
         model.addAttribute("newsGroups", newsGroups);
         return "management/news/news-groups";
     }
 
     @PostMapping("/groups/save")
-    public String saveNewsGroup(@ModelAttribute NewsGroup newsGroup, RedirectAttributes redirectAttributes) {
+    public String saveNewsGroup(@ModelAttribute NewsGroup newsGroup, HttpSession session, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(STAFF)) return "redirect:/hotel/dashboard";
         try {
             newsService.saveNewsGroup(newsGroup);
             redirectAttributes.addFlashAttribute("message",
@@ -166,7 +206,11 @@ public class NewsController {
     }
 
     @PostMapping("/groups/delete/{id}")
-    public String deleteNewsGroup(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String deleteNewsGroup(@PathVariable Integer id, HttpSession session, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(STAFF)) return "redirect:/hotel/dashboard";
         try {
             newsService.deleteNewsGroup(id);
             redirectAttributes.addFlashAttribute("message", "Xóa nhóm tin tức thành công!");

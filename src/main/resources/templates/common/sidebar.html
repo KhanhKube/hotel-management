@@ -109,7 +109,7 @@
             </a>
         </li>
         <!-- Dashboard -->
-        <li class="nav-item menu-items">
+        <li class="nav-item menu-items" th:if="${user != null and (user.role == 'MANAGER' || user.role == 'ADMIN')}">
             <a class="nav-link" th:href="@{/hotel/dashboard}">
                 <span class="menu-icon"><i class="mdi mdi-playlist-play"></i></span>
                 <span class="menu-title">Dashboard</span>
@@ -142,20 +142,20 @@
 <!--                    <li class="nav-item">-->
 <!--                        <a class="nav-link" th:href="@{/management/services}">Dịch vụ</a>-->
 <!--                    </li>-->
-                    <li class="nav-item">
+                    <li class="nav-item" th:if="${user != null and (user.role == 'MANAGER' || user.role == 'STAFF')}">
                     <a class="nav-link" th:href="@{/hotel-management/furnishing}">Dụng cụ</a>
                     </li>
 
-                    <li class="nav-item">
+                    <li class="nav-item" th:if="${user != null and (user.role == 'MANAGER' || user.role == 'STAFF')}">
                         <a class="nav-link" th:href="@{/hotel-management/discount}">Mã giảm giá</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" th:if="${user != null and (user.role == 'MANAGER' || user.role == 'STAFF')}">
                         <a class="nav-link" th:href="@{/management/news}">Tin tức</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/management/hotels}">Khách sạn</a>
-                    </li>
-                    <li class="nav-item">
+<!--                    <li class="nav-item">-->
+<!--                        <a class="nav-link" th:href="@{/management/hotels}">Khách sạn</a>-->
+<!--                    </li>-->
+                    <li class="nav-item" >
                         <a class="nav-link" th:href="@{/hotel-management/room-maintenance}">Phòng bảo trì</a>
                     </li>
                 </ul>
