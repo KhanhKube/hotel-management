@@ -2,6 +2,7 @@ package hotel.service.cart;
 
 import hotel.db.dto.cart.AddToCartRequest;
 import hotel.db.dto.cart.CartItemDto;
+import hotel.db.dto.cart.CartSummaryDto;
 import hotel.db.entity.*;
 import hotel.db.repository.discount.DiscountRepository;
 import hotel.db.repository.order.OrderRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -88,6 +90,9 @@ public class CartServiceImpl implements CartService {
 			}
 		}
 
+		// Calculate total amount for this order
+		BigDecimal totalAmount = room.getPrice().multiply(BigDecimal.valueOf(days));
+
 		// Create Order with status CART
 		Order order = new Order();
 		order.setUserId(userId);
@@ -95,11 +100,12 @@ public class CartServiceImpl implements CartService {
 		order.setCheckIn(checkInDate);
 		order.setCheckOut(checkOutDate);
 		order.setStatus("CART");
+		order.setTotalAmount(totalAmount); // Lưu tổng tiền ngay khi thêm vào giỏ
 
 		Order savedOrder = orderRepository.save(order);
-		System.out.println("Created cart order with ID: " + savedOrder.getOrderId());
+		System.out.println("Created cart order with ID: " + savedOrder.getOrderId() + " with totalAmount: " + totalAmount);
 
-		// Create OrderDetail
+		// Create OrderDetail (không set amount ở đây, sẽ set khi thanh toán thành công)
 		OrderDetail orderDetail = new OrderDetail();
 		orderDetail.setOrderId(savedOrder.getOrderId());
 		orderDetail.setUserId(userId);
@@ -110,7 +116,8 @@ public class CartServiceImpl implements CartService {
 		orderDetail.setCheckIn(checkInDate);
 		orderDetail.setCheckOut(checkOutDate);
 		orderDetail.setStatus("CART");
-		orderDetail.setOrderDescription("Giỏ hàng - " + room.getRoomType() + " - Phòng " + room.getRoomNumber());
+		orderDetail.setOrderDescription(request.getDescription());
+		// amount sẽ được set khi thanh toán thành công
 
 		orderDetailRepository.save(orderDetail);
 
@@ -158,6 +165,7 @@ public class CartServiceImpl implements CartService {
 				cartItem.setNumberOfDays((int) days);
 				cartItem.setTotalPrice(totalPrice);
 				cartItem.setImageRoom(imageUrl);
+				cartItem.setOrderDescription(detail.getOrderDescription());
 
 				cartItems.add(cartItem);
 			}
@@ -181,12 +189,26 @@ public class CartServiceImpl implements CartService {
 			// Find and remove order detail with matching roomId
 			for (OrderDetail detail : orderDetails) {
 				if (detail.getRoomId().equals(roomId)) {
+					// Get room to calculate amount to subtract
+					Room room = roomRepository.findById(detail.getRoomId()).orElse(null);
+					if (room != null) {
+						long days = ChronoUnit.DAYS.between(detail.getCheckIn(), detail.getCheckOut());
+						BigDecimal amountToRemove = room.getPrice().multiply(BigDecimal.valueOf(days));
+						
+						// Update order total amount
+						BigDecimal currentTotal = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+						order.setTotalAmount(currentTotal.subtract(amountToRemove));
+					}
+					
 					orderDetailRepository.delete(detail);
 
 					// If no more details, delete the order
 					List<OrderDetail> remainingDetails = orderDetailRepository.findByOrderId(order.getOrderId());
 					if (remainingDetails.isEmpty()) {
 						orderRepository.delete(order);
+					} else {
+						// Save updated order with new total
+						orderRepository.save(order);
 					}
 
 					System.out.println("Removed cart item successfully");
@@ -330,5 +352,120 @@ public class CartServiceImpl implements CartService {
 				.filter(discount -> roomTypesInCart.contains(discount.getRoomType()))
 				.limit(5) // Giới hạn 5 voucher để giao diện đẹp
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public CartSummaryDto getCartSummary(Integer userId, List<Integer> selectedOrderIds, String discountCode) {
+		System.out.println("=== Calculating cart summary for userId: " + userId + " ===");
+
+		// Get all cart orders
+		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
+		
+		CartSummaryDto summary = new CartSummaryDto();
+		summary.setTotalOrders(cartOrders.size());
+		
+		// Filter by selected order IDs if provided
+		if (selectedOrderIds != null && !selectedOrderIds.isEmpty()) {
+			cartOrders = cartOrders.stream()
+					.filter(order -> selectedOrderIds.contains(order.getOrderId()))
+					.collect(Collectors.toList());
+			summary.setSelectedOrders(cartOrders.size());
+			summary.setSelectedOrderIds(selectedOrderIds);
+		} else {
+			// If no selection, select all
+			summary.setSelectedOrders(cartOrders.size());
+			summary.setSelectedOrderIds(cartOrders.stream()
+					.map(Order::getOrderId)
+					.collect(Collectors.toList()));
+		}
+		
+		// Calculate subtotal from Order.totalAmount (already calculated in backend)
+		BigDecimal subtotal = cartOrders.stream()
+				.map(order -> order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		
+		summary.setSubtotal(subtotal);
+		
+		// Apply discount if code provided
+		BigDecimal discountAmount = BigDecimal.ZERO;
+		summary.setDiscountValid(false);
+		
+		if (discountCode != null && !discountCode.trim().isEmpty()) {
+			Discount discount = discountRepository.findByCodeAndIsDeletedFalse(discountCode.trim().toUpperCase());
+			
+			if (discount == null) {
+				summary.setDiscountMessage("Mã giảm giá không tồn tại");
+				summary.setDiscountValid(false);
+			} else if (discount.getIsDeleted()) {
+				summary.setDiscountMessage("Mã giảm giá đã bị xóa");
+				summary.setDiscountValid(false);
+			} else {
+				LocalDate today = LocalDate.now();
+				
+				// Check if discount is within valid date range
+				if (today.isBefore(discount.getStartDate())) {
+					summary.setDiscountMessage("Mã giảm giá chưa có hiệu lực (bắt đầu từ " + discount.getStartDate() + ")");
+					summary.setDiscountValid(false);
+				} else if (today.isAfter(discount.getEndDate())) {
+					summary.setDiscountMessage("Mã giảm giá đã hết hạn (hết hạn ngày " + discount.getEndDate() + ")");
+					summary.setDiscountValid(false);
+				} else if (discount.getUsedCount() >= discount.getUsageLimit()) {
+					summary.setDiscountMessage("Mã giảm giá đã hết lượt sử dụng");
+					summary.setDiscountValid(false);
+				} else {
+					// Valid discount - calculate discount amount
+					BigDecimal discountPercent = BigDecimal.valueOf(discount.getValue());
+					discountAmount = subtotal.multiply(discountPercent)
+							.divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
+					
+					summary.setDiscountMessage(" Áp dụng mã " + discount.getCode() + " - Giảm " + discount.getValue() + "%");
+					summary.setDiscountValid(true);
+					
+					System.out.println("Applied discount: " + discount.getCode() + " (" + discount.getValue() + "%)");
+				}
+			}
+		}
+		
+		summary.setDiscountAmount(discountAmount);
+		
+		// Calculate final total
+		BigDecimal totalAmount = subtotal.subtract(discountAmount);
+		if (totalAmount.compareTo(BigDecimal.ZERO) < 0) {
+			totalAmount = BigDecimal.ZERO;
+		}
+		
+		summary.setTotalAmount(totalAmount);
+		
+		System.out.println("Cart summary - Subtotal: " + subtotal + ", Discount: " + discountAmount + ", Total: " + totalAmount);
+		
+		return summary;
+	}
+
+	@Override
+	@Transactional
+	public void updateOrderNote(Integer userId, Integer orderId, String note) {
+		System.out.println("=== Updating order note for orderId: " + orderId + ", userId: " + userId + " ===");
+		
+		// Find the order
+		Order order = orderRepository.findById(orderId)
+				.orElseThrow(() -> new RuntimeException("Order not found"));
+		
+		// Verify ownership and status
+		if (!order.getUserId().equals(userId)) {
+			throw new RuntimeException("Unauthorized: Order does not belong to user");
+		}
+		
+		if (!"CART".equals(order.getStatus())) {
+			throw new RuntimeException("Cannot update note: Order is not in cart");
+		}
+		
+		// Update note in OrderDetail
+		List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
+		if (!orderDetails.isEmpty()) {
+			OrderDetail detail = orderDetails.get(0); // Mỗi order chỉ có 1 detail (1 phòng)
+			detail.setOrderDescription(note);
+			orderDetailRepository.save(detail);
+			System.out.println("Updated order note successfully");
+		}
 	}
 }

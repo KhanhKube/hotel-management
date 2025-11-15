@@ -2,6 +2,7 @@ package hotel.service.cart;
 
 import hotel.db.dto.cart.AddToCartRequest;
 import hotel.db.dto.cart.CartItemDto;
+import hotel.db.dto.cart.CartSummaryDto;
 import hotel.db.entity.Discount;
 
 import java.util.List;
@@ -16,4 +17,6 @@ public interface CartService {
     int fixLegacyCartStatus(Integer userId);
     List<Discount> getAvailableDiscounts();
     List<Discount> getAvailableDiscountsForCart(Integer userId);
+    CartSummaryDto getCartSummary(Integer userId, List<Integer> selectedOrderIds, String discountCode);
+    void updateOrderNote(Integer userId, Integer orderId, String note);
 }

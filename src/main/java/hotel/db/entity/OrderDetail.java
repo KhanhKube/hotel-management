@@ -40,6 +40,9 @@ public class OrderDetail extends AbstractVersion{
     @Column(name = "order_description", columnDefinition = "TEXT")
     private String orderDescription;
 
+    @Column(name = "note",columnDefinition = "TEXT")
+    private String note;
+
     @Column(name = "check_in")
     private LocalDateTime checkIn;
 
@@ -50,6 +53,5 @@ public class OrderDetail extends AbstractVersion{
     private BigDecimal amount;
 
     @Column(name = "status")
-    private String status = "PENDING"; // Trường hợp mà khách hàng hủy đặt phòng, thì status anh nào co
-                                       // de phần này thì để là CANCELLED nhé, hoặc check out xong thì để là COMPLETED nhé.
+    private String status ;
 }
