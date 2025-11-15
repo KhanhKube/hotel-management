@@ -345,13 +345,17 @@
                                                 <div th:switch="${d.status}">
                                                             <span th:case="'Đang trống'"
                                                                   class="btn btn-outline-success">Đang trống</span>
+                                                    <span th:case="'Đang check-in'"
+                                                          class="btn btn-outline-primary">Đang check-in</span>
                                                     <span th:case="'Đang thuê'"
                                                           class="btn btn-outline-primary">Đang thuê</span>
+                                                    <span th:case="'Cần dọn dẹp'"
+                                                          class="btn btn-outline-warning">Cần dọn dẹp</span>
                                                     <span th:case="'Đang dọn dẹp'"
                                                           class="btn btn-outline-warning">Đang dọn dẹp</span>
                                                     <span th:case="'Đang bảo trì'"
-                                                          class="btn btn-outline-danger">Đang bảo trì</span>
-                                                    <span th:case="*" class="btn btn-inverse-warning">Lỗi</span>
+                                                          class="btn btn-outline-warning">Đang bảo trì</span>
+                                                    <span th:case="*" class="btn btn-inverse-danger">Lỗi</span>
                                                 </div>
                                             </td>
                                             <td onclick="event.stopPropagation();">
@@ -363,8 +367,11 @@
                                                        th:case="'Bảo trì'"
                                                        class="btn btn-inverse-warning">Sắp bảo trì</a>
                                                     <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
-                                                       th:case="'Dừng hoạt động'"
-                                                       class="btn btn-inverse-danger">Sắp dừng hoạt động</a>
+                                                       th:case="'Sắp dừng hoạt động'"
+                                                       class="btn btn-inverse-warning">Sắp dừng hoạt động</a>
+                                                    <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
+                                                       th:case="'Đã dừng hoạt động'"
+                                                       class="btn btn-inverse-danger">Đã dừng hoạt động</a>
                                                     <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
                                                        th:case="*" class="btn btn-inverse-warning">Lỗi</a>
                                                 </div>

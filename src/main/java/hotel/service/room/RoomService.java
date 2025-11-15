@@ -14,6 +14,8 @@ public interface RoomService {
     
     List<FurnishingFormDto> getFurnishingsForForm(Integer roomId);
     
+    List<FurnishingFormDto> getFurnishingsForForm(Integer roomId, List<Integer> furnishingIds, List<Integer> quantities);
+    
     void saveRoomFurnishings(Integer roomId, List<Integer> furnishingIds, List<Integer> quantities);
 
     void saveMaintenance(Integer roomId, String checkInDate, String checkOutDate,
@@ -75,5 +77,11 @@ public interface RoomService {
 
 	RoomDetailResponseDto getRoomDetailById(Integer roomId);
 	
-	void disableRoom(Integer roomId, String disableDate, String description, Integer createdBy);
+	void disableRoom(Integer roomId, String disableStartDate, String disableEndDate, String description, Integer createdBy);
+	
+	List<RoomMaintenance> getMaintenanceByRoomId(Integer roomId);
+	
+	RoomMaintenance getMaintenanceById(Integer maintenanceId);
+	
+	void deleteMaintenance(Integer maintenanceId);
 }

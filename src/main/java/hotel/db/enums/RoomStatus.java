@@ -7,9 +7,10 @@ public class RoomStatus {
 	public static final String NEED_CLEAN = "Cần dọn dẹp";
 	public static final String CLEANING = "Đang dọn dẹp";
 	public static final String MAINTENANCE = "Đang bảo trì";
+    public static final String EMERGENCYMAINTENANCE = "Bảo trì khẩn";
 	public static final String RESERVED = "Đã đặt";
 
 	public static final String[] ALL = {
-			AVAILABLE, CHECKIN, OCCUPIED, NEED_CLEAN, CLEANING, MAINTENANCE, RESERVED
+			AVAILABLE, CHECKIN, OCCUPIED, NEED_CLEAN, CLEANING, MAINTENANCE, EMERGENCYMAINTENANCE ,RESERVED
 	};
 }
