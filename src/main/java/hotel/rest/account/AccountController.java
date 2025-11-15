@@ -2,6 +2,7 @@ package hotel.rest.account;
 
 import hotel.db.dto.user.AccountRequestDto;
 import hotel.db.dto.user.AccountResponseDto;
+import hotel.db.entity.User;
 import hotel.service.account.AccountService;
 import hotel.util.BaseController;
 import jakarta.servlet.http.HttpSession;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+
+import static hotel.db.enums.Constants.*;
 
 @Controller
 @RequestMapping("/hotel-management/accounts")
@@ -38,16 +41,27 @@ public class AccountController extends BaseController {
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             HttpSession session, Model model) {
-        
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) ||
+                user.getRole().equals(RECEPTIONIST) ||
+                user.getRole().equals(ADMIN)) {
+            return "redirect:/hotel/dashboard";
+        }
         Page<AccountResponseDto> accountsPage;
-        
+
         // Phân tách customer và staff
         if ("staffs".equalsIgnoreCase(type)) {
             accountsPage = accountService.getStaffsWithPagination(searchTerm, status, page, size);
         } else {
             accountsPage = accountService.getCustomersWithPagination(searchTerm, status, page, size);
         }
-        
+
         model.addAttribute("accounts", accountsPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", accountsPage.getTotalPages());
@@ -56,13 +70,13 @@ public class AccountController extends BaseController {
         model.addAttribute("status", status);
         model.addAttribute("size", size);
         model.addAttribute("accountType", type);
-        
+
         // Lấy tổng số để hiển thị thống kê
         Page<AccountResponseDto> customersPage = accountService.getCustomersWithPagination("", "ALL", 0, 1);
         Page<AccountResponseDto> staffsPage = accountService.getStaffsWithPagination("", "ALL", 0, 1);
         model.addAttribute("totalCustomers", customersPage.getTotalElements());
         model.addAttribute("totalStaffs", staffsPage.getTotalElements());
-        
+
         return "management/account/account-list";
     }
 
@@ -71,6 +85,18 @@ public class AccountController extends BaseController {
      */
     @GetMapping("/role/{role}")
     public String listAccountsByRole(@PathVariable String role, HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) ||
+                user.getRole().equals(RECEPTIONIST) ||
+                user.getRole().equals(ADMIN)) {
+            return "redirect:/hotel/dashboard";
+        }
         List<AccountResponseDto> accounts = accountService.getAccountsByRole(role);
         model.addAttribute("accounts", accounts);
         model.addAttribute("role", role);
@@ -81,7 +107,19 @@ public class AccountController extends BaseController {
      * Hiển thị chi tiết account
      */
     @GetMapping("/{id}")
-    public String viewAccount(@PathVariable Integer id, Model model) {
+    public String viewAccount(@PathVariable Integer id, Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) ||
+                user.getRole().equals(RECEPTIONIST) ||
+                user.getRole().equals(ADMIN)) {
+            return "redirect:/hotel/dashboard";
+        }
         AccountResponseDto account = accountService.getAccountById(id);
         model.addAttribute("account", account);
         return "management/account/account-details";
@@ -91,7 +129,19 @@ public class AccountController extends BaseController {
      * Form tạo account mới
      */
     @GetMapping("/new")
-    public String createAccountForm(Model model) {
+    public String createAccountForm(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) ||
+                user.getRole().equals(RECEPTIONIST) ||
+                user.getRole().equals(ADMIN)) {
+            return "redirect:/hotel/dashboard";
+        }
         model.addAttribute("account", new AccountRequestDto());
         return "management/account/account-form";
     }
@@ -103,8 +153,20 @@ public class AccountController extends BaseController {
     public String saveAccount(@Valid @ModelAttribute("account") AccountRequestDto accountRequestDto,
                               BindingResult bindingResult,
                               RedirectAttributes redirectAttributes,
+                              HttpSession session,
                               Model model) {
-        
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) ||
+                user.getRole().equals(RECEPTIONIST) ||
+                user.getRole().equals(ADMIN)) {
+            return "redirect:/hotel/dashboard";
+        }
         if (bindingResult.hasErrors()) {
             // Giữ lại dữ liệu đã nhập khi có lỗi validation
             model.addAttribute("account", accountRequestDto);
@@ -127,10 +189,22 @@ public class AccountController extends BaseController {
      * Form chỉnh sửa account
      */
     @GetMapping("/edit/{id}")
-    public String editAccountForm(@PathVariable Integer id, Model model) {
+    public String editAccountForm(@PathVariable Integer id, HttpSession session, Model model) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return "redirect:/hotel";
+            }
+            if (user.getRole().equals(CUSTOMER)) {
+                return "redirect:/hotel";
+            }
+            if (user.getRole().equals(STAFF) ||
+                    user.getRole().equals(RECEPTIONIST) ||
+                    user.getRole().equals(ADMIN)) {
+                return "redirect:/hotel/dashboard";
+            }
             AccountResponseDto account = accountService.getAccountById(id);
-            
+
             // Convert ResponseDto to RequestDto for form
             AccountRequestDto accountRequestDto = new AccountRequestDto();
             accountRequestDto.setUserId(account.getUserId());
@@ -145,7 +219,7 @@ public class AccountController extends BaseController {
             accountRequestDto.setRole(account.getRole());
             accountRequestDto.setStatus(account.getStatus());
             accountRequestDto.setAvatarUrl(account.getAvatarUrl());
-            
+
             model.addAttribute("account", accountRequestDto);
             model.addAttribute("accountId", id);
             return "management/account/account-form";
@@ -160,11 +234,23 @@ public class AccountController extends BaseController {
      */
     @PostMapping("/update/{id}")
     public String updateAccount(@PathVariable Integer id,
-                               @Valid @ModelAttribute("account") AccountRequestDto accountRequestDto,
-                               BindingResult bindingResult,
-                               RedirectAttributes redirectAttributes,
-                               Model model) {
-        
+                                @Valid @ModelAttribute("account") AccountRequestDto accountRequestDto,
+                                BindingResult bindingResult,
+                                RedirectAttributes redirectAttributes,
+                                HttpSession session,
+                                Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) ||
+                user.getRole().equals(RECEPTIONIST) ||
+                user.getRole().equals(ADMIN)) {
+            return "redirect:/hotel/dashboard";
+        }
         if (bindingResult.hasErrors()) {
             // Giữ lại accountId để form biết đang ở chế độ edit
             model.addAttribute("accountId", id);
@@ -189,7 +275,20 @@ public class AccountController extends BaseController {
      */
     @PostMapping("/toggle-status/{id}")
     public String toggleAccountStatus(@PathVariable Integer id,
-                                     RedirectAttributes redirectAttributes) {
+                                      HttpSession session,
+                                      RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) ||
+                user.getRole().equals(RECEPTIONIST) ||
+                user.getRole().equals(ADMIN)) {
+            return "redirect:/hotel/dashboard";
+        }
         try {
             accountService.toggleAccountStatus(id);
             redirectAttributes.addFlashAttribute("successMessage", "Thay đổi trạng thái account thành công!");
@@ -208,24 +307,24 @@ public class AccountController extends BaseController {
     @ResponseBody
     public Map<String, Object> deleteAccount(@PathVariable Integer id) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             log.info("=== BẮT ĐẦU SOFT DELETE TÀI KHOẢN ID: {} ===", id);
-            
+
             // Gọi service soft delete
             accountService.deleteAccount(id);
-            
+
             response.put("success", true);
             response.put("message", "Đã xóa tài khoản khỏi hệ thống!");
             log.info("=== SOFT DELETE THÀNH CÔNG ID: {} - ĐÃ ẨN KHỎI GIAO DIỆN ===", id);
-            
+
         } catch (Exception e) {
             log.error("=== LỖI SOFT DELETE ID: {} - {} ===", id, e.getMessage());
-            
+
             response.put("success", false);
             response.put("message", "Lỗi: " + e.getMessage());
         }
-        
+
         return response;
     }
 
@@ -253,6 +352,18 @@ public class AccountController extends BaseController {
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) ||
+                user.getRole().equals(RECEPTIONIST) ||
+                user.getRole().equals(ADMIN)) {
+            return "redirect:/hotel/dashboard";
+        }
         Page<AccountResponseDto> customersPage = accountService.getCustomersWithPagination(searchTerm, status, page, size);
         model.addAttribute("accounts", customersPage.getContent());
         model.addAttribute("currentPage", page);
@@ -275,6 +386,18 @@ public class AccountController extends BaseController {
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) ||
+                user.getRole().equals(RECEPTIONIST) ||
+                user.getRole().equals(ADMIN)) {
+            return "redirect:/hotel/dashboard";
+        }
         Page<AccountResponseDto> staffsPage = accountService.getStaffsWithPagination(searchTerm, status, page, size);
         model.addAttribute("accounts", staffsPage.getContent());
         model.addAttribute("currentPage", page);

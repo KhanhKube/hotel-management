@@ -2,14 +2,19 @@ package hotel.rest.discount;
 
 import hotel.db.dto.discount.DiscountResponseDto;
 import hotel.db.entity.Discount;
+import hotel.db.entity.User;
 import hotel.db.repository.discount.DiscountRepository;
 import hotel.service.discount.DiscountService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import static hotel.db.enums.Constants.*;
+import static hotel.db.enums.Constants.ADMIN;
 
 @Controller
 @RequiredArgsConstructor
@@ -27,8 +32,19 @@ public class DiscountController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize,
+            HttpSession session,
             Model model) {
-        
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(ADMIN) ||
+                user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel/dashboard";
+        }
         Page<DiscountResponseDto> discountPage = 
                 discountService.getDiscountListForManagement(search, roomType, status, sortBy, page, pageSize);
         
@@ -43,7 +59,18 @@ public class DiscountController {
     }
 
     @GetMapping("/create")
-    public String createDiscountForm(Model model) {
+    public String createDiscountForm(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(ADMIN) ||
+                user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel/dashboard";
+        }
         Discount discount = new Discount();
         model.addAttribute("discount", discount);
         model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
@@ -52,7 +79,18 @@ public class DiscountController {
 
     @PostMapping("/create")
     public String createDiscount(@ModelAttribute("discount") Discount discount,
-                                 BindingResult result, Model model) {
+                                 BindingResult result, HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(ADMIN) ||
+                user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel/dashboard";
+        }
         // Validate mã giảm giá
         if (discount.getCode() == null || discount.getCode().trim().isEmpty()) {
             model.addAttribute("errorMessage", "Vui lòng nhập mã giảm giá!");
@@ -114,7 +152,18 @@ public class DiscountController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editDiscountForm(@PathVariable Long id, Model model) {
+    public String editDiscountForm(@PathVariable Long id, HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(ADMIN) ||
+                user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel/dashboard";
+        }
         Discount discount =  discountService.getDiscountById(id);
         if  (discount == null) {
             return "redirect:/hotel-management/discount";
@@ -125,7 +174,18 @@ public class DiscountController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteDiscount(@PathVariable Long id, Model model) {
+    public String deleteDiscount(@PathVariable Long id, HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(ADMIN) ||
+                user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel/dashboard";
+        }
         // Lấy discount để check status
         Discount discount = discountService.getDiscountById(id);
         
@@ -153,7 +213,18 @@ public class DiscountController {
     }
 
     @GetMapping("/detail/{id}")
-    public String detailDiscount(@PathVariable Long id, Model model) {
+    public String detailDiscount(@PathVariable Long id, HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(ADMIN) ||
+                user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel/dashboard";
+        }
         Discount discount = discountService.getDiscountById(id);
         model.addAttribute("discount", discount);
         return "management/discount/discount-detail";

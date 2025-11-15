@@ -2,6 +2,7 @@ package hotel.rest.cart;
 
 import hotel.db.dto.cart.AddToCartRequest;
 import hotel.db.dto.cart.CartItemDto;
+import hotel.db.entity.User;
 import hotel.service.cart.CartService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -16,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static hotel.db.enums.Constants.*;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/cart")
@@ -25,12 +28,18 @@ public class CartController {
 
 	@GetMapping
 	public String viewCart(Model model, HttpSession session) {
+		User user = (User) session.getAttribute("user");
 		Integer userId = getUserIdFromSession(session);
 		if (userId == null) {
 			model.addAttribute("error", "Vui lòng đăng nhập để xem giỏ hàng");
 			return "redirect:/hotel/login";
 		}
-
+		if (user == null) {
+			return "redirect:/hotel";
+		}
+		if (!user.getRole().equals(CUSTOMER) && !user.getRole().equals(RECEPTIONIST)) {
+			return "redirect:/hotel";
+		}
 		List<CartItemDto> cartItems = cartService.getCartItems(userId);
 
 		// Get available discounts for room types in cart (max 5)
