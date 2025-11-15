@@ -107,6 +107,9 @@ public class CommonServiceImpl implements CommonService {
 		if (!dto.getPhone().matches("^0\\d{9}$")) {
 			return new MessageResponse(false, PHONEINVALID);
 		}
+		if (dto.getPassword().length() < 6 || dto.getPassword().length() > 20) {
+			return new MessageResponse(false, PASSWORDENOUGH);
+		}
 		if (!dto.getPassword().equals(dto.getConfirmPassword())) {
 			return new MessageResponse(false, PASSWORDNOTMATCH);
 		}

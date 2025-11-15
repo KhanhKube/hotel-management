@@ -42,14 +42,22 @@ public class CommonController {
         return "common/login";
     }
 
+    @RequestMapping("/**")
+    public String handleInvalidHotelUrl() {
+        return "error/404";
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/hotel";
         }
-        if(user.getRole().equals(CUSTOMER)) {
+        if (user.getRole().equals(CUSTOMER)) {
             return "redirect:/hotel";
+        }
+        if(user.getRole().equals(STAFF) || user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel-management/checking";
         }
         model.addAllAttributes(commonService.getDashboardData());
         return "common/dashboard";
@@ -88,7 +96,6 @@ public class CommonController {
                         RedirectAttributes redirectAttrs) {
         return commonService.login(formUser.getUsername(), formUser.getPassword())
                 .map(user -> {
-                    // Lưu user vào session
                     session.setAttribute("user", user);
                     if (!user.getOtpVerified()) {
                         commonService.resendOtp(user.getEmail());
@@ -100,12 +107,14 @@ public class CommonController {
                         redirectAttrs.addFlashAttribute("verifyDto", verifyOtpDto);
                         return "redirect:/hotel/verify";
                     }
-                    if (!user.getRole().equals(CUSTOMER)) {
+                    if (user.getRole().equals(ADMIN) || user.getRole().equals(MANAGER)) {
                         return "redirect:/hotel/dashboard";
+                    }
+                    if(user.getRole().equals(STAFF) || user.getRole().equals(RECEPTIONIST)) {
+                        return "redirect:/hotel-management/checking";
                     }
                     session.setAttribute("userId", user.getUserId());
 
-                    // Kiểm tra nếu có trang cần quay lại
                     String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
                     if (redirectUrl != null) {
                         session.removeAttribute("redirectAfterLogin");
@@ -208,6 +217,9 @@ public class CommonController {
         if (user == null) {
             return "redirect:/hotel/login";
         }
+        if (!user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
         UserProfileDto dto = commonService.userToUserProfile(user);
         model.addAttribute("userProfileDto", dto);
         return "common/edit-profile";
@@ -219,6 +231,14 @@ public class CommonController {
                                 HttpSession session,
                                 Model model,
                                 RedirectAttributes redirectAttrs) {
+        User userSession = (User) session.getAttribute("user");
+        if (userSession == null) {
+            return "redirect:/hotel";
+        }
+        if (!userSession.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+
         MessageResponse response = commonService.editUserProfile(dto);
         if (response.isSuccess()) {
             User user = commonService.getUserByPhoneOrEmail(dto.getPhone());

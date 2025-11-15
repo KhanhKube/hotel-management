@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -33,6 +34,8 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 	List<Room> findTop3ByOrderBySoldDesc();
 
 	List<Room> findAll();
+
+	List<Room> findAllBySystemStatus(String systemStatus);
 
     //soft delete
     @Modifying
@@ -71,4 +74,18 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 	// Count rooms by status - optimized count query
 	@Query("SELECT COUNT(r) FROM Room r WHERE r.status = :status AND r.isDeleted = false")
 	long countByStatusAndIsDeletedFalse(@Param("status") String status);
+
+
+	@Query("""
+    SELECT DISTINCT r
+    FROM Room r
+    JOIN OrderDetail od
+    ON r.roomId = od.roomId
+    WHERE r.systemStatus = :status
+      AND od.startDate >= :today
+      AND od.isDeleted = false
+""")
+	List<Room> findRoomsInMaintenanceWithFutureOrders(
+			@Param("status") String status,
+			@Param("today") LocalDateTime today);
 }
