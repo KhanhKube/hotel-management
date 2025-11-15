@@ -29,18 +29,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static hotel.db.enums.RoomStatus.AVAILABLE;
+import static hotel.db.enums.RoomStatus.OCCUPIED;
 
 @Controller
 @RequiredArgsConstructor
@@ -113,8 +111,8 @@ public class RoomController {
             
             // Xử lý status
             if (!isUpdate) {
-                room.setStatus("Đang trống");
-                room.setSystemStatus("Hoạt động");
+                room.setStatus(AVAILABLE);
+                room.setSystemStatus(RoomSystemStatus.WORKING);
             } else {
                 Room existingRoom = roomService.getRoomById(room.getRoomId());
                 room.setStatus(existingRoom.getStatus());
@@ -215,7 +213,7 @@ public class RoomController {
         }
 
         // Không cho xóa nếu phòng đang hoạt động (Đang thuê hoặc Đã đặt)
-        if ("Đang thuê".equals(room.getStatus()) || "Đã đặt".equals(room.getStatus())) {
+        if (OCCUPIED.equals(room.getStatus())) {
             redirectAttributes.addFlashAttribute("errorMessage", 
                 "Không thể xóa phòng đang hoạt động! Phòng đang ở trạng thái: " + room.getStatus());
             return "redirect:/hotel-management/room";
@@ -299,10 +297,33 @@ public class RoomController {
             }
 
             Integer createdBy = user.getUserId();
+            
+            // Parse ngày bắt đầu để kiểm tra
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate startDate = LocalDate.parse(checkInDate, formatter);
+            LocalDateTime now = LocalDateTime.now();
+            LocalDate today = now.toLocalDate();
+            
+            // Lưu maintenance vào DB
             roomService.saveMaintenance(roomId, checkInDate, checkOutDate, description, createdBy);
 
+            // Cập nhật systemStatus của phòng dựa trên thời gian
             Room room = roomService.getRoomById(roomId);
-            room.setSystemStatus("Bảo trì");
+            
+            if (startDate.equals(today)) {
+                // Ngày bắt đầu = hôm nay
+                if (now.getHour() >= 14) {
+                    // Đã qua 14:00 → Chuyển ngay sang "Đang bảo trì"
+                    room.setSystemStatus(RoomSystemStatus.MAINTENANCE);
+                } else {
+                    // Chưa đến 14:00 → Set "Sắp bảo trì", đợi scheduler
+                    room.setSystemStatus(RoomSystemStatus.NEARMAINTENANCE);
+                }
+            } else if (startDate.isAfter(today)) {
+                // Ngày bắt đầu > hôm nay → Set "Sắp bảo trì"
+                room.setSystemStatus(RoomSystemStatus.NEARMAINTENANCE);
+            }
+            
             roomService.saveRoom(room);
 
             return "redirect:/hotel-management/room";
@@ -329,8 +350,8 @@ public class RoomController {
             
             // Cập nhật lại trạng thái phòng về "Đang trống" và "Hoạt động"
             Room room = roomService.getRoomById(roomId);
-            room.setStatus("Đang trống");
-            room.setSystemStatus("Hoạt động");
+            room.setStatus(AVAILABLE);
+            room.setSystemStatus(RoomSystemStatus.WORKING);
             roomService.saveRoom(room);
             
             redirectAttributes.addFlashAttribute("successMessage", "Đã xóa lịch bảo trì thành công!");
@@ -361,7 +382,7 @@ public class RoomController {
             
             // Set status phòng ngay lập tức
             Room room = roomService.getRoomById(roomId);
-            room.setSystemStatus("Sắp dừng hoạt động");
+            room.setSystemStatus(RoomSystemStatus.NEARSTOPWORKING);
             roomService.saveRoom(room);
 
             redirectAttributes.addFlashAttribute("successMessage", "Đã lên lịch dừng hoạt động phòng!");

@@ -51,6 +51,6 @@ public interface RoomMaintenanceRepository extends JpaRepository<RoomMaintenance
     // Tìm các maintenance đã đến ngày bắt đầu (để scheduled job update status phòng)
     @Query("SELECT rm FROM RoomMaintenance rm WHERE rm.startDate <= :now " +
            "AND rm.endDate >= :now AND rm.isDeleted = false " +
-           "AND rm.status = 'Dừng hoạt động'")
+           "AND rm.status = 'STOPWORKING'")
     List<RoomMaintenance> findMaintenancesToActivate(@Param("now") LocalDateTime now);
 }

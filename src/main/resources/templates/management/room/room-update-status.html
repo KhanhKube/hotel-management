@@ -184,10 +184,11 @@
                                                 <td th:text="${#temporals.format(maintenance.startDate, 'dd/MM/yyyy HH:mm')}"></td>
                                                 <td th:text="${#temporals.format(maintenance.endDate, 'dd/MM/yyyy HH:mm')}"></td>
                                                 <td>
-                                                    <span th:if="${maintenance.status == 'Đã giao'}" class="badge badge-success">Đã giao</span>
-                                                    <span th:if="${maintenance.status == 'Dừng hoạt động'}" class="badge badge-danger">Dừng hoạt động</span>
-                                                    <span th:if="${maintenance.status != 'Đã giao' and maintenance.status != 'Dừng hoạt động'}" 
-                                                          class="badge badge-warning" th:text="${maintenance.status}"></span>
+                                                    <span th:if="${maintenance.status == 'MAINTENANCE'}" class="badge badge-success">Đang bảo trì</span>
+                                                    <span th:if="${maintenance.status == 'NEARMAINTENANCE'}" class="badge badge-danger">Sắp bảo trì</span>
+                                                    <span th:if="${maintenance.status == 'STOPWORKING'}" class="badge badge-danger">Đã dừng hoạt động</span>
+                                                    <span th:if="${maintenance.status == 'NEARSTOPWORKING'}" class="badge badge-danger">Sắp dừng hoạt động</span>
+
                                                 </td>
                                                 <td th:text="${maintenance.description ?: 'N/A'}"></td>
                                                 <td th:text="${maintenance.createBy}"></td>

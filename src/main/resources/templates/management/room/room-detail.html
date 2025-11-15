@@ -119,10 +119,14 @@
                                                     <tr>
                                                         <td><i class="mdi mdi-information"></i> <strong>Trạng thái:</strong></td>
                                                         <td>
-                                                            <span th:if="${room.status == 'Trống'}" class="badge badge-success">Trống</span>
-                                                            <span th:if="${room.status == 'Đang thuê'}" class="badge badge-danger">Đang thuê</span>
-                                                            <span th:if="${room.status == 'Bảo trì'}" class="badge badge-warning">Bảo trì</span>
-                                                            <span th:if="${room.status == 'Đã đặt'}" class="badge badge-info">Đã đặt</span>
+                                                            <span th:if="${room.status == 'AVAILABLE'}" class="badge badge-success">Đang trống</span>
+                                                            <span th:if="${room.status == 'CHECKIN'}" class="badge badge-info">Đang check-in</span>
+                                                            <span th:if="${room.status == 'OCCUPIED'}" class="badge badge-danger">Đang thuê</span>
+                                                            <span th:if="${room.status == 'NEED_CLEAN'}" class="badge badge-danger">Cần dọn dẹp</span>
+                                                            <span th:if="${room.status == 'CLEANING'}" class="badge badge-danger">Đang dọn dẹp</span>
+                                                            <span th:if="${room.status == 'EMERGENCYMAINTENANCE'}" class="badge badge-danger">Bảo trì khẩn</span>
+                                                            <span th:if="${room.status == 'MAINTENANCE'}" class="badge badge-warning">Bảo trì</span>
+                                                            <span th:if="${room.status == 'RESERVED'}" class="badge badge-info">Đã đặt</span>
                                                         </td>
                                                     </tr>
                                                     <tr>
