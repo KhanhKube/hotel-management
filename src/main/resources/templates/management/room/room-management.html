@@ -343,34 +343,37 @@
                                             <td th:text="${d.price != null ? d.price : 'N/A'}"></td>
                                             <td>
                                                 <div th:switch="${d.status}">
-                                                            <span th:case="'Đang trống'"
+                                                            <span th:case="'AVAILABLE'"
                                                                   class="btn btn-outline-success">Đang trống</span>
-                                                    <span th:case="'Đang check-in'"
-                                                          class="btn btn-outline-primary">Đang check-in</span>
-                                                    <span th:case="'Đang thuê'"
+                                                    <span th:case="'OCCUPIED'"
                                                           class="btn btn-outline-primary">Đang thuê</span>
-                                                    <span th:case="'Cần dọn dẹp'"
+                                                    <span th:case="'NEED_CLEAN'"
                                                           class="btn btn-outline-warning">Cần dọn dẹp</span>
-                                                    <span th:case="'Đang dọn dẹp'"
+                                                    <span th:case="'CLEANING'"
                                                           class="btn btn-outline-warning">Đang dọn dẹp</span>
-                                                    <span th:case="'Đang bảo trì'"
-                                                          class="btn btn-outline-warning">Đang bảo trì</span>
-                                                    <span th:case="*" class="btn btn-inverse-danger">Lỗi</span>
+                                                    <span th:case="'MAINTENANCE'"
+                                                          class="btn btn-outline-danger">Đang bảo trì</span>
+                                                    <span th:case="'EMERGENCYMAINTENANCE'"
+                                                          class="btn btn-outline-danger">Bảo trì khẩn</span>
+                                                    <span th:case="*" class="btn btn-inverse-warning">Lỗi</span>
                                                 </div>
                                             </td>
                                             <td onclick="event.stopPropagation();">
                                                 <div th:switch="${d.systemStatus}">
                                                     <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
-                                                       th:case="'Hoạt động'"
+                                                       th:case="'WORKING'"
                                                        class="btn btn-inverse-success">Hoạt động</a>
                                                     <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
-                                                       th:case="'Bảo trì'"
+                                                       th:case="'NEARMAINTENANCE'"
                                                        class="btn btn-inverse-warning">Sắp bảo trì</a>
                                                     <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
-                                                       th:case="'Sắp dừng hoạt động'"
+                                                       th:case="'MAINTENANCE'"
+                                                       class="btn btn-inverse-warning">Đang bảo trì</a>
+                                                    <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
+                                                       th:case="'NEARSTOPWORKING'"
                                                        class="btn btn-inverse-warning">Sắp dừng hoạt động</a>
                                                     <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
-                                                       th:case="'Đã dừng hoạt động'"
+                                                       th:case="'STOPWORKING'"
                                                        class="btn btn-inverse-danger">Đã dừng hoạt động</a>
                                                     <a th:href="@{/hotel-management/room/status/{id}(id=${d.roomId})}"
                                                        th:case="*" class="btn btn-inverse-warning">Lỗi</a>

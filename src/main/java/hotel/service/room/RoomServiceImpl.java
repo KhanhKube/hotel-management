@@ -36,6 +36,19 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static hotel.db.enums.BedType.KING;
+import static hotel.db.enums.BedType.QUEEN;
+import static hotel.db.enums.OrderDetailStatus.CANCELLED;
+import static hotel.db.enums.OrderDetailStatus.CART;
+import static hotel.db.enums.OrderDetailStatus.RESERVED;
+import static hotel.db.enums.RoomStatus.AVAILABLE;
+import static hotel.db.enums.RoomStatus.EMERGENCYMAINTENANCE;
+import static hotel.db.enums.RoomStatus.MAINTENANCE;
+import static hotel.db.enums.RoomSystemStatus.NEARSTOPWORKING;
+import static hotel.db.enums.RoomSystemStatus.STOPWORKING;
+import static hotel.db.enums.RoomSystemStatus.WORKING;
+import static hotel.db.enums.RoomType.*;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -156,7 +169,7 @@ public class RoomServiceImpl implements RoomService {
         maintenance.setRoomId(roomId);
         maintenance.setStartDate(startDateTime);
         maintenance.setEndDate(endDateTime);
-        maintenance.setStatus("Đã giao");
+        maintenance.setStatus(MAINTENANCE);
         maintenance.setDescription(description);
         maintenance.setCreateBy(createBy);
 
@@ -172,14 +185,14 @@ public class RoomServiceImpl implements RoomService {
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
+                Arrays.asList(RESERVED, CART)
         );
 
         List<RoomMaintenance> maintenances = roomMaintenanceRepository.findMaintenancesByRoomAndDateRange(
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("Dừng hoạt động")
+                Arrays.asList(STOPWORKING)
         );
 
         List<String> disableDates = new ArrayList<>();
@@ -217,14 +230,14 @@ public class RoomServiceImpl implements RoomService {
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("PENDING", "CONFIRMED", "OCCUPIED", "CHECKED_IN", "CHECKED_OUT", "COMPLETED")
+                Arrays.asList(RESERVED, CART)
         );
 
         List<RoomMaintenance> maintenances = roomMaintenanceRepository.findMaintenancesByRoomAndDateRange(
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("Đã giao")
+                Arrays.asList(MAINTENANCE)
         );
 
         List<String> bookedDates = new ArrayList<>();
@@ -261,14 +274,14 @@ public class RoomServiceImpl implements RoomService {
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("PENDING", "CONFIRMED", "OCCUPIED", "CHECKED_IN", "CHECKED_OUT", "COMPLETED")
+                Arrays.asList(RESERVED, CART)
         );
 
         List<RoomMaintenance> maintenances = roomMaintenanceRepository.findMaintenancesByRoomAndDateRange(
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("Đã giao")
+                Arrays.asList(MAINTENANCE)
         );
 
         List<String> bookedDates = new ArrayList<>();
@@ -369,7 +382,7 @@ public class RoomServiceImpl implements RoomService {
                     .collect(Collectors.toList());
         }
         List<RoomBookListDto> BookList = rooms.stream() //Lấy Listcác phòng đã được lọc field qua Dto
-                .filter(x -> !"Dừng hoạt động".equals(x.getSystemStatus()))
+                .filter(x -> !STOPWORKING.equals(x.getSystemStatus()))
                 .map(x -> {
                     return toRoomBookDto(x);
                 }).collect(Collectors.toList());
@@ -628,8 +641,8 @@ public class RoomServiceImpl implements RoomService {
             // Xử lý status cho create/update
             if (!isUpdate) {
                 // Tạo mới: Set status mặc định
-                room.setStatus("Đang trống");
-                room.setSystemStatus("Hoạt động");
+                room.setStatus(AVAILABLE);
+                room.setSystemStatus(WORKING);
             } else {
                 // Update: Giữ nguyên status và systemStatus từ DB
                 Room existingRoom = roomRepository.findById(room.getRoomId())
@@ -747,18 +760,18 @@ public class RoomServiceImpl implements RoomService {
         }
 
         // Validate theo loại phòng
-        if (roomType.equals("Tiêu chuẩn")) {
+        if (roomType.equals(STANDARD)) {
             if (sizeNumber != null && sizeNumber > 40) {
                 return "Phòng Tiêu chuẩn diện tích vui lòng nhỏ hơn hoặc bằng 40 mét vuông!";
             }
-            if (bedType.equals("Giường King") || bedType.equals("Giường Queen")) {
+            if (bedType.equals(KING) || bedType.equals(QUEEN)) {
                 return "Phòng tiêu chuẩn chỉ được chọn giường Đơn hoặc Đôi!";
             }
-        } else if (roomType.equals("Cao cấp") || roomType.equals("Hạng sang")) {
+        } else if (roomType.equals(DELUXE) || roomType.equals(SUITE)) {
             if (sizeNumber != null && (sizeNumber > 50 || sizeNumber <= 40)) {
                 return "Phòng " + roomType + " diện tích vui lòng nhỏ hơn hoặc bằng 50 và lớn hơn 40 mét vuông!";
             }
-        } else if (roomType.equals("VIP")) {
+        } else if (roomType.equals(VIP)) {
             if (sizeNumber != null && (sizeNumber > 70 || sizeNumber <= 50)) {
                 return "Phòng " + roomType + " diện tích vui lòng nhỏ hơn hoặc bằng 70 và lớn hơn 50 mét vuông!";
             }
@@ -766,7 +779,7 @@ public class RoomServiceImpl implements RoomService {
             if (sizeNumber != null && sizeNumber < 80) {
                 return "Phòng " + roomType + " diện tích vui lòng lớn hơn hoặc bằng 80 mét vuông!";
             }
-            if (!bedType.equals("Giường King") && !bedType.equals("Giường Queen")) {
+            if (!bedType.equals(KING) && !bedType.equals(QUEEN)) {
                 return "Phòng Tổng thống vui lòng chọn giường King hoặc Queen!";
             }
         }
@@ -1106,7 +1119,7 @@ public class RoomServiceImpl implements RoomService {
                     booking.getEndDate());
 
             // Update status sang CANCELLED
-            booking.setStatus("CANCELLED");
+            booking.setStatus(CANCELLED);
             booking.setUpdatedAt(LocalDateTime.now());
             orderDetailRepository.save(booking);
 
@@ -1138,7 +1151,7 @@ public class RoomServiceImpl implements RoomService {
         maintenance.setRoomId(roomId);
         maintenance.setStartDate(disableStartDateTime);
         maintenance.setEndDate(disableEndDateTime);
-        maintenance.setStatus("Dừng hoạt động");
+        maintenance.setStatus(STOPWORKING);
         maintenance.setDescription(description != null ? description : "Phòng dừng hoạt động");
         maintenance.setCreateBy(createdBy);
         roomMaintenanceRepository.save(maintenance);
@@ -1152,21 +1165,27 @@ public class RoomServiceImpl implements RoomService {
             // Ngày bắt đầu = hôm nay
             if (now.getHour() >= 14) {
                 // Đã qua 14:00 → Chuyển ngay sang "Đã dừng hoạt động"
-                room.setStatus("Bảo trì khẩn");
-                room.setSystemStatus("Đã dừng hoạt động");
+                room.setStatus(EMERGENCYMAINTENANCE);
+                room.setSystemStatus(STOPWORKING);
                 roomRepository.save(room);
-                log.info("Room {} status updated to 'Đã dừng hoạt động' immediately (today after 14:00)", roomId);
+                log.info("Room {} status updated to 'STOPWORKING' immediately (today at or after 14:00)", roomId);
             } else {
-                // Chưa đến 14:00 → Giữ status cũ, chỉ đổi systemStatus
-                room.setSystemStatus("Sắp dừng hoạt động");
+                // Chưa đến 14:00 → Set "Sắp dừng hoạt động", đợi scheduler lúc 14:00
+                room.setSystemStatus(NEARSTOPWORKING);
                 roomRepository.save(room);
-                log.info("Room {} systemStatus set to 'Sắp dừng hoạt động' (today before 14:00, job will activate at 14:00)", roomId);
+                log.info("Room {} systemStatus set to 'NEARSTOPWORKING' (today before 14:00, scheduler will activate at 14:00)", roomId);
             }
-        } else if (startDate.isAfter(today)) {
-            // Ngày bắt đầu > hôm nay → Giữ status cũ, chỉ đổi systemStatus
-            room.setSystemStatus("Sắp dừng hoạt động");
+        } else if (startDate.isBefore(today)) {
+            // Ngày bắt đầu < hôm nay (quá khứ) → Chuyển ngay sang "Đã dừng hoạt động"
+            room.setStatus(EMERGENCYMAINTENANCE);
+            room.setSystemStatus(STOPWORKING);
             roomRepository.save(room);
-            log.info("Room {} systemStatus set to 'Sắp dừng hoạt động' (will activate on {} at 14:00)", roomId, startDate);
+            log.info("Room {} status updated to 'STOPWORKING' immediately (start date in the past)", roomId);
+        } else {
+            // Ngày bắt đầu > hôm nay → Set "Sắp dừng hoạt động", scheduler sẽ chuyển đúng ngày lúc 14:00
+            room.setSystemStatus(NEARSTOPWORKING);
+            roomRepository.save(room);
+            log.info("Room {} systemStatus set to 'NEARSTOPWORKING' (will activate on {} at 14:00)", roomId, startDate);
         }
 
         log.info("Room {} disabled successfully. Cancelled {} bookings", roomId, bookingsToCancel.size());
@@ -1199,7 +1218,7 @@ public class RoomServiceImpl implements RoomService {
         Pageable pageable = PageRequest.of(page, pageSize);
         LocalDateTime today = LocalDate.now().atStartOfDay();
         List<Room> rooms = roomRepository
-                .findRoomsInMaintenanceWithFutureOrders("Đang bảo trì", today);
+                .findRoomsInMaintenanceWithFutureOrders(MAINTENANCE, today);
 
         if (search != null && !search.trim().isEmpty()) {
             String searchLower = search.trim().toLowerCase();

@@ -13,6 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static hotel.db.enums.RoomStatus.EMERGENCYMAINTENANCE;
+import static hotel.db.enums.RoomStatus.MAINTENANCE;
+import static hotel.db.enums.RoomSystemStatus.NEARMAINTENANCE;
+import static hotel.db.enums.RoomSystemStatus.NEARSTOPWORKING;
+import static hotel.db.enums.RoomSystemStatus.STOPWORKING;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -22,7 +28,7 @@ public class RoomMaintenanceScheduler {
     private final RoomRepository roomRepository;
 
     /**
-     * Chạy vào 14:00 mỗi ngày để check và update status phòng khi đến ngày dừng hoạt động
+     * Chạy vào 14:00 mỗi ngày để check và update status phòng khi đến ngày bảo trì hoặc dừng hoạt động
      */
     @Scheduled(cron = "0 0 14 * * *") // Chạy vào 14:00 mỗi ngày
     @Transactional
@@ -36,6 +42,7 @@ public class RoomMaintenanceScheduler {
         
         log.info("Found {} maintenances to activate", maintenances.size());
         
+        int updatedCount = 0;
         for (RoomMaintenance maintenance : maintenances) {
             try {
                 Room room = roomRepository.findById(maintenance.getRoomId()).orElse(null);
@@ -44,20 +51,35 @@ public class RoomMaintenanceScheduler {
                     continue;
                 }
                 
-                // Chỉ update nếu phòng đang ở trạng thái "Sắp dừng hoạt động"
-                if ("Sắp dừng hoạt động".equals(room.getSystemStatus())) {
-                    room.setStatus("Bảo trì khẩn");
-                    room.setSystemStatus("Đã dừng hoạt động");
-                    roomRepository.save(room);
-                    
-                    log.info("Updated room {} (Room #{}) to 'Đã dừng hoạt động' status", 
-                        room.getRoomId(), room.getRoomNumber());
+                // Xử lý theo loại maintenance
+                String maintenanceStatus = maintenance.getStatus();
+                
+                if (hotel.db.enums.RoomSystemStatus.STOPWORKING.equals(maintenanceStatus)) {
+                    // Dừng hoạt động: Chỉ update nếu phòng đang ở trạng thái "Sắp dừng hoạt động"
+                    if (NEARSTOPWORKING.equals(room.getSystemStatus())) {
+                        room.setStatus(EMERGENCYMAINTENANCE);
+                        room.setSystemStatus(STOPWORKING);
+                        roomRepository.save(room);
+                        updatedCount++;
+                        log.info("Updated room {} (Room #{}) to 'Dừng hoạt động' status", 
+                            room.getRoomId(), room.getRoomNumber());
+                    }
+                } else if (hotel.db.enums.RoomSystemStatus.MAINTENANCE.equals(maintenanceStatus)) {
+                    // Bảo trì: Chỉ update nếu phòng đang ở trạng thái "Sắp bảo trì"
+                    if (NEARMAINTENANCE.equals(room.getSystemStatus())) {
+                        room.setStatus(MAINTENANCE);
+                        room.setSystemStatus(hotel.db.enums.RoomSystemStatus.MAINTENANCE);
+                        roomRepository.save(room);
+                        updatedCount++;
+                        log.info("Updated room {} (Room #{}) to 'Bảo trì' status", 
+                            room.getRoomId(), room.getRoomNumber());
+                    }
                 }
             } catch (Exception e) {
                 log.error("Error updating room status for maintenance {}", maintenance.getMaintenanceId(), e);
             }
         }
         
-        log.info("=== Completed scheduled job: Updated {} rooms ===", maintenances.size());
+        log.info("=== Completed scheduled job: Updated {} rooms ===", updatedCount);
     }
 }
