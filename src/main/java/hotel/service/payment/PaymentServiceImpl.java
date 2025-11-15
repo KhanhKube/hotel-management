@@ -2,8 +2,10 @@ package hotel.service.payment;
 
 import hotel.db.dto.cart.CartItemDto;
 import hotel.db.dto.payment.CreatePaymentLinkRequestBody;
+import hotel.db.entity.Discount;
 import hotel.db.entity.Order;
 import hotel.db.entity.OrderDetail;
+import hotel.db.entity.Room;
 import hotel.db.repository.order.OrderRepository;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
 import hotel.db.repository.room.RoomRepository;
@@ -63,7 +65,7 @@ public class PaymentServiceImpl implements PaymentService {
 		BigDecimal totalAmount = subtotal;
 		if (requestBody.getDiscountId() != null) {
 			// Get discount from database
-			hotel.db.entity.Discount discount = cartService.getAvailableDiscounts().stream()
+			Discount discount = cartService.getAvailableDiscounts().stream()
 					.filter(d -> d.getDiscountId().equals(requestBody.getDiscountId()))
 					.findFirst()
 					.orElse(null);
@@ -207,7 +209,7 @@ public class PaymentServiceImpl implements PaymentService {
 			BigDecimal totalAmount = BigDecimal.ZERO;
 			for (OrderDetail detail : orderDetails) {
 				// Get room price
-				hotel.db.entity.Room room = roomRepository.findById(detail.getRoomId()).orElse(null);
+				Room room = roomRepository.findById(detail.getRoomId()).orElse(null);
 				if (room != null) {
 					// Calculate number of nights
 					long nights = ChronoUnit.DAYS.between(

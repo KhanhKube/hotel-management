@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -77,7 +78,7 @@ public class ViewController extends BaseController {
             
             log.info("Redirecting to view list");
             // Add timestamp to prevent browser cache
-            return "redirect:/hotel-management/view";
+            return "redirect:/hotel-management/location-room?type=view&page=0&size=10";
         } catch (IllegalArgumentException e) {
             log.warn("Validation error when saving view: {}", e.getMessage());
             // Hiển thị error ngay trên màn hình
@@ -120,7 +121,7 @@ public class ViewController extends BaseController {
                            @ModelAttribute("view") View view,
                            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
                            Model model,
-                           org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+                           RedirectAttributes redirectAttributes) {
         try {
             View existingView = viewService.getViewById(id);
             existingView.setViewType(view.getViewType());
@@ -134,9 +135,9 @@ public class ViewController extends BaseController {
             }
             
             viewService.saveView(existingView);
-            // Redirect back to edit page and show success message via flash attribute
+            // Redirect back to view list with success message
             redirectAttributes.addFlashAttribute("message", "View đã được cập nhật thành công!");
-            return "redirect:/hotel-management/view/edit/" + id;
+            return "redirect:/hotel-management/location-room?type=view&page=0&size=10";
         } catch (IllegalArgumentException e) {
             log.warn("Validation error when updating view: {}", e.getMessage());
             // Hiển thị error ngay trên màn hình
@@ -170,7 +171,7 @@ public class ViewController extends BaseController {
             viewService.deleteView(id);
             log.info("View {} deleted successfully", id);
             
-            return "redirect:/hotel-management/view?success=delete";
+            return "redirect:/hotel-management/location-room?type=view&page=0&size=10&success=delete";
         } catch (RuntimeException e) {
             if (e.getMessage().contains("not found")) {
                 log.warn("View {} not found for deletion", id);

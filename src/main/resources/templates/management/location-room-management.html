@@ -253,6 +253,7 @@
                                                         </div>
                                                     </td>
                                                 </tr>
+                                                
                                                 <!-- View Data -->
                                                 <tr th:if="${currentType == 'view'}" th:each="view, iterStat : ${views}">
                                                     <td th:text="${(currentPage * pageSize) + iterStat.count}">1</td>
@@ -276,6 +277,7 @@
                                                         </div>
                                                     </td>
                                                 </tr>
+
                                                 <!-- Size Data -->
                                                 <tr th:if="${currentType == 'size'}" th:each="size, iterStat : ${sizes}">
                                                     <td th:text="${(currentPage * pageSize) + iterStat.count}">1</td>

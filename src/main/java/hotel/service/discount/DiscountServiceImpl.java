@@ -5,6 +5,8 @@ import hotel.db.enums.RoomType;
 import hotel.db.repository.discount.DiscountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -142,8 +144,8 @@ public class DiscountServiceImpl implements DiscountService {
         
         List<DiscountResponseDto> pagedDtos = discountDtos.subList(startPage, endPage);
         
-        return new org.springframework.data.domain.PageImpl<>(pagedDtos, 
-                org.springframework.data.domain.PageRequest.of(page, pageSize), 
+        return new PageImpl<>(pagedDtos, 
+                PageRequest.of(page, pageSize), 
                 discountDtos.size());
     }
 

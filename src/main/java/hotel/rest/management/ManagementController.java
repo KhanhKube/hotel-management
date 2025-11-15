@@ -129,7 +129,7 @@ public class ManagementController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "add");
         }
-        return "redirect:/hotel-management/size";
+        return "redirect:/hotel-management/location-room?type=size&page=0&size=10";
     }
 
     @GetMapping("/size/edit/{id}")
@@ -150,7 +150,7 @@ public class ManagementController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "edit");
         }
-        return "redirect:/hotel-management/size";
+        return "redirect:/hotel-management/location-room?type=size&page=0&size=10";
     }
 
     @PostMapping("/size/delete/{id}")
@@ -161,7 +161,7 @@ public class ManagementController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "delete");
         }
-        return "redirect:/hotel-management/size";
+        return "redirect:/hotel-management/location-room?type=size&page=0&size=10";
     }
 
     // FLOOR MANAGEMENT (redirect to location-room)
