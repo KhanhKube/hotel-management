@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Phòng bảo trì</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}"/>
+    <style>
+        tbody tr:hover {
+            cursor: pointer;
+            opacity: 0.65;
+            transition: background-color 0.2s;
+        }
+
+        /* Style cho select dropdown */
+        .form-select {
+            width: 100%;
+            background-color: #2c2e33;
+            border: 1px solid #2c2e33;
+            color: #ffffff;
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1;
+            border-radius: 2px;
+            height: calc(1em + 1.5rem + 2px);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+        }
+
+        .form-select:focus {
+            background-color: #2c2e33;
+            border-color: #2196f3;
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .form-select option {
+            background-color: #2c2e33;
+            color: #ffffff;
+        }
+
+        .form-label {
+            display: block;
+            color: #6c7293;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: #2c2e33;
+            border: 1px solid #2c2e33;
+            color: #ffffff;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1;
+            height: calc(1em + 1.5rem + 2px);
+        }
+
+        .form-control:focus {
+            background-color: #2c2e33;
+            border-color: #2196f3;
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .form-control::placeholder {
+            color: #6c7293;
+        }
+
+        /* Toast notification styles */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast-notification.error {
+            background-color: #dc3545;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast-notification.hiding {
+            animation: slideOut 0.3s ease-out;
+        }
+
+        .toast-notification .toast-close {
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 1;
+            color: white;
+            opacity: 0.8;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .toast-notification .toast-close:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+<!-- Toast Notification -->
+<div th:if="${successMessage}" class="toast-notification">
+    <span class="toast-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300);">&times;</span>
+    <i class="mdi mdi-check-circle"></i>
+    <span th:text="${successMessage}"></span>
+</div>
+
+<div th:if="${errorMessage}" class="toast-notification error">
+    <span class="toast-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300);">&times;</span>
+    <i class="mdi mdi-alert-circle"></i>
+    <span th:text="${errorMessage}"></span>
+</div>
+
+<div class="container-scroller">
+    <!-- Include sidebar -->
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+    <div class="container-fluid page-body-wrapper">
+        <nav class="navbar p-0 fixed-top d-flex flex-row">
+            <div class="navbar-brand-wrapper d-flex d-lg-none align-items-center justify-content-center">
+                <a class="navbar-brand brand-logo-mini" href="index.html"><img src="assets/images/logo-mini.svg"
+                                                                               alt="logo"/></a>
+            </div>
+            <div class="navbar-menu-wrapper flex-grow d-flex align-items-stretch">
+            </div>
+        </nav>
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="row">
+
+                    <!--Filter Bar-->
+
+                    <h1 th:text="'Danh sách đặt phòng của phòng ' + ${room.roomNumber}"></h1>
+
+                    <!--Main Deteils-->
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="card-title mb-0">Quản Lý Phòng Bảo Trì</h4>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show"
+                                     role="alert">
+                                    <i class="mdi mdi-alert-circle"></i>
+                                    <strong>Lỗi!</strong> <span th:text="${error}"></span>
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table" id="roomTable">
+                                        <thead>
+                                        <tr>
+                                            <th> STT</th>
+                                            <th> SDT</th>
+                                            <th> Tên</th>
+                                            <th> Thời gian</th>
+                                            <th> Giá</th>
+                                            <th> Hành động</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="d, stat : ${orderDetails}"
+                                            style="cursor: pointer;">
+
+                                            <td th:text="${stat.count}"></td>
+                                            <td th:text="${d.customerPhone != null ? d.customerPhone : 'N/A'}"></td>
+                                            <td th:text="${d.customerName != null ? d.customerName : 'N/A'}"></td>
+                                            <td th:text="${d.startDate != null && d.endDate != null ? d.startDate + ' - ' + d.endDate : 'N/A'}"></td>
+                                            <td th:text="${d.amount != null ? #numbers.formatDecimal(d.amount, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : 'N/A'}"></td>
+
+                                            <td onclick="event.stopPropagation();">
+                                                <a href="#"
+                                                   th:href="@{/hotel-management/room-maintenance/submit/{id}(id=${d.orderDetailId})}"
+                                                   onclick="return confirm('Bạn chắc chắn đã xử lý xong?');">
+                                                    Xứ lí xong
+                                                </a>
+                                            </td>
+                                        </tr>
+
+                                        <tr th:if="${#lists.isEmpty(orderDetails)}">
+                                            <td colspan="8" class="text-center text-muted">Không có đơn nào
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <div class="pagination-wrapper" th:if="${totalPages > 1}">
+                                    <nav>
+                                        <ul class="pagination justify-content-center">
+                                            <!-- Previous -->
+                                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                                <a class="page-link" th:href="@{/hotel-management/room-maintenance/{id}(id=${room.roomId})(page=${currentPage - 1}, pageSize=${pageSize})}">
+                                                    Trước
+                                                </a>
+                                            </li>
+
+                                            <!-- Page numbers -->
+                                            <li class="page-item"
+                                                th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                                th:classappend="${i == currentPage} ? 'active'">
+                                                <a class="page-link" th:href="@{/hotel-management/room-maintenance/{id}(id=${room.roomId})(page=${i}, pageSize=${pageSize})}">
+                                                   th:text="${i + 1}">1</a>
+                                            </li>
+
+                                            <!-- Next -->
+                                            <li class="page-item"
+                                                th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                                <a class="page-link" th:href="@{/hotel-management/room-maintenance/{id}(id=${room.roomId})(page=${currentPage + 1}, pageSize=${pageSize})}">
+                                                    Sau
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+
+                                    <!-- Info -->
+                                    <div class="text-center mt-3">
+                                        <p>Trang [[${currentPage + 1}]] / [[${totalPages}]] - Tổng
+                                            [[${totalElements}]] phòng</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+
+<script>
+    // Auto hide toast notification after 3 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const toast = document.querySelector('.toast-notification');
+        if (toast) {
+            setTimeout(function() {
+                toast.classList.add('hiding');
+                setTimeout(function() {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+    });
+</script>
+</body>
+
+</html>

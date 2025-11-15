@@ -1,5 +1,6 @@
 package hotel.db.repository.orderdetail;
 
+import hotel.db.dto.checking.OrderMaintenanceResponse;
 import hotel.db.entity.OrderDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -106,4 +107,42 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
 
 	// Find order details by room ID and status
 	List<OrderDetail> findByRoomIdAndStatus(Integer roomId, String status);
+
+	@Query("""
+    SELECT od FROM OrderDetail od
+    WHERE od.roomId = :roomId
+      AND od.startDate >= :today
+      AND od.isDeleted = false
+    ORDER BY od.startDate ASC
+""")
+	Page<OrderDetail> findFutureOrdersByRoomId(
+			Integer roomId,
+			LocalDateTime today,
+			Pageable pageable);
+
+	@Query("""
+        SELECT new hotel.db.dto.checking.OrderMaintenanceResponse(
+            od.orderDetailId,
+            o.orderId,
+            u.userId,
+            r.roomId,
+            r.roomNumber,
+            od.startDate,
+            od.endDate,
+            od.amount,
+            u.firstName,
+            u.phone
+        )
+        FROM OrderDetail od
+        JOIN Order o ON od.orderId = o.orderId
+        JOIN User u ON o.userId = u.userId
+        JOIN Room r ON od.roomId = r.roomId
+        WHERE od.roomId = :roomId
+          AND od.startDate >= :today
+          AND od.isDeleted = FALSE
+        ORDER BY od.startDate ASC""")
+	Page<OrderMaintenanceResponse> findRoomMaintenanceOrders(
+			Integer roomId,
+			LocalDateTime today,
+			Pageable pageable);
 }

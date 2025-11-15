@@ -1,24 +1,29 @@
 package hotel.rest.management;
 
+import hotel.db.dto.checking.OrderMaintenanceResponse;
 import hotel.db.dto.size.SizeRequestDto;
 import hotel.db.dto.floor.FloorRequestDto;
 import hotel.db.dto.floor.FloorResponseDto;
 import hotel.db.dto.room.RoomRequestDto;
-import hotel.db.entity.Room;
-import hotel.db.entity.Size;
-import hotel.db.entity.User;
+import hotel.db.entity.*;
+import hotel.service.order.OrderService;
 import hotel.service.view.ViewService;
 import hotel.service.size.SizeService;
 import hotel.service.floor.FloorService;
 import hotel.service.room.RoomService;
+import hotel.util.MessageResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -35,6 +40,7 @@ public class ManagementController {
     private final FloorService floorService;
     private final RoomService roomService;
     private final SizeService sizeService;
+    private final OrderService orderService;
 
     @GetMapping("/location-room")
     public String locationRoomManagement(
@@ -408,4 +414,62 @@ public class ManagementController {
         return "management/room-maintenance/room-list";
 
     }
+
+    @GetMapping("/room-maintenance/{id}")
+    public String viewRoomMaintenance(
+            @PathVariable Integer id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpSession session,
+            Model model, RedirectAttributes redirectAttrs) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(RECEPTIONIST)) return "redirect:/hotel/dashboard";
+
+        // Lấy phòng theo ID
+        Room room = roomService.getRoomById(id);
+        if (room == null || !"đang bảo trì".equalsIgnoreCase(room.getSystemStatus())) {
+            redirectAttrs.addFlashAttribute("error", "Phòng không tồn tại hoặc không phải phòng bảo trì");
+            return "redirect:/hotel-management/room-maintenance";
+        }
+        LocalDateTime today = LocalDate.now().atStartOfDay();
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<OrderMaintenanceResponse> orderDetails = orderService.findFutureOrdersByRoomId(id, today, pageable);
+        if(orderDetails == null){
+            redirectAttrs.addFlashAttribute("message", "Không có phòng nào đang bảo trì!");
+            return "redirect:/hotel-management/room-maintenance";
+        }
+        // Add model
+        model.addAttribute("room", room);
+        model.addAttribute("orderDetails", orderDetails.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", orderDetails.getTotalPages());
+        model.addAttribute("totalElements", orderDetails.getTotalElements());
+        model.addAttribute("pageSize", pageSize);
+
+        return "management/room-maintenance/room-maintenance-detail";
+
+    }
+
+    @GetMapping("/room-maintenance/submit/{orderDetailId}")
+    public String viewRoomMaintenance(@PathVariable Integer orderDetailId,
+                                      HttpSession session,
+                                      Model model,
+                                      RedirectAttributes redirectAttrs){
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(RECEPTIONIST)) return "redirect:/hotel/dashboard";
+        OrderDetail orderDetail = orderService.getOrderDetail(orderDetailId);
+        MessageResponse response = orderService.cancelOrderDetail(orderDetailId);
+        if(!response.isSuccess()){
+            redirectAttrs.addFlashAttribute("error", response.getMessage());
+            return "redirect:/hotel-management/room-maintenance/" + orderDetail.getRoomId();
+        }
+
+       return "redirect:/hotel-management/room-maintenance/"+ orderDetail.getRoomId();
+    }
+
+
 }
