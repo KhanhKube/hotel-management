@@ -396,6 +396,10 @@ public class CommonServiceImpl implements CommonService {
 			return new MessageResponse(false, "Mật khẩu hiện tại không đúng!");
 		}
 
+		if (passwordEncoder.matches(dto.getNewPassword(), user.getPassword())) {
+			return new MessageResponse(false, "Mật khẩu hiện tại không thay đổi!");
+		}
+
 		if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
 			return new MessageResponse(false, "Mật khẩu xác nhận không khớp!");
 		}
