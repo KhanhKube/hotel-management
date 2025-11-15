@@ -2,7 +2,9 @@ package hotel.rest.cart;
 
 import hotel.db.dto.cart.AddToCartRequest;
 import hotel.db.dto.cart.CartItemDto;
+import hotel.db.dto.cart.CartSummaryDto;
 import hotel.db.entity.User;
+import hotel.db.entity.Discount;
 import hotel.service.cart.CartService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -43,11 +45,15 @@ public class CartController {
 		List<CartItemDto> cartItems = cartService.getCartItems(userId);
 
 		// Get available discounts for room types in cart (max 5)
-		List<hotel.db.entity.Discount> availableDiscounts = cartService.getAvailableDiscountsForCart(userId);
+		List<Discount> availableDiscounts = cartService.getAvailableDiscountsForCart(userId);
+
+		// Get cart summary (all items selected by default, no discount code)
+		CartSummaryDto cartSummary = cartService.getCartSummary(userId, null, null);
 
 		model.addAttribute("cartItems", cartItems);
 		model.addAttribute("cartCount", cartItems.size());
 		model.addAttribute("availableDiscounts", availableDiscounts);
+		model.addAttribute("cartSummary", cartSummary);
 
 		return "cart/cart";
 	}
@@ -68,7 +74,6 @@ public class CartController {
 			System.out.println("Room ID: " + requestBody.getRoomId());
 			System.out.println("Check In: " + requestBody.getCheckIn());
 			System.out.println("Check Out: " + requestBody.getCheckOut());
-			System.out.println("Early Check In: " + requestBody.getEarlyCheckIn());
 		}
 
 		Integer userId = getUserIdFromSession(session);
@@ -260,6 +265,62 @@ public class CartController {
 		response.put("message", "Fixed " + fixed + " cart items");
 
 		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/summary")
+	@ResponseBody
+	public ResponseEntity<CartSummaryDto> getCartSummary(
+			@RequestBody Map<String, Object> request,
+			HttpSession session) {
+		
+		Integer userId = getUserIdFromSession(session);
+		if (userId == null) {
+			return ResponseEntity.ok(new CartSummaryDto());
+		}
+
+		// Get selected order IDs from request
+		@SuppressWarnings("unchecked")
+		List<Integer> selectedOrderIds = (List<Integer>) request.get("selectedOrderIds");
+		
+		// Get discount code from request
+		String discountCode = request.get("discountCode") != null
+				? request.get("discountCode").toString()
+				: null;
+
+		CartSummaryDto summary = cartService.getCartSummary(userId, selectedOrderIds, discountCode);
+		
+		return ResponseEntity.ok(summary);
+	}
+
+	@PostMapping("/update-note")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> updateOrderNote(
+			@RequestBody Map<String, Object> request,
+			HttpSession session) {
+		
+		Map<String, Object> response = new HashMap<>();
+		Integer userId = getUserIdFromSession(session);
+		
+		if (userId == null) {
+			response.put("success", false);
+			response.put("message", "Unauthorized");
+			return ResponseEntity.ok(response);
+		}
+
+		try {
+			Integer orderId = Integer.parseInt(request.get("orderId").toString());
+			String note = request.get("note") != null ? request.get("note").toString() : null;
+			
+			cartService.updateOrderNote(userId, orderId, note);
+			
+			response.put("success", true);
+			response.put("message", "Đã lưu ghi chú");
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("message", e.getMessage());
+			return ResponseEntity.ok(response);
+		}
 	}
 
 	/**

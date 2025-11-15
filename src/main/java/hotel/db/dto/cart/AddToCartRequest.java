@@ -13,5 +13,5 @@ public class AddToCartRequest {
     private Integer roomId;
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;
-    private Boolean earlyCheckIn;
+    private String description;
 }

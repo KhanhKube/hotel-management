@@ -14,6 +14,7 @@ import java.util.Optional;
 @Repository
 public interface DiscountRepository extends JpaRepository<Discount, Long> {
 
+    Discount findByCodeAndIsDeletedFalse(String code);
     //check xem code voucher da ton tai hay chua.
     boolean existsByCodeAndIsDeletedFalse(String code);
 

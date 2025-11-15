@@ -1,6 +1,7 @@
 package hotel.service.payment;
 
 import hotel.db.dto.cart.CartItemDto;
+import hotel.db.dto.cart.CartSummaryDto;
 import hotel.db.dto.payment.CreatePaymentLinkRequestBody;
 import hotel.db.entity.Discount;
 import hotel.db.entity.Order;
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,30 +63,35 @@ public class PaymentServiceImpl implements PaymentService {
 				.map(CartItemDto::getTotalPrice)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
 
-		// Apply discount if provided
+		// Apply discount if provided (use discountCode, fallback to discountId for backward compatibility)
 		BigDecimal totalAmount = subtotal;
-		if (requestBody.getDiscountId() != null) {
-			// Get discount from database
-			Discount discount = cartService.getAvailableDiscounts().stream()
+		String discountCodeToUse = requestBody.getDiscountCode();
+		
+		// Fallback to discountId if discountCode not provided (backward compatibility)
+		if (discountCodeToUse == null && requestBody.getDiscountId() != null) {
+			Discount discountById = cartService.getAvailableDiscounts().stream()
 					.filter(d -> d.getDiscountId().equals(requestBody.getDiscountId()))
 					.findFirst()
 					.orElse(null);
-
-			if (discount != null) {
-				// Calculate discount amount
-				BigDecimal discountPercent = BigDecimal.valueOf(discount.getValue());
-				BigDecimal discountAmount = subtotal.multiply(discountPercent)
-						.divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
-
-				totalAmount = subtotal.subtract(discountAmount);
-
-				// Ensure total is not negative
-				if (totalAmount.compareTo(BigDecimal.ZERO) < 0) {
-					totalAmount = BigDecimal.ZERO;
-				}
-
-				System.out.println("Applied discount: " + discount.getCode() + " (" + discount.getValue() + "%)");
+			if (discountById != null) {
+				discountCodeToUse = discountById.getCode();
+			}
+		}
+		
+		if (discountCodeToUse != null && !discountCodeToUse.trim().isEmpty()) {
+			// Use CartService to get summary with discount validation
+			CartSummaryDto summary = cartService.getCartSummary(
+					userId, 
+					requestBody.getSelectedOrderIds(), 
+					discountCodeToUse
+			);
+			
+			if (summary.getDiscountValid() && summary.getDiscountAmount() != null) {
+				totalAmount = summary.getTotalAmount();
+				System.out.println("Applied discount code: " + discountCodeToUse);
 				System.out.println("Subtotal: " + subtotal + " -> Total after discount: " + totalAmount);
+			} else {
+				System.out.println("Invalid discount code: " + discountCodeToUse + " - " + summary.getDiscountMessage());
 			}
 		}
 
@@ -117,7 +124,7 @@ public class PaymentServiceImpl implements PaymentService {
 			// Only update selected orders
 			cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART").stream()
 					.filter(order -> requestBody.getSelectedOrderIds().contains(order.getOrderId()))
-					.collect(java.util.stream.Collectors.toList());
+					.collect(Collectors.toList());
 		} else {
 			// Update all cart orders (backward compatibility)
 			cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
@@ -202,11 +209,9 @@ public class PaymentServiceImpl implements PaymentService {
 		for (Order order : cartOrders) {
 			order.setStatus("COMPLETED");
 
-			// Calculate and set total amount for this order
-			List<OrderDetail> orderDetails =
-					orderDetailRepository.findByOrderId(order.getOrderId());
+			// Get order details and set amount for each
+			List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
 
-			BigDecimal totalAmount = BigDecimal.ZERO;
 			for (OrderDetail detail : orderDetails) {
 				// Get room price
 				Room room = roomRepository.findById(detail.getRoomId()).orElse(null);
@@ -217,11 +222,8 @@ public class PaymentServiceImpl implements PaymentService {
 							detail.getCheckOut().toLocalDate()
 					);
 
-					// Calculate total for this room
+					// Calculate and set amount for this order detail
 					BigDecimal roomTotal = room.getPrice().multiply(BigDecimal.valueOf(nights));
-					totalAmount = totalAmount.add(roomTotal);
-
-					// Set amount for this order detail
 					detail.setAmount(roomTotal);
 				}
 
@@ -230,11 +232,10 @@ public class PaymentServiceImpl implements PaymentService {
 				orderDetailRepository.save(detail);
 			}
 
-			// Set total amount to order
-			order.setTotalAmount(totalAmount);
+			// totalAmount đã được tính và lưu khi thêm vào giỏ hàng, chỉ cần save order
 			orderRepository.save(order);
 
-			System.out.println("Updated order " + order.getOrderId() + " to COMPLETED status with total amount: " + totalAmount + " VND and " + orderDetails.size() + " RESERVED rooms");
+			System.out.println("Updated order " + order.getOrderId() + " to COMPLETED status with total amount: " + order.getTotalAmount() + " VND and " + orderDetails.size() + " RESERVED rooms");
 		}
 
 		System.out.println("=== Successfully updated " + cartOrders.size() + " orders to COMPLETED ===");

@@ -21,4 +21,5 @@ public class CartItemDto {
     private Integer numberOfDays;
     private BigDecimal totalPrice;
     private String imageRoom;
+    private String orderDescription;
 }

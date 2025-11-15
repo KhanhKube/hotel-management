@@ -28,7 +28,7 @@ public class CartCleanupScheduler {
 	public void cleanupExpiredCartItems() {
 		try {
 			// Tính thời gian 15 phút trước
-			LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(1);
+			LocalDateTime expiryTime = LocalDateTime.now().minusMinutes(15);
 
 			// Tìm tất cả orders có status CART và createdAt < expiryTime
 			List<Order> expiredCartOrders = orderRepository.findByStatusAndCreatedAtBefore("CART", expiryTime);

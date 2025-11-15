@@ -72,6 +72,17 @@
             font-size: 1.3rem;
             font-weight: 700;
         }
+
+        /* Toast animations */
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes slideOutRight {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100px); }
+        }
     </style>
 </head>
 
@@ -109,10 +120,10 @@
             <div class="col-lg-8">
                 <div th:if="${cartItems == null || #lists.isEmpty(cartItems)}" class="alert alert-info">
                     <i class="fas fa-shopping-cart"></i> Giỏ hàng của bạn đang trống.
-                    <a th:href="@{/hotel/rooms}">Tiếp tục mua sắm</a>
+                    <a th:href="@{/hotel/rooms}">Tiếp tục đặt phòng</a>
                 </div>
 
-                <div th:each="item, iterStat : ${cartItems}" class="cart-item">
+                <div th:each="item, iterStat : ${cartItems}" class="cart-item">  <!-- iterStat chứa vòng lặp  -->
                     <div class="row align-items-center">
                         <div class="col-md-1 text-center">
                             <input type="checkbox" 
@@ -131,27 +142,41 @@
                                 </h6>
                             </div>
                             <h5 th:text="${item.roomType}">Room Type</h5>
-                            <p class="text-muted mb-1">Phòng số: <span th:text="${item.roomNumber}">101</span></p>
+                            <p class="text-muted mb-1">Phòng số: <span th:text="${item.roomNumber}"></span></p>
                             <p class="text-muted mb-1">
                                 Check-in: <span
-                                    th:text="${#temporals.format(item.checkIn, 'dd/MM/yyyy')}">01/01/2024</span>
+                                    th:text="${#temporals.format(item.checkIn, 'dd/MM/yyyy')}"></span>   <!--#temporals là Thymeleaf Utility Object để xử lý ngày giờ -->
                             </p>
                             <p class="text-muted mb-1">
                                 Check-out: <span
                                     th:text="${#temporals.format(item.checkOut, 'dd/MM/yyyy')}">05/01/2024</span>
                             </p>
-                            <p class="text-muted">
+                            <p class="text-muted mb-1">
                                 Số đêm: <span th:text="${item.numberOfDays}">4</span> đêm
                             </p>
+                            <!-- Ghi chú có thể chỉnh sửa -->
+                            <div class="mt-2">
+                                <label class="form-label small mb-1">
+                                    <i class="fas fa-sticky-note text-warning"></i> 
+                                    <strong>Ghi chú yêu cầu đặc biệt:</strong>
+                                </label>
+                                <textarea class="form-control form-control-sm order-note" 
+                                          th:id="'note-' + ${item.orderId}"
+                                          th:data-order-id="${item.orderId}"
+                                          rows="2"
+                                          th:text="${item.orderDescription}"
+                                          style="font-size: 0.85rem; resize: vertical;"></textarea>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> Ghi chú sẽ được lưu tự động khi bạn nhập xong
+                                </small>
+                            </div>
                         </div>
                         <div class="col-md-4 text-end">
                             <h5 class="text-primary"
                                 th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
-                                1,400,000 VNĐ
                             </h5>
                             <p class="text-muted small"
                                th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/đêm'">
-                                350,000 VNĐ/đêm
                             </p>
                             <button class="btn btn-sm btn-outline-danger remove-btn"
                                     th:onclick="'removeFromCart(' + ${item.roomId} + ')'">
@@ -168,27 +193,33 @@
                     <h4 class="mb-3">Tổng Quan Đơn Hàng</h4>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Tổng số đơn:</span>
-                        <span th:text="${cartItems.size()}">0</span>
+                        <span th:text="${cartSummary != null ? cartSummary.totalOrders : 0}">0</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Đơn được chọn:</span>
-                        <span id="selectedCount" th:text="${cartItems.size()}">0</span>
+                        <span id="selectedCount" th:text="${cartSummary != null ? cartSummary.selectedOrders : 0}">0</span>
                     </div>
                     
-                    <!-- Discount Selection -->
-                    <div class="mb-3" th:if="${!#lists.isEmpty(availableDiscounts)}">
-                        <label for="discountSelect" class="form-label small">
-                            <i class="fas fa-tag"></i> Mã giảm giá (tối đa 5)
+                    <!-- Discount Code Input -->
+                    <div class="mb-3">
+                        <label for="discountCode" class="form-label small">
+                            <i class="fas fa-tag"></i> Mã giảm giá
                         </label>
-                        <select id="discountSelect" class="form-control" onchange="applyDiscount()">
-                            <option value="">-- Chọn mã giảm giá --</option>
-                            <option th:each="discount : ${availableDiscounts}" 
-                                    th:value="${discount.discountId}"
-                                    th:attr="data-value=${discount.value},data-room-type=${discount.roomType},data-code=${discount.code}"
-                                    th:text="${discount.code} + ' - Giảm ' + ${discount.value} + '% cho ' + ${discount.roomType}">
-                            </option>
-                        </select>
-                        <small class="text-muted">Chỉ hiển thị voucher phù hợp với loại phòng trong giỏ</small>
+                        <div class="input-group">
+                            <input type="text" 
+                                   id="discountCode" 
+                                   class="form-control" 
+                                   placeholder="Nhập mã giảm giá"
+                                   style="text-transform: uppercase;"
+                                   onkeypress="if(event.key === 'Enter') applyDiscount()">
+                            <button class="btn btn-outline-primary" type="button" onclick="applyDiscount()">
+                                <i class="fas fa-check"></i> Áp dụng
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="clearDiscount()">
+                                <i class="fas fa-times"></i> Xóa
+                            </button>
+                        </div>
+                        <small id="discountMessage" class="text-muted"></small>
                     </div>
                     
                     <hr>
@@ -196,16 +227,22 @@
                     <div class="d-flex justify-content-between mb-2">
                         <span>Tạm tính:</span>
                         <span id="subtotal">
-                            <span th:if="${!#lists.isEmpty(cartItems)}"
-                                  th:text="${#numbers.formatDecimal(#aggregates.sum(cartItems.![totalPrice]), 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                            <span th:if="${cartSummary != null && cartSummary.subtotal != null}"
+                                  th:text="${#numbers.formatDecimal(cartSummary.subtotal, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
                             </span>
-                            <span th:if="${#lists.isEmpty(cartItems)}">0 VNĐ</span>
+                            <span th:if="${cartSummary == null || cartSummary.subtotal == null}">0 VNĐ</span>
                         </span>
                     </div>
                     
-                    <div class="d-flex justify-content-between mb-2 text-success" id="discountRow" style="display: none !important;">
+                    <div class="d-flex justify-content-between mb-2 text-success" id="discountRow" 
+                         th:style="${cartSummary != null && cartSummary.discountAmount != null && cartSummary.discountAmount > 0} ? 'display: flex !important;' : 'display: none !important;'">
                         <span><i class="fas fa-tag"></i> Giảm giá:</span>
-                        <span id="discountAmount">- 0 VNĐ</span>
+                        <span id="discountAmount">
+                            <span th:if="${cartSummary != null && cartSummary.discountAmount != null}"
+                                  th:text="'- ' + ${#numbers.formatDecimal(cartSummary.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                            </span>
+                            <span th:if="${cartSummary == null || cartSummary.discountAmount == null}">- 0 VNĐ</span>
+                        </span>
                     </div>
                     
                     <hr>
@@ -213,12 +250,10 @@
                     <div class="d-flex justify-content-between mb-3">
                         <strong>Tổng cộng:</strong>
                         <strong class="text-primary" id="totalAmount">
-                                <span th:if="${!#lists.isEmpty(cartItems)}"
-                                      th:text="${#numbers.formatDecimal(#aggregates.sum(cartItems.![totalPrice]), 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
-                                </span>
-                            <span th:if="${#lists.isEmpty(cartItems)}">
-                                    0 VNĐ
-                                </span>
+                            <span th:if="${cartSummary != null && cartSummary.totalAmount != null}"
+                                  th:text="${#numbers.formatDecimal(cartSummary.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                            </span>
+                            <span th:if="${cartSummary == null || cartSummary.totalAmount == null}">0 VNĐ</span>
                         </strong>
                     </div>
                     <button class="btn btn-primary w-100 mb-2" onclick="checkout()"
@@ -298,41 +333,6 @@
         $('#confirmModal').modal('show');
     }
 
-    function removeFromCart(roomId) {
-        showConfirmModal(
-            'Xóa phòng',
-            'Bạn có chắc muốn xóa phòng này khỏi giỏ hàng?',
-            function () {
-                // Show loading
-                const btn = event.target.closest('button');
-                const originalText = btn.innerHTML;
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xóa...';
-
-                fetch('/cart/remove/' + roomId, {
-                    method: 'DELETE'
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Show success message
-                            showToast('success', 'Đã xóa phòng khỏi giỏ hàng');
-                            setTimeout(() => location.reload(), 1000);
-                        } else {
-                            showToast('error', data.message);
-                            btn.disabled = false;
-                            btn.innerHTML = originalText;
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error:', err);
-                        showToast('error', 'Có lỗi xảy ra!');
-                        btn.disabled = false;
-                        btn.innerHTML = originalText;
-                    });
-            }
-        );
-    }
 
     function clearCart() {
         showConfirmModal(
@@ -378,114 +378,195 @@
                 checkoutBtn.disabled = true;
                 checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo link thanh toán...';
 
-                // Get total amount from UI (after discount applied)
-                const totalText = document.getElementById('totalAmount').textContent.trim();
-                const totalAmount = parseFloat(totalText.replace(/[^0-9]/g, ''));
+                // Get discount code (if any)
+                const discountInput = document.getElementById('discountCode');
+                const discountCode = discountInput && discountInput.value ? discountInput.value.trim().toUpperCase() : null;
 
-                // Get selected discount ID (if any)
-                const discountSelect = document.getElementById('discountSelect');
-                const discountId = discountSelect ? discountSelect.value : null;
-
-                // Create payment request body
-                const requestBody = {
-                    productName: 'Đặt phòng khách sạn',
-                    description: 'Thanh toán đặt phòng',
-                    price: totalAmount,
-                    returnUrl: window.location.origin + '/payment/success',
-                    cancelUrl: window.location.origin + '/payment/cancel',
-                    selectedOrderIds: selectedOrderIds
-                };
-
-                // Add discountId if selected
-                if (discountId) {
-                    requestBody.discountId = parseInt(discountId);
-                }
-
-                console.log('Checkout request:', requestBody);
-
-                // Create payment link
-                fetch('/payment/create', {
+                // Get cart summary from backend first
+                fetch('/cart/summary', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(requestBody)
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        checkoutBtn.disabled = false;
-                        checkoutBtn.innerHTML = originalText;
-
-                        if (data.error === 0 && data.data && data.data.checkoutUrl) {
-                            // Redirect to PayOS checkout page
-                            window.location.href = data.data.checkoutUrl;
-                        } else {
-                            showToast('error', data.message || 'Không thể tạo link thanh toán!');
-                        }
+                    body: JSON.stringify({
+                        selectedOrderIds: selectedOrderIds,
+                        discountCode: discountCode
                     })
-                    .catch(err => {
-                        console.error('Error:', err);
-                        checkoutBtn.disabled = false;
-                        checkoutBtn.innerHTML = originalText;
-                        showToast('error', 'Có lỗi xảy ra khi tạo link thanh toán!');
+                })
+                .then(res => res.json())
+                .then(summary => {
+                    console.log('Cart summary for checkout:', summary);
+                    
+                    // Create payment request body with backend-calculated amount
+                    const requestBody = {
+                        productName: 'Đặt phòng khách sạn',
+                        description: 'Thanh toán đặt phòng',
+                        price: summary.totalAmount,
+                        returnUrl: window.location.origin + '/payment/success',
+                        cancelUrl: window.location.origin + '/payment/cancel',
+                        selectedOrderIds: selectedOrderIds
+                    };
+
+                    // Add discountCode if provided
+                    if (discountCode) {
+                        requestBody.discountCode = discountCode;
+                    }
+
+                    console.log('Checkout request:', requestBody);
+
+                    // Create payment link
+                    return fetch('/payment/create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestBody)
                     });
+                })
+                .then(res => res.json())
+                .then(data => {
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.innerHTML = originalText;
+
+                    if (data.error === 0 && data.data && data.data.checkoutUrl) {
+                        // Redirect to PayOS checkout page
+                        window.location.href = data.data.checkoutUrl;
+                    } else {
+                        showToast('error', data.message || 'Không thể tạo link thanh toán!');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.innerHTML = originalText;
+                    showToast('error', 'Có lỗi xảy ra khi tạo link thanh toán!');
+                });
             }
         );
     }
 
-    // Update total based on selected orders
-    function updateTotal() {
+    // Update total based on selected orders - Call backend API
+    function updateTotal(discountCode = null) {
         const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-        let subtotal = 0;
+        const selectedOrderIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
         
-        checkboxes.forEach(cb => {
-            subtotal += parseFloat(cb.getAttribute('data-total'));
+        // Use provided discount code or get from input
+        if (discountCode === null) {
+            const discountInput = document.getElementById('discountCode');
+            discountCode = discountInput && discountInput.value ? discountInput.value.trim().toUpperCase() : null;
+        }
+        
+        // Convert empty string to null
+        if (discountCode === '') {
+            discountCode = null;
+        }
+        
+        // Call backend API to calculate summary
+        fetch('/cart/summary', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                selectedOrderIds: selectedOrderIds,
+                discountCode: discountCode
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log('Cart summary from backend:', data);
+            
+            // Update UI with backend data
+            document.getElementById('selectedCount').textContent = data.selectedOrders || 0;
+            document.getElementById('subtotal').textContent = (data.subtotal || 0).toLocaleString('vi-VN') + ' VNĐ';
+            
+            const discountRow = document.getElementById('discountRow');
+            const discountAmount = document.getElementById('discountAmount');
+            const totalElement = document.getElementById('totalAmount');
+            const discountMessage = document.getElementById('discountMessage');
+            
+            // Handle discount message and input state
+            const discountInput = document.getElementById('discountCode');
+            const applyBtn = document.querySelector('.btn-outline-primary');
+            const clearBtn = document.querySelector('.btn-outline-secondary');
+            
+            if (data.discountMessage) {
+                discountMessage.textContent = data.discountMessage;
+                discountMessage.className = data.discountValid ? 'text-success' : 'text-danger';
+                
+                // If discount is valid, disable input and apply button
+                if (data.discountValid) {
+                    discountInput.disabled = true;
+                    applyBtn.disabled = true;
+                    clearBtn.disabled = false;
+                } else {
+                    discountInput.disabled = false;
+                    applyBtn.disabled = false;
+                    clearBtn.disabled = false;
+                }
+            } else {
+                discountMessage.textContent = '';
+                discountMessage.className = 'text-muted';
+                discountInput.disabled = false;
+                applyBtn.disabled = false;
+                clearBtn.disabled = false;
+            }
+            
+            if (data.discountAmount && data.discountAmount > 0) {
+                discountRow.style.setProperty('display', 'flex', 'important');
+                discountAmount.textContent = '- ' + data.discountAmount.toLocaleString('vi-VN') + ' VNĐ';
+            } else {
+                discountRow.style.display = 'none';
+                discountAmount.textContent = '- 0 VNĐ';
+            }
+            
+            totalElement.textContent = (data.totalAmount || 0).toLocaleString('vi-VN') + ' VNĐ';
+        })
+        .catch(err => {
+            console.error('Error calculating cart summary:', err);
         });
-        
-        // Update selected count
-        document.getElementById('selectedCount').textContent = checkboxes.length;
-        
-        // Update subtotal
-        document.getElementById('subtotal').textContent = subtotal.toLocaleString('vi-VN') + ' VNĐ';
-        
-        // Reapply discount if any
-        applyDiscount();
     }
 
-    // Apply discount calculation
+    // Apply discount - Validate and apply discount code
     function applyDiscount() {
-        const select = document.getElementById('discountSelect');
-        const selectedOption = select.options[select.selectedIndex];
-        const discountRow = document.getElementById('discountRow');
-        const discountAmount = document.getElementById('discountAmount');
-        const totalElement = document.getElementById('totalAmount');
+        const discountInput = document.getElementById('discountCode');
+        const discountCode = discountInput.value.trim().toUpperCase();
         
-        // Get subtotal from selected orders
-        const subtotalText = document.getElementById('subtotal').textContent.trim();
-        const subtotal = parseFloat(subtotalText.replace(/[^0-9]/g, ''));
-        
-        if (!selectedOption.value) {
-            // No discount selected - Reset to original
-            discountRow.style.display = 'none';
-            discountAmount.textContent = '- 0 VNĐ';
-            totalElement.textContent = subtotalText;
-            console.log('No discount selected');
+        if (!discountCode) {
+            document.getElementById('discountMessage').textContent = 'Vui lòng nhập mã giảm giá';
+            document.getElementById('discountMessage').className = 'text-warning';
             return;
         }
         
-        // Calculate discount
-        const discountPercent = parseFloat(selectedOption.getAttribute('data-value'));
-        const discountValue = Math.round(subtotal * discountPercent / 100);
+        // Update discount input to uppercase
+        discountInput.value = discountCode;
         
-        // Ensure final total is not negative
-        const finalTotal = Math.max(0, subtotal - discountValue);
+        // Call updateTotal with discount code
+        updateTotal(discountCode);
+    }
+    
+    // Clear discount - Reset to original price and enable input
+    function clearDiscount() {
+        const discountInput = document.getElementById('discountCode');
+        const discountMessage = document.getElementById('discountMessage');
+        const applyBtn = document.querySelector('.btn-outline-primary');
         
-        // Update UI
-        discountRow.style.setProperty('display', 'flex', 'important');
-        discountAmount.textContent = '- ' + discountValue.toLocaleString('vi-VN') + ' VNĐ';
-        totalElement.textContent = finalTotal.toLocaleString('vi-VN') + ' VNĐ';
+        // Clear input
+        discountInput.value = '';
         
-        console.log('Discount applied:', discountPercent + '%', 'Amount:', discountValue, 'Final:', finalTotal);
+        // Enable input and apply button
+        discountInput.disabled = false;
+        applyBtn.disabled = false;
+        
+        // Clear message
+        discountMessage.textContent = '';
+        discountMessage.className = 'text-muted';
+        
+        // Focus on input for user to enter new code
+        discountInput.focus();
+        
+        // Update total without discount (pass empty string)
+        updateTotal('');
     }
 
     // Toast notification
@@ -537,23 +618,64 @@
         }, 4000);
     }
 
-    // Add animation keyframes
-    const style = document.createElement('style');
-    style.textContent = `
-            @keyframes slideInRight {
-                from { opacity: 0; transform: translateX(100px); }
-                to { opacity: 1; transform: translateX(0); }
+    // Auto-save order notes with debounce
+    let noteTimeouts = {};
+    
+    function setupNoteAutoSave() {
+        document.querySelectorAll('.order-note').forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                const orderId = this.getAttribute('data-order-id');
+                const note = this.value.trim();
+                
+                // Clear existing timeout for this order
+                if (noteTimeouts[orderId]) {
+                    clearTimeout(noteTimeouts[orderId]);
+                }
+                
+                // Set new timeout to save after 1 second of no typing
+                noteTimeouts[orderId] = setTimeout(() => {
+                    saveOrderNote(orderId, note);
+                }, 1000);
+            });
+        });
+    }
+    
+    function saveOrderNote(orderId, note) {
+        console.log('Saving note for order:', orderId);
+        
+        fetch('/cart/update-note', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                orderId: parseInt(orderId),
+                note: note || null
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Note saved successfully');
+                // Optional: Show subtle success indicator
+            } else {
+                console.error('Failed to save note:', data.message);
             }
-            @keyframes slideOutRight {
-                from { opacity: 1; transform: translateX(0); }
-                to { opacity: 0; transform: translateX(100px); }
-            }
-        `;
-    document.head.appendChild(style);
+        })
+        .catch(err => {
+            console.error('Error saving note:', err);
+        });
+    }
 
     // Load cart badge on page load
     document.addEventListener('DOMContentLoaded', function () {
         console.log('Cart page loaded, updating cart badge...');
+
+        // Calculate cart summary from backend on page load
+        updateTotal();
+        
+        // Setup auto-save for order notes
+        setupNoteAutoSave();
 
         // Wait a bit for header script to load
         setTimeout(function () {
