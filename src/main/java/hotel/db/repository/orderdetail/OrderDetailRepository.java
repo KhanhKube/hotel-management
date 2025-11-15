@@ -1,7 +1,6 @@
 package hotel.db.repository.orderdetail;
 
 import hotel.db.entity.OrderDetail;
-import hotel.db.entity.Room;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
