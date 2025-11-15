@@ -199,94 +199,99 @@
                                                 placeholder="Nhập mô tả chi tiết về phòng..."></textarea>
                                         </div>
 
-                                        <!-- Vật dụng phòng -->
-                                        <div class="form-group">
-                                            <label>Vật dụng phòng:</label>
-                                            <table class="table table-bordered table-sm" style="width: auto;">
-                                                <thead>
-                                                    <tr>
-                                                        <th style="width: 250px;">Tên vật dụng</th>
-                                                        <th style="width: 120px;" class="text-center">Số lượng</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr th:each="furnishing, iterStat : ${furnishings}">
-                                                        <td th:text="${furnishing.name}"></td>
-                                                        <td>
-                                                            <input type="hidden" 
-                                                                   name="furnishingIds" 
-                                                                   th:value="${furnishing.furnishingId}">
-                                                            <input type="number" 
-                                                                   class="form-control form-control-sm" 
-                                                                   name="furnishingQuantities"
-                                                                   th:value="${furnishing.roomQuantity}"
-                                                                   min="0" 
-                                                                   placeholder="0">
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                            <small class="form-text text-muted">
-                                                Nhập số lượng vật dụng mặc định cho phòng này.
-                                            </small>
-                                        </div>
-                                        <!-- Upload ảnh -->
-                                        <div class="form-group">
-                                            <label for="imageFiles">
-                                                Ảnh phòng:
-                                            </label>
-                                            <input type="file" id="imageFiles" name="imageFiles"
-                                                class="form-control-file" accept="image/*" multiple>
-                                            <small class="form-text text-muted">
-                                                Chọn nhiều ảnh (tối đa 10MB/ảnh). Định dạng: JPG, PNG, GIF
-                                            </small>
-                                        </div>
+                                        <!-- Layout 2 cột: Vật dụng bên trái, Ảnh bên phải -->
+                                        <div class="row">
+                                            <!-- Cột trái: Vật dụng phòng -->
+                                            <div class="col-md-5">
+                                                <div class="form-group">
+                                                    <label>Vật dụng phòng:</label>
+                                                    <table class="table table-bordered table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Tên vật dụng</th>
+                                                                <th style="width: 100px;" class="text-center">Số lượng</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr th:each="furnishing, iterStat : ${furnishings}">
+                                                                <td th:text="${furnishing.name}"></td>
+                                                                <td>
+                                                                    <input type="hidden" 
+                                                                           name="furnishingIds" 
+                                                                           th:value="${furnishing.furnishingId}">
+                                                                    <input type="number" 
+                                                                           class="form-control form-control-sm" 
+                                                                           name="furnishingQuantities"
+                                                                           th:value="${furnishing.roomQuantity}"
+                                                                           min="0" 
+                                                                           placeholder="0">
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <small class="form-text text-muted">
+                                                        Nhập số lượng vật dụng mặc định cho phòng này.
+                                                    </small>
+                                                </div>
+                                            </div>
 
-                                        <!-- Preview ảnh mới chọn -->
-                                        <div class="form-group" id="imagePreviewContainer" style="display: none;">
-                                            <label>Xem trước:</label>
-                                            <div class="row" id="imagePreview"></div>
-                                        </div>
+                                            <!-- Cột phải: Upload ảnh -->
+                                            <div class="col-md-7">
+                                                <!-- Upload ảnh mới -->
+                                                <div class="form-group">
+                                                    <label for="imageFiles">Ảnh phòng:</label>
+                                                    <input type="file" id="imageFiles" name="imageFiles"
+                                                        class="form-control-file" accept="image/*" multiple>
+                                                    <small class="form-text text-muted">
+                                                        Chọn nhiều ảnh (tối đa 10MB/ảnh). Định dạng: JPG, PNG, GIF
+                                                    </small>
+                                                </div>
 
-                                        <!-- Ảnh hiện tại (nếu edit) -->
-                                        <div th:if="${room.roomId != null}" class="form-group">
-                                            <label>
-                                                Ảnh hiện tại:
-                                            </label>
+                                                <!-- Preview ảnh mới chọn -->
+                                                <div class="form-group" id="imagePreviewContainer" style="display: none;">
+                                                    <label>Xem trước:</label>
+                                                    <div class="row" id="imagePreview"></div>
+                                                </div>
 
-                                            <!-- Nếu có ảnh -->
-                                            <div th:if="${images != null and !images.empty}" class="row">
-                                                <div th:each="image : ${images}" class="col-md-3 mb-3">
-                                                    <div class="card">
-                                                        <img th:src="@{${image.roomImageUrl}}" class="card-img-top"
-                                                            style="height: 150px; object-fit: cover;" alt="Room image">
-                                                        <div class="card-body p-2 text-center">
-                                                            <small class="text-muted">ID: <span
-                                                                    th:text="${image.roomImageId}"></span></small><br>
-                                                            <form
-                                                                th:action="@{/hotel-management/room/image/delete/{id}(id=${image.roomImageId})}"
-                                                                method="post" style="display: inline;"
-                                                                onsubmit="return confirm('Bạn có chắc muốn xóa ảnh này?');">
-                                                                <input type="hidden" name="roomId"
-                                                                    th:value="${room.roomId}">
-                                                                <button type="submit"
-                                                                    class="btn btn-danger btn-sm mt-2">
-                                                                    <i class="mdi mdi-delete"></i> Xóa
-                                                                </button>
-                                                            </form>
+                                                <!-- Ảnh hiện tại (nếu edit) -->
+                                                <div th:if="${room.roomId != null}" class="form-group">
+                                                    <label>Ảnh hiện tại:</label>
+
+                                                    <!-- Nếu có ảnh -->
+                                                    <div th:if="${images != null and !images.empty}" class="row" id="existingImagesContainer">
+                                                        <div th:each="image : ${images}" class="col-md-6 mb-3" 
+                                                             th:id="'image-card-' + ${image.roomImageId}"
+                                                             th:data-image-id="${image.roomImageId}">
+                                                            <div class="card">
+                                                                <img th:src="@{${image.roomImageUrl}}" class="card-img-top"
+                                                                    style="height: 150px; object-fit: cover;" alt="Room image">
+                                                                <div class="card-body p-2 text-center">
+                                                                    <small class="text-muted">ID: <span
+                                                                            th:text="${image.roomImageId}"></span></small><br>
+                                                                    <button type="button"
+                                                                            class="btn btn-danger btn-sm mt-2 delete-image-btn"
+                                                                            th:data-image-id="${image.roomImageId}"
+                                                                            onclick="markImageForDeletion(this)">
+                                                                        <i class="mdi mdi-delete"></i> Xóa
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Nếu không có ảnh -->
+                                                    <div th:if="${images == null or images.empty}">
+                                                        <div class="text-center text-muted py-4">
+                                                            <i class="mdi mdi-image-off" style="font-size: 48px;"></i>
+                                                            <p>Chưa có ảnh</p>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <!-- Nếu không có ảnh -->
-                                            <div th:if="${images == null or images.empty}" class="row">
-                                                <div class="col-12 text-center text-muted py-4">
-                                                    <i class="mdi mdi-image-off" style="font-size: 48px;"></i>
-                                                    <p>Chưa có ảnh</p>
-                                                </div>
-                                            </div>
                                         </div>
+                                        
+                                        <!-- Hidden input để lưu danh sách ảnh cần xóa -->
+                                        <input type="hidden" id="imagesToDelete" name="imagesToDelete" value="" />
                                         <!-- Buttons -->
                                         <div class="form-group mt-4">
                                             <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
@@ -358,6 +363,26 @@
                 container.style.display = 'none';
             }
         });
+        
+        // Danh sách ảnh cần xóa
+        let imagesToDelete = [];
+        
+        // Function đánh dấu ảnh để xóa (ẩn đi)
+        function markImageForDeletion(button) {
+            const imageId = button.getAttribute('data-image-id');
+            const card = document.getElementById('image-card-' + imageId);
+            
+            if (card) {
+                // Thêm vào danh sách xóa
+                imagesToDelete.push(imageId);
+                
+                // Ẩn card
+                card.style.display = 'none';
+                
+                // Cập nhật hidden input
+                document.getElementById('imagesToDelete').value = imagesToDelete.join(',');
+            }
+        }
 
     </script>
 

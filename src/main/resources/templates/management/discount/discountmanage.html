@@ -249,7 +249,7 @@
                                             <!-- Previous -->
                                             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                                 <a class="page-link" th:href="@{/hotel-management/discount(page=${currentPage - 1}, pageSize=${pageSize},
-                                                search=${param.search}, discountType=${param.discountType}, roomType=${param.roomType},
+                                                search=${param.search}, roomType=${param.roomType},
                                                 status=${param.status}, sortBy=${param.sortBy})}">
                                                     Trước
                                                 </a>
@@ -259,14 +259,14 @@
                                             <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                                 th:classappend="${i == currentPage} ? 'active'">
                                                 <a class="page-link" th:href="@{/hotel-management/discount(page=${i}, pageSize=${pageSize},
-                                                search=${param.search}, discountType=${param.discountType}, roomType=${param.roomType},
+                                                search=${param.search}, roomType=${param.roomType},
                                                 status=${param.status}, sortBy=${param.sortBy})}" th:text="${i + 1}">1</a>
                                             </li>
 
                                             <!-- Next -->
                                             <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                                                 <a class="page-link" th:href="@{/hotel-management/discount(page=${currentPage + 1}, pageSize=${pageSize},
-                                                search=${param.search}, discountType=${param.discountType}, roomType=${param.roomType},
+                                                search=${param.search}, roomType=${param.roomType},
                                                 status=${param.status}, sortBy=${param.sortBy})}">
                                                     Sau
                                                 </a>

@@ -66,24 +66,10 @@
                                                 </h5>
                                                 <table class="table table-borderless">
                                                     <tr>
-                                                        <td style="width: 40%;"><i class="mdi mdi-format-list-bulleted-type"></i> <strong>Loại giảm giá:</strong></td>
-                                                        <td>
-                                                            <span th:if="${discount.discountType == 'PERCENT'}" class="badge badge-success">
-                                                                <i class="mdi mdi-percent"></i> Phần trăm
-                                                            </span>
-                                                            <span th:if="${discount.discountType == 'AMOUNT'}" class="badge badge-info">
-                                                                <i class="mdi mdi-cash"></i> Số tiền cố định
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><i class="mdi mdi-currency-usd"></i> <strong>Giá trị:</strong></td>
+                                                        <td style="width: 40%;"><i class="mdi mdi-currency-usd"></i> <strong>Giá trị giảm:</strong></td>
                                                         <td>
                                                             <span class="text-primary" style="font-size: 18px; font-weight: bold;">
-                                                                <span th:if="${discount.discountType == 'PERCENT'}" 
-                                                                      th:text="${discount.value + '%'}"></span>
-                                                                <span th:if="${discount.discountType == 'AMOUNT'}" 
-                                                                      th:text="${#numbers.formatDecimal(discount.value, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></span>
+                                                                <span th:text="${#numbers.formatDecimal(discount.value, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></span>
                                                             </span>
                                                         </td>
                                                     </tr>

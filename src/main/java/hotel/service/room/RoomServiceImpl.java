@@ -27,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -65,12 +66,28 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<FurnishingFormDto> getFurnishingsForForm(Integer roomId) {
-        // Lấy tất cả vật dụng trong khách sạn (chỉ để hiển thị tên)
+        return getFurnishingsForForm(roomId, null, null);
+    }
+
+    @Override
+    public List<FurnishingFormDto> getFurnishingsForForm(Integer roomId,
+                                                         List<Integer> furnishingIds,
+                                                         List<Integer> quantities) {
+
+        // Lấy tất cả vật dụng trong khách sạn
         List<Furnishing> allFurnishings = furnishingRepository.findFurnishingsByIsDeletedFalse();
 
-        // Lấy vật dụng hiện có của phòng (nếu đang edit)
+        // Tạo map từ form data (nếu có - khi validation fail)
+        Map<Integer, Integer> formDataMap = new HashMap<>();
+        if (furnishingIds != null && quantities != null && furnishingIds.size() == quantities.size()) {
+            for (int i = 0; i < furnishingIds.size(); i++) {
+                formDataMap.put(furnishingIds.get(i), quantities.get(i));
+            }
+        }
+
+        // Nếu không có form data, lấy từ DB (khi edit)
         Map<Integer, Integer> roomFurnishingMap = new HashMap<>();
-        if (roomId != null) {
+        if (formDataMap.isEmpty() && roomId != null) {
             List<RoomFurnishing> roomFurnishings = roomFurnishingRepository.findByRoomIdAndIsDeletedFalse(roomId);
             roomFurnishingMap = roomFurnishings.stream()
                     .collect(Collectors.toMap(
@@ -85,8 +102,14 @@ public class RoomServiceImpl implements RoomService {
             FurnishingFormDto dto = new FurnishingFormDto();
             dto.setFurnishingId(furnishing.getFurnishingId());
             dto.setName(furnishing.getName());
-            // Số lượng vật dụng của phòng (mặc định 0 nếu chưa có)
-            dto.setRoomQuantity(roomFurnishingMap.getOrDefault(furnishing.getFurnishingId(), 0));
+
+            // Ưu tiên: form data > DB data > 0
+            if (!formDataMap.isEmpty()) {
+                dto.setRoomQuantity(formDataMap.getOrDefault(furnishing.getFurnishingId(), 0));
+            } else {
+                dto.setRoomQuantity(roomFurnishingMap.getOrDefault(furnishing.getFurnishingId(), 0));
+            }
+
             result.add(dto);
         }
 
@@ -194,7 +217,7 @@ public class RoomServiceImpl implements RoomService {
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
+                Arrays.asList("PENDING", "CONFIRMED", "OCCUPIED", "CHECKED_IN", "CHECKED_OUT", "COMPLETED")
         );
 
         List<RoomMaintenance> maintenances = roomMaintenanceRepository.findMaintenancesByRoomAndDateRange(
@@ -238,7 +261,7 @@ public class RoomServiceImpl implements RoomService {
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
+                Arrays.asList("PENDING", "CONFIRMED", "OCCUPIED", "CHECKED_IN", "CHECKED_OUT", "COMPLETED")
         );
 
         List<RoomMaintenance> maintenances = roomMaintenanceRepository.findMaintenancesByRoomAndDateRange(
@@ -336,10 +359,14 @@ public class RoomServiceImpl implements RoomService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             LocalDateTime filterStartDate = LocalDate.parse(startDate, formatter).atTime(14, 0); //Thêm nghiệp vụ để để filter chuẩn phòng khách có thể book.
             LocalDateTime filterEndDate = LocalDate.parse(endDate, formatter).atTime(12, 0);
-            List<Integer> roomIdList = orderDetailRepository.findRoomIdsByFilterEndateAndStatdate(filterStartDate, filterEndDate);
-            rooms = rooms.stream().filter(x -> roomIdList.contains(x.getRoomId()))
-                    .collect(Collectors.toList());
 
+            // Lấy danh sách room_id có booking CONFLICT với filter date
+            List<Integer> bookedRoomIds = orderDetailRepository.findRoomIdsByFilterEndateAndStatdate(filterStartDate, filterEndDate);
+
+            // LOẠI BỎ các phòng đã có booking conflict (chỉ giữ lại phòng trống)
+            rooms = rooms.stream()
+                    .filter(x -> !bookedRoomIds.contains(x.getRoomId()))
+                    .collect(Collectors.toList());
         }
         List<RoomBookListDto> BookList = rooms.stream() //Lấy Listcác phòng đã được lọc field qua Dto
                 .filter(x -> !"Dừng hoạt động".equals(x.getSystemStatus()))
@@ -590,13 +617,11 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public HashMap<String, String> createOrUpdateRoom(Room room, List<org.springframework.web.multipart.MultipartFile> imageFiles,
+    public HashMap<String, String> createOrUpdateRoom(Room room, List<MultipartFile> imageFiles,
                                                       List<Integer> furnishingIds, List<Integer> furnishingQuantities) {
         HashMap<String, String> result = new HashMap<>();
 
         try {
-            log.info("=== CREATE/UPDATE ROOM ===");
-            log.info("Room ID: {}, Room Number: {}", room.getRoomId(), room.getRoomNumber());
 
             boolean isUpdate = room.getRoomId() != null;
 
@@ -651,7 +676,7 @@ public class RoomServiceImpl implements RoomService {
                 int successCount = 0;
                 int failCount = 0;
 
-                for (org.springframework.web.multipart.MultipartFile file : imageFiles) {
+                for (MultipartFile file : imageFiles) {
                     if (!file.isEmpty()) {
                         try {
                             // Upload lên Cloudinary
@@ -669,7 +694,6 @@ public class RoomServiceImpl implements RoomService {
                     }
                 }
 
-                log.info("Image upload completed: {} success, {} failed", successCount, failCount);
             }
 
             // Lưu vật dụng của phòng
@@ -1049,18 +1073,25 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public void disableRoom(Integer roomId, String disableDate, String description, Integer createdBy) {
-        log.info("=== Disabling room {} from date: {} ===", roomId, disableDate);
+    public void disableRoom(Integer roomId, String disableStartDate, String disableEndDate, String description, Integer createdBy) {
+        log.info("=== Disabling room {} from {} to {} ===", roomId, disableStartDate, disableEndDate);
 
-        // Parse ngày disable
+        // Parse ngày bắt đầu và kết thúc
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        LocalDate disableDateParsed = LocalDate.parse(disableDate, formatter);
-        LocalDateTime disableDateTime = disableDateParsed.atTime(14, 0); // 14:00
+        LocalDate startDateParsed = LocalDate.parse(disableStartDate, formatter);
+        LocalDate endDateParsed = LocalDate.parse(disableEndDate, formatter);
+        LocalDateTime disableStartDateTime = startDateParsed.atTime(14, 0); // 14:00
+        LocalDateTime disableEndDateTime = endDateParsed.atTime(12, 0); // 12:00
 
-        // Tìm tất cả bookings từ ngày disable trở đi
-        List<OrderDetail> bookingsToCancel = orderDetailRepository.findBookingsToCancel(roomId, disableDateTime);
+        // Tìm tất cả bookings bị TRÙNG với khoảng thời gian dừng hoạt động
+        // Logic: booking.startDate < disableEndDate AND booking.endDate > disableStartDate
+        List<OrderDetail> bookingsToCancel = orderDetailRepository.findBookingsToCancel(
+                roomId,
+                disableStartDateTime,
+                disableEndDateTime
+        );
 
-        log.info("Found {} bookings to cancel", bookingsToCancel.size());
+        log.info("Found {} bookings overlapping with disable period", bookingsToCancel.size());
 
         // Lấy thông tin phòng
         Room room = roomRepository.findById(roomId)
@@ -1068,7 +1099,11 @@ public class RoomServiceImpl implements RoomService {
 
         // Hủy từng booking và gửi email
         for (OrderDetail booking : bookingsToCancel) {
-            log.info("Cancelling booking ID: {}, User ID: {}", booking.getOrderDetailId(), booking.getUserId());
+            log.info("Cancelling booking ID: {}, User ID: {}, Period: {} to {}",
+                    booking.getOrderDetailId(),
+                    booking.getUserId(),
+                    booking.getStartDate(),
+                    booking.getEndDate());
 
             // Update status sang CANCELLED
             booking.setStatus("CANCELLED");
@@ -1091,29 +1126,71 @@ public class RoomServiceImpl implements RoomService {
                         room.getRoomNumber(),
                         startDateStr,
                         endDateStr,
-                        description != null ? description : "Phòng tạm ngừng hoạt động"
+                        description != null ? description : "Phòng tạm ngừng hoạt động do bảo trì khẩn cấp"
                 );
 
                 log.info("Sent cancellation email to: {}", user.getEmail());
             }
         }
 
-        // Lưu vào room_maintenance với endDate = 10/10/2099
-        LocalDateTime endDateTime = LocalDate.of(2099, 10, 10).atTime(12, 0);
+        // Lưu vào room_maintenance với ngày bắt đầu và kết thúc
         RoomMaintenance maintenance = new RoomMaintenance();
         maintenance.setRoomId(roomId);
-        maintenance.setStartDate(disableDateTime);
-        maintenance.setEndDate(endDateTime);
+        maintenance.setStartDate(disableStartDateTime);
+        maintenance.setEndDate(disableEndDateTime);
         maintenance.setStatus("Dừng hoạt động");
         maintenance.setDescription(description != null ? description : "Phòng dừng hoạt động");
         maintenance.setCreateBy(createdBy);
         roomMaintenanceRepository.save(maintenance);
 
-        // Update room systemStatus
-        room.setSystemStatus("Dừng hoạt động");
-        roomRepository.save(room);
+        // Kiểm tra ngày bắt đầu và thời gian để cập nhật status phòng
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = now.toLocalDate();
+        LocalDate startDate = disableStartDateTime.toLocalDate();
+
+        if (startDate.equals(today)) {
+            // Ngày bắt đầu = hôm nay
+            if (now.getHour() >= 14) {
+                // Đã qua 14:00 → Chuyển ngay sang "Đã dừng hoạt động"
+                room.setStatus("Bảo trì khẩn");
+                room.setSystemStatus("Đã dừng hoạt động");
+                roomRepository.save(room);
+                log.info("Room {} status updated to 'Đã dừng hoạt động' immediately (today after 14:00)", roomId);
+            } else {
+                // Chưa đến 14:00 → Giữ status cũ, chỉ đổi systemStatus
+                room.setSystemStatus("Sắp dừng hoạt động");
+                roomRepository.save(room);
+                log.info("Room {} systemStatus set to 'Sắp dừng hoạt động' (today before 14:00, job will activate at 14:00)", roomId);
+            }
+        } else if (startDate.isAfter(today)) {
+            // Ngày bắt đầu > hôm nay → Giữ status cũ, chỉ đổi systemStatus
+            room.setSystemStatus("Sắp dừng hoạt động");
+            roomRepository.save(room);
+            log.info("Room {} systemStatus set to 'Sắp dừng hoạt động' (will activate on {} at 14:00)", roomId, startDate);
+        }
 
         log.info("Room {} disabled successfully. Cancelled {} bookings", roomId, bookingsToCancel.size());
+    }
+
+    @Override
+    public List<RoomMaintenance> getMaintenanceByRoomId(Integer roomId) {
+        return roomMaintenanceRepository.findByRoomIdAndIsDeletedFalseOrderByStartDateDesc(roomId);
+    }
+
+    @Override
+    public RoomMaintenance getMaintenanceById(Integer maintenanceId) {
+        return roomMaintenanceRepository.findById(maintenanceId).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public void deleteMaintenance(Integer maintenanceId) {
+        RoomMaintenance maintenance = roomMaintenanceRepository.findByMaintenanceIdAndIsDeletedFalse(maintenanceId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch bảo trì"));
+
+        // Soft delete
+        maintenance.setIsDeleted(true);
+        roomMaintenanceRepository.save(maintenance);
     }
 
     @Override

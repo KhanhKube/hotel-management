@@ -13,19 +13,19 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         /* Style cho input ngày bảo trì và dừng hoạt động */
-        #checkInDate, #checkOutDate, #disableDate {
+        #checkInDate, #checkOutDate, #disableStartDate, #disableEndDate {
             background-color: #2c2e33 !important;
             border: 1px solid #2c2e33 !important;
             color: #ffffff !important;
         }
 
-        #checkInDate:focus, #checkOutDate:focus, #disableDate:focus {
+        #checkInDate:focus, #checkOutDate:focus, #disableStartDate:focus, #disableEndDate:focus {
             background-color: #2c2e33 !important;
             border-color: #2196f3 !important;
             color: #ffffff !important;
         }
 
-        #checkInDate::placeholder, #checkOutDate::placeholder, #disableDate::placeholder {
+        #checkInDate::placeholder, #checkOutDate::placeholder, #disableStartDate::placeholder, #disableEndDate::placeholder {
             color: #6c7293 !important;
         }
 
@@ -106,7 +106,12 @@
                     <div class="col-12 grid-margin">
                         <div class="card">
                             <div class="card-body">
-                                <h1>Chỉnh sửa trạng thái phòng</h1>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h1 class="mb-0">Chỉnh sửa trạng thái phòng</h1>
+                                    <a th:href="@{/hotel-management/room}" class="btn btn-outline-secondary">
+                                        <i class="mdi mdi-arrow-left"></i> Quay lại
+                                    </a>
+                                </div>
                                 <!-- Form chọn ngày -->
                                 <div class="row mb-3">
                                     <div class="col-md-6">
@@ -134,7 +139,10 @@
                                             <input type="hidden" name="roomId" th:value="${roomId}">
 
                                             <label class="form-label fw-bold">Ngày bắt đầu dừng hoạt động:</label>
-                                            <input type="text" id="disableDate" name="checkInDate" class="form-control"
+                                            <input type="text" id="disableStartDate" name="checkInDate" class="form-control"
+                                                   required><br>
+                                            <label class="form-label fw-bold">Ngày kết thúc dừng hoạt động:</label>
+                                            <input type="text" id="disableEndDate" name="checkOutDate" class="form-control"
                                                    required><br>
                                             <label>Lý do dừng hoạt động:</label>
                                             <input type="text" name="des" class="form-control"><br>
@@ -142,6 +150,60 @@
                                             <a th:href="@{/hotel-management/room}" class="btn btn-secondary">Hủy</a>
                                         </form>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card hiển thị danh sách maintenance -->
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">Lịch sử bảo trì phòng</h4>
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Số phòng</th>
+                                                <th>Ngày bắt đầu</th>
+                                                <th>Ngày kết thúc</th>
+                                                <th>Trạng thái</th>
+                                                <th>Mô tả</th>
+                                                <th>Người tạo</th>
+                                                <th>Ngày tạo</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="maintenance : ${maintenanceList}">
+                                                <td th:text="${maintenance.maintenanceId}"></td>
+                                                <td th:text="${maintenance.roomId}"></td>
+                                                <td th:text="${#temporals.format(maintenance.startDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                                <td th:text="${#temporals.format(maintenance.endDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                                <td>
+                                                    <span th:if="${maintenance.status == 'Đã giao'}" class="badge badge-success">Đã giao</span>
+                                                    <span th:if="${maintenance.status == 'Dừng hoạt động'}" class="badge badge-danger">Dừng hoạt động</span>
+                                                    <span th:if="${maintenance.status != 'Đã giao' and maintenance.status != 'Dừng hoạt động'}" 
+                                                          class="badge badge-warning" th:text="${maintenance.status}"></span>
+                                                </td>
+                                                <td th:text="${maintenance.description ?: 'N/A'}"></td>
+                                                <td th:text="${maintenance.createBy}"></td>
+                                                <td th:text="${#temporals.format(maintenance.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                                                <td>
+                                                    <a th:href="@{/hotel-management/room/maintenance/delete/{id}(id=${maintenance.maintenanceId})}" 
+                                                       class="btn btn-success btn-sm">
+                                                        <i class="mdi mdi-check-circle"></i> Hoạt động lại phòng
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${maintenanceList == null or maintenanceList.isEmpty()}">
+                                                <td colspan="9" class="text-center text-muted">Chưa có lịch sử bảo trì</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -267,12 +329,40 @@
             }
         });
 
-        // Initialize disable date picker (form dừng hoạt động)
-        const disableDatePicker = flatpickr("#disableDate", {
+        // Initialize disable start date picker (form dừng hoạt động)
+        const disableStartDatePicker = flatpickr("#disableStartDate", {
             dateFormat: "d/m/Y",
             minDate: "today",
             maxDate: maxDate,
-            disable: disabledDatesForDisable, // CHỈ disable ngày có khách ở, KHÔNG disable ngày bảo trì
+            allowInput: false,
+            clickOpens: true,
+            onChange: function (selectedDates) {
+                if (selectedDates.length > 0) {
+                    const startDate = selectedDates[0];
+                    const minEndDate = new Date(startDate);
+                    minEndDate.setDate(minEndDate.getDate() + 1);
+                    
+                    disableEndDatePicker.set('minDate', minEndDate);
+                }
+            },
+            locale: {
+                firstDayOfWeek: 1,
+                weekdays: {
+                    shorthand: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                    longhand: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']
+                },
+                months: {
+                    shorthand: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
+                    longhand: ['', '', '', '', '', '', '', '', '', '', '', '']
+                }
+            }
+        });
+        
+        // Initialize disable end date picker
+        const disableEndDatePicker = flatpickr("#disableEndDate", {
+            dateFormat: "d/m/Y",
+            minDate: "today",
+            maxDate: maxDate,
             allowInput: false,
             clickOpens: true,
             locale: {
