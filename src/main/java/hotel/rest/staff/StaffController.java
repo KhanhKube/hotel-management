@@ -1,5 +1,6 @@
 package hotel.rest.staff;
 
+import hotel.db.dto.staff.StaffListDto;
 import hotel.db.entity.User;
 import hotel.db.repository.user.UserRepository;
 import hotel.service.receptionist.ReceptionistService;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/hotel-management/staff")
@@ -39,7 +41,7 @@ public class StaffController {
             @RequestParam(defaultValue = "10") int pageSize,
             Model model) {
         
-        Page<hotel.db.dto.staff.StaffListDto> staffPage = staffService.getStaffListForManagement(
+        Page<StaffListDto> staffPage = staffService.getStaffListForManagement(
                 search, role, gender, status, sortBy, page, pageSize);
 
         model.addAttribute("listUser", staffPage.getContent());
@@ -59,7 +61,7 @@ public class StaffController {
 
     @PostMapping("/create")
     public String createStaff(@ModelAttribute User user, Model model, 
-                             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+                             RedirectAttributes redirectAttributes) {
         String errorMessage = staffService.createStaffFromForm(user);
         if (errorMessage != null) {
             model.addAttribute("errorMessage", errorMessage);
@@ -95,7 +97,7 @@ public class StaffController {
 
     @PostMapping("/edit/{id}")
     public String updateStaff(@PathVariable Integer id, @ModelAttribute User user, Model model,
-                              org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+                              RedirectAttributes redirectAttributes) {
         user.setUserId(id);
         String errorMessage = staffService.updateStaffFromForm(user);
         if (errorMessage != null) {

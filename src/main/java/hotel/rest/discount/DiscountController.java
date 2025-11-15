@@ -1,9 +1,11 @@
 package hotel.rest.discount;
 
+import hotel.db.dto.discount.DiscountResponseDto;
 import hotel.db.entity.Discount;
 import hotel.db.repository.discount.DiscountRepository;
 import hotel.service.discount.DiscountService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,7 +29,7 @@ public class DiscountController {
             @RequestParam(defaultValue = "20") int pageSize,
             Model model) {
         
-        org.springframework.data.domain.Page<hotel.db.dto.discount.DiscountResponseDto> discountPage = 
+        Page<DiscountResponseDto> discountPage = 
                 discountService.getDiscountListForManagement(search, roomType, status, sortBy, page, pageSize);
         
         model.addAttribute("listDiscount", discountPage.getContent());

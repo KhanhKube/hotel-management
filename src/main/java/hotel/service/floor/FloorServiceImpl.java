@@ -44,13 +44,14 @@ public class FloorServiceImpl implements FloorService {
 	@Override
 	public FloorResponseDto createFloor(FloorRequestDto floorRequestDto) {
 		log.info("Creating new floor with number: {}", floorRequestDto.getFloorNumber());
-		Boolean floorExits = floorRepository.existsByFloorNumberAndIsDeletedIsFalse(floorRequestDto.getFloorNumber());
-		// Kiểm tra số tầng đã tồn tại chưa
-		if (Boolean.TRUE.equals(floorExits)) {
+		
+		if (floorRepository.existsByFloorNumberAndIsDeletedIsFalse(floorRequestDto.getFloorNumber())) {
 			throw new RuntimeException("Số tầng " + floorRequestDto.getFloorNumber() + " đã tồn tại");
 		}
 
-		Floor floor = buildFloor(floorRequestDto);
+		Floor floor = new Floor();
+		floor.setFloorNumber(floorRequestDto.getFloorNumber());
+		floor.setIsDeleted(false);
 
 		Floor savedFloor = floorRepository.save(floor);
 		log.info("Created floor with ID: {}", savedFloor.getFloorId());
@@ -58,30 +59,18 @@ public class FloorServiceImpl implements FloorService {
 		return convertToResponseDto(savedFloor);
 	}
 
-	private Floor buildFloor(FloorRequestDto floorRequestDto) {
-		Floor floor = new Floor();
-		floor.setFloorNumber(floorRequestDto.getFloorNumber());
-		floor.setIsDeleted(false);
-		return floor;
-	}
-
 	@Override
 	public FloorResponseDto updateFloor(Integer floorId, FloorRequestDto floorRequestDto) {
 		log.info("Updating floor with ID: {} with floor number: {}", floorId, floorRequestDto.getFloorNumber());
 
 		Floor existingFloor = floorRepository.findByFloorIdAndIsDeletedIsFalse(floorId);
-
 		if (existingFloor == null) {
 			throw new RuntimeException("Floor with ID: " + floorId + " not found");
 		}
 
-		// Kiểm tra nếu floorNumber thay đổi, phải validate không trùng với floor khác
-		if (!existingFloor.getFloorNumber().equals(floorRequestDto.getFloorNumber())) {
-			Boolean floorExists = floorRepository.existsByFloorNumberAndIsDeletedIsFalseAndFloorIdNot(
-					floorRequestDto.getFloorNumber(), floorId);
-			if (Boolean.TRUE.equals(floorExists)) {
-				throw new RuntimeException("Số tầng " + floorRequestDto.getFloorNumber() + " đã tồn tại ở tầng khác");
-			}
+		if (!existingFloor.getFloorNumber().equals(floorRequestDto.getFloorNumber()) &&
+			floorRepository.existsByFloorNumberAndIsDeletedIsFalseAndFloorIdNot(floorRequestDto.getFloorNumber(), floorId)) {
+			throw new RuntimeException("Số tầng " + floorRequestDto.getFloorNumber() + " đã tồn tại ở tầng khác");
 		}
 
 		existingFloor.setFloorNumber(floorRequestDto.getFloorNumber());
@@ -109,22 +98,13 @@ public class FloorServiceImpl implements FloorService {
 	@Override
 	@Transactional(readOnly = true)
 	public boolean existsById(Integer floorId) {
-		Floor floor = floorRepository.findByFloorIdAndIsDeletedIsFalse(floorId);
-		if (floor != null) {
-			return true;
-		} else {
-			return false;
-		}
+		return floorRepository.findByFloorIdAndIsDeletedIsFalse(floorId) != null;
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public boolean existsByFloorNumber(Integer floorNumber) {
-		Floor floor = floorRepository.findByFloorIdAndIsDeletedIsFalse(floorNumber);
-		if (floor != null) {
-			return true;
-		}
-		return false;
+		return floorRepository.findByFloorIdAndIsDeletedIsFalse(floorNumber) != null;
 	}
 
 	/**

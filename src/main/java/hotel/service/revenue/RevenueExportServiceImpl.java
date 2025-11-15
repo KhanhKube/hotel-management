@@ -3,6 +3,7 @@ package hotel.service.revenue;
 import hotel.db.dto.revenue.MonthlyRevenueDto;
 import hotel.db.entity.Order;
 import hotel.db.entity.OrderDetail;
+import hotel.db.entity.Room;
 import hotel.db.entity.User;
 import hotel.db.repository.order.OrderRepository;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
@@ -94,7 +95,7 @@ public class RevenueExportServiceImpl implements RevenueExportService {
                     
                     // If detail amount is null, calculate from room price and nights
                     if (detailAmount == null || detailAmount.compareTo(BigDecimal.ZERO) == 0) {
-                        hotel.db.entity.Room room = roomRepository.findById(detail.getRoomId()).orElse(null);
+                        Room room = roomRepository.findById(detail.getRoomId()).orElse(null);
                         if (room != null && detail.getCheckIn() != null && detail.getCheckOut() != null) {
                             long nights = java.time.temporal.ChronoUnit.DAYS.between(
                                     detail.getCheckIn().toLocalDate(),
@@ -143,8 +144,8 @@ public class RevenueExportServiceImpl implements RevenueExportService {
         File file = new File(filePath);
         int attempt = 0;
         while (file.exists() && !canWrite(file) && attempt < 5) {
-            String timestamp = java.time.LocalDateTime.now().format(
-                    java.time.format.DateTimeFormatter.ofPattern("_HHmmss"));
+            String timestamp = LocalDateTime.now().format(
+                    DateTimeFormatter.ofPattern("_HHmmss"));
             fileName = baseFileName + timestamp + ".csv";
             filePath = "exports/revenue/" + fileName;
             file = new File(filePath);

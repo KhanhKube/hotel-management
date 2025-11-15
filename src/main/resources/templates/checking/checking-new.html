@@ -446,9 +446,15 @@
                                 <div class="room-guest" th:if="${room.endDate}">
                                     Check-out: <span th:text="${#temporals.format(room.endDate, 'dd/MM/yyyy')}">13/11/2025</span>
                                 </div>
-                                <div class="room-guest" th:if="${room.orderDescription}" style="font-size: 11px; color: #fb6340;">
-                                    <i class="mdi mdi-alert-circle"></i>
-                                    <span th:text="${room.orderDescription}">Ghi chú</span>
+                                <div th:if="${room.orderDescription}" 
+                                     style="margin-top: 12px; padding: 10px; background: linear-gradient(135deg, rgba(251, 99, 64, 0.1) 0%, rgba(251, 99, 64, 0.05) 100%); border-left: 3px solid #fb6340; border-radius: 6px;">
+                                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                        <i class="mdi mdi-alert-circle" style="color: #fb6340; font-size: 16px;"></i>
+                                        <strong style="color: #fb6340; font-size: 12px; font-weight: 600;">Báo cáo từ nhân viên</strong>
+                                    </div>
+                                    <div style="font-size: 11px; color: #666; line-height: 1.4; padding-left: 22px;" th:text="${room.orderDescription}">
+                                        Ghi chú
+                                    </div>
                                 </div>
                                 
                                 <!-- Status badges with different colors -->
@@ -548,9 +554,15 @@
                                     <i class="mdi mdi-clock-outline"></i>
                                     Checked out: <span th:text="${#temporals.format(room.checkOut, 'dd/MM/yyyy HH:mm')}">13/11/2025 12:00</span>
                                 </div>
-                                <div class="room-guest" th:if="${room.orderDescription}" style="font-size: 11px; color: #fb6340; background: rgba(251, 99, 64, 0.1); padding: 6px; border-radius: 4px; margin-top: 8px;">
-                                    <i class="mdi mdi-alert-circle"></i>
-                                    <span th:text="${room.orderDescription}">Ghi chú từ nhân viên</span>
+                                <div th:if="${room.orderDescription}" 
+                                     style="margin-top: 12px; padding: 10px; background: linear-gradient(135deg, rgba(251, 99, 64, 0.1) 0%, rgba(251, 99, 64, 0.05) 100%); border-left: 3px solid #fb6340; border-radius: 6px;">
+                                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                        <i class="mdi mdi-alert-circle" style="color: #fb6340; font-size: 16px;"></i>
+                                        <strong style="color: #fb6340; font-size: 12px; font-weight: 600;">Báo cáo từ nhân viên</strong>
+                                    </div>
+                                    <div style="font-size: 11px; color: #666; line-height: 1.4; padding-left: 22px;" th:text="${room.orderDescription}">
+                                        Ghi chú từ nhân viên
+                                    </div>
                                 </div>
                                 
                                 <!-- Status badge with different colors -->
@@ -633,181 +645,424 @@
     <script src="/assets/js/off-canvas.js"></script>
     <script src="/assets/js/hoverable-collapse.js"></script>
     <script src="/assets/js/misc.js"></script>
+    
+    <!-- Toast Notification Styles -->
+    <style>
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        
+        .toast-notification.hiding {
+            animation: slideOut 0.3s ease-out forwards;
+        }
+        
+        .toast-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        
+        .toast-success .toast-icon {
+            background: #d4edda;
+            color: #28a745;
+        }
+        
+        .toast-error .toast-icon {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+        
+        .toast-info .toast-icon {
+            background: #d1ecf1;
+            color: #17a2b8;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .toast-message {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .toast-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        /* Confirm Modal */
+        .confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .confirm-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .confirm-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+        
+        .confirm-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .confirm-message {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        
+        .confirm-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .confirm-btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .confirm-btn-cancel {
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .confirm-btn-cancel:hover {
+            background: #e0e0e0;
+        }
+        
+        .confirm-btn-ok {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .confirm-btn-ok:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+    
     <script>
+        function showToast(type, title, message) {
+            const icons = { success: '✓', error: '✕', info: 'ℹ' };
+            
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type]}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        function showConfirm(title, message) {
+            return new Promise((resolve) => {
+                const overlay = document.createElement('div');
+                overlay.className = 'confirm-overlay';
+                overlay.innerHTML = `
+                    <div class="confirm-modal">
+                        <div class="confirm-header">
+                            <div class="confirm-icon">?</div>
+                            <div class="confirm-title">${title}</div>
+                        </div>
+                        <div class="confirm-message">${message}</div>
+                        <div class="confirm-buttons">
+                            <button class="confirm-btn confirm-btn-cancel" onclick="this.closest('.confirm-overlay').remove(); window.confirmResult(false)">Hủy</button>
+                            <button class="confirm-btn confirm-btn-ok" onclick="this.closest('.confirm-overlay').remove(); window.confirmResult(true)">Xác nhận</button>
+                        </div>
+                    </div>
+                `;
+                
+                window.confirmResult = resolve;
+                document.body.appendChild(overlay);
+                
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        overlay.remove();
+                        resolve(false);
+                    }
+                });
+            });
+        }
+        
         // Hàm xử lý redirect dựa trên header từ server
         function handleRedirect(response, defaultTab) {
             const redirectTab = response.headers.get('X-Redirect-Tab');
             if (redirectTab) {
-                // Redirect đến tab được chỉ định
                 window.location.href = '/hotel-management/checking/page?tab=' + redirectTab;
             } else {
-                // Reload trang hiện tại
                 window.location.reload();
             }
         }
 
-        // LỄ TÂN: Bắt đầu check-in (RESERVED -> CHECKING_IN)
-        function startCheckIn(orderDetailId) {
-            if (confirm('Xác nhận bắt đầu check-in cho phòng này?')) {
-                fetch('/api/checking/start-checkin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderDetailId: orderDetailId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Đã gửi yêu cầu check-in cho khách!');
-                    location.reload();
-                })
-                .catch(error => {
-                    alert('Có lỗi xảy ra: ' + error);
-                });
-            }
+        async function startCheckIn(orderDetailId) {
+            const confirmed = await showConfirm('Bắt đầu Check-in', 'Xác nhận bắt đầu check-in cho phòng này?');
+            if (!confirmed) return;
+            
+            fetch('/api/checking/start-checkin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderDetailId })
+            })
+            .then(res => res.json())
+            .then(() => {
+                showToast('success', 'Thành công!', 'Đã gửi yêu cầu check-in cho khách');
+                setTimeout(() => location.reload(), 1000);
+            })
+            .catch(err => showToast('error', 'Lỗi!', err.message));
         }
 
-        // KHÁCH HÀNG: Xác nhận check-in (CHECKING_IN -> CUSTOMER_CONFIRM)
-        function customerConfirmCheckIn(orderDetailId) {
-            if (confirm('Xác nhận thông tin check-in?')) {
-                fetch('/api/checking/customer-confirm', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderDetailId: orderDetailId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Xác nhận thành công! Vui lòng chờ nhân viên xác nhận.');
-                    location.reload();
-                })
-                .catch(error => {
-                    alert('Có lỗi xảy ra: ' + error);
-                });
-            }
+        async function customerConfirmCheckIn(orderDetailId) {
+            const confirmed = await showConfirm('Xác nhận Check-in', 'Xác nhận thông tin check-in của bạn?');
+            if (!confirmed) return;
+            
+            fetch('/api/checking/customer-confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderDetailId })
+            })
+            .then(res => res.json())
+            .then(() => {
+                showToast('success', 'Xác nhận thành công!', 'Vui lòng chờ nhân viên xác nhận');
+                setTimeout(() => location.reload(), 1000);
+            })
+            .catch(err => showToast('error', 'Lỗi!', err.message));
         }
 
-        // NHÂN VIÊN: Xác nhận check-in (CUSTOMER_CONFIRM -> OCCUPIED)
-        function staffConfirmCheckIn(orderDetailId) {
-            if (confirm('Xác nhận hoàn tất check-in cho phòng này?')) {
-                fetch('/api/checking/staff-confirm', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderDetailId: orderDetailId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Check-in hoàn tất!');
-                    location.href = '/hotel-management/checking/page?tab=checkout';
-                })
-                .catch(error => {
-                    alert('Có lỗi xảy ra: ' + error);
-                });
-            }
+        async function staffConfirmCheckIn(orderDetailId) {
+            const confirmed = await showConfirm('Hoàn tất Check-in', 'Xác nhận hoàn tất check-in cho phòng này?');
+            if (!confirmed) return;
+            
+            fetch('/api/checking/staff-confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderDetailId })
+            })
+            .then(res => res.json())
+            .then(() => {
+                showToast('success', 'Check-in hoàn tất!', 'Phòng đã sẵn sàng cho khách');
+                setTimeout(() => location.href = '/hotel-management/checking/page?tab=checkout', 1000);
+            })
+            .catch(err => showToast('error', 'Lỗi!', err.message));
         }
 
-        // LỄ TÂN: Bắt đầu check-out (OCCUPIED -> NEED_CHECKOUT)
-        function initiateCheckOut(orderDetailId) {
-            if (confirm('Xác nhận bắt đầu check-out cho phòng này?')) {
-                fetch('/api/checking/initiate-checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderDetailId: orderDetailId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Đã gửi yêu cầu kiểm tra phòng cho nhân viên!');
-                    location.reload();
-                })
-                .catch(error => {
-                    alert('Có lỗi xảy ra: ' + error);
-                });
-            }
+        async function initiateCheckOut(orderDetailId) {
+            const confirmed = await showConfirm('Bắt đầu Check-out', 'Xác nhận bắt đầu check-out cho phòng này?');
+            if (!confirmed) return;
+            
+            fetch('/api/checking/initiate-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderDetailId })
+            })
+            .then(res => res.json())
+            .then(() => {
+                showToast('success', 'Thành công!', 'Đã gửi yêu cầu kiểm tra phòng cho nhân viên');
+                setTimeout(() => location.reload(), 1000);
+            })
+            .catch(err => showToast('error', 'Lỗi!', err.message));
         }
 
-        // NHÂN VIÊN: Kiểm tra phòng (NEED_CHECKOUT -> CHECKED_OUT)
-        function staffCheckRoom(orderDetailId) {
-            const hasIssue = confirm('Phòng có vấn đề gì không?\nNhấn OK nếu có vấn đề, Cancel nếu không có.');
+        async function staffCheckRoom(orderDetailId) {
+            const hasIssue = await showConfirm('Kiểm tra phòng', 'Phòng có vấn đề gì không?');
             let reportNote = '';
             
             if (hasIssue) {
                 reportNote = prompt('Nhập ghi chú về vấn đề của phòng:');
-                if (reportNote === null) return; // User cancelled
+                if (!reportNote) return;
             }
 
             fetch('/api/checking/staff-check-room', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    orderDetailId: orderDetailId,
-                    hasIssue: hasIssue,
-                    reportNote: reportNote
-                })
+                body: JSON.stringify({ orderDetailId, hasIssue, reportNote })
             })
-            .then(response => {
-                handleRedirect(response, 'checkout-staff');
-                return response.json();
+            .then(res => res.json())
+            .then(() => {
+                showToast('success', 'Đã gửi báo cáo!', 'Lễ tân sẽ xác nhận check-out');
+                setTimeout(() => location.reload(), 1000);
             })
-            .then(data => {
-                alert('Đã gửi báo cáo cho lễ tân!');
-            })
-            .catch(error => {
-                alert('Có lỗi xảy ra: ' + error);
-            });
+            .catch(err => showToast('error', 'Lỗi!', err.message));
         }
 
-        // LỄ TÂN: Xác nhận check-out (CHECKED_OUT -> NEED_CLEAN)
-        function receptionistConfirmCheckOut(orderDetailId) {
-            if (confirm('Xác nhận hoàn tất check-out? Phòng sẽ chuyển sang After Check-Out.')) {
-                fetch('/api/checking/confirm-checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderDetailId: orderDetailId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Check-out hoàn tất! Phòng chuyển sang After Check-Out.');
-                    location.href = '/hotel-management/checking/page?tab=aftercheckout';
-                })
-                .catch(error => {
-                    alert('Có lỗi xảy ra: ' + error);
-                });
-            }
+        async function receptionistConfirmCheckOut(orderDetailId) {
+            const confirmed = await showConfirm('Xác nhận Check-out', 'Xác nhận hoàn tất check-out? Phòng sẽ chuyển sang After Check-Out.');
+            if (!confirmed) return;
+            
+            fetch('/api/checking/confirm-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderDetailId })
+            })
+            .then(res => res.json())
+            .then(() => {
+                showToast('success', 'Check-out hoàn tất!', 'Phòng chuyển sang After Check-Out');
+                setTimeout(() => location.href = '/hotel-management/checking/page?tab=aftercheckout', 1000);
+            })
+            .catch(err => showToast('error', 'Lỗi!', err.message));
         }
 
-        // NHÂN VIÊN: Bắt đầu dọn dẹp (NEED_CLEAN -> CLEANING)
-        function startCleaning(orderDetailId) {
-            if (confirm('Xác nhận bắt đầu dọn dẹp phòng này?')) {
-                fetch('/api/checking/start-cleaning', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderDetailId: orderDetailId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Đã bắt đầu dọn dẹp!');
-                    location.reload();
-                })
-                .catch(error => {
-                    alert('Có lỗi xảy ra: ' + error);
-                });
-            }
+        async function startCleaning(orderDetailId) {
+            const confirmed = await showConfirm('Bắt đầu dọn dẹp', 'Xác nhận bắt đầu dọn dẹp phòng này?');
+            if (!confirmed) return;
+            
+            fetch('/api/checking/start-cleaning', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderDetailId })
+            })
+            .then(res => res.json())
+            .then(() => {
+                showToast('info', 'Bắt đầu dọn dẹp!', 'Đang tiến hành dọn dẹp phòng');
+                setTimeout(() => location.reload(), 1000);
+            })
+            .catch(err => showToast('error', 'Lỗi!', err.message));
         }
 
-        // NHÂN VIÊN: Hoàn thành dọn dẹp (CLEANING -> COMPLETED)
-        function completeCleaning(orderDetailId) {
-            if (confirm('Xác nhận hoàn thành dọn dẹp phòng này? Phòng sẽ sẵn sàng cho khách mới.')) {
-                fetch('/api/checking/complete-cleaning', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderDetailId: orderDetailId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Dọn dẹp hoàn tất! Phòng sẵn sàng cho khách mới.');
-                    location.reload();
-                })
-                .catch(error => {
-                    alert('Có lỗi xảy ra: ' + error);
-                });
-            }
+        async function completeCleaning(orderDetailId) {
+            const confirmed = await showConfirm('Hoàn thành dọn dẹp', 'Xác nhận hoàn thành dọn dẹp phòng này? Phòng sẽ sẵn sàng cho khách mới.');
+            if (!confirmed) return;
+            
+            fetch('/api/checking/complete-cleaning', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderDetailId })
+            })
+            .then(res => res.json())
+            .then(() => {
+                showToast('success', 'Dọn dẹp hoàn tất!', 'Phòng sẵn sàng cho khách mới');
+                setTimeout(() => location.reload(), 1000);
+            })
+            .catch(err => showToast('error', 'Lỗi!', err.message));
         }
 
         function changePage(page) {

@@ -55,31 +55,22 @@ public class AccountServiceImpl implements AccountService {
     public Page<AccountResponseDto> getAccountsWithPagination(String searchTerm, String status, int page, int size) {
         log.info("Getting accounts with pagination - page: {}, size: {}, search: {}, status: {}", page, size, searchTerm, status);
         
-        // Build specification for filtering
         Specification<User> spec = (root, query, cb) -> {
             List<Predicate> predicates = new java.util.ArrayList<>();
-            
-            // Exclude ADMIN role
             predicates.add(cb.notEqual(root.get("role"), "ADMIN"));
-            
-            // Exclude soft deleted accounts
             predicates.add(cb.equal(root.get("isDeleted"), false));
             
-            // Search by full name (firstName + lastName), username, email, or phone
             if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                String search = searchTerm.trim().toLowerCase();
-                String pattern = "%" + search + "%";
-                // Search in firstName, lastName, username, email, or phone
-                Predicate firstNamePredicate = cb.like(cb.lower(root.get("firstName")), pattern);
-                Predicate lastNamePredicate = cb.like(cb.lower(root.get("lastName")), pattern);
-                Predicate usernamePredicate = cb.like(cb.lower(root.get("username")), pattern);
-                Predicate emailPredicate = cb.like(cb.lower(root.get("email")), pattern);
-                Predicate phonePredicate = cb.like(root.get("phone"), pattern);
-                Predicate searchOr = cb.or(firstNamePredicate, lastNamePredicate, usernamePredicate, emailPredicate, phonePredicate);
-                predicates.add(searchOr);
+                String pattern = "%" + searchTerm.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                    cb.like(cb.lower(root.get("firstName")), pattern),
+                    cb.like(cb.lower(root.get("lastName")), pattern),
+                    cb.like(cb.lower(root.get("username")), pattern),
+                    cb.like(cb.lower(root.get("email")), pattern),
+                    cb.like(root.get("phone"), pattern)
+                ));
             }
             
-            // Filter by status
             if (status != null && !status.isEmpty() && !"ALL".equals(status.toUpperCase())) {
                 predicates.add(cb.equal(root.get("status"), status.toUpperCase()));
             }
@@ -87,16 +78,14 @@ public class AccountServiceImpl implements AccountService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
         
-        // Pagination
         Pageable pageable = PageRequest.of(page, size);
         Page<User> userPage = userRepository.findAll(spec, pageable);
         
-        // Convert to DTO
-        List<AccountResponseDto> dtos = userPage.getContent().stream()
-                .map(AccountResponseDto::new)
-                .collect(Collectors.toList());
-        
-        return new PageImpl<>(dtos, pageable, userPage.getTotalElements());
+        return new PageImpl<>(
+            userPage.getContent().stream().map(AccountResponseDto::new).collect(Collectors.toList()),
+            pageable,
+            userPage.getTotalElements()
+        );
     }
 
     @Override
@@ -104,31 +93,22 @@ public class AccountServiceImpl implements AccountService {
     public Page<AccountResponseDto> getCustomersWithPagination(String searchTerm, String status, int page, int size) {
         log.info("Getting customers with pagination - page: {}, size: {}, search: {}, status: {}", page, size, searchTerm, status);
         
-        // Build specification for filtering customers only
         Specification<User> spec = (root, query, cb) -> {
             List<Predicate> predicates = new java.util.ArrayList<>();
-            
-            // Only CUSTOMER role
             predicates.add(cb.equal(root.get("role"), "CUSTOMER"));
-            
-            // Exclude soft deleted accounts
             predicates.add(cb.equal(root.get("isDeleted"), false));
             
-            // Search by full name (firstName + lastName), username, email, or phone
             if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                String search = searchTerm.trim().toLowerCase();
-                String pattern = "%" + search + "%";
-                // Search in firstName, lastName, username, email, or phone
-                Predicate firstNamePredicate = cb.like(cb.lower(root.get("firstName")), pattern);
-                Predicate lastNamePredicate = cb.like(cb.lower(root.get("lastName")), pattern);
-                Predicate usernamePredicate = cb.like(cb.lower(root.get("username")), pattern);
-                Predicate emailPredicate = cb.like(cb.lower(root.get("email")), pattern);
-                Predicate phonePredicate = cb.like(root.get("phone"), pattern);
-                Predicate searchOr = cb.or(firstNamePredicate, lastNamePredicate, usernamePredicate, emailPredicate, phonePredicate);
-                predicates.add(searchOr);
+                String pattern = "%" + searchTerm.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                    cb.like(cb.lower(root.get("firstName")), pattern),
+                    cb.like(cb.lower(root.get("lastName")), pattern),
+                    cb.like(cb.lower(root.get("username")), pattern),
+                    cb.like(cb.lower(root.get("email")), pattern),
+                    cb.like(root.get("phone"), pattern)
+                ));
             }
             
-            // Filter by status
             if (status != null && !status.isEmpty() && !"ALL".equals(status.toUpperCase())) {
                 predicates.add(cb.equal(root.get("status"), status.toUpperCase()));
             }
@@ -136,16 +116,14 @@ public class AccountServiceImpl implements AccountService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
         
-        // Pagination
         Pageable pageable = PageRequest.of(page, size);
         Page<User> userPage = userRepository.findAll(spec, pageable);
         
-        // Convert to DTO
-        List<AccountResponseDto> dtos = userPage.getContent().stream()
-                .map(AccountResponseDto::new)
-                .collect(Collectors.toList());
-        
-        return new PageImpl<>(dtos, pageable, userPage.getTotalElements());
+        return new PageImpl<>(
+            userPage.getContent().stream().map(AccountResponseDto::new).collect(Collectors.toList()),
+            pageable,
+            userPage.getTotalElements()
+        );
     }
 
     @Override
@@ -153,35 +131,26 @@ public class AccountServiceImpl implements AccountService {
     public Page<AccountResponseDto> getStaffsWithPagination(String searchTerm, String status, int page, int size) {
         log.info("Getting staffs with pagination - page: {}, size: {}, search: {}, status: {}", page, size, searchTerm, status);
         
-        // Build specification for filtering staffs only (STAFF, RECEPTIONIST, MANAGER)
         Specification<User> spec = (root, query, cb) -> {
             List<Predicate> predicates = new java.util.ArrayList<>();
-            
-            // Only STAFF, RECEPTIONIST, MANAGER roles
-            Predicate staffRole = cb.equal(root.get("role"), "STAFF");
-            Predicate receptionistRole = cb.equal(root.get("role"), "RECEPTIONIST");
-            Predicate managerRole = cb.equal(root.get("role"), "MANAGER");
-            Predicate staffRoles = cb.or(staffRole, receptionistRole, managerRole);
-            predicates.add(staffRoles);
-            
-            // Exclude soft deleted accounts
+            predicates.add(cb.or(
+                cb.equal(root.get("role"), "STAFF"),
+                cb.equal(root.get("role"), "RECEPTIONIST"),
+                cb.equal(root.get("role"), "MANAGER")
+            ));
             predicates.add(cb.equal(root.get("isDeleted"), false));
             
-            // Search by full name (firstName + lastName), username, email, or phone
             if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                String search = searchTerm.trim().toLowerCase();
-                String pattern = "%" + search + "%";
-                // Search in firstName, lastName, username, email, or phone
-                Predicate firstNamePredicate = cb.like(cb.lower(root.get("firstName")), pattern);
-                Predicate lastNamePredicate = cb.like(cb.lower(root.get("lastName")), pattern);
-                Predicate usernamePredicate = cb.like(cb.lower(root.get("username")), pattern);
-                Predicate emailPredicate = cb.like(cb.lower(root.get("email")), pattern);
-                Predicate phonePredicate = cb.like(root.get("phone"), pattern);
-                Predicate searchOr = cb.or(firstNamePredicate, lastNamePredicate, usernamePredicate, emailPredicate, phonePredicate);
-                predicates.add(searchOr);
+                String pattern = "%" + searchTerm.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                    cb.like(cb.lower(root.get("firstName")), pattern),
+                    cb.like(cb.lower(root.get("lastName")), pattern),
+                    cb.like(cb.lower(root.get("username")), pattern),
+                    cb.like(cb.lower(root.get("email")), pattern),
+                    cb.like(root.get("phone"), pattern)
+                ));
             }
             
-            // Filter by status
             if (status != null && !status.isEmpty() && !"ALL".equals(status.toUpperCase())) {
                 predicates.add(cb.equal(root.get("status"), status.toUpperCase()));
             }
@@ -189,16 +158,14 @@ public class AccountServiceImpl implements AccountService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
         
-        // Pagination
         Pageable pageable = PageRequest.of(page, size);
         Page<User> userPage = userRepository.findAll(spec, pageable);
         
-        // Convert to DTO
-        List<AccountResponseDto> dtos = userPage.getContent().stream()
-                .map(AccountResponseDto::new)
-                .collect(Collectors.toList());
-        
-        return new PageImpl<>(dtos, pageable, userPage.getTotalElements());
+        return new PageImpl<>(
+            userPage.getContent().stream().map(AccountResponseDto::new).collect(Collectors.toList()),
+            pageable,
+            userPage.getTotalElements()
+        );
     }
 
     @Override

@@ -1,6 +1,7 @@
 package hotel.rest.checking;
 
 import hotel.db.dto.checking.OrderDetailResponse;
+import hotel.db.entity.User;
 import hotel.service.checking.CheckingService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -33,53 +34,40 @@ public class CheckingViewController {
     }
 
     @GetMapping("/hotel-management/checking/page")
-    public String checkingPage(@RequestParam(defaultValue = "checkin") String tab, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "12") int size, HttpSession session, Model model) {
-        hotel.db.entity.User user = (hotel.db.entity.User) session.getAttribute("user");
-        String userRole = user != null ? user.getRole() : "GUEST";
-        model.addAttribute("userRole", userRole);
+    public String checkingPage(@RequestParam(defaultValue = "checkin") String tab, 
+                              @RequestParam(defaultValue = "0") int page, 
+                              @RequestParam(defaultValue = "12") int size, 
+                              HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        model.addAttribute("userRole", user != null ? user.getRole() : "GUEST");
+        
         Pageable pageable = PageRequest.of(page, size);
+        Pageable countPageable = PageRequest.of(0, 1);
+        
+        // Tính số lượng cho từng tab
+        long checkinCount = checkingService.getReservedOrders(countPageable).getTotalElements() 
+                          + checkingService.getCheckingInOrders(countPageable).getTotalElements() 
+                          + checkingService.getCustomerConfirmedOrders(countPageable).getTotalElements();
+        
+        long checkoutCount = checkingService.getOccupiedOrders(countPageable).getTotalElements() 
+                           + checkingService.getNeedCheckOutOrders(countPageable).getTotalElements() 
+                           + checkingService.getCheckingOutOrders(countPageable).getTotalElements() 
+                           + checkingService.getCheckedOutOrders(countPageable).getTotalElements();
+        
+        long afterCheckoutCount = checkingService.getNeedCleanOrders(countPageable).getTotalElements() 
+                                + checkingService.getCleaningOrders(countPageable).getTotalElements();
+        
+        // Lấy dữ liệu theo tab
         Page<OrderDetailResponse> roomsPage;
-        long checkinCount = checkingService.getReservedOrders(PageRequest.of(0, 1)).getTotalElements() + checkingService.getCheckingInOrders(PageRequest.of(0, 1)).getTotalElements() + checkingService.getCustomerConfirmedOrders(PageRequest.of(0, 1)).getTotalElements();
-        long checkoutCount = checkingService.getOccupiedOrders(PageRequest.of(0, 1)).getTotalElements() + checkingService.getNeedCheckOutOrders(PageRequest.of(0, 1)).getTotalElements() + checkingService.getCheckingOutOrders(PageRequest.of(0, 1)).getTotalElements() + checkingService.getCheckedOutOrders(PageRequest.of(0, 1)).getTotalElements();
-        long afterCheckoutCount = checkingService.getNeedCleanOrders(PageRequest.of(0, 1)).getTotalElements() + checkingService.getCleaningOrders(PageRequest.of(0, 1)).getTotalElements();
-        if ("checkin".equals(tab)) {
-            Page<OrderDetailResponse> reservedPage = checkingService.getReservedOrders(PageRequest.of(0, 100));
-            Page<OrderDetailResponse> checkingInPage = checkingService.getCheckingInOrders(PageRequest.of(0, 100));
-            Page<OrderDetailResponse> customerConfirmPage = checkingService.getCustomerConfirmedOrders(PageRequest.of(0, 100));
-            List<OrderDetailResponse> allCheckinRooms = new ArrayList<>();
-            allCheckinRooms.addAll(reservedPage.getContent());
-            allCheckinRooms.addAll(checkingInPage.getContent());
-            allCheckinRooms.addAll(customerConfirmPage.getContent());
-            roomsPage = new PageImpl<>(allCheckinRooms, pageable, reservedPage.getTotalElements() + checkingInPage.getTotalElements() + customerConfirmPage.getTotalElements());
-        } else if ("checkout".equals(tab)) {
-            Page<OrderDetailResponse> occupiedPage = checkingService.getOccupiedOrders(PageRequest.of(0, 100));
-            Page<OrderDetailResponse> needCheckoutPage = checkingService.getNeedCheckOutOrders(PageRequest.of(0, 100));
-            Page<OrderDetailResponse> checkingOutPage = checkingService.getCheckingOutOrders(PageRequest.of(0, 100));
-            Page<OrderDetailResponse> checkedOutPage = checkingService.getCheckedOutOrders(PageRequest.of(0, 100));
-            List<OrderDetailResponse> allCheckoutRooms = new ArrayList<>();
-            allCheckoutRooms.addAll(occupiedPage.getContent());
-            allCheckoutRooms.addAll(needCheckoutPage.getContent());
-            allCheckoutRooms.addAll(checkingOutPage.getContent());
-            allCheckoutRooms.addAll(checkedOutPage.getContent());
-            roomsPage = new PageImpl<>(allCheckoutRooms, pageable, occupiedPage.getTotalElements() + needCheckoutPage.getTotalElements() + checkingOutPage.getTotalElements() + checkedOutPage.getTotalElements());
+        if ("checkout".equals(tab)) {
+            roomsPage = getCheckoutRooms(pageable);
         } else if ("aftercheckout".equals(tab)) {
-            Page<OrderDetailResponse> needCleanPage = checkingService.getNeedCleanOrders(pageable);
-            Page<OrderDetailResponse> cleaningPage = checkingService.getCleaningOrders(pageable);
-            List<OrderDetailResponse> allRooms = new ArrayList<>();
-            allRooms.addAll(needCleanPage.getContent());
-            allRooms.addAll(cleaningPage.getContent());
-            roomsPage = new PageImpl<>(allRooms, pageable, needCleanPage.getTotalElements() + cleaningPage.getTotalElements());
+            roomsPage = getAfterCheckoutRooms(pageable);
         } else {
+            roomsPage = getCheckinRooms(pageable);
             tab = "checkin";
-            Page<OrderDetailResponse> reservedPage = checkingService.getReservedOrders(PageRequest.of(0, 100));
-            Page<OrderDetailResponse> checkingInPage = checkingService.getCheckingInOrders(PageRequest.of(0, 100));
-            Page<OrderDetailResponse> customerConfirmPage = checkingService.getCustomerConfirmedOrders(PageRequest.of(0, 100));
-            List<OrderDetailResponse> allCheckinRooms = new ArrayList<>();
-            allCheckinRooms.addAll(reservedPage.getContent());
-            allCheckinRooms.addAll(checkingInPage.getContent());
-            allCheckinRooms.addAll(customerConfirmPage.getContent());
-            roomsPage = new PageImpl<>(allCheckinRooms, pageable, reservedPage.getTotalElements() + checkingInPage.getTotalElements() + customerConfirmPage.getTotalElements());
         }
+        
         model.addAttribute("currentTab", tab);
         model.addAttribute("checkinCount", checkinCount);
         model.addAttribute("checkoutCount", checkoutCount);
@@ -90,7 +78,34 @@ public class CheckingViewController {
         model.addAttribute("totalItems", roomsPage.getTotalElements());
         model.addAttribute("startItem", page * size + 1);
         model.addAttribute("endItem", Math.min((page + 1) * size, (int) roomsPage.getTotalElements()));
+        
         return "checking/checking-new";
+    }
+    
+    private Page<OrderDetailResponse> getCheckinRooms(Pageable pageable) {
+        Pageable fetchAll = PageRequest.of(0, 100);
+        List<OrderDetailResponse> rooms = new ArrayList<>();
+        rooms.addAll(checkingService.getReservedOrders(fetchAll).getContent());
+        rooms.addAll(checkingService.getCheckingInOrders(fetchAll).getContent());
+        rooms.addAll(checkingService.getCustomerConfirmedOrders(fetchAll).getContent());
+        return new PageImpl<>(rooms, pageable, rooms.size());
+    }
+    
+    private Page<OrderDetailResponse> getCheckoutRooms(Pageable pageable) {
+        Pageable fetchAll = PageRequest.of(0, 100);
+        List<OrderDetailResponse> rooms = new ArrayList<>();
+        rooms.addAll(checkingService.getOccupiedOrders(fetchAll).getContent());
+        rooms.addAll(checkingService.getNeedCheckOutOrders(fetchAll).getContent());
+        rooms.addAll(checkingService.getCheckingOutOrders(fetchAll).getContent());
+        rooms.addAll(checkingService.getCheckedOutOrders(fetchAll).getContent());
+        return new PageImpl<>(rooms, pageable, rooms.size());
+    }
+    
+    private Page<OrderDetailResponse> getAfterCheckoutRooms(Pageable pageable) {
+        List<OrderDetailResponse> rooms = new ArrayList<>();
+        rooms.addAll(checkingService.getNeedCleanOrders(pageable).getContent());
+        rooms.addAll(checkingService.getCleaningOrders(pageable).getContent());
+        return new PageImpl<>(rooms, pageable, rooms.size());
     }
 }
 

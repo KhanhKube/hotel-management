@@ -3,18 +3,23 @@ package hotel.service.checking;
 import hotel.db.dto.checking.*;
 import hotel.db.entity.OrderDetail;
 import hotel.db.entity.Room;
+import hotel.db.entity.User;
 import hotel.db.enums.OrderDetailStatus;
 import hotel.db.enums.RoomStatus;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
 import hotel.db.repository.room.RoomRepository;
+import hotel.db.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,13 +28,41 @@ public class CheckingServiceImpl implements CheckingService {
 
     private final OrderDetailRepository orderDetailRepository;
     private final RoomRepository roomRepository;
-    private final hotel.db.repository.user.UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Page<OrderDetailResponse> getReservedOrders(Pageable pageable) {
-        Page<OrderDetail> orderDetails = orderDetailRepository.findByStatusOrderByCreatedAtDesc(
+        LocalDateTime now = LocalDateTime.now();
+        Page<OrderDetail> reservedOrders = orderDetailRepository.findByStatusOrderByCreatedAtDesc(
                 OrderDetailStatus.RESERVED, pageable);
-        return orderDetails.map(this::convertToResponse);
+
+        List<OrderDetail> validOrders = new ArrayList<>();
+
+        for (OrderDetail order : reservedOrders.getContent()) {
+            if (isOrderValid(order, now)) {
+                validOrders.add(order);
+            } else {
+                markOrderAsExpired(order);
+            }
+        }
+
+        List<OrderDetailResponse> responses = validOrders.stream()
+                .map(this::convertToResponse)
+                .toList();
+
+        return new PageImpl<>(responses, pageable, validOrders.size());
+    }
+
+    private boolean isOrderValid(OrderDetail order, LocalDateTime now) {
+        if (order.getStartDate() == null || order.getEndDate() == null) {
+            return false;
+        }
+        return order.getStartDate().isBefore(now) && now.isBefore(order.getEndDate());
+    }
+
+    private void markOrderAsExpired(OrderDetail order) {
+        order.setIsDeleted(true);
+        orderDetailRepository.save(order);
     }
 
     @Override
@@ -42,11 +75,8 @@ public class CheckingServiceImpl implements CheckingService {
             throw new RuntimeException("Order detail must be in RESERVED status");
         }
 
-        // Chỉ update OrderDetail, KHÔNG update Room
         orderDetail.setStatus(OrderDetailStatus.CHECKING_IN);
         orderDetailRepository.save(orderDetail);
-
-        log.info("Started check-in for order detail: {}", orderDetail.getOrderDetailId());
         return convertToResponse(orderDetail);
     }
 
@@ -62,10 +92,8 @@ public class CheckingServiceImpl implements CheckingService {
         }
 
         if ("CUSTOMER".equals(request.getConfirmedBy())) {
-            // Khách xác nhận: chỉ update OrderDetail
             orderDetail.setStatus(OrderDetailStatus.CUSTOMER_CONFIRM);
             orderDetailRepository.save(orderDetail);
-            log.info("Customer confirmed check-in for order detail: {}", orderDetail.getOrderDetailId());
         } else if ("STAFF".equals(request.getConfirmedBy())) {
             // Staff xác nhận: phải có customer confirm trước
             if (OrderDetailStatus.CUSTOMER_CONFIRM.equals(orderDetail.getStatus())) {
@@ -73,13 +101,10 @@ public class CheckingServiceImpl implements CheckingService {
                 orderDetail.setCheckIn(LocalDateTime.now()); // Set thời gian check-in thực tế
                 orderDetailRepository.save(orderDetail);
 
-                // Update Room status
                 Room room = roomRepository.findById(orderDetail.getRoomId())
                         .orElseThrow(() -> new RuntimeException("Room not found"));
                 room.setStatus(RoomStatus.OCCUPIED);
                 roomRepository.save(room);
-
-                log.info("Completed check-in for order detail: {}", orderDetail.getOrderDetailId());
             } else {
                 throw new RuntimeException("Customer must confirm first");
             }
@@ -105,11 +130,8 @@ public class CheckingServiceImpl implements CheckingService {
             throw new RuntimeException("Order detail must be in OCCUPIED status");
         }
 
-        // Chỉ update OrderDetail, Room vẫn OCCUPIED
         orderDetail.setStatus(OrderDetailStatus.NEED_CHECKOUT);
         orderDetailRepository.save(orderDetail);
-
-        log.info("Started check-out for order detail: {}", orderDetail.getOrderDetailId());
         return convertToResponse(orderDetail);
     }
 
@@ -145,9 +167,6 @@ public class CheckingServiceImpl implements CheckingService {
         }
         
         orderDetailRepository.save(orderDetail);
-
-        // KHÔNG update Room - Room vẫn OCCUPIED cho đến khi lễ tân confirm
-        log.info("Staff completed check-out for order detail: {}", orderDetail.getOrderDetailId());
         return convertToResponse(orderDetail);
     }
 
@@ -204,13 +223,10 @@ public class CheckingServiceImpl implements CheckingService {
         orderDetail.setStatus(OrderDetailStatus.NEED_CLEAN);
         orderDetailRepository.save(orderDetail);
 
-        // Cập nhật trạng thái phòng
         Room room = roomRepository.findById(orderDetail.getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
         room.setStatus(RoomStatus.NEED_CLEAN);
         roomRepository.save(room);
-
-        log.info("Receptionist confirmed check-out for order detail: {}", orderDetail.getOrderDetailId());
         return convertToResponse(orderDetail);
     }
 
@@ -234,13 +250,10 @@ public class CheckingServiceImpl implements CheckingService {
         orderDetail.setStatus(OrderDetailStatus.CLEANING);
         orderDetailRepository.save(orderDetail);
 
-        // Cập nhật trạng thái phòng
         Room room = roomRepository.findById(orderDetail.getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
         room.setStatus(RoomStatus.CLEANING);
         roomRepository.save(room);
-
-        log.info("Started cleaning for order detail: {}", orderDetail.getOrderDetailId());
         return convertToResponse(orderDetail);
     }
 
@@ -257,13 +270,10 @@ public class CheckingServiceImpl implements CheckingService {
         orderDetail.setStatus(OrderDetailStatus.COMPLETED);
         orderDetailRepository.save(orderDetail);
 
-        // Cập nhật trạng thái phòng về AVAILABLE
         Room room = roomRepository.findById(orderDetail.getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
         room.setStatus(RoomStatus.AVAILABLE);
         roomRepository.save(room);
-
-        log.info("Completed cleaning for order detail: {}", orderDetail.getOrderDetailId());
         return convertToResponse(orderDetail);
     }
 
@@ -291,7 +301,7 @@ public class CheckingServiceImpl implements CheckingService {
 
         // Get customer info
         if (orderDetail.getUserId() != null) {
-            hotel.db.entity.User user = userRepository.findById(orderDetail.getUserId()).orElse(null);
+            User user = userRepository.findById(orderDetail.getUserId()).orElse(null);
             if (user != null) {
                 response.setCustomerName(user.getFirstName() + " " + user.getLastName());
                 response.setCustomerPhone(user.getPhone());
