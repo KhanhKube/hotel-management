@@ -21,6 +21,7 @@ public class Constants {
     public static final String LOGININVALID = "Sai email hoặc mật khẩu";
     public static final String FILLALLFEILD = "Vui lòng nhập các trường cần thiết!";
     public static final String PASSWORDNOTMATCH = "Mật khẩu không giống nhau!";
+    public static final String PASSWORDENOUGH = "Mật khẩu phải từ 6 -20 kí tự!";
     public static final String USERNAMEDUPLICATE = "Username already taken!";
     public static final String DOBINVALID = "Người dùng cần ít nhât 18 tuổi!";
     public static final String EMAILDUPLICATE = "Email đã được đặng kí!";

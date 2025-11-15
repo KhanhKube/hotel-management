@@ -47,7 +47,7 @@ public interface RoomService {
 
 	List<Room> getAllRooms();
 
-
+    Page<Room> getAllRoomsMaintenance(String seach, String sortBy, int page, int pageSize);
 
     HashMap<String, String> saveRoom(Room room);
     

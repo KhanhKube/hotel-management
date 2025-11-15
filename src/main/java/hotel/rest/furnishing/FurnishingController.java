@@ -166,9 +166,14 @@ public class FurnishingController {
         MessageResponse response = furnishingService.updateFurnishingStock(selectedIds, quantities, actionType);
         if (response.isSuccess()) {
             redirectAttrs.addFlashAttribute("message", response.getMessage());
+            return "redirect:/hotel-management/furnishing";
         } else {
+            redirectAttrs.addFlashAttribute("selectedIds", selectedIds);
+            redirectAttrs.addFlashAttribute("quantities", quantities);
+            redirectAttrs.addFlashAttribute("actionType", actionType);
+
             redirectAttrs.addFlashAttribute("error", response.getMessage());
+            return "redirect:/hotel-management/furnishing/update-stock";
         }
-        return "redirect:/hotel-management/furnishing";
     }
 }

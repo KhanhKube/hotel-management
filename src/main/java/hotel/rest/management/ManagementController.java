@@ -6,20 +6,27 @@ import hotel.db.dto.floor.FloorResponseDto;
 import hotel.db.dto.room.RoomRequestDto;
 import hotel.db.entity.Room;
 import hotel.db.entity.Size;
+import hotel.db.entity.User;
 import hotel.service.view.ViewService;
 import hotel.service.size.SizeService;
 import hotel.service.floor.FloorService;
 import hotel.service.room.RoomService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+
+import static hotel.db.enums.Constants.*;
 
 @Controller
 @RequestMapping("/hotel-management")
@@ -45,16 +52,16 @@ public class ManagementController {
         model.addAttribute("viewCount", viewCount);
         model.addAttribute("sizeCount", sizeCount);
         model.addAttribute("floorCount", floorCount);
-        
+
         // Load data based on type with pagination
         model.addAttribute("currentType", type);
         model.addAttribute("currentPage", page);
         model.addAttribute("pageSize", size);
-        
+
         List<?> allItems = new ArrayList<>();
         int totalItems = 0;
-        
-        switch(type) {
+
+        switch (type) {
             case "view":
                 List<hotel.db.entity.View> allViews = viewService.getAllViews();
                 allItems = allViews;
@@ -72,20 +79,20 @@ public class ManagementController {
                 totalItems = allFloors.size();
                 break;
         }
-        
+
         // Calculate pagination
         int totalPages = totalItems > 0 ? (int) Math.ceil((double) totalItems / size) : 0;
         int start = page * size;
         int end = Math.min(start + size, totalItems);
-        
+
         // Get paginated items
         List<?> paginatedItems = new ArrayList<>();
         if (totalItems > 0 && start < totalItems) {
             paginatedItems = allItems.subList(start, end);
         }
-        
+
         // Add paginated data to model
-        switch(type) {
+        switch (type) {
             case "view":
                 model.addAttribute("views", paginatedItems);
                 break;
@@ -97,7 +104,7 @@ public class ManagementController {
                 model.addAttribute("floors", paginatedItems);
                 break;
         }
-        
+
         model.addAttribute("totalPages", Math.max(totalPages, 1)); // At least 1 page even if empty
         model.addAttribute("totalItems", totalItems);
         model.addAttribute("hasPrevious", page > 0);
@@ -172,9 +179,9 @@ public class ManagementController {
     }
 
     @PostMapping("/floor/save")
-    public String saveFloor(@ModelAttribute("floorRequest") FloorRequestDto floorRequest, 
-                           Model model, 
-                           RedirectAttributes redirectAttributes) {
+    public String saveFloor(@ModelAttribute("floorRequest") FloorRequestDto floorRequest,
+                            Model model,
+                            RedirectAttributes redirectAttributes) {
         try {
             floorService.createFloor(floorRequest);
             redirectAttributes.addFlashAttribute("successMessage", "Thêm tầng thành công!");
@@ -198,10 +205,10 @@ public class ManagementController {
     }
 
     @PostMapping("/floor/update/{id}")
-    public String updateFloor(@PathVariable Integer id, 
-                             @ModelAttribute("floorRequest") FloorRequestDto floorRequest, 
-                             Model model,
-                             RedirectAttributes redirectAttributes) {
+    public String updateFloor(@PathVariable Integer id,
+                              @ModelAttribute("floorRequest") FloorRequestDto floorRequest,
+                              Model model,
+                              RedirectAttributes redirectAttributes) {
         try {
             floorService.updateFloor(id, floorRequest);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật tầng thành công!");
@@ -246,7 +253,7 @@ public class ManagementController {
         roomRequest.setStatus("AVAILABLE");
         roomRequest.setPrice(new java.math.BigDecimal("1000000")); // 1 triệu VNĐ
         roomRequest.setRoomDescription("Phòng deluxe với view đẹp");
-        
+
         model.addAttribute("roomRequest", roomRequest);
         return "management/room-form";
     }
@@ -266,7 +273,7 @@ public class ManagementController {
             room.setSold(roomRequest.getSold() != null ? roomRequest.getSold() : 0);
             room.setView(roomRequest.getView() != null ? roomRequest.getView() : 0);
             room.setMaxSizePeople(roomRequest.getMaxSizePeople());
-            
+
             Room savedRoom = roomService.createRoom(room);
             redirectAttributes.addFlashAttribute("success", "add");
             redirectAttributes.addFlashAttribute("newRoomId", savedRoom.getRoomId());
@@ -293,7 +300,7 @@ public class ManagementController {
             roomRequest.setSold(room.getSold());
             roomRequest.setView(room.getView());
             roomRequest.setMaxSizePeople(room.getMaxSizePeople());
-            
+
             model.addAttribute("roomRequest", roomRequest);
             model.addAttribute("roomId", id);
         } catch (Exception e) {
@@ -317,7 +324,7 @@ public class ManagementController {
             room.setSold(roomRequest.getSold() != null ? roomRequest.getSold() : 0);
             room.setView(roomRequest.getView() != null ? roomRequest.getView() : 0);
             room.setMaxSizePeople(roomRequest.getMaxSizePeople());
-            
+
             Room updatedRoom = roomService.updateRoom(id, room);
             redirectAttributes.addFlashAttribute("success", "edit");
             redirectAttributes.addFlashAttribute("updatedRoomId", updatedRoom.getRoomId());
@@ -340,7 +347,7 @@ public class ManagementController {
         }
         return "redirect:/hotel-management/rooms";
     }
-    
+
     // API endpoint to check if room number exists
     @GetMapping("/api/rooms/check-exists")
     @ResponseBody
@@ -357,21 +364,50 @@ public class ManagementController {
         }
         return response;
     }
-    
+
     // View room detail
     @GetMapping("/rooms/detail/{id}")
     public String viewRoomDetail(@PathVariable Integer id, Model model) {
         try {
             Room room = roomService.getRoomById(id);
             model.addAttribute("room", room);
-            
+
             // Get additional room information if needed
             // You can add more services here to get room images, views, etc.
-            
+
             return "management/room/room-detail";
         } catch (Exception e) {
             model.addAttribute("error", "Không thể tải thông tin phòng: " + e.getMessage());
             return "redirect:/hotel-management/rooms";
         }
+    }
+
+    @GetMapping("/room-maintenance")
+    public String view(@RequestParam(required = false) String search,
+                       @RequestParam(required = false) String sortBy,
+                       @RequestParam(defaultValue = "0") int page,
+                       @RequestParam(defaultValue = "10") int pageSize,
+                       HttpSession session,
+                       Model model, RedirectAttributes redirectAttrs) {
+
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(ADMIN)) {
+            return "redirect:/hotel/dashboard";
+        }
+
+        Page<Room> rooms = roomService.getAllRoomsMaintenance(search, sortBy, page, pageSize);
+        model.addAttribute("listRoom", rooms.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", rooms.getTotalPages());
+        model.addAttribute("totalElements", rooms.getTotalElements());
+        model.addAttribute("pageSize", pageSize);
+        return "management/room-maintenance/room-list";
+
     }
 }
