@@ -27,7 +27,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -63,11 +62,12 @@ public class RoomServiceImpl implements RoomService {
     }
 
 
+    
     @Override
     public List<FurnishingFormDto> getFurnishingsForForm(Integer roomId) {
         // Lấy tất cả vật dụng trong khách sạn (chỉ để hiển thị tên)
         List<Furnishing> allFurnishings = furnishingRepository.findFurnishingsByIsDeletedFalse();
-
+        
         // Lấy vật dụng hiện có của phòng (nếu đang edit)
         Map<Integer, Integer> roomFurnishingMap = new HashMap<>();
         if (roomId != null) {
@@ -89,26 +89,26 @@ public class RoomServiceImpl implements RoomService {
             dto.setRoomQuantity(roomFurnishingMap.getOrDefault(furnishing.getFurnishingId(), 0));
             result.add(dto);
         }
-
+        
         return result;
     }
-
+    
     @Override
     @Transactional
     public void saveRoomFurnishings(Integer roomId, List<Integer> furnishingIds, List<Integer> quantities) {
         if (furnishingIds == null || quantities == null || furnishingIds.size() != quantities.size()) {
             return;
         }
-
+        
         // Xóa tất cả vật dụng cũ của phòng
         List<RoomFurnishing> oldRoomFurnishings = roomFurnishingRepository.findByRoomIdAndIsDeletedFalse(roomId);
         roomFurnishingRepository.deleteAll(oldRoomFurnishings);
-
+        
         // Thêm vật dụng mới theo cấu hình
         for (int i = 0; i < furnishingIds.size(); i++) {
             Integer furnishingId = furnishingIds.get(i);
             Integer quantity = quantities.get(i);
-
+            
             // Chỉ lưu nếu quantity > 0
             if (quantity != null && quantity > 0) {
                 RoomFurnishing roomFurnishing = new RoomFurnishing();
@@ -194,7 +194,7 @@ public class RoomServiceImpl implements RoomService {
                 roomId,
                 fromDate,
                 toDate,
-                Arrays.asList("CHECKED_IN", "CHECKED_OUT", "CONFIRMED")
+                Arrays.asList("PENDING", "CHECKED_OUT", "CONFIRMED")
         );
 
         List<RoomMaintenance> maintenances = roomMaintenanceRepository.findMaintenancesByRoomAndDateRange(
@@ -375,10 +375,9 @@ public class RoomServiceImpl implements RoomService {
         } else {
             dto.setImageRoom(null); // Sẽ dùng ảnh mặc định trong HTML
         }
-
+        
         return dto;
     }
-
     /*
     Tìm ngày trống thoả mãn điều kiện booking đầu tiên
     */
@@ -565,6 +564,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
 
+
     @Override
     public HashMap<String, String> saveRoom(Room room) {
         HashMap<String, String> result = new HashMap<>();
@@ -587,19 +587,19 @@ public class RoomServiceImpl implements RoomService {
             return result;
         }
     }
-
+    
     @Override
     @Transactional
     public HashMap<String, String> createOrUpdateRoom(Room room, List<org.springframework.web.multipart.MultipartFile> imageFiles,
                                                       List<Integer> furnishingIds, List<Integer> furnishingQuantities) {
         HashMap<String, String> result = new HashMap<>();
-
+        
         try {
             log.info("=== CREATE/UPDATE ROOM ===");
             log.info("Room ID: {}, Room Number: {}", room.getRoomId(), room.getRoomNumber());
-
+            
             boolean isUpdate = room.getRoomId() != null;
-
+            
             // Xử lý status cho create/update
             if (!isUpdate) {
                 // Tạo mới: Set status mặc định
@@ -650,8 +650,8 @@ public class RoomServiceImpl implements RoomService {
                 log.info("=== UPLOADING {} IMAGES ===", imageFiles.size());
                 int successCount = 0;
                 int failCount = 0;
-
-                for (org.springframework.web.multipart.MultipartFile file : imageFiles) {
+                
+                for (MultipartFile file : imageFiles) {
                     if (!file.isEmpty()) {
                         try {
                             // Upload lên Cloudinary
@@ -695,7 +695,6 @@ public class RoomServiceImpl implements RoomService {
             return result;
         }
     }
-
     @Override
     public void DeleteRoom(Integer id) {
         roomRepository.softDeleteById(id);
@@ -709,7 +708,7 @@ public class RoomServiceImpl implements RoomService {
         if (sizeId == null) {
             return "Vui lòng chọn diện tích!";
         }
-
+        
         // Lấy số tầng và size
         Integer floorNumber = floorRepository.findById(floorId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tầng"))
@@ -781,7 +780,7 @@ public class RoomServiceImpl implements RoomService {
             long roomCountOnFloor = roomRepository.findAllByIsDeletedFalse().stream()
                     .filter(r -> r.getFloorId().equals(floorId))
                     .count();
-
+            
             if (roomCountOnFloor >= 11) {
                 return "Số lượng phòng trên tầng " + floorNumber + " đã đầy!";
             }
@@ -791,14 +790,14 @@ public class RoomServiceImpl implements RoomService {
         if (price == null) {
             return "Vui lòng nhập giá phòng!";
         }
-
+        
         BigDecimal minPrice = new BigDecimal("100000");
         BigDecimal maxPrice = new BigDecimal("10000000");
-
+        
         if (price.compareTo(minPrice) < 0) {
             return "Giá phòng tối thiểu là 100.000 VNĐ!";
         }
-
+        
         if (price.compareTo(maxPrice) > 0) {
             return "Giá phòng tối đa là 10.000.000 VNĐ!";
         }
@@ -1039,42 +1038,42 @@ public class RoomServiceImpl implements RoomService {
         }
 
         dto.setImages(imageUrls);
-
+        
         // Lấy danh sách room views
         List<String> roomViews = getRoomViewList(room.getRoomId());
         dto.setRoomViews(roomViews);
 
         return dto;
     }
-
+    
     @Override
     @Transactional
     public void disableRoom(Integer roomId, String disableDate, String description, Integer createdBy) {
         log.info("=== Disabling room {} from date: {} ===", roomId, disableDate);
-
+        
         // Parse ngày disable
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate disableDateParsed = LocalDate.parse(disableDate, formatter);
         LocalDateTime disableDateTime = disableDateParsed.atTime(14, 0); // 14:00
-
+        
         // Tìm tất cả bookings từ ngày disable trở đi
         List<OrderDetail> bookingsToCancel = orderDetailRepository.findBookingsToCancel(roomId, disableDateTime);
-
+        
         log.info("Found {} bookings to cancel", bookingsToCancel.size());
-
+        
         // Lấy thông tin phòng
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng"));
-
+        
         // Hủy từng booking và gửi email
         for (OrderDetail booking : bookingsToCancel) {
             log.info("Cancelling booking ID: {}, User ID: {}", booking.getOrderDetailId(), booking.getUserId());
-
+            
             // Update status sang CANCELLED
             booking.setStatus("CANCELLED");
             booking.setUpdatedAt(LocalDateTime.now());
             orderDetailRepository.save(booking);
-
+            
             // Lấy thông tin user
             User user = userRepository.findById(booking.getUserId()).orElse(null);
             if (user != null && user.getEmail() != null) {
@@ -1082,7 +1081,7 @@ public class RoomServiceImpl implements RoomService {
                 DateTimeFormatter emailFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
                 String startDateStr = booking.getStartDate().format(emailFormatter);
                 String endDateStr = booking.getEndDate().format(emailFormatter);
-
+                
                 // Gửi email thông báo
                 String fullName = user.getFirstName() + (user.getLastName() != null ? " " + user.getLastName() : "");
                 commonService.sendCancellationEmail(
@@ -1093,7 +1092,7 @@ public class RoomServiceImpl implements RoomService {
                         endDateStr,
                         description != null ? description : "Phòng tạm ngừng hoạt động"
                 );
-
+                
                 log.info("Sent cancellation email to: {}", user.getEmail());
             }
         }
@@ -1108,11 +1107,11 @@ public class RoomServiceImpl implements RoomService {
         maintenance.setDescription(description != null ? description : "Phòng dừng hoạt động");
         maintenance.setCreateBy(createdBy);
         roomMaintenanceRepository.save(maintenance);
-
+        
         // Update room systemStatus
         room.setSystemStatus("Dừng hoạt động");
         roomRepository.save(room);
-
+        
         log.info("Room {} disabled successfully. Cancelled {} bookings", roomId, bookingsToCancel.size());
     }
 

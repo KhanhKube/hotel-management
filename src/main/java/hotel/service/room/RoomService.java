@@ -4,6 +4,7 @@ import hotel.db.dto.furnishing.FurnishingFormDto;
 import hotel.db.dto.room.*;
 import hotel.db.entity.*;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public interface RoomService {
 
     HashMap<String, String> saveRoom(Room room);
     
-    HashMap<String, String> createOrUpdateRoom(Room room, List<org.springframework.web.multipart.MultipartFile> imageFiles,
+    HashMap<String, String> createOrUpdateRoom(Room room, List<MultipartFile> imageFiles,
                                                List<Integer> furnishingIds, List<Integer> furnishingQuantities);
 
     void DeleteRoom(Integer id);
