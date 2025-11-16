@@ -111,6 +111,7 @@ public class HomePageController {
         model.addAttribute("selectedSortBy", sortBy);
         model.addAttribute("selectedMinPrice", minPrice);
         model.addAttribute("selectedMaxPrice", maxPrice);
+        model.addAttribute("selectedDate", date);
         return "common/room-booklist";
     }
 

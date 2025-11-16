@@ -1110,18 +1110,13 @@ public class RoomServiceImpl implements RoomService {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng"));
 
-        // Hủy từng booking và gửi email
+        // Gửi email thông báo cho các booking bị ảnh hưởng
         for (OrderDetail booking : bookingsToCancel) {
-            log.info("Cancelling booking ID: {}, User ID: {}, Period: {} to {}",
+            log.info("Notifying booking ID: {}, User ID: {}, Period: {} to {}",
                     booking.getOrderDetailId(),
                     booking.getUserId(),
                     booking.getStartDate(),
                     booking.getEndDate());
-
-            // Update status sang CANCELLED
-            booking.setStatus(CANCELLED);
-            booking.setUpdatedAt(LocalDateTime.now());
-            orderDetailRepository.save(booking);
 
             // Lấy thông tin user
             User user = userRepository.findById(booking.getUserId()).orElse(null);
@@ -1188,7 +1183,7 @@ public class RoomServiceImpl implements RoomService {
             log.info("Room {} systemStatus set to 'NEARSTOPWORKING' (will activate on {} at 14:00)", roomId, startDate);
         }
 
-        log.info("Room {} disabled successfully. Cancelled {} bookings", roomId, bookingsToCancel.size());
+        log.info("Room {} disabled successfully. Notified {} bookings", roomId, bookingsToCancel.size());
     }
 
     @Override
