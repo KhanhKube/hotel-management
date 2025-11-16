@@ -301,7 +301,9 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h4 class="card-title mb-0">Quản Lý Phòng</h4>
-                                    <a th:href="@{/hotel-management/room/create}" class="btn btn-primary">
+                                    <a th:if="${session.user.role == 'ADMIN' or session.user.role == 'MANAGER'}"
+                                       th:href="@{/hotel-management/room/create}"
+                                       class="btn btn-primary">
                                         <i class="mdi mdi-plus"></i> Thêm Phòng
                                     </a>
                                 </div>
@@ -381,10 +383,10 @@
                                             </td>
 
                                             <td onclick="event.stopPropagation();">
-                                                <a
+                                                <a th:if="${session.user.role == 'ADMIN' or session.user.role == 'MANAGER'}"
                                                         th:href="@{/hotel-management/room/edit/{id}(id=${d.roomId})}">Sửa</a>
-                                                <a
-                                                        th:href="@{/hotel-management/room/delete/{id}(id=${d.roomId})}">Xóa</a>
+<!--                                                <a-->
+<!--                                                        th:href="@{/hotel-management/room/delete/{id}(id=${d.roomId})}">Xóa</a>-->
                                             </td>
                                         </tr>
 

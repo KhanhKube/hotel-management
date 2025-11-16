@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +48,12 @@ public class ManagementController {
             @RequestParam(value = "type", defaultValue = "floor") String type,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
+            HttpSession session,
             Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (user.getRole().equals(RECEPTIONIST)) return "redirect:/hotel/dashboard";
         // Get counts for statistics
         int viewCount = viewService.getAllViews().size();
         int sizeCount = sizeService.getAllSizes().size();
@@ -121,20 +127,32 @@ public class ManagementController {
 
     // SIZE MANAGEMENT
     @GetMapping("/size")
-    public String sizeManagement(Model model) {
+    public String sizeManagement(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (user.getRole().equals(RECEPTIONIST)) return "redirect:/hotel/dashboard";
         model.addAttribute("sizes", sizeService.getAllSizes());
         return "management/size-management";
     }
 
     @GetMapping("/size/new")
-    public String newSizeForm(Model model) {
+    public String newSizeForm(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (user.getRole().equals(RECEPTIONIST)) return "redirect:/hotel/dashboard";
         model.addAttribute("sizeRequest", new SizeRequestDto());
         return "management/size-form";
     }
 
     @PostMapping("/size/save")
-    public String saveSize(@ModelAttribute("sizeRequest") SizeRequestDto sizeRequest, RedirectAttributes redirectAttributes) {
+    public String saveSize(@ModelAttribute("sizeRequest") SizeRequestDto sizeRequest, RedirectAttributes redirectAttributes, HttpSession session) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) return "redirect:/hotel";
+            if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+            if (user.getRole().equals(RECEPTIONIST)) return "redirect:/hotel/dashboard";
             sizeService.createSize(sizeRequest);
             redirectAttributes.addFlashAttribute("success", "add");
         } catch (Exception e) {
@@ -340,8 +358,18 @@ public class ManagementController {
     }
 
     @PostMapping("/rooms/delete/{id}")
-    public String deleteRoom(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String deleteRoom(@PathVariable Integer id, HttpSession session, RedirectAttributes redirectAttributes) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return "redirect:/hotel";
+            }
+            if (user.getRole().equals(CUSTOMER)) {
+                return "redirect:/hotel";
+            }
+            if (user.getRole().equals(STAFF) || user.getRole().equals(RECEPTIONIST)) {
+                return "redirect:/hotel/dashboard";
+            }
             roomService.hardDeleteRoom(id);
             redirectAttributes.addFlashAttribute("success", "delete");
             redirectAttributes.addFlashAttribute("deletedRoomId", id);
