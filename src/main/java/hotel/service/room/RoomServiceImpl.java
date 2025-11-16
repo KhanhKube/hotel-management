@@ -917,6 +917,7 @@ public class RoomServiceImpl implements RoomService {
                 .bedType(room.getBedType())
                 .floorNumber(floorNumber)
                 .size(size)
+                .max_size_people(room.getMaxSizePeople())
                 .roomDescription(room.getRoomDescription())
                 .price(room.getPrice())
                 .status(room.getStatus())

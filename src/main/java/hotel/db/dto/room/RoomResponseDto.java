@@ -24,6 +24,7 @@ public class RoomResponseDto {
 	private String status;
 	private Integer sold;
 	private Integer view;
+	private Integer max_size_people;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private Boolean isDeleted;
