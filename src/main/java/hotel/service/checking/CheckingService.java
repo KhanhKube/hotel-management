@@ -98,4 +98,9 @@ public interface CheckingService {
      * Nhân viên hoàn thành dọn dẹp: CLEANING -> COMPLETED, Room -> AVAILABLE
      */
     OrderDetailResponse completeCleaning(CleaningRequest request);
+    
+    /**
+     * Lấy danh sách furnishing của phòng để kiểm tra khi check-out
+     */
+    List<java.util.Map<String, Object>> getRoomFurnishings(Integer orderDetailId);
 }

@@ -17,6 +17,7 @@ public class OrderDetailResponse {
     private String orderDescription;
     private LocalDateTime checkIn;
     private LocalDateTime checkOut;
+    private String furnishingCheckNote; // Ghi chú kiểm tra dụng cụ
     private String status;
     private String roomStatus;
     

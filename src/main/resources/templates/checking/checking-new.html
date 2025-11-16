@@ -1049,20 +1049,143 @@
         }
 
         async function completeCleaning(orderDetailId) {
-            const confirmed = await showConfirm('Hoàn thành dọn dẹp', 'Xác nhận hoàn thành dọn dẹp phòng này? Phòng sẽ sẵn sàng cho khách mới.');
-            if (!confirmed) return;
+            // Bước 1: Hiển thị popup kiểm tra dụng cụ phòng
+            const checkResult = await showFurnishingCheckPopup(orderDetailId);
+            if (!checkResult) return; // User hủy
+            
+            // Bước 2: Kiểm tra xem có dụng cụ nào thiếu không
+            const missingItems = checkResult.filter(item => !item.isComplete);
+            
+            // Bước 3: Gọi API hoàn thành dọn (không cần confirm nữa)
+            const notes = missingItems.length > 0 
+                ? `⚠️ THIẾU: ${missingItems.map(i => i.name).join(', ')}` 
+                : '✅ Đầy đủ';
             
             fetch('/api/checking/complete-cleaning', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ orderDetailId })
+                body: JSON.stringify({ 
+                    orderDetailId,
+                    notes: notes
+                })
             })
             .then(res => res.json())
             .then(() => {
-                showToast('success', 'Dọn dẹp hoàn tất!', 'Phòng sẵn sàng cho khách mới');
-                setTimeout(() => location.reload(), 1000);
+                // Bước 4: Hiển thị notification đẹp theo UI mới
+                showCompletionNotification(missingItems);
             })
             .catch(err => showToast('error', 'Lỗi!', err.message));
+        }
+        
+        async function showFurnishingCheckPopup(orderDetailId) {
+            return new Promise((resolve) => {
+                // Tạo overlay
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                `;
+                
+                // Tạo popup
+                const popup = document.createElement('div');
+                popup.style.cssText = `
+                    background: white;
+                    border-radius: 15px;
+                    padding: 30px;
+                    max-width: 600px;
+                    width: 90%;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                `;
+                
+                popup.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                    border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+                            <i class="mdi mdi-clipboard-check" style="font-size: 30px; color: white;"></i>
+                        </div>
+                        <h3 style="margin: 0; color: #2c3e50;">Kiểm Tra Dụng Cụ Phòng</h3>
+                        <p style="color: #6c757d; margin-top: 10px;">Vui lòng kiểm tra và xác nhận tình trạng dụng cụ trong phòng</p>
+                    </div>
+                    
+                    <div id="furnishingList" style="margin: 20px 0;">
+                        <div style="text-align: center; padding: 20px;">
+                            <i class="mdi mdi-loading mdi-spin" style="font-size: 30px; color: #667eea;"></i>
+                            <p>Đang tải danh sách dụng cụ...</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button id="cancelBtn" style="flex: 1; padding: 12px; border: 2px solid #dc3545; background: white; 
+                                color: #dc3545; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            <i class="mdi mdi-close"></i> Hủy
+                        </button>
+                        <button id="confirmBtn" style="flex: 1; padding: 12px; border: none; 
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            <i class="mdi mdi-check"></i> Xác Nhận
+                        </button>
+                    </div>
+                `;
+                
+                overlay.appendChild(popup);
+                document.body.appendChild(overlay);
+                
+                // Load danh sách furnishing từ API
+                fetch(`/api/checking/room-furnishings/${orderDetailId}`)
+                    .then(res => res.json())
+                    .then(furnishings => {
+                        const listHtml = furnishings.map(f => `
+                            <div style="display: flex; align-items: center; padding: 15px; border: 1px solid #e0e0e0; 
+                                        border-radius: 8px; margin-bottom: 10px; background: #f8f9fa;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: #2c3e50;">${f.name}</div>
+                                    <div style="color: #6c757d; font-size: 14px;">Số lượng: ${f.quantity}</div>
+                                </div>
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" class="furnishing-check" 
+                                           data-id="${f.furnishingId}" 
+                                           data-name="${f.name}"
+                                           style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;">
+                                    <span style="color: #28a745; font-weight: 600;">Đầy đủ</span>
+                                </label>
+                            </div>
+                        `).join('');
+                        
+                        document.getElementById('furnishingList').innerHTML = listHtml || 
+                            '<p style="text-align: center; color: #6c757d;">Phòng không có dụng cụ nào</p>';
+                    })
+                    .catch(() => {
+                        document.getElementById('furnishingList').innerHTML = 
+                            '<p style="text-align: center; color: #dc3545;">Lỗi tải danh sách dụng cụ</p>';
+                    });
+                
+                // Xử lý nút
+                document.getElementById('cancelBtn').onclick = () => {
+                    document.body.removeChild(overlay);
+                    resolve(null);
+                };
+                
+                document.getElementById('confirmBtn').onclick = () => {
+                    const checks = Array.from(document.querySelectorAll('.furnishing-check'))
+                        .map(cb => ({
+                            furnishingId: cb.dataset.id,
+                            name: cb.dataset.name,
+                            isComplete: cb.checked
+                        }));
+                    document.body.removeChild(overlay);
+                    resolve(checks);
+                };
+            });
         }
 
         function changePage(page) {
@@ -1070,7 +1193,175 @@
             urlParams.set('page', page);
             window.location.search = urlParams.toString();
         }
+        
+        // Function hiển thị thông báo hoàn thành dọn dẹp
+        function showCompletionNotification(missingItems) {
+            const overlay = document.createElement('div');
+            overlay.className = 'completion-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.6);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.3s;
+            `;
+            
+            const notification = document.createElement('div');
+            
+            if (missingItems.length === 0) {
+                // ✅ ĐẦY ĐỦ
+                notification.style.cssText = `
+                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                    color: white;
+                    padding: 40px 50px;
+                    border-radius: 15px;
+                    box-shadow: 0 10px 40px rgba(40, 167, 69, 0.4);
+                    text-align: center;
+                    max-width: 500px;
+                    animation: slideIn 0.3s;
+                `;
+                
+                notification.innerHTML = `
+                    <div style="font-size: 70px; margin-bottom: 20px;">✓</div>
+                    <div style="font-size: 22px; font-weight: 600; line-height: 1.6;">
+                        Dọn dẹp hoàn tất! Phòng đã sẵn sàng cho khách mới.
+                    </div>
+                    <button onclick="this.closest('.completion-overlay').remove(); location.reload();" 
+                            style="margin-top: 25px; padding: 14px 40px; background: white; 
+                                   color: #28a745; border: none; border-radius: 8px; 
+                                   font-weight: 600; cursor: pointer; font-size: 16px;
+                                   box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                        OK
+                    </button>
+                `;
+                
+                // Auto close sau 3 giây
+                setTimeout(() => {
+                    overlay.remove();
+                    location.reload();
+                }, 3000);
+            } else {
+                // ❌ THIẾU
+                const missingNames = missingItems.map(i => i.name).join(', ');
+                
+                notification.style.cssText = `
+                    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+                    color: white;
+                    padding: 40px 50px;
+                    border-radius: 15px;
+                    box-shadow: 0 10px 40px rgba(220, 53, 69, 0.4);
+                    text-align: center;
+                    max-width: 600px;
+                    animation: slideIn 0.3s;
+                `;
+                
+                const missingItemsHtml = missingItems.map(item => `
+                    <div style="display: flex; align-items: center; justify-content: space-between; 
+                                padding: 12px; background: rgba(255,255,255,0.15); 
+                                border-radius: 8px; margin-bottom: 8px;">
+                        <span style="font-size: 16px; font-weight: 500;">${item.name}</span>
+                        <button class="restock-btn" data-item='${JSON.stringify(item)}'
+                                style="padding: 8px 20px; background: white; color: #dc3545; 
+                                       border: none; border-radius: 6px; font-weight: 600; 
+                                       cursor: pointer; font-size: 14px;">
+                            ✓ Đã thêm
+                        </button>
+                    </div>
+                `).join('');
+                
+                notification.innerHTML = `
+                    <div style="font-size: 70px; margin-bottom: 20px;">✗</div>
+                    <div style="font-size: 22px; font-weight: 600; line-height: 1.6; margin-bottom: 20px;">
+                        Phòng còn thiếu dụng cụ. Vui lòng bổ sung trước khi mở cho khách.
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 20px; 
+                                border-radius: 10px; margin-top: 20px;">
+                        <div style="font-size: 15px; opacity: 0.9; margin-bottom: 12px;">Chi tiết thiếu:</div>
+                        <div id="missingItemsList">
+                            ${missingItemsHtml}
+                        </div>
+                    </div>
+                    <button id="confirmRestockBtn" disabled
+                            style="margin-top: 25px; padding: 14px 40px; background: rgba(255,255,255,0.3); 
+                                   color: white; border: none; border-radius: 8px; 
+                                   font-weight: 600; cursor: not-allowed; font-size: 16px;
+                                   box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                        Xác nhận đã bổ sung
+                    </button>
+                `;
+                
+                // Xử lý click nút "Đã thêm"
+                setTimeout(() => {
+                    const restockBtns = notification.querySelectorAll('.restock-btn');
+                    const confirmBtn = notification.querySelector('#confirmRestockBtn');
+                    let restockedCount = 0;
+                    
+                    restockBtns.forEach(btn => {
+                        btn.onclick = function() {
+                            this.style.background = '#28a745';
+                            this.style.color = 'white';
+                            this.disabled = true;
+                            this.textContent = '✓ Đã thêm';
+                            restockedCount++;
+                            
+                            // Nếu đã thêm hết → Enable nút xác nhận
+                            if (restockedCount === missingItems.length) {
+                                confirmBtn.disabled = false;
+                                confirmBtn.style.background = 'white';
+                                confirmBtn.style.color = '#28a745';
+                                confirmBtn.style.cursor = 'pointer';
+                                
+                                confirmBtn.onclick = () => {
+                                    // Hiển thị notification thành công
+                                    overlay.remove();
+                                    showCompletionNotification([]);
+                                };
+                            }
+                        };
+                    });
+                }, 100);
+            }
+            
+            overlay.appendChild(notification);
+            document.body.appendChild(overlay);
+        }
     </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .completion-overlay > div {
+                max-width: 90% !important;
+                padding: 30px 25px !important;
+                font-size: 16px !important;
+            }
+            
+            .completion-overlay > div > div:first-child {
+                font-size: 50px !important;
+            }
+        }
+    </style>
 </body>
 </html>
 

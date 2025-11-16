@@ -49,6 +49,9 @@ public class OrderDetail extends AbstractVersion{
     @Column(name = "check_out")
     private LocalDateTime checkOut;
 
+    @Column(name = "furnishing_check_note", columnDefinition = "TEXT")
+    private String furnishingCheckNote; // Ghi chú kiểm tra dụng cụ khi check-out
+
     @Column(name = "amount")
     private BigDecimal amount;
 

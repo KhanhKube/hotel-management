@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class StaffCheckOutRequest {
     private Integer orderDetailId;
-    private String reportNote; // Ghi chú nếu có thiếu hụt hoặc lỗi
-    private Boolean hasIssue; // Có vấn đề không
+    private Boolean furnishingCheckCompleted; // Đã kiểm tra dụng cụ chưa (BẮT BUỘC = true)
+    private String issueNote; // Ghi chú nếu có dụng cụ thiếu/hỏng (không bắt buộc)
 }
