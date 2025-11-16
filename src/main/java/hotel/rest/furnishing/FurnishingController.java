@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 
 import static hotel.db.enums.Constants.*;
 
@@ -158,22 +159,21 @@ public class FurnishingController {
     }
 
     @PostMapping("/update-stock")
-    public String updateStock(@RequestParam("selectedIds") List<Integer> selectedIds,
-                              @RequestParam("quantities") List<Integer> quantities,
-                              @RequestParam("actionType") String actionType,
-                              RedirectAttributes redirectAttrs) {
+    public String updateStock(
+            @RequestParam("selectedIds") List<Integer> selectedIds,
+            @RequestParam Map<String, String> params,
+            @RequestParam("actionType") String actionType,
+            RedirectAttributes redirectAttrs) {
 
-        MessageResponse response = furnishingService.updateFurnishingStock(selectedIds, quantities, actionType);
+        MessageResponse response = furnishingService.updateFurnishingStock(selectedIds, params, actionType);
+
         if (response.isSuccess()) {
             redirectAttrs.addFlashAttribute("message", response.getMessage());
             return "redirect:/hotel-management/furnishing";
         } else {
-            redirectAttrs.addFlashAttribute("selectedIds", selectedIds);
-            redirectAttrs.addFlashAttribute("quantities", quantities);
-            redirectAttrs.addFlashAttribute("actionType", actionType);
-
             redirectAttrs.addFlashAttribute("error", response.getMessage());
             return "redirect:/hotel-management/furnishing/update-stock";
         }
     }
+
 }
