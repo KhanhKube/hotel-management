@@ -1,8 +1,10 @@
 package hotel.rest.checking;
 
 import hotel.db.dto.checking.*;
+import hotel.db.entity.User;
 import hotel.service.checking.CheckingService;
 import hotel.util.MessageResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
+
+import static hotel.db.enums.Constants.*;
+import static hotel.db.enums.Constants.ADMIN;
 
 @RestController
 @RequestMapping("/api/checking")
@@ -43,8 +48,23 @@ public class CheckingController {
     @GetMapping("/checking-in")
     public ResponseEntity<?> getCheckingInOrders(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            HttpSession session) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Phải đăng nhập trước!"));
+            }
+            if (user.getRole().equals(CUSTOMER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
+            if (user.getRole().equals(ADMIN) ||
+                    user.getRole().equals(MANAGER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
             Pageable pageable = PageRequest.of(page, size);
             Page<OrderDetailResponse> orders = checkingService.getCheckingInOrders(pageable);
             return ResponseEntity.ok(orders);
@@ -75,8 +95,22 @@ public class CheckingController {
      * Bước 1: Lễ tân bắt đầu check-in: RESERVED -> CHECKING_IN
      */
     @PostMapping("/start-checkin")
-    public ResponseEntity<?> startCheckIn(@RequestBody CheckInRequest request) {
+    public ResponseEntity<?> startCheckIn(@RequestBody CheckInRequest request, HttpSession session) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Phải đăng nhập trước!"));
+            }
+            if (user.getRole().equals(CUSTOMER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
+            if (user.getRole().equals(ADMIN) ||
+                    user.getRole().equals(MANAGER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
             OrderDetailResponse response = checkingService.startCheckIn(request);
             
             // Kiểm tra xem còn phòng RESERVED không
@@ -116,8 +150,22 @@ public class CheckingController {
      * Bước 3: Nhân viên xác nhận: CUSTOMER_CONFIRM -> OCCUPIED
      */
     @PostMapping("/staff-confirm")
-    public ResponseEntity<?> staffConfirmCheckIn(@RequestBody CheckInConfirmRequest request) {
+    public ResponseEntity<?> staffConfirmCheckIn(@RequestBody CheckInConfirmRequest request, HttpSession session) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Phải đăng nhập trước!"));
+            }
+            if (user.getRole().equals(CUSTOMER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
+            if (user.getRole().equals(ADMIN) ||
+                    user.getRole().equals(MANAGER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
             request.setConfirmedBy("STAFF");
             OrderDetailResponse response = checkingService.confirmCheckIn(request);
             
@@ -201,8 +249,22 @@ public class CheckingController {
      * Bước 2: Nhân viên kiểm tra phòng: NEED_CHECKOUT -> CHECKING_OUT -> CHECKED_OUT
      */
     @PostMapping("/staff-check-room")
-    public ResponseEntity<?> staffCheckOut(@RequestBody StaffCheckOutRequest request) {
+    public ResponseEntity<?> staffCheckOut(@RequestBody StaffCheckOutRequest request, HttpSession session) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Phải đăng nhập trước!"));
+            }
+            if (user.getRole().equals(CUSTOMER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
+            if (user.getRole().equals(ADMIN) ||
+                    user.getRole().equals(MANAGER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
             OrderDetailResponse response = checkingService.staffCheckOut(request);
             
             // Kiểm tra xem còn phòng NEED_CHECKOUT không
@@ -238,8 +300,23 @@ public class CheckingController {
      * Bước 3: Lễ tân xác nhận checkout: CHECKED_OUT -> NEED_CLEAN
      */
     @PostMapping("/confirm-checkout")
-    public ResponseEntity<?> receptionistConfirmCheckOut(@RequestBody AfterCheckOutConfirmRequest request) {
+    public ResponseEntity<?> receptionistConfirmCheckOut(@RequestBody AfterCheckOutConfirmRequest request, HttpSession session) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Phải đăng nhập trước!"));
+            }
+            if (user.getRole().equals(CUSTOMER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
+            if (user.getRole().equals(ADMIN) ||
+                    user.getRole().equals(MANAGER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
+
             OrderDetailResponse response = checkingService.receptionistConfirmCheckOut(request);
             
             // Kiểm tra xem còn phòng CHECKED_OUT không
@@ -302,8 +379,22 @@ public class CheckingController {
      * Bước 4: Nhân viên bắt đầu dọn phòng: NEED_CLEAN -> CLEANING
      */
     @PostMapping("/start-cleaning")
-    public ResponseEntity<?> startCleaning(@RequestBody CleaningRequest request) {
+    public ResponseEntity<?> startCleaning(@RequestBody CleaningRequest request, HttpSession session) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Phải đăng nhập trước!"));
+            }
+            if (user.getRole().equals(CUSTOMER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
+            if (user.getRole().equals(ADMIN) ||
+                    user.getRole().equals(MANAGER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
             OrderDetailResponse response = checkingService.startCleaning(request);
             
             // Kiểm tra xem còn phòng NEED_CLEAN không
@@ -322,8 +413,22 @@ public class CheckingController {
      * Bước 5: Nhân viên hoàn thành dọn phòng: CLEANING -> COMPLETED, Room -> AVAILABLE
      */
     @PostMapping("/complete-cleaning")
-    public ResponseEntity<?> completeCleaning(@RequestBody CleaningRequest request) {
+    public ResponseEntity<?> completeCleaning(@RequestBody CleaningRequest request, HttpSession session) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Phải đăng nhập trước!"));
+            }
+            if (user.getRole().equals(CUSTOMER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
+            if (user.getRole().equals(ADMIN) ||
+                    user.getRole().equals(MANAGER)) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse(false, "Bạn không có quyền!"));
+            }
             OrderDetailResponse response = checkingService.completeCleaning(request);
             
             // Kiểm tra xem còn phòng CLEANING không

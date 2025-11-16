@@ -133,7 +133,7 @@
             </a>
             <div class="collapse" id="ui-basic">
                 <ul class="nav flex-column sub-menu">
-                    <li class="nav-item">
+                    <li class="nav-item" th:if="${user != null and (user.role != 'RECEPTIONIST')}">
                         <a class="nav-link" th:href="@{/hotel-management/location-room}">Vị trí phòng</a>
                     </li>
                     <li class="nav-item">
