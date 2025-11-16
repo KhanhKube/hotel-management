@@ -158,11 +158,25 @@ public class FurnishingController {
     }
 
     @PostMapping("/update-stock")
-    public String updateStock(@RequestParam("selectedIds") List<Integer> selectedIds,
-                              @RequestParam("quantities") List<Integer> quantities,
+    public String updateStock(@RequestParam(value = "selectedIds", required = false) List<Integer> selectedIds,
+                              @RequestParam(value = "quantities", required = false) List<Integer> quantities,
                               @RequestParam("actionType") String actionType,
                               RedirectAttributes redirectAttrs) {
+        // Validate: không chọn dụng cụ nào
+        if (selectedIds == null || selectedIds.isEmpty()) {
+            redirectAttrs.addFlashAttribute("error", "Vui lòng chọn ít nhất một dụng cụ.");
+            return "redirect:/hotel-management/furnishing/update-stock";
+        }
 
+        // Validate: số lượng không nhập
+        if (quantities == null || quantities.isEmpty()) {
+            redirectAttrs.addFlashAttribute("error", "Vui lòng nhập số lượng thay đổi.");
+            return "redirect:/hotel-management/furnishing/update-stock";
+        }
+        if (!actionType.equals("ADD") && !actionType.equals("TAKE")) {
+            redirectAttrs.addFlashAttribute("error", "Vui lòng chọn phương thức thêm/lấy.");
+            return "redirect:/hotel-management/furnishing/update-stock";
+        }
         MessageResponse response = furnishingService.updateFurnishingStock(selectedIds, quantities, actionType);
         if (response.isSuccess()) {
             redirectAttrs.addFlashAttribute("message", response.getMessage());

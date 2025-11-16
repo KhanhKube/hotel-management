@@ -128,32 +128,50 @@ public class FurnishingServiceImpl implements FurnishingService {
 
     @Override
     @Transactional
-    public MessageResponse updateFurnishingStock(List<Integer> selectedIds, List<Integer> quantities, String actionType) {
+    public MessageResponse updateFurnishingStock(List<Integer> selectedIds,
+                                                 List<Integer> quantities,
+                                                 String actionType) {
+
+        // Kiểm tra không chọn dụng cụ
         if (selectedIds == null || selectedIds.isEmpty()) {
             return new MessageResponse(false, "Vui lòng chọn ít nhất một dụng cụ.");
         }
 
+        // Kiểm tra số lượng nhập vào có khớp số ID không
+        if (quantities == null || quantities.isEmpty() || quantities.size() != selectedIds.size()) {
+            return new MessageResponse(false, "Số lượng nhập không khớp với số dụng cụ được chọn.");
+        }
+
+        // Xử lý update
         for (int i = 0; i < selectedIds.size(); i++) {
             int id = selectedIds.get(i);
             int qty = quantities.get(i);
+
+            if (qty <= 0) {
+                return new MessageResponse(false, "Số lượng phải lớn hơn 0.");
+            }
 
             Furnishing item = furnishingRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy dụng cụ ID: " + id));
 
             if ("ADD".equalsIgnoreCase(actionType)) {
                 item.setQuantity(item.getQuantity() + qty);
+
             } else if ("TAKE".equalsIgnoreCase(actionType)) {
                 if (item.getQuantity() < qty) {
-                    return new MessageResponse(false, "Không đủ số lượng trong kho cho: " + item.getName());
+                    return new MessageResponse(false,
+                            "Không đủ số lượng trong kho cho: " + item.getName());
                 }
                 item.setQuantity(item.getQuantity() - qty);
             }
+
             furnishingRepository.save(item);
         }
 
         String msg = "ADD".equalsIgnoreCase(actionType)
                 ? "Thêm dụng cụ thành công!"
                 : "Lấy dụng cụ thành công!";
+
         return new MessageResponse(true, msg);
     }
 }
