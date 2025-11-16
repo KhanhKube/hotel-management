@@ -424,12 +424,7 @@ public class RoomController {
 			Integer createdBy = user.getUserId();
 			roomService.disableRoom(roomId, checkInDate, checkOutDate, description, createdBy);
 
-			// Set status phòng ngay lập tức
-			Room room = roomService.getRoomById(roomId);
-			room.setSystemStatus(RoomSystemStatus.NEARSTOPWORKING);
-			roomService.saveRoom(room);
-
-			redirectAttributes.addFlashAttribute("successMessage", "Đã lên lịch dừng hoạt động phòng!");
+			redirectAttributes.addFlashAttribute("successMessage", "Đã dừng hoạt động phòng!");
 			return "redirect:/hotel-management/room";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
