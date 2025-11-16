@@ -135,6 +135,29 @@
         .toast-notification .toast-close:hover {
             opacity: 1;
         }
+
+        /* Giới hạn độ dài text trong table để tránh vỡ UI */
+        .table td {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Cột họ tên - giới hạn 150px */
+        .table td:nth-child(2) {
+            max-width: 150px;
+        }
+
+        /* Cột email - giới hạn 160px */
+        .table td:nth-child(5) {
+            max-width: 160px;
+        }
+
+        /* Thêm tooltip khi hover để xem full text */
+        .table td[title] {
+            cursor: help;
+        }
     </style>
 </head>
 
@@ -294,10 +317,12 @@
                                             style="cursor: pointer;">
 
                                             <td th:text="${stat.count}"></td>
-                                            <td th:text="${d.fullName != null && !d.fullName.isEmpty() ? d.fullName : 'N/A'}"></td>
+                                            <td th:text="${d.fullName != null && !d.fullName.isEmpty() ? d.fullName : 'N/A'}" 
+                                                th:title="${d.fullName}"></td>
                                             <td th:text="${d.codeStaff != null ? d.codeStaff : 'N/A'}"></td>
                                             <td th:text="${d.phone != null ? d.phone : 'N/A'}"></td>
-                                            <td th:text="${d.email != null ? d.email : 'N/A'}"></td>
+                                            <td th:text="${d.email != null ? d.email : 'N/A'}" 
+                                                th:title="${d.email}"></td>
                                             <td th:text="${d.gender != null ? d.gender : 'N/A'}"></td>
                                             <td>
                                                 <span th:if="${d.role == 'RECEPTIONIST'}">Lễ tân</span>
