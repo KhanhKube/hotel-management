@@ -26,7 +26,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
 	long countByStatusIn(List<String> statuses);
 
 	// Query cho check-out list: CHECKED_IN với pagination
-	Page<OrderDetail> findByStatusOrderByCreatedAtDesc(String status, Pageable pageable);
+	Page<OrderDetail> findByStatusAndIsDeletedFalseOrderByCreatedAtDesc(String status, Pageable pageable);
 
 	// Count cho check-out
 	long countByStatus(String status);

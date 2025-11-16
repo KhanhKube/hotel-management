@@ -56,8 +56,8 @@ public class CartServiceImpl implements CartService {
 		Room room = roomRepository.findById(request.getRoomId())
 				.orElseThrow(() -> new RuntimeException("Room not found with ID: " + request.getRoomId()));
 
-		// Calculate number of days
-		long days = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+		// Calculate number of nights (based on dates only, not time)
+		long days = ChronoUnit.DAYS.between(checkInDate.toLocalDate(), checkOutDate.toLocalDate());
 		if (days <= 0) {
 			throw new RuntimeException("Check-out date must be after check-in date");
 		}
@@ -142,8 +142,8 @@ public class CartServiceImpl implements CartService {
 				Room room = roomRepository.findById(detail.getRoomId()).orElse(null);
 				if (room == null) continue;
 
-				// Calculate days and total price
-				long days = ChronoUnit.DAYS.between(detail.getCheckIn(), detail.getCheckOut());
+				// Calculate nights (based on dates only, not time)
+				long days = ChronoUnit.DAYS.between(detail.getCheckIn().toLocalDate(), detail.getCheckOut().toLocalDate());
 				BigDecimal totalPrice = room.getPrice().multiply(BigDecimal.valueOf(days));
 
 				// Get room image
@@ -192,7 +192,7 @@ public class CartServiceImpl implements CartService {
 					// Get room to calculate amount to subtract
 					Room room = roomRepository.findById(detail.getRoomId()).orElse(null);
 					if (room != null) {
-						long days = ChronoUnit.DAYS.between(detail.getCheckIn(), detail.getCheckOut());
+						long days = ChronoUnit.DAYS.between(detail.getCheckIn().toLocalDate(), detail.getCheckOut().toLocalDate());
 						BigDecimal amountToRemove = room.getPrice().multiply(BigDecimal.valueOf(days));
 
 						// Update order total amount
