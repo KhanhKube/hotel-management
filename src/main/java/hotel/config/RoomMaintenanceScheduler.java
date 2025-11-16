@@ -56,17 +56,7 @@ public class RoomMaintenanceScheduler {
                 // Xử lý theo loại maintenance
                 String maintenanceStatus = maintenance.getStatus();
                 
-                if (hotel.db.enums.RoomSystemStatus.STOPWORKING.equals(maintenanceStatus)) {
-                    // Dừng hoạt động: Chỉ update nếu phòng đang ở trạng thái "Sắp dừng hoạt động"
-                    if (NEARSTOPWORKING.equals(room.getSystemStatus())) {
-                        room.setStatus(EMERGENCYMAINTENANCE);
-                        room.setSystemStatus(STOPWORKING);
-                        roomRepository.save(room);
-                        updatedCount++;
-                        log.info("Updated room {} (Room #{}) to 'Dừng hoạt động' status", 
-                            room.getRoomId(), room.getRoomNumber());
-                    }
-                } else if (hotel.db.enums.RoomSystemStatus.MAINTENANCE.equals(maintenanceStatus)) {
+                if (hotel.db.enums.RoomSystemStatus.MAINTENANCE.equals(maintenanceStatus)) {
                     // Bảo trì: Chỉ update nếu phòng đang ở trạng thái "Sắp bảo trì"
                     if (NEARMAINTENANCE.equals(room.getSystemStatus())) {
                         room.setStatus(MAINTENANCE);

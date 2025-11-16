@@ -1152,37 +1152,11 @@ public class RoomServiceImpl implements RoomService {
         maintenance.setCreateBy(createdBy);
         roomMaintenanceRepository.save(maintenance);
 
-        // Kiểm tra ngày bắt đầu và thời gian để cập nhật status phòng
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate today = now.toLocalDate();
-        LocalDate startDate = disableStartDateTime.toLocalDate();
-
-        if (startDate.equals(today)) {
-            // Ngày bắt đầu = hôm nay
-            if (now.getHour() >= 14) {
-                // Đã qua 14:00 → Chuyển ngay sang "Đã dừng hoạt động"
-                room.setStatus(EMERGENCYMAINTENANCE);
-                room.setSystemStatus(STOPWORKING);
-                roomRepository.save(room);
-                log.info("Room {} status updated to 'STOPWORKING' immediately (today at or after 14:00)", roomId);
-            } else {
-                // Chưa đến 14:00 → Set "Sắp dừng hoạt động", đợi scheduler lúc 14:00
-                room.setSystemStatus(NEARSTOPWORKING);
-                roomRepository.save(room);
-                log.info("Room {} systemStatus set to 'NEARSTOPWORKING' (today before 14:00, scheduler will activate at 14:00)", roomId);
-            }
-        } else if (startDate.isBefore(today)) {
-            // Ngày bắt đầu < hôm nay (quá khứ) → Chuyển ngay sang "Đã dừng hoạt động"
-            room.setStatus(EMERGENCYMAINTENANCE);
-            room.setSystemStatus(STOPWORKING);
-            roomRepository.save(room);
-            log.info("Room {} status updated to 'STOPWORKING' immediately (start date in the past)", roomId);
-        } else {
-            // Ngày bắt đầu > hôm nay → Set "Sắp dừng hoạt động", scheduler sẽ chuyển đúng ngày lúc 14:00
-            room.setSystemStatus(NEARSTOPWORKING);
-            roomRepository.save(room);
-            log.info("Room {} systemStatus set to 'NEARSTOPWORKING' (will activate on {} at 14:00)", roomId, startDate);
-        }
+        // Cập nhật status phòng ngay lập tức khi admin chọn ngày dừng hoạt động
+        room.setStatus(EMERGENCYMAINTENANCE);
+        room.setSystemStatus(STOPWORKING);
+        roomRepository.save(room);
+        log.info("Room {} status updated to 'MAINTENANCE' and systemStatus to 'STOPWORKING' immediately", roomId);
 
         log.info("Room {} disabled successfully. Notified {} bookings", roomId, bookingsToCancel.size());
     }
