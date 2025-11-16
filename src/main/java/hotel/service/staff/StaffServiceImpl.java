@@ -367,6 +367,15 @@ public class StaffServiceImpl implements StaffService {
         }
     }
 
+    @Override
+    public void deleteStaff(Integer id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            user.setIsDeleted(true);
+            userRepository.save(user);
+        }
+    }
+
     private String generateStaffCode() {
         String prefix = "NV";
         long count = userRepository.count() + 1;

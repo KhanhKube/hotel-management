@@ -186,28 +186,8 @@ public class DiscountController {
                 user.getRole().equals(RECEPTIONIST)) {
             return "redirect:/hotel/dashboard";
         }
-        // Lấy discount để check status
-        Discount discount = discountService.getDiscountById(id);
         
-        if (discount == null) {
-            model.addAttribute("errorMessage", "Không tìm thấy mã giảm giá!");
-            model.addAttribute("listDiscount", discountService.getListDiscount());
-            model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
-            return "management/discount/discountmanage";
-        }
-        
-        // Tính status
-        String status = discountService.calculateStatus(discount);
-        
-        // Không cho xóa nếu đang ACTIVE
-        if ("ACTIVE".equals(status)) {
-            model.addAttribute("errorMessage", "Không thể xóa mã giảm giá đang hoạt động! Vui lòng đợi đến khi hết hạn hoặc hết số lượng.");
-            model.addAttribute("listDiscount", discountService.getListDiscount());
-            model.addAttribute("roomTypes", discountService.getRoomTypesForDiscount());
-            return "management/discount/discountmanage";
-        }
-        
-        // Cho phép xóa nếu PENDING, EXPIRED, hoặc EXHAUSTED
+        // Admin có toàn quyền xóa mã giảm giá bất kể trạng thái
         discountRepository.softDeleteById(id);
         return "redirect:/hotel-management/discount";
     }

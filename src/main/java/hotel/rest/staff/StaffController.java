@@ -141,4 +141,16 @@ public class StaffController {
         return "redirect:/hotel-management/staff";
     }
 
+    @GetMapping("/delete/{id}")
+    public String deleteStaff(@PathVariable Integer id, HttpSession session, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(MANAGER)) return "redirect:/hotel/dashboard";
+
+        staffService.deleteStaff(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Xóa nhân viên thành công!");
+        return "redirect:/hotel-management/staff";
+    }
+
 }
