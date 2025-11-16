@@ -21,4 +21,8 @@ public class OrderMaintenanceResponse {
     // Customer info
     private String customerName;
     private String customerPhone;
+    
+    // Status info
+    private String status;
+    private Boolean isDeleted;
 }

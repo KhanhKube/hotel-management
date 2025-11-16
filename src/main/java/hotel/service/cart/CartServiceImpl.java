@@ -49,9 +49,9 @@ public class CartServiceImpl implements CartService {
 			throw new RuntimeException("Check-out date is required");
 		}
 
-		// Normalize dates to start of day (remove time component)
-		LocalDateTime checkInDate = request.getCheckIn().toLocalDate().atStartOfDay();
-		LocalDateTime checkOutDate = request.getCheckOut().toLocalDate().atStartOfDay();
+		// Set default times: check-in at 14:00:00, check-out at 12:00:00
+		LocalDateTime checkInDate = request.getCheckIn().toLocalDate().atTime(14, 0, 0);
+		LocalDateTime checkOutDate = request.getCheckOut().toLocalDate().atTime(12, 0, 0);
 
 		Room room = roomRepository.findById(request.getRoomId())
 				.orElseThrow(() -> new RuntimeException("Room not found with ID: " + request.getRoomId()));
@@ -68,9 +68,9 @@ public class CartServiceImpl implements CartService {
 			List<OrderDetail> cartDetails = orderDetailRepository.findByOrderId(cartOrder.getOrderId());
 			for (OrderDetail detail : cartDetails) {
 				if (detail.getRoomId().equals(request.getRoomId())) {
-					// Check date overlap
-					LocalDateTime existingCheckIn = detail.getCheckIn().toLocalDate().atStartOfDay();
-					LocalDateTime existingCheckOut = detail.getCheckOut().toLocalDate().atStartOfDay();
+					// Check date overlap (using actual times)
+					LocalDateTime existingCheckIn = detail.getCheckIn();
+					LocalDateTime existingCheckOut = detail.getCheckOut();
 
 					if (checkInDate.isBefore(existingCheckOut) && checkOutDate.isAfter(existingCheckIn)) {
 						throw new RuntimeException("Phòng này đã có trong giỏ hàng với ngày trùng lặp");
@@ -82,8 +82,8 @@ public class CartServiceImpl implements CartService {
 		// Check if room is already reserved by others for these dates
 		List<OrderDetail> reservedDetails = orderDetailRepository.findByRoomIdAndStatus(request.getRoomId(), "RESERVED");
 		for (OrderDetail detail : reservedDetails) {
-			LocalDateTime existingCheckIn = detail.getCheckIn().toLocalDate().atStartOfDay();
-			LocalDateTime existingCheckOut = detail.getCheckOut().toLocalDate().atStartOfDay();
+			LocalDateTime existingCheckIn = detail.getCheckIn();
+			LocalDateTime existingCheckOut = detail.getCheckOut();
 
 			if (checkInDate.isBefore(existingCheckOut) && checkOutDate.isAfter(existingCheckIn)) {
 				throw new RuntimeException("Phòng này đã được đặt cho ngày bạn chọn");
@@ -194,12 +194,12 @@ public class CartServiceImpl implements CartService {
 					if (room != null) {
 						long days = ChronoUnit.DAYS.between(detail.getCheckIn(), detail.getCheckOut());
 						BigDecimal amountToRemove = room.getPrice().multiply(BigDecimal.valueOf(days));
-						
+
 						// Update order total amount
 						BigDecimal currentTotal = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
 						order.setTotalAmount(currentTotal.subtract(amountToRemove));
 					}
-					
+
 					orderDetailRepository.delete(detail);
 
 					// If no more details, delete the order
@@ -360,10 +360,10 @@ public class CartServiceImpl implements CartService {
 
 		// Get all cart orders
 		List<Order> cartOrders = orderRepository.findByUserIdAndStatus(userId, "CART");
-		
+
 		CartSummaryDto summary = new CartSummaryDto();
 		summary.setTotalOrders(cartOrders.size());
-		
+
 		// Filter by selected order IDs if provided
 		if (selectedOrderIds != null && !selectedOrderIds.isEmpty()) {
 			cartOrders = cartOrders.stream()
@@ -378,21 +378,21 @@ public class CartServiceImpl implements CartService {
 					.map(Order::getOrderId)
 					.collect(Collectors.toList()));
 		}
-		
+
 		// Calculate subtotal from Order.totalAmount (already calculated in backend)
 		BigDecimal subtotal = cartOrders.stream()
 				.map(order -> order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
-		
+
 		summary.setSubtotal(subtotal);
-		
+
 		// Apply discount if code provided
 		BigDecimal discountAmount = BigDecimal.ZERO;
 		summary.setDiscountValid(false);
-		
+
 		if (discountCode != null && !discountCode.trim().isEmpty()) {
 			Discount discount = discountRepository.findByCodeAndIsDeletedFalse(discountCode.trim().toUpperCase());
-			
+
 			if (discount == null) {
 				summary.setDiscountMessage("Mã giảm giá không tồn tại");
 				summary.setDiscountValid(false);
@@ -401,7 +401,7 @@ public class CartServiceImpl implements CartService {
 				summary.setDiscountValid(false);
 			} else {
 				LocalDate today = LocalDate.now();
-				
+
 				// Check if discount is within valid date range
 				if (today.isBefore(discount.getStartDate())) {
 					summary.setDiscountMessage("Mã giảm giá chưa có hiệu lực (bắt đầu từ " + discount.getStartDate() + ")");
@@ -417,27 +417,27 @@ public class CartServiceImpl implements CartService {
 					BigDecimal discountPercent = BigDecimal.valueOf(discount.getValue());
 					discountAmount = subtotal.multiply(discountPercent)
 							.divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
-					
+
 					summary.setDiscountMessage(" Áp dụng mã " + discount.getCode() + " - Giảm " + discount.getValue() + "%");
 					summary.setDiscountValid(true);
-					
+
 					System.out.println("Applied discount: " + discount.getCode() + " (" + discount.getValue() + "%)");
 				}
 			}
 		}
-		
+
 		summary.setDiscountAmount(discountAmount);
-		
+
 		// Calculate final total
 		BigDecimal totalAmount = subtotal.subtract(discountAmount);
 		if (totalAmount.compareTo(BigDecimal.ZERO) < 0) {
 			totalAmount = BigDecimal.ZERO;
 		}
-		
+
 		summary.setTotalAmount(totalAmount);
-		
+
 		System.out.println("Cart summary - Subtotal: " + subtotal + ", Discount: " + discountAmount + ", Total: " + totalAmount);
-		
+
 		return summary;
 	}
 
@@ -445,20 +445,20 @@ public class CartServiceImpl implements CartService {
 	@Transactional
 	public void updateOrderNote(Integer userId, Integer orderId, String note) {
 		System.out.println("=== Updating order note for orderId: " + orderId + ", userId: " + userId + " ===");
-		
+
 		// Find the order
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new RuntimeException("Order not found"));
-		
+
 		// Verify ownership and status
 		if (!order.getUserId().equals(userId)) {
 			throw new RuntimeException("Unauthorized: Order does not belong to user");
 		}
-		
+
 		if (!"CART".equals(order.getStatus())) {
 			throw new RuntimeException("Cannot update note: Order is not in cart");
 		}
-		
+
 		// Update note in OrderDetail
 		List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
 		if (!orderDetails.isEmpty()) {

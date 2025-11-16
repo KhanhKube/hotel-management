@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Quản lý đơn đặt phòng</title>
+    <base th:href="@{/static}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/mdi/css/materialdesignicons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/vendors/css/vendor.bundle.base.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/assets/images/favicon.png}"/>
+
+    <style>
+        tbody tr:hover {
+            cursor: pointer;
+            opacity: 0.65;
+            transition: background-color 0.2s;
+        }
+
+        .form-select {
+            width: 100%;
+            background-color: #2c2e33;
+            border: 1px solid #2c2e33;
+            color: #ffffff;
+            padding: 0.5rem 2rem 0.5rem 0.5rem;
+            font-size: 0.875rem;
+            border-radius: 2px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 16px 12px;
+        }
+
+        .form-select:focus {
+            background-color: #2c2e33;
+            border-color: #2196f3;
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .form-select option {
+            background-color: #2c2e33;
+            color: #ffffff;
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast-notification.error {
+            background-color: #dc3545;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast-notification.hiding {
+            animation: slideOut 0.3s ease-out;
+        }
+
+        .toast-notification .toast-close {
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            opacity: 0.8;
+            cursor: pointer;
+        }
+
+        .toast-notification .toast-close:hover {
+            opacity: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #191c24;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #2c2e33;
+            border-radius: 4px;
+            width: 400px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: white;
+        }
+
+        /* Custom notification and confirm dialog animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .custom-notification {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .confirm-overlay {
+            animation: fadeIn 0.2s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Toast -->
+<div th:if="${successMessage}" class="toast-notification">
+    <span class="toast-close"
+          onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300);">&times;</span>
+    <i class="mdi mdi-check-circle"></i> <span th:text="${successMessage}"></span>
+</div>
+<div th:if="${errorMessage}" class="toast-notification error">
+    <span class="toast-close"
+          onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300);">&times;</span>
+    <i class="mdi mdi-alert-circle"></i> <span th:text="${errorMessage}"></span>
+</div>
+
+<div class="container-scroller">
+
+    <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+    <div class="container-fluid page-body-wrapper">
+
+        <div class="main-panel">
+            <div class="content-wrapper">
+
+                <div class="row">
+
+                    <!-- Bộ lọc -->
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title mb-3">Tìm kiếm nhanh</h4>
+
+                                <form th:action="@{/hotel-management/order-details}" method="get">
+                                    <div class="row">
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">Tìm theo tên hoặc số điện thoại</label>
+                                            <input type="text" name="search" class="form-control"
+                                                   placeholder="Nhập tên hoặc số điện thoại..."
+                                                   th:value="${search}">
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label class="form-label">Trạng thái</label>
+                                            <select name="status" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                <option value="RESERVED" th:selected="${status == 'RESERVED'}">Hoạt
+                                                    động
+                                                </option>
+                                                <option value="CANCEL" th:selected="${status == 'CANCEL'}">Đã hủy
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-5 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-primary mr-2">
+                                                <i class="mdi mdi-magnify"></i> Tìm kiếm
+                                            </button>
+                                            <a th:href="@{/hotel-management/order-details}" class="btn btn-secondary">
+                                                <i class="mdi mdi-refresh"></i> Đặt lại
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <h4 class="card-title mb-3">Quản lý đơn đặt phòng</h4>
+
+                                <div class="table-responsive">
+                                    <table class="table" id="orderTable">
+                                        <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Số điện thoại</th>
+                                            <th>Tên khách hàng</th>
+                                            <th>Số phòng</th>
+                                            <th>Ngày đặt</th>
+                                            <th>Ngày kết thúc</th>
+                                            <th>Giá</th>
+                                            <th>Trạng thái</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                        </thead>
+
+                                        <tbody>
+                                        <tr th:each="d, stat : ${orderDetails}">
+
+                                            <td th:text="${(currentPage * pageSize) + stat.count}"></td>
+                                            <td th:text="${d.customerPhone ?: 'N/A'}"></td>
+                                            <td th:text="${d.customerName ?: 'N/A'}"></td>
+                                            <td th:text="${d.roomNumber ?: 'N/A'}"></td>
+                                            <td th:text="${#temporals.format(d.startDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                            <td th:text="${#temporals.format(d.endDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                            <td th:text="${#numbers.formatDecimal(d.amount,0,'COMMA',0,'POINT') + ' VNĐ'}"></td>
+
+                                            <td>
+                                                <span th:if="${d.isDeleted}" class="badge badge-danger">Đã hủy</span>
+                                                <span th:if="${!d.isDeleted}"
+                                                      class="badge badge-success">Đã đặt</span>
+                                            </td>
+
+                                            <td onclick="event.stopPropagation();">
+
+                                                <!-- ⭐ NÚT CHỈNH SỬA (ĐÃ FIX) -->
+                                                <button class="btn btn-primary btn-sm"
+                                                        th:onclick="'openStatusModal('
+                                                                    + ${d.orderDetailId}
+                                                                    + ', \''
+                                                                    + (${d.isDeleted} ? 'CANCEL' : 'RESERVED')
+                                                                    + '\')'">
+                                                    <i class="mdi mdi-pencil"></i> Chỉnh sửa
+                                                </button>
+
+                                            </td>
+                                        </tr>
+
+                                        <tr th:if="${#lists.isEmpty(orderDetails)}">
+                                            <td colspan="9" class="text-center text-muted">Không có đơn nào</td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <div class="pagination-wrapper" th:if="${totalPages > 1}">
+                                    <nav>
+                                        <ul class="pagination justify-content-center">
+                                            <!-- Previous -->
+                                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                                <a class="page-link"
+                                                   th:href="@{/hotel-management/order-details(page=${currentPage - 1}, pageSize=${pageSize}, search=${search}, status=${status})}">
+                                                    Trước
+                                                </a>
+                                            </li>
+
+                                            <!-- Page numbers -->
+                                            <li class="page-item"
+                                                th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                                th:classappend="${i == currentPage} ? 'active'">
+                                                <a class="page-link"
+                                                   th:href="@{/hotel-management/order-details(page=${i}, pageSize=${pageSize}, search=${search}, status=${status})}"
+                                                   th:text="${i + 1}">1</a>
+                                            </li>
+
+                                            <!-- Next -->
+                                            <li class="page-item"
+                                                th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                                <a class="page-link"
+                                                   th:href="@{/hotel-management/order-details(page=${currentPage + 1}, pageSize=${pageSize}, search=${search}, status=${status})}">
+                                                    Sau
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+
+                                    <!-- Info -->
+                                    <div class="text-center mt-3">
+                                        <p>Trang [[${currentPage + 1}]] / [[${totalPages}]] - Tổng [[${totalElements}]]
+                                            đơn</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- row -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ⭐ MODAL CHỈNH SỬA TRẠNG THÁI -->
+<div id="statusModal" class="modal">
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h5>Chỉnh sửa trạng thái đơn</h5>
+            <span class="close" onclick="closeStatusModal()">&times;</span>
+        </div>
+
+        <form id="statusForm" method="post" onsubmit="return confirmStatusChange(event)">
+
+            <label class="form-label">Chọn trạng thái:</label>
+            <select id="statusSelect" name="status" class="form-select" required>
+                <option value="" disabled>-- Chọn trạng thái --</option>
+                <option value="RESERVED">Hoạt động lại</option>
+                <option value="CANCEL">Hủy</option>
+            </select>
+
+            <div class="modal-footer mt-3">
+                <button type="button" class="btn btn-secondary" onclick="closeStatusModal()">Hủy</button>
+                <button type="submit" class="btn btn-primary">Lưu</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<script th:src="@{/assets/vendors/js/vendor.bundle.base.js}"></script>
+<script th:src="@{/assets/js/off-canvas.js}"></script>
+<script th:src="@{/assets/js/hoverable-collapse.js}"></script>
+<script th:src="@{/assets/js/misc.js}"></script>
+
+<script>
+
+    // Tự ẩn toast
+    document.addEventListener('DOMContentLoaded', function () {
+        const toast = document.querySelector('.toast-notification');
+        if (toast) {
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    });
+
+    let currentOrderDetailId = null;
+
+    // Hàm mở modal
+    function openStatusModal(orderDetailId) {
+        currentOrderDetailId = orderDetailId;
+
+        const modal = document.getElementById('statusModal');
+        const form = document.getElementById('statusForm');
+        const select = document.getElementById('statusSelect');
+
+        // Reset form về trạng thái ban đầu
+        form.reset();
+
+        // Đặt select về option mặc định (-- Chọn trạng thái --)
+        select.value = "";
+
+        // Set action URL
+        form.action = '/hotel-management/order-details/update-status/' + orderDetailId;
+
+        // Hiển thị modal
+        modal.style.display = 'block';
+    }
+
+    function closeStatusModal() {
+        const modal = document.getElementById('statusModal');
+        const form = document.getElementById('statusForm');
+
+        // Reset form
+        form.reset();
+
+        // Ẩn modal
+        modal.style.display = 'none';
+        currentOrderDetailId = null;
+    }
+
+    function confirmStatusChange(event) {
+        const select = document.getElementById('statusSelect');
+
+        if (!select.value) {
+            event.preventDefault();
+            showNotification('Vui lòng chọn trạng thái!', 'warning');
+            return false;
+        }
+
+        const statusText = select.value === 'CANCEL' ? 'hủy' : 'hoạt động lại';
+        const statusColor = select.value === 'CANCEL' ? '#dc3545' : '#28a745';
+
+        event.preventDefault();
+        showConfirmDialog(
+            'Xác nhận thay đổi',
+            'Bạn có chắc chắn muốn ' + statusText + ' đơn này?',
+            statusColor,
+            function () {
+                // User confirmed - submit form
+                document.getElementById('statusForm').submit();
+            }
+        );
+        return false;
+    }
+
+    function showNotification(message, type) {
+        const bgColor = type === 'warning' ? '#ffc107' : type === 'error' ? '#dc3545' : '#28a745';
+        const icon = type === 'warning' ? 'mdi-alert' : type === 'error' ? 'mdi-alert-circle' : 'mdi-check-circle';
+
+        const notification = document.createElement('div');
+        notification.className = 'custom-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            background-color: ${bgColor};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+        `;
+        notification.innerHTML = `
+            <i class="mdi ${icon}"></i>
+            <span style="margin-left: 10px;">${message}</span>
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(function () {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(function () {
+                notification.remove();
+            }, 300);
+        }, 3000);
+    }
+
+    function showConfirmDialog(title, message, color, onConfirm) {
+        const overlay = document.createElement('div');
+        overlay.className = 'confirm-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-out;
+        `;
+
+        const dialog = document.createElement('div');
+        dialog.style.cssText = `
+            background-color: #191c24;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: scaleIn 0.3s ease-out;
+        `;
+
+        dialog.innerHTML = `
+            <div style="text-align: center;">
+                <div style="width: 60px; height: 60px; border-radius: 50%; background-color: ${color}; 
+                            margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                    <i class="mdi mdi-help" style="font-size: 32px; color: white;"></i>
+                </div>
+                <h4 style="color: #ffffff; margin-bottom: 10px;">${title}</h4>
+                <p style="color: #b4b7bd; margin-bottom: 30px;">${message}</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="btn btn-secondary" onclick="this.closest('.confirm-overlay').remove()">
+                        Hủy
+                    </button>
+                    <button class="btn btn-primary" style="background-color: ${color}; border-color: ${color};" 
+                            onclick="this.closest('.confirm-overlay').remove(); arguments[0]()">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Add click handler to confirm button
+        const confirmBtn = dialog.querySelector('.btn-primary');
+        confirmBtn.onclick = function () {
+            overlay.remove();
+            onConfirm();
+        };
+
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+
+        // Close on overlay click
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) {
+                overlay.remove();
+            }
+        });
+    }
+
+    // Đóng modal khi click bên ngoài
+    window.onclick = function (event) {
+        const modal = document.getElementById('statusModal');
+        if (event.target === modal) closeStatusModal();
+    };
+
+</script>
+
+</body>
+</html>

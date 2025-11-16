@@ -49,7 +49,7 @@ public class PaymentServiceImpl implements PaymentService {
 		if (requestBody.getSelectedOrderIds() != null && !requestBody.getSelectedOrderIds().isEmpty()) {
 			cartItems = cartItems.stream()
 					.filter(item -> requestBody.getSelectedOrderIds().contains(item.getOrderId()))
-					.collect(java.util.stream.Collectors.toList());
+					.collect(Collectors.toList());
 			
 			if (cartItems.isEmpty()) {
 				throw new RuntimeException("Không có đơn hàng nào được chọn");

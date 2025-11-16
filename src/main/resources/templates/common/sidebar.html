@@ -16,10 +16,10 @@
     <!-- Brand -->
     <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
         <a class="sidebar-brand brand-logo" th:href="@{/hotel}">
-            <img src="/assets/images/logo.svg" alt="logo" />
+            <img src="/assets/images/logo.svg" alt="logo"/>
         </a>
         <a class="sidebar-brand brand-logo-mini" th:href="@{/hotel-management/dashboard}">
-            <img src="/assets/images/logo-mini.svg" alt="logo" />
+            <img src="/assets/images/logo-mini.svg" alt="logo"/>
         </a>
     </div>
 
@@ -74,7 +74,8 @@
 
                     <!-- Logout form -->
                     <form th:action="@{/hotel/logout}" method="post">
-                        <button type="submit" class="dropdown-item preview-item border-0 bg-transparent w-100 text-left">
+                        <button type="submit"
+                                class="dropdown-item preview-item border-0 bg-transparent w-100 text-left">
                             <div class="preview-thumbnail">
                                 <div class="preview-icon bg-dark rounded-circle">
                                     <i class="mdi mdi-logout text-danger"></i>
@@ -116,7 +117,8 @@
             </a>
         </li>
         <!-- Dashboard -->
-        <li class="nav-item menu-items" th:if="${user != null and (user.role == 'RECEPTIONIST' || user.role == 'STAFF')}">
+        <li class="nav-item menu-items"
+            th:if="${user != null and (user.role == 'RECEPTIONIST' || user.role == 'STAFF')}">
             <a class="nav-link" th:href="@{/hotel-management/checking}">
                 <span class="menu-icon"><i class="mdi mdi-playlist-play"></i></span>
                 <span class="menu-title">Check-In/Check-Out</span>
@@ -139,11 +141,11 @@
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/hotel-management/room}">Phòng</a>
                     </li>
-<!--                    <li class="nav-item">-->
-<!--                        <a class="nav-link" th:href="@{/management/services}">Dịch vụ</a>-->
-<!--                    </li>-->
+                    <!--                    <li class="nav-item">-->
+                    <!--                        <a class="nav-link" th:href="@{/management/services}">Dịch vụ</a>-->
+                    <!--                    </li>-->
                     <li class="nav-item" th:if="${user != null and (user.role == 'MANAGER' || user.role == 'STAFF')}">
-                    <a class="nav-link" th:href="@{/hotel-management/furnishing}">Dụng cụ</a>
+                        <a class="nav-link" th:href="@{/hotel-management/furnishing}">Dụng cụ</a>
                     </li>
 
                     <li class="nav-item" th:if="${user != null and (user.role == 'MANAGER' || user.role == 'STAFF')}">
@@ -152,11 +154,14 @@
                     <li class="nav-item" th:if="${user != null and (user.role == 'MANAGER' || user.role == 'STAFF')}">
                         <a class="nav-link" th:href="@{/management/news}">Tin tức</a>
                     </li>
-<!--                    <li class="nav-item">-->
-<!--                        <a class="nav-link" th:href="@{/management/hotels}">Khách sạn</a>-->
-<!--                    </li>-->
-                    <li class="nav-item" >
+                    <!--                    <li class="nav-item">-->
+                    <!--                        <a class="nav-link" th:href="@{/management/hotels}">Khách sạn</a>-->
+                    <!--                    </li>-->
+                    <li class="nav-item">
                         <a class="nav-link" th:href="@{/hotel-management/room-maintenance}">Phòng bảo trì</a>
+                    </li>
+                    <li class="nav-item" th:if="${user != null and user.role == 'RECEPTIONIST'}">
+                        <a class="nav-link" th:href="@{/hotel-management/order-details}">Quản lý đơn đặt phòng</a>
                     </li>
                 </ul>
             </div>
@@ -172,19 +177,19 @@
             </a>
             <div class="collapse" id="auth">
                 <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"  th:if="${user != null and user.role == 'ADMIN'}">
+                    <li class="nav-item" th:if="${user != null and user.role == 'ADMIN'}">
                         <a class="nav-link" th:href="@{/hotel-management/accounts}">Tài khoản</a>
                     </li>
                     <!-- Only MANAGER can see -->
-<!--                    <li class="nav-item" th:if="${user != null and user.role == 'MANAGER'}">-->
-<!--                        <a class="nav-link" th:href="@{/hotel-management/receptionist}">Lễ tân</a>-->
-<!--                    </li>-->
+                    <!--                    <li class="nav-item" th:if="${user != null and user.role == 'MANAGER'}">-->
+                    <!--                        <a class="nav-link" th:href="@{/hotel-management/receptionist}">Lễ tân</a>-->
+                    <!--                    </li>-->
                     <li class="nav-item" th:if="${user != null and user.role == 'MANAGER'}">
                         <a class="nav-link" th:href="@{/hotel-management/staff}">Nhân viên</a>
                     </li>
                     <li class="nav-item">
                         <!--                        <a class="nav-link" th:href="@{/hotel-management/customer}">Khách hàng</a>-->
-                        <a class="nav-link"  href="#">Khách hàng</a>
+                        <a class="nav-link" href="#">Khách hàng</a>
                     </li>
                 </ul>
             </div>
