@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 
 import static hotel.db.enums.Constants.*;
 
@@ -158,36 +159,21 @@ public class FurnishingController {
     }
 
     @PostMapping("/update-stock")
-    public String updateStock(@RequestParam(value = "selectedIds", required = false) List<Integer> selectedIds,
-                              @RequestParam(value = "quantities", required = false) List<Integer> quantities,
-                              @RequestParam("actionType") String actionType,
-                              RedirectAttributes redirectAttrs) {
-        // Validate: không chọn dụng cụ nào
-        if (selectedIds == null || selectedIds.isEmpty()) {
-            redirectAttrs.addFlashAttribute("error", "Vui lòng chọn ít nhất một dụng cụ.");
-            return "redirect:/hotel-management/furnishing/update-stock";
-        }
+    public String updateStock(
+            @RequestParam("selectedIds") List<Integer> selectedIds,
+            @RequestParam Map<String, String> params,
+            @RequestParam("actionType") String actionType,
+            RedirectAttributes redirectAttrs) {
 
-        // Validate: số lượng không nhập
-        if (quantities == null || quantities.isEmpty()) {
-            redirectAttrs.addFlashAttribute("error", "Vui lòng nhập số lượng thay đổi.");
-            return "redirect:/hotel-management/furnishing/update-stock";
-        }
-        if (!actionType.equals("ADD") && !actionType.equals("TAKE")) {
-            redirectAttrs.addFlashAttribute("error", "Vui lòng chọn phương thức thêm/lấy.");
-            return "redirect:/hotel-management/furnishing/update-stock";
-        }
-        MessageResponse response = furnishingService.updateFurnishingStock(selectedIds, quantities, actionType);
+        MessageResponse response = furnishingService.updateFurnishingStock(selectedIds, params, actionType);
+
         if (response.isSuccess()) {
             redirectAttrs.addFlashAttribute("message", response.getMessage());
             return "redirect:/hotel-management/furnishing";
         } else {
-            redirectAttrs.addFlashAttribute("selectedIds", selectedIds);
-            redirectAttrs.addFlashAttribute("quantities", quantities);
-            redirectAttrs.addFlashAttribute("actionType", actionType);
-
             redirectAttrs.addFlashAttribute("error", response.getMessage());
             return "redirect:/hotel-management/furnishing/update-stock";
         }
     }
+
 }

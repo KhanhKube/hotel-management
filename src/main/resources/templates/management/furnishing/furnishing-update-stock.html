@@ -61,7 +61,13 @@
                 <td th:text="${item.name}"></td>
                 <td th:text="${item.furnishingDescription}"></td>
                 <td th:text="${item.quantity}"></td>
-                <td><input type="number" name="quantities" min="1"  class="form-control" style="width: 100px;"></td>
+                <td>
+                  <input type="number"
+                         th:name="'quantity_' + ${item.furnishingId}"
+                         min="1"
+                         class="form-control"
+                         style="width: 100px;">
+                </td>
               </tr>
               </tbody>
             </table>

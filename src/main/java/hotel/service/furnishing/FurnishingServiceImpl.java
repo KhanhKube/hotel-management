@@ -11,10 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -129,34 +126,32 @@ public class FurnishingServiceImpl implements FurnishingService {
     @Override
     @Transactional
     public MessageResponse updateFurnishingStock(List<Integer> selectedIds,
-                                                 List<Integer> quantities,
+                                                 Map<String, String> params,
                                                  String actionType) {
 
-        // Kiểm tra không chọn dụng cụ
         if (selectedIds == null || selectedIds.isEmpty()) {
             return new MessageResponse(false, "Vui lòng chọn ít nhất một dụng cụ.");
         }
 
-        // Kiểm tra số lượng nhập vào có khớp số ID không
-        if (quantities == null || quantities.isEmpty() || quantities.size() != selectedIds.size()) {
-            return new MessageResponse(false, "Số lượng nhập không khớp với số dụng cụ được chọn.");
-        }
+        for (Integer id : selectedIds) {
+            Furnishing furnishing = furnishingRepository.findFurnishingByFurnishingId(id);
+            String key = "quantity_" + id;
+            if (!params.containsKey(key) || params.get(key).isBlank()) {
+                return new MessageResponse(false,
+                        "Vui lòng nhập số lượng cho dụng cụ: " + furnishing.getName());
+            }
 
-        // Xử lý update
-        for (int i = 0; i < selectedIds.size(); i++) {
-            int id = selectedIds.get(i);
-            int qty = quantities.get(i);
-
+            int qty = Integer.parseInt(params.get(key));
             if (qty <= 0) {
-                return new MessageResponse(false, "Số lượng phải lớn hơn 0.");
+                return new MessageResponse(false,
+                        "Số lượng phải lớn hơn 0 cho dụng cụ: " + furnishing.getName());
             }
 
             Furnishing item = furnishingRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy dụng cụ ID: " + id));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy dụng cụ: " + id));
 
             if ("ADD".equalsIgnoreCase(actionType)) {
                 item.setQuantity(item.getQuantity() + qty);
-
             } else if ("TAKE".equalsIgnoreCase(actionType)) {
                 if (item.getQuantity() < qty) {
                     return new MessageResponse(false,
@@ -168,10 +163,7 @@ public class FurnishingServiceImpl implements FurnishingService {
             furnishingRepository.save(item);
         }
 
-        String msg = "ADD".equalsIgnoreCase(actionType)
-                ? "Thêm dụng cụ thành công!"
-                : "Lấy dụng cụ thành công!";
-
-        return new MessageResponse(true, msg);
+        return new MessageResponse(true,
+                actionType.equals("ADD") ? "Thêm dụng cụ thành công!" : "Lấy dụng cụ thành công!");
     }
 }
