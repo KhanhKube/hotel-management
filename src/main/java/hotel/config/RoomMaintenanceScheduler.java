@@ -30,6 +30,8 @@ public class RoomMaintenanceScheduler {
     /**
      * Chạy vào 14:00 mỗi ngày để check và update status phòng khi đến ngày bảo trì hoặc dừng hoạt động
      */
+//    @Scheduled(cron = "*/30 * * * * *") // Mỗi 30s
+
     @Scheduled(cron = "0 0 14 * * *") // Chạy vào 14:00 mỗi ngày
     @Transactional
     public void updateRoomStatusForMaintenance() {

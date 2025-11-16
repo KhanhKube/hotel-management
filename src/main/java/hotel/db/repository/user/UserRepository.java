@@ -29,7 +29,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByIsDeletedFalse();
     List<User> findByRoleAndIsDeletedFalse(String role);
 
-    @Query(value = "SELECT * FROM users WHERE role = 'STAFF' OR role = 'RECEPTIONIST'", nativeQuery = true)
+    @Query(value = "SELECT * FROM users WHERE (role = 'STAFF' OR role = 'RECEPTIONIST') AND is_deleted = false", nativeQuery = true)
     List<User> findByRoleStaffOrReceptionist();
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.role = 'STAFF' AND u.isDeleted = false ")

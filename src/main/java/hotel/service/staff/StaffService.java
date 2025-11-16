@@ -31,4 +31,6 @@ public interface StaffService {
 
     String updateStaffFromForm(User user);
 
+    void deleteStaff(Integer id);
+
 }
