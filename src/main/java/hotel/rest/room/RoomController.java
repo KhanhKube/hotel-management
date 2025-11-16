@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static hotel.db.enums.Constants.*;
 import static hotel.db.enums.RoomStatus.AVAILABLE;
 import static hotel.db.enums.RoomStatus.OCCUPIED;
 
@@ -75,8 +76,15 @@ public class RoomController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int pageSize,
+            HttpSession session,
             Model model) {
-
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
         Page<RoomListDto> roomPage = roomService.getRoomListForManagement(
                 search, roomType, status, systemstatus, floor, size, minPrice, maxPrice, sortBy, page, pageSize
         );
@@ -91,7 +99,17 @@ public class RoomController {
     }
 
     @GetMapping("/create")
-    public String create(Model model) {
+    public String create(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) || user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel-management/room";
+        }
         Room room = new Room();
         model.addAttribute("room", room);
         // Load danh sách vật dụng cho form
@@ -186,7 +204,17 @@ public class RoomController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editRoomtForm(@PathVariable Integer id, Model model) {
+    public String editRoomtForm(@PathVariable Integer id, Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) || user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel-management/room";
+        }
         Room room = roomService.getRoomById(id);
         if (room == null) {
             return "redirect:/hotel-management/room";
@@ -203,7 +231,17 @@ public class RoomController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteRoom(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String deleteRoom(@PathVariable Integer id, RedirectAttributes redirectAttributes, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(STAFF) || user.getRole().equals(RECEPTIONIST)) {
+            return "redirect:/hotel-management/room";
+        }
         // Lấy room để check status
         Room room = roomService.getRoomById(id);
 
@@ -226,7 +264,14 @@ public class RoomController {
     }
 
     @GetMapping("/detail/{id}")
-    public String detailRoom(@PathVariable Integer id, Model model) {
+    public String detailRoom(@PathVariable Integer id, Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(CUSTOMER)) {
+            return "redirect:/hotel";
+        }
         Room room = roomService.getRoomById(id);
         List<RoomImage> images = roomImageService.getImagesByRoomId(id);
         List<FurnishingFormDto> furnishings = roomService.getFurnishingsForForm(id);

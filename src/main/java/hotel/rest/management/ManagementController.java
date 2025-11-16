@@ -358,8 +358,18 @@ public class ManagementController {
     }
 
     @PostMapping("/rooms/delete/{id}")
-    public String deleteRoom(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String deleteRoom(@PathVariable Integer id, HttpSession session, RedirectAttributes redirectAttributes) {
         try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return "redirect:/hotel";
+            }
+            if (user.getRole().equals(CUSTOMER)) {
+                return "redirect:/hotel";
+            }
+            if (user.getRole().equals(STAFF) || user.getRole().equals(RECEPTIONIST)) {
+                return "redirect:/hotel/dashboard";
+            }
             roomService.hardDeleteRoom(id);
             redirectAttributes.addFlashAttribute("success", "delete");
             redirectAttributes.addFlashAttribute("deletedRoomId", id);
