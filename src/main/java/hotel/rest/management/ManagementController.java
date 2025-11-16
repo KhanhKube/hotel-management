@@ -500,5 +500,62 @@ public class ManagementController {
        return "redirect:/hotel-management/room-maintenance/"+ orderDetail.getRoomId();
     }
 
+    // ORDER DETAILS MANAGEMENT
+    @GetMapping("/order-details")
+    public String orderDetailsManagement(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpSession session,
+            Model model) {
+        
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        
+        // Convert status string to isDeleted boolean
+        Boolean isDeleted = null;
+        if ("CANCEL".equals(status)) {
+            isDeleted = true;
+        } else if ("RESERVED".equals(status)) {
+            isDeleted = false;
+        }
+        
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<OrderMaintenanceResponse> orderDetails = orderService.findAllOrderDetailsWithFilter(search, isDeleted, pageable);
+        
+        model.addAttribute("orderDetails", orderDetails.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", orderDetails.getTotalPages());
+        model.addAttribute("totalElements", orderDetails.getTotalElements());
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("search", search);
+        model.addAttribute("status", status);
+        
+        return "management/order-details/order-details-list";
+    }
+
+    @PostMapping("/order-details/update-status/{orderDetailId}")
+    public String updateOrderDetailStatus(
+            @PathVariable Integer orderDetailId,
+            @RequestParam String status,
+            HttpSession session,
+            RedirectAttributes redirectAttrs) {
+        
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        
+        MessageResponse response = orderService.updateOrderDetailStatus(orderDetailId, status);
+        
+        if (response.isSuccess()) {
+            redirectAttrs.addFlashAttribute("successMessage", response.getMessage());
+        } else {
+            redirectAttrs.addFlashAttribute("errorMessage", response.getMessage());
+        }
+        
+        return "redirect:/hotel-management/order-details";
+    }
 
 }
