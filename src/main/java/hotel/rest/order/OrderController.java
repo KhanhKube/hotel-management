@@ -2,6 +2,7 @@ package hotel.rest.order;
 
 import hotel.db.dto.order.BookingInfoDto;
 import hotel.db.dto.order.OrderDto;
+import hotel.db.entity.User;
 import hotel.db.repository.orderdetail.OrderDetailRepository;
 import hotel.service.order.OrderService;
 import jakarta.servlet.http.HttpSession;
@@ -15,73 +16,84 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
+import static hotel.db.enums.Constants.*;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/hotel")
 public class OrderController {
 
-	private final OrderService orderService;
-	private final OrderDetailRepository orderDetailRepository;
+    private final OrderService orderService;
+    private final OrderDetailRepository orderDetailRepository;
 
-	@GetMapping("/order")
-	public String viewOrders(Model model, HttpSession session) {
-		Integer userId = getUserIdFromSession(session);
-		if (userId == null) {
-			return "redirect:/hotel/login";
-		}
+    @GetMapping("/order")
+    public String viewOrders(Model model, HttpSession session) {
+        Integer userId = getUserIdFromSession(session);
+        if (userId == null) {
+            return "redirect:/hotel/login";
+        }
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/hotel";
+        }
+        if (user.getRole().equals(ADMIN) ||
+                user.getRole().equals(MANAGER) ||
+                user.getRole().equals(STAFF)) {
+            return "redirect:/hotel";
+        }
 
-		List<OrderDto> orders = orderService.getOrdersByUserId(userId);
+        List<OrderDto> orders = orderService.getOrdersByUserId(userId);
 
 
-		model.addAttribute("orders", orders);
-		return "order/orders";
-	}
+        model.addAttribute("orders", orders);
+        return "order/orders";
+    }
 
-	/**
-	 * API endpoint: Lấy thông tin đặt phòng của user
-	 * Trả về: orderId, orderDetailId, checkIn (ngày đặt), checkOut (ngày hết hạn), roomNumber, roomType, status
-	 */
-	@GetMapping("/api/booking-info")
-	@ResponseBody
-	public ResponseEntity<List<BookingInfoDto>> getBookingInfo(HttpSession session) {
-		Integer userId = getUserIdFromSession(session);
-		if (userId == null) {
-			return ResponseEntity.ok(List.of());
-		}
+    /**
+     * API endpoint: Lấy thông tin đặt phòng của user
+     * Trả về: orderId, orderDetailId, checkIn (ngày đặt), checkOut (ngày hết hạn), roomNumber, roomType, status
+     */
+    @GetMapping("/api/booking-info")
+    @ResponseBody
+    public ResponseEntity<List<BookingInfoDto>> getBookingInfo(HttpSession session) {
+        Integer userId = getUserIdFromSession(session);
+        if (userId == null) {
+            return ResponseEntity.ok(List.of());
+        }
 
-		List<BookingInfoDto> bookingInfo = orderService.getBookingInfoByUserId(userId);
-		return ResponseEntity.ok(bookingInfo);
-	}
+        List<BookingInfoDto> bookingInfo = orderService.getBookingInfoByUserId(userId);
+        return ResponseEntity.ok(bookingInfo);
+    }
 
-	/**
-	 * API endpoint: Lấy tất cả thông tin đặt phòng (cho admin)
-	 * Trả về: orderId, orderDetailId, checkIn (ngày đặt), checkOut (ngày hết hạn), roomNumber, roomType, status
-	 */
-	@GetMapping("/api/all-booking-info")
-	@ResponseBody
-	public ResponseEntity<List<BookingInfoDto>> getAllBookingInfo() {
-		List<BookingInfoDto> bookingInfo = orderService.getAllBookingInfo();
-		return ResponseEntity.ok(bookingInfo);
-	}
+    /**
+     * API endpoint: Lấy tất cả thông tin đặt phòng (cho admin)
+     * Trả về: orderId, orderDetailId, checkIn (ngày đặt), checkOut (ngày hết hạn), roomNumber, roomType, status
+     */
+    @GetMapping("/api/all-booking-info")
+    @ResponseBody
+    public ResponseEntity<List<BookingInfoDto>> getAllBookingInfo() {
+        List<BookingInfoDto> bookingInfo = orderService.getAllBookingInfo();
+        return ResponseEntity.ok(bookingInfo);
+    }
 
-	private Integer getUserIdFromSession(HttpSession session) {
-		// Check userId attribute first
-		Object userIdObj = session.getAttribute("userId");
-		if (userIdObj != null) {
-			return (Integer) userIdObj;
-		}
+    private Integer getUserIdFromSession(HttpSession session) {
+        // Check userId attribute first
+        Object userIdObj = session.getAttribute("userId");
+        if (userIdObj != null) {
+            return (Integer) userIdObj;
+        }
 
-		// Fallback: check if user object exists in session
-		Object user = session.getAttribute("user");
-		if (user != null) {
-			try {
-				return (Integer) user.getClass().getMethod("getUserId").invoke(user);
-			} catch (Exception e) {
-				System.err.println("Failed to get userId from user object: " + e.getMessage());
-			}
-		}
+        // Fallback: check if user object exists in session
+        Object user = session.getAttribute("user");
+        if (user != null) {
+            try {
+                return (Integer) user.getClass().getMethod("getUserId").invoke(user);
+            } catch (Exception e) {
+                System.err.println("Failed to get userId from user object: " + e.getMessage());
+            }
+        }
 
-		// Return null if not logged in - require authentication
-		return null;
-	}
+        // Return null if not logged in - require authentication
+        return null;
+    }
 }
