@@ -667,6 +667,32 @@
         });
     }
 
+    // Remove item from cart
+    function removeFromCart(roomId) {
+        showConfirmModal(
+            'Xóa phòng',
+            'Bạn có chắc muốn xóa phòng này khỏi giỏ hàng?',
+            function () {
+                fetch('/cart/remove/' + roomId, {
+                    method: 'DELETE'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('success', data.message || 'Đã xóa phòng khỏi giỏ hàng');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showToast('error', data.message || 'Có lỗi xảy ra!');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    showToast('error', 'Có lỗi xảy ra khi xóa phòng!');
+                });
+            }
+        );
+    }
+
     // Load cart badge on page load
     document.addEventListener('DOMContentLoaded', function () {
         console.log('Cart page loaded, updating cart badge...');
