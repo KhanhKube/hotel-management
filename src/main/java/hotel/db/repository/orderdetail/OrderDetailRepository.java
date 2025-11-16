@@ -78,6 +78,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
 			"AND od.status IN :statuses " +
 			"AND od.endDate >= :fromDate " +
 			"AND od.startDate <= :toDate " +
+			"AND od.isDeleted = false " +
 			"ORDER BY od.startDate ASC")
 	List<OrderDetail> findBookingsByRoomAndDateRange(
 			@Param("roomId") Integer roomId,
@@ -85,19 +86,22 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
 			@Param("toDate") LocalDateTime toDate,
 			@Param("statuses") List<String> statuses
 	);
-	
+
+
 	// Query tìm bookings bị trùng với khoảng thời gian dừng hoạt động để hủy
 	@Query("SELECT od FROM OrderDetail od " +
 			"WHERE od.roomId = :roomId " +
 			"AND od.status IN ('PENDING', 'CONFIRMED', 'CHECKED_IN', 'OCCUPIED') " +
 			"AND od.startDate < :disableEndDate " +
 			"AND od.endDate > :disableStartDate " +
+			"AND od.isDeleted = false " +
 			"ORDER BY od.startDate ASC")
 	List<OrderDetail> findBookingsToCancel(
 			@Param("roomId") Integer roomId,
 			@Param("disableStartDate") LocalDateTime disableStartDate,
 			@Param("disableEndDate") LocalDateTime disableEndDate
 	);
+
 
 	@Query(value = "SELECT room_id FROM order_details WHERE start_date < :endDate AND end_date > :startDate", nativeQuery = true)
 	List<Integer> findRoomIdsByFilterEndateAndStatdate(
@@ -131,7 +135,9 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
             od.endDate,
             od.amount,
             u.firstName,
-            u.phone
+            u.phone,
+            od.status,
+            od.isDeleted
         )
         FROM OrderDetail od
         JOIN Order o ON od.orderId = o.orderId
@@ -144,5 +150,58 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
 	Page<OrderMaintenanceResponse> findRoomMaintenanceOrders(
 			Integer roomId,
 			LocalDateTime today,
+			Pageable pageable);
+
+	@Query("""
+        SELECT new hotel.db.dto.checking.OrderMaintenanceResponse(
+            od.orderDetailId,
+            o.orderId,
+            u.userId,
+            r.roomId,
+            r.roomNumber,
+            od.startDate,
+            od.endDate,
+            od.amount,
+            u.firstName,
+            u.phone,
+            od.status,
+            od.isDeleted
+        )
+        FROM OrderDetail od
+        JOIN Order o ON od.orderId = o.orderId
+        JOIN User u ON o.userId = u.userId
+        JOIN Room r ON od.roomId = r.roomId
+        WHERE (od.startDate < CURRENT_TIMESTAMP AND od.endDate > CURRENT_TIMESTAMP)
+           OR (CURRENT_TIMESTAMP < od.startDate)
+        ORDER BY od.startDate DESC""")
+	Page<OrderMaintenanceResponse> findAllOrderDetails(Pageable pageable);
+
+	@Query("""
+        SELECT new hotel.db.dto.checking.OrderMaintenanceResponse(
+            od.orderDetailId,
+            o.orderId,
+            u.userId,
+            r.roomId,
+            r.roomNumber,
+            od.startDate,
+            od.endDate,
+            od.amount,
+            u.firstName,
+            u.phone,
+            od.status,
+            od.isDeleted
+        )
+        FROM OrderDetail od
+        JOIN Order o ON od.orderId = o.orderId
+        JOIN User u ON o.userId = u.userId
+        JOIN Room r ON od.roomId = r.roomId
+        WHERE ((od.startDate < CURRENT_TIMESTAMP AND od.endDate > CURRENT_TIMESTAMP)
+           OR (CURRENT_TIMESTAMP < od.startDate))
+          AND (:search IS NULL OR :search = '' OR u.firstName LIKE %:search% OR u.phone LIKE %:search%)
+          AND (:isDeleted IS NULL OR od.isDeleted = :isDeleted)
+        ORDER BY od.startDate DESC""")
+	Page<OrderMaintenanceResponse> findAllOrderDetailsWithFilter(
+			@Param("search") String search,
+			@Param("isDeleted") Boolean isDeleted,
 			Pageable pageable);
 }

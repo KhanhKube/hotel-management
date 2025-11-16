@@ -13,8 +13,8 @@ import hotel.db.enums.BedType;
 import hotel.db.enums.RoomStatus;
 import hotel.db.enums.RoomSystemStatus;
 import hotel.db.enums.RoomType;
-import hotel.db.repository.roomimage.RoomImageRepository;
 import hotel.service.booking.BookingService;
+import hotel.service.cloudinary.CloudinaryService;
 import hotel.service.image.ImageService;
 import hotel.service.room.RoomService;
 import jakarta.servlet.http.HttpSession;
@@ -46,22 +46,21 @@ import static hotel.db.enums.RoomStatus.OCCUPIED;
 @RequestMapping("/hotel-management/room")
 public class RoomController {
 
-    private final BookingService bookingService;
-    private final RoomService roomService;
-    private final hotel.service.cloudinary.CloudinaryService cloudinaryService;
-    private final ImageService roomImageService;
-    private final RoomImageRepository roomImageRepository;
+	private final BookingService bookingService;
+	private final RoomService roomService;
+	private final CloudinaryService cloudinaryService;
+	private final ImageService roomImageService;
 
-    // Tự động load data cho dropdown trong mọi request
-    @ModelAttribute
-    public void loadDropdownData(Model model) {
-        model.addAttribute("roomTypes", RoomType.ALL);
-        model.addAttribute("bedTypes", BedType.ALL);
-        model.addAttribute("statuses", RoomStatus.ALL);
-        model.addAttribute("systemStatus", RoomSystemStatus.ALL);
-        model.addAttribute("floors", roomService.getAllFloors());
-        model.addAttribute("sizes", roomService.getAllSizes());
-    }
+	// Tự động load data cho dropdown trong mọi request
+	@ModelAttribute
+	public void loadDropdownData(Model model) {
+		model.addAttribute("roomTypes", RoomType.ALL);
+		model.addAttribute("bedTypes", BedType.ALL);
+		model.addAttribute("statuses", RoomStatus.ALL);
+		model.addAttribute("systemStatus", RoomSystemStatus.ALL);
+		model.addAttribute("floors", roomService.getAllFloors());
+		model.addAttribute("sizes", roomService.getAllSizes());
+	}
 
     @GetMapping
     public String view(
@@ -117,91 +116,91 @@ public class RoomController {
         return "management/room/room-create-form";
     }
 
-    @PostMapping("/create")
-    public String create(@ModelAttribute("room") Room room,
-                         @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
-                         @RequestParam(value = "furnishingIds", required = false) List<Integer> furnishingIds,
-                         @RequestParam(value = "furnishingQuantities", required = false) List<Integer> furnishingQuantities,
-                         @RequestParam(value = "imagesToDelete", required = false) String imagesToDelete,
-                         BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-        try {
-            boolean isUpdate = room.getRoomId() != null;
-            
-            // Xử lý status
-            if (!isUpdate) {
-                room.setStatus(AVAILABLE);
-                room.setSystemStatus(RoomSystemStatus.WORKING);
-            } else {
-                Room existingRoom = roomService.getRoomById(room.getRoomId());
-                room.setStatus(existingRoom.getStatus());
-                room.setSystemStatus(existingRoom.getSystemStatus());
-            }
-            
-            // Validate số phòng (chỉ khi create)
-            if (!isUpdate && roomService.existsByRoomNumber(room.getRoomNumber())) {
-                model.addAttribute("room", room);
-                model.addAttribute("furnishings", roomService.getFurnishingsForForm(
-                    room.getRoomId(), furnishingIds, furnishingQuantities
-                ));
-                model.addAttribute("errorMessage", "Số phòng này đã tồn tại!");
-                return "management/room/room-create-form";
-            }
-            
-            // Lưu phòng
-            HashMap<String, String> saveResult = roomService.saveRoom(room);
-            if (saveResult.containsKey("error")) {
-                model.addAttribute("room", room);
-                model.addAttribute("furnishings", roomService.getFurnishingsForForm(
-                    room.getRoomId(), furnishingIds, furnishingQuantities
-                ));
-                model.addAttribute("errorMessage", saveResult.get("error"));
-                return "management/room/room-create-form";
-            }
-            
-            // Xóa ảnh đã đánh dấu
-            if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
-                String[] ids = imagesToDelete.split(",");
-                for (String id : ids) {
-                    try {
-                        roomImageService.deleteRoomImage(Integer.parseInt(id.trim()));
-                    } catch (Exception e) {
-                        // Log và tiếp tục
-                    }
-                }
-            }
-            
-            // Upload ảnh mới
-            if (imageFiles != null && !imageFiles.isEmpty()) {
-                for (MultipartFile file : imageFiles) {
-                    if (!file.isEmpty()) {
-                        try {
-                            String imageUrl = cloudinaryService.getImageUrlAfterUpload(file);
-                            roomImageService.saveRoomImage(room.getRoomId(), imageUrl);
-                        } catch (Exception e) {
-                            // Log và tiếp tục
-                        }
-                    }
-                }
-            }
-            
-            // Lưu vật dụng
-            if (furnishingIds != null && !furnishingIds.isEmpty()) {
-                roomService.saveRoomFurnishings(room.getRoomId(), furnishingIds, furnishingQuantities);
-            }
-            
-            String successMessage = isUpdate ? "Đã cập nhật phòng thành công!" : "Đã tạo phòng thành công!";
-            redirectAttributes.addFlashAttribute("successMessage", successMessage);
-            return "redirect:/hotel-management/room";
-            
-        } catch (Exception e) {
-            model.addAttribute("room", room);
-            model.addAttribute("furnishings", roomService.getFurnishingsForForm(
-                room.getRoomId(), furnishingIds, furnishingQuantities
-            ));
-            model.addAttribute("errorMessage", "Lỗi: " + e.getMessage());
-            return "management/room/room-create-form";
-        }
-    }
+	@PostMapping("/create")
+	public String create(@ModelAttribute("room") Room room,
+	                     @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
+	                     @RequestParam(value = "furnishingIds", required = false) List<Integer> furnishingIds,
+	                     @RequestParam(value = "furnishingQuantities", required = false) List<Integer> furnishingQuantities,
+	                     @RequestParam(value = "imagesToDelete", required = false) String imagesToDelete,
+	                     BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+		try {
+			boolean isUpdate = room.getRoomId() != null;
+
+			// Xử lý status
+			if (!isUpdate) {
+				room.setStatus(AVAILABLE);
+				room.setSystemStatus(RoomSystemStatus.WORKING);
+			} else {
+				Room existingRoom = roomService.getRoomById(room.getRoomId());
+				room.setStatus(existingRoom.getStatus());
+				room.setSystemStatus(existingRoom.getSystemStatus());
+			}
+
+			// Validate số phòng (chỉ khi create)
+			if (!isUpdate && roomService.existsByRoomNumber(room.getRoomNumber())) {
+				model.addAttribute("room", room);
+				model.addAttribute("furnishings", roomService.getFurnishingsForForm(
+						room.getRoomId(), furnishingIds, furnishingQuantities
+				));
+				model.addAttribute("errorMessage", "Số phòng này đã tồn tại!");
+				return "management/room/room-create-form";
+			}
+
+			// Lưu phòng
+			HashMap<String, String> saveResult = roomService.saveRoom(room);
+			if (saveResult.containsKey("error")) {
+				model.addAttribute("room", room);
+				model.addAttribute("furnishings", roomService.getFurnishingsForForm(
+						room.getRoomId(), furnishingIds, furnishingQuantities
+				));
+				model.addAttribute("errorMessage", saveResult.get("error"));
+				return "management/room/room-create-form";
+			}
+
+			// Xóa ảnh đã đánh dấu
+			if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
+				String[] ids = imagesToDelete.split(",");
+				for (String id : ids) {
+					try {
+						roomImageService.deleteRoomImage(Integer.parseInt(id.trim()));
+					} catch (Exception e) {
+						// Log và tiếp tục
+					}
+				}
+			}
+
+			// Upload ảnh mới
+			if (imageFiles != null && !imageFiles.isEmpty()) {
+				for (MultipartFile file : imageFiles) {
+					if (!file.isEmpty()) {
+						try {
+							String imageUrl = cloudinaryService.getImageUrlAfterUpload(file);
+							roomImageService.saveRoomImage(room.getRoomId(), imageUrl);
+						} catch (Exception e) {
+							// Log và tiếp tục
+						}
+					}
+				}
+			}
+
+			// Lưu vật dụng
+			if (furnishingIds != null && !furnishingIds.isEmpty()) {
+				roomService.saveRoomFurnishings(room.getRoomId(), furnishingIds, furnishingQuantities);
+			}
+
+			String successMessage = isUpdate ? "Đã cập nhật phòng thành công!" : "Đã tạo phòng thành công!";
+			redirectAttributes.addFlashAttribute("successMessage", successMessage);
+			return "redirect:/hotel-management/room";
+
+		} catch (Exception e) {
+			model.addAttribute("room", room);
+			model.addAttribute("furnishings", roomService.getFurnishingsForForm(
+					room.getRoomId(), furnishingIds, furnishingQuantities
+			));
+			model.addAttribute("errorMessage", "Lỗi: " + e.getMessage());
+			return "management/room/room-create-form";
+		}
+	}
 
     @GetMapping("/edit/{id}")
     public String editRoomtForm(@PathVariable Integer id, Model model, HttpSession session) {
@@ -225,10 +224,10 @@ public class RoomController {
         // Load vật dụng của phòng
         model.addAttribute("furnishings", roomService.getFurnishingsForForm(id));
 
-        model.addAttribute("room", room);
-        model.addAttribute("images", images);
-        return "management/room/room-create-form";
-    }
+		model.addAttribute("room", room);
+		model.addAttribute("images", images);
+		return "management/room/room-create-form";
+	}
 
     @GetMapping("/delete/{id}")
     public String deleteRoom(@PathVariable Integer id, RedirectAttributes redirectAttributes, HttpSession session) {
@@ -245,23 +244,23 @@ public class RoomController {
         // Lấy room để check status
         Room room = roomService.getRoomById(id);
 
-        if (room == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy phòng!");
-            return "redirect:/hotel-management/room";
-        }
+		if (room == null) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy phòng!");
+			return "redirect:/hotel-management/room";
+		}
 
-        // Không cho xóa nếu phòng đang hoạt động (Đang thuê hoặc Đã đặt)
-        if (OCCUPIED.equals(room.getStatus())) {
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Không thể xóa phòng đang hoạt động! Phòng đang ở trạng thái: " + room.getStatus());
-            return "redirect:/hotel-management/room";
-        }
+		// Không cho xóa nếu phòng đang hoạt động (Đang thuê hoặc Đã đặt)
+		if (OCCUPIED.equals(room.getStatus())) {
+			redirectAttributes.addFlashAttribute("errorMessage",
+					"Không thể xóa phòng đang hoạt động! Phòng đang ở trạng thái: " + room.getStatus());
+			return "redirect:/hotel-management/room";
+		}
 
-        // Cho phép xóa nếu Trống hoặc Bảo trì
-        roomService.DeleteRoom(id);
-        redirectAttributes.addFlashAttribute("successMessage", "Đã xóa phòng thành công!");
-        return "redirect:/hotel-management/room";
-    }
+		// Cho phép xóa nếu Trống hoặc Bảo trì
+		roomService.DeleteRoom(id);
+		redirectAttributes.addFlashAttribute("successMessage", "Đã xóa phòng thành công!");
+		return "redirect:/hotel-management/room";
+	}
 
     @GetMapping("/detail/{id}")
     public String detailRoom(@PathVariable Integer id, Model model, HttpSession session) {
@@ -301,161 +300,161 @@ public class RoomController {
                 .orElse(null);
         }
 
-        model.addAttribute("room", room);
-        model.addAttribute("images", images);
-        model.addAttribute("furnishings", roomFurnishings);
-        model.addAttribute("floorNumber", floorNumber);
-        model.addAttribute("sizeValue", sizeValue);
-        return "management/room/room-detail";
-    }
+		model.addAttribute("room", room);
+		model.addAttribute("images", images);
+		model.addAttribute("furnishings", roomFurnishings);
+		model.addAttribute("floorNumber", floorNumber);
+		model.addAttribute("sizeValue", sizeValue);
+		return "management/room/room-detail";
+	}
 
-    @GetMapping("/status/{id}")
-    public String statusRoom(@PathVariable Integer id, Model model) {
-        // Lấy 2 lists riêng biệt cho check-in và check-out calendar
-        List<String> bookedDatesCheckIn = roomService.getBookedDatesForBookingRoom(id);
-        List<String> bookedDatesCheckOut = roomService.getBookedDatesForCheckOut(id);
-        List<String> disableDate = roomService.getDateToDisableRoom(id);
-        
-        // Lấy danh sách maintenance của phòng này
-        List<RoomMaintenance> maintenanceList = roomService.getMaintenanceByRoomId(id);
-        
-        model.addAttribute("roomId", id);
-        model.addAttribute("disableDate", disableDate);
-        model.addAttribute("bookedDatesCheckIn", bookedDatesCheckIn);
-        model.addAttribute("bookedDatesCheckOut", bookedDatesCheckOut);
-        model.addAttribute("maintenanceList", maintenanceList);
-        return "management/room/room-update-status";
-    }
+	@GetMapping("/status/{id}")
+	public String statusRoom(@PathVariable Integer id, Model model) {
+		// Lấy 2 lists riêng biệt cho check-in và check-out calendar
+		List<String> bookedDatesCheckIn = roomService.getBookedDatesForBookingRoom(id);
+		List<String> bookedDatesCheckOut = roomService.getBookedDatesForCheckOut(id);
+		List<String> disableDate = roomService.getDateToDisableRoom(id);
 
-    @PostMapping("/maintenance")
-    public String createRoomMaintenance(
-            @RequestParam("roomId") Integer roomId,
-            @RequestParam("checkInDate") String checkInDate,
-            @RequestParam("checkOutDate") String checkOutDate,
-            @RequestParam(value = "des", required = false) String description,
-            Model model, HttpSession session) {
-        try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                model.addAttribute("errorMessage", "Vui lòng đăng nhập!");
-                return "redirect:/hotel/login";
-            }
+		// Lấy danh sách maintenance của phòng này
+		List<RoomMaintenance> maintenanceList = roomService.getMaintenanceByRoomId(id);
 
-            Integer createdBy = user.getUserId();
-            
-            // Parse ngày bắt đầu để kiểm tra
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDate startDate = LocalDate.parse(checkInDate, formatter);
-            LocalDateTime now = LocalDateTime.now();
-            LocalDate today = now.toLocalDate();
-            
-            // Lưu maintenance vào DB
-            roomService.saveMaintenance(roomId, checkInDate, checkOutDate, description, createdBy);
+		model.addAttribute("roomId", id);
+		model.addAttribute("disableDate", disableDate);
+		model.addAttribute("bookedDatesCheckIn", bookedDatesCheckIn);
+		model.addAttribute("bookedDatesCheckOut", bookedDatesCheckOut);
+		model.addAttribute("maintenanceList", maintenanceList);
+		return "management/room/room-update-status";
+	}
 
-            // Cập nhật systemStatus của phòng dựa trên thời gian
-            Room room = roomService.getRoomById(roomId);
-            
-            if (startDate.equals(today)) {
-                // Ngày bắt đầu = hôm nay
-                if (now.getHour() >= 14) {
-                    // Đã qua 14:00 → Chuyển ngay sang "Đang bảo trì"
-                    room.setSystemStatus(RoomSystemStatus.MAINTENANCE);
-                } else {
-                    // Chưa đến 14:00 → Set "Sắp bảo trì", đợi scheduler
-                    room.setSystemStatus(RoomSystemStatus.NEARMAINTENANCE);
-                }
-            } else if (startDate.isAfter(today)) {
-                // Ngày bắt đầu > hôm nay → Set "Sắp bảo trì"
-                room.setSystemStatus(RoomSystemStatus.NEARMAINTENANCE);
-            }
-            
-            roomService.saveRoom(room);
+	@PostMapping("/maintenance")
+	public String createRoomMaintenance(
+			@RequestParam("roomId") Integer roomId,
+			@RequestParam("checkInDate") String checkInDate,
+			@RequestParam("checkOutDate") String checkOutDate,
+			@RequestParam(value = "des", required = false) String description,
+			Model model, HttpSession session) {
+		try {
+			User user = (User) session.getAttribute("user");
+			if (user == null) {
+				model.addAttribute("errorMessage", "Vui lòng đăng nhập!");
+				return "redirect:/hotel/login";
+			}
 
-            return "redirect:/hotel-management/room";
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            return "management/room/room-update-status";
-        }
-    }
-    
-    @GetMapping("/maintenance/delete/{id}")
-    public String deleteMaintenance(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
-        try {
-            // Lấy thông tin maintenance trước khi xóa
-            RoomMaintenance maintenance = roomService.getMaintenanceById(id);
-            if (maintenance == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy lịch bảo trì!");
-                return "redirect:/hotel-management/room";
-            }
-            
-            Integer roomId = maintenance.getRoomId();
-            
-            // Soft delete maintenance
-            roomService.deleteMaintenance(id);
-            
-            // Cập nhật lại trạng thái phòng về "Đang trống" và "Hoạt động"
-            Room room = roomService.getRoomById(roomId);
-            room.setStatus(AVAILABLE);
-            room.setSystemStatus(RoomSystemStatus.WORKING);
-            roomService.saveRoom(room);
-            
-            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa lịch bảo trì thành công!");
-            return "redirect:/hotel-management/room/status/" + roomId;
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
-            return "redirect:/hotel-management/room";
-        }
-    }
-    
-    @PostMapping("/disable")
-    public String disableRoom(
-            @RequestParam("roomId") Integer roomId,
-            @RequestParam("checkInDate") String checkInDate,
-            @RequestParam("checkOutDate") String checkOutDate,
-            @RequestParam(value = "des", required = false) String description,
-            RedirectAttributes redirectAttributes,
-            HttpSession session) {
-        try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập!");
-                return "redirect:/hotel/login";
-            }
+			Integer createdBy = user.getUserId();
 
-            Integer createdBy = user.getUserId();
-            roomService.disableRoom(roomId, checkInDate, checkOutDate, description, createdBy);
-            
-            // Set status phòng ngay lập tức
-            Room room = roomService.getRoomById(roomId);
-            room.setSystemStatus(RoomSystemStatus.NEARSTOPWORKING);
-            roomService.saveRoom(room);
+			// Parse ngày bắt đầu để kiểm tra
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			LocalDate startDate = LocalDate.parse(checkInDate, formatter);
+			LocalDateTime now = LocalDateTime.now();
+			LocalDate today = now.toLocalDate();
 
-            redirectAttributes.addFlashAttribute("successMessage", "Đã lên lịch dừng hoạt động phòng!");
-            return "redirect:/hotel-management/room";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
-            return "redirect:/hotel-management/room/status/" + roomId;
-        }
-    }
+			// Lưu maintenance vào DB
+			roomService.saveMaintenance(roomId, checkInDate, checkOutDate, description, createdBy);
 
-    @PostMapping("/search")
-    @ResponseBody
-    public ResponseEntity<ListIdRoomResponse> listRooms(@RequestBody SearchRoomRequest request) {
-        ListIdRoomResponse listRoomResponse = bookingService.listRoom(request);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(listRoomResponse);
-    }
+			// Cập nhật systemStatus của phòng dựa trên thời gian
+			Room room = roomService.getRoomById(roomId);
 
-    @GetMapping("/api/list")
-    public ResponseEntity<Map<String, Object>> getRooms() {
-        ListRoomResponse rooms = roomService.getAllRoomForSearch();
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", rooms);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(response);
-    }
+			if (startDate.equals(today)) {
+				// Ngày bắt đầu = hôm nay
+				if (now.getHour() >= 14) {
+					// Đã qua 14:00 → Chuyển ngay sang "Đang bảo trì"
+					room.setSystemStatus(RoomSystemStatus.MAINTENANCE);
+				} else {
+					// Chưa đến 14:00 → Set "Sắp bảo trì", đợi scheduler
+					room.setSystemStatus(RoomSystemStatus.NEARMAINTENANCE);
+				}
+			} else if (startDate.isAfter(today)) {
+				// Ngày bắt đầu > hôm nay → Set "Sắp bảo trì"
+				room.setSystemStatus(RoomSystemStatus.NEARMAINTENANCE);
+			}
+
+			roomService.saveRoom(room);
+
+			return "redirect:/hotel-management/room";
+		} catch (Exception e) {
+			model.addAttribute("errorMessage", e.getMessage());
+			return "management/room/room-update-status";
+		}
+	}
+
+	@GetMapping("/maintenance/delete/{id}")
+	public String deleteMaintenance(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+		try {
+			// Lấy thông tin maintenance trước khi xóa
+			RoomMaintenance maintenance = roomService.getMaintenanceById(id);
+			if (maintenance == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy lịch bảo trì!");
+				return "redirect:/hotel-management/room";
+			}
+
+			Integer roomId = maintenance.getRoomId();
+
+			// Soft delete maintenance
+			roomService.deleteMaintenance(id);
+
+			// Cập nhật lại trạng thái phòng về "Đang trống" và "Hoạt động"
+			Room room = roomService.getRoomById(roomId);
+			room.setStatus(AVAILABLE);
+			room.setSystemStatus(RoomSystemStatus.WORKING);
+			roomService.saveRoom(room);
+
+			redirectAttributes.addFlashAttribute("successMessage", "Đã xóa lịch bảo trì thành công!");
+			return "redirect:/hotel-management/room/status/" + roomId;
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+			return "redirect:/hotel-management/room";
+		}
+	}
+
+	@PostMapping("/disable")
+	public String disableRoom(
+			@RequestParam("roomId") Integer roomId,
+			@RequestParam("checkInDate") String checkInDate,
+			@RequestParam("checkOutDate") String checkOutDate,
+			@RequestParam(value = "des", required = false) String description,
+			RedirectAttributes redirectAttributes,
+			HttpSession session) {
+		try {
+			User user = (User) session.getAttribute("user");
+			if (user == null) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập!");
+				return "redirect:/hotel/login";
+			}
+
+			Integer createdBy = user.getUserId();
+			roomService.disableRoom(roomId, checkInDate, checkOutDate, description, createdBy);
+
+			// Set status phòng ngay lập tức
+			Room room = roomService.getRoomById(roomId);
+			room.setSystemStatus(RoomSystemStatus.NEARSTOPWORKING);
+			roomService.saveRoom(room);
+
+			redirectAttributes.addFlashAttribute("successMessage", "Đã lên lịch dừng hoạt động phòng!");
+			return "redirect:/hotel-management/room";
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+			return "redirect:/hotel-management/room/status/" + roomId;
+		}
+	}
+
+	@PostMapping("/search")
+	@ResponseBody
+	public ResponseEntity<ListIdRoomResponse> listRooms(@RequestBody SearchRoomRequest request) {
+		ListIdRoomResponse listRoomResponse = bookingService.listRoom(request);
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(listRoomResponse);
+	}
+
+	@GetMapping("/api/list")
+	public ResponseEntity<Map<String, Object>> getRooms() {
+		ListRoomResponse rooms = roomService.getAllRoomForSearch();
+		Map<String, Object> response = new HashMap<>();
+		response.put("data", rooms);
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(response);
+	}
 
 
 }

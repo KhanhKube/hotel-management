@@ -99,6 +99,11 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
+	public Page<OrderMaintenanceResponse> findAllOrderDetailsWithFilter(String search, Boolean isDeleted, Pageable pageable) {
+		return orderDetailRepository.findAllOrderDetailsWithFilter(search, isDeleted, pageable);
+	}
+
+	@Override
 	public MessageResponse cancelOrderDetail(Integer orderId){
 		OrderDetail orderDetail = orderDetailRepository.findById(orderId).orElse(null);
 		if(orderDetail == null) {
@@ -121,6 +126,27 @@ public class OrderServiceImpl implements OrderService {
 		order.setTotalAmount(newTotal);
 		orderRepository.save(order);
 		return new MessageResponse(true, "Xứ lí thành công, huỷ đơn đặt phòng!");
+	}
+
+	@Override
+	public MessageResponse updateOrderDetailStatus(Integer orderDetailId, String status) {
+		OrderDetail orderDetail = orderDetailRepository.findById(orderDetailId).orElse(null);
+		if(orderDetail == null) {
+			return new MessageResponse(false, "Không tìm thấy đơn!");
+		}
+		orderDetail.setStatus(status);
+		
+		// Nếu trạng thái là CANCEL thì set isDeleted = true
+		if("CANCEL".equals(status)) {
+			orderDetail.setIsDeleted(true);
+		}
+		// Nếu trạng thái là RESERVED thì set isDeleted = false
+		else if("RESERVED".equals(status)) {
+			orderDetail.setIsDeleted(false);
+		}
+		
+		orderDetailRepository.save(orderDetail);
+		return new MessageResponse(true, "Cập nhật trạng thái thành công!");
 	}
 
 	@Override

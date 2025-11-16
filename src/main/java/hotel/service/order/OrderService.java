@@ -16,6 +16,8 @@ public interface OrderService {
     List<BookingInfoDto> getBookingInfoByUserId(Integer userId);
     List<BookingInfoDto> getAllBookingInfo();
     Page<OrderMaintenanceResponse> findFutureOrdersByRoomId(int id, LocalDateTime today, Pageable pageable);
+    Page<OrderMaintenanceResponse> findAllOrderDetailsWithFilter(String search, Boolean isDeleted, Pageable pageable);
     MessageResponse cancelOrderDetail(Integer orderId);
+    MessageResponse updateOrderDetailStatus(Integer orderDetailId, String status);
     OrderDetail getOrderDetail(Integer orderId);
 }

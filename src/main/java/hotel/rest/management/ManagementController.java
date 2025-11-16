@@ -6,6 +6,7 @@ import hotel.db.dto.floor.FloorRequestDto;
 import hotel.db.dto.floor.FloorResponseDto;
 import hotel.db.dto.room.RoomRequestDto;
 import hotel.db.entity.*;
+import hotel.db.enums.RoomStatus;
 import hotel.service.order.OrderService;
 import hotel.service.view.ViewService;
 import hotel.service.size.SizeService;
@@ -457,7 +458,7 @@ public class ManagementController {
 
         // Lấy phòng theo ID
         Room room = roomService.getRoomById(id);
-        if (room == null || !"đang bảo trì".equalsIgnoreCase(room.getSystemStatus())) {
+        if (room == null || !RoomStatus.EMERGENCYMAINTENANCE.equalsIgnoreCase(room.getStatus())) {
             redirectAttrs.addFlashAttribute("error", "Phòng không tồn tại hoặc không phải phòng bảo trì");
             return "redirect:/hotel-management/room-maintenance";
         }
@@ -497,6 +498,75 @@ public class ManagementController {
         }
 
        return "redirect:/hotel-management/room-maintenance/"+ orderDetail.getRoomId();
+    }
+
+    @GetMapping("/order-details")
+    public String viewAllOrderDetails(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpSession session,
+            Model model,
+            RedirectAttributes redirectAttrs) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(RECEPTIONIST)) return "redirect:/hotel/dashboard";
+
+        // Convert status to isDeleted
+        Boolean isDeleted = null;
+        if (status != null && !status.isEmpty()) {
+            if ("CANCEL".equals(status)) {
+                isDeleted = true;
+            } else if ("RESERVED".equals(status)) {
+                isDeleted = false;
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<OrderMaintenanceResponse> orderDetails = orderService.findAllOrderDetailsWithFilter(search, isDeleted, pageable);
+
+        // Debug logging
+        System.out.println("=== Order Details Query Result ===");
+        System.out.println("Total elements: " + orderDetails.getTotalElements());
+        System.out.println("Filter - search: " + search + ", isDeleted: " + isDeleted);
+        orderDetails.getContent().forEach(od -> {
+            System.out.println("OrderDetailId: " + od.getOrderDetailId() + 
+                             ", Status: " + od.getStatus() + 
+                             ", IsDeleted: " + od.getIsDeleted());
+        });
+
+        model.addAttribute("orderDetails", orderDetails.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", orderDetails.getTotalPages());
+        model.addAttribute("totalElements", orderDetails.getTotalElements());
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("search", search);
+        model.addAttribute("status", status);
+
+        return "management/order-details/order-details-list";
+    }
+
+    @PostMapping("/order-details/update-status/{orderDetailId}")
+    public String updateOrderDetailStatus(
+            @PathVariable Integer orderDetailId,
+            @RequestParam String status,
+            HttpSession session,
+            RedirectAttributes redirectAttrs) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/hotel";
+        if (user.getRole().equals(CUSTOMER)) return "redirect:/hotel";
+        if (!user.getRole().equals(RECEPTIONIST)) return "redirect:/hotel/dashboard";
+
+        MessageResponse response = orderService.updateOrderDetailStatus(orderDetailId, status);
+        if (response.isSuccess()) {
+            redirectAttrs.addFlashAttribute("successMessage", response.getMessage());
+        } else {
+            redirectAttrs.addFlashAttribute("errorMessage", response.getMessage());
+        }
+
+        return "redirect:/hotel-management/order-details";
     }
 
 
